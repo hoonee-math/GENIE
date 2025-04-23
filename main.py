@@ -31,7 +31,7 @@ async def read_root():
     return {"message": "API 연결 완료"}
 
 
-# 개발 환경에서는 해당 코드 사용, 아닐 경우에는 주석 처리 후 배포해야 합니다
+# 개발 환경에서는 해당 코드 사용하고 아니면 주석 처리 후 배포
 # if __name__ == "__main__":
 #     logger.info("🚀 API 서버 시작 준비 중...")
 #     uvicorn.run("main:app", host="0.0.0.0", port=8501, reload=True)
