@@ -1,0 +1,37 @@
+import uvicorn
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+from routers import passage as passage_router
+from routers import question as question_router
+from utils.logger import logger
+
+load_dotenv()
+
+app = FastAPI(
+    title="API",
+    version="1.0.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], 
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# 라우터 등록
+app.include_router(passage_router.router)
+app.include_router(question_router.router)
+
+@app.get("/", tags=["Root"])
+async def read_root():
+    logger.info("✅ 루트 엔드포인트 접근")
+    return {"message": "API 연결 완료"}
+
+
+# 개발 환경에서는 해당 코드 사용, 아닐 경우에는 주석 처리 후 배포해야 합니다
+# if __name__ == "__main__":
+#     logger.info("🚀 API 서버 시작 준비 중...")
+#     uvicorn.run("main:app", host="0.0.0.0", port=8501, reload=True)
