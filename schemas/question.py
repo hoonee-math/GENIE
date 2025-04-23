@@ -5,7 +5,6 @@ from typing import List
 class QuestionRequest(BaseModel):
     custom_passage: str # 사용자 입력 지문 Or 생성 지문을 사용자가 편집한 지문
     type_question: str # 문항 유형
-    type_question_detail: str # 서술 방식, 현재는 사용하지 않는데 제거해야하는 코드인지 확인 필요
     question_example: str # 문항 예시
 
 class QuestionResponse(BaseModel):

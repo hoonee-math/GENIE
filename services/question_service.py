@@ -19,6 +19,7 @@ try:
     # 사용 가능 모델 : gemini-2.5-flash-preview-04-17, gemini-2.5-pro-preview-03-25
     # 테스트 모델 : gemini-1.5-flash-8b 
     MODEL_NAME = "gemini-2.5-pro-preview-03-25"
+    CORE_POINT_MODEL = "gemini-2.0-flash-lite"
     
 except Exception as e:
     logger.critical(f"초기화 오류 발생: {e}")
@@ -84,7 +85,7 @@ async def create_question(request: QuestionRequest) -> QuestionResponse:
                                 출력은 불필요한 문자 없이 줄글 형태로만 출력해라."""
 
         core_point_response = await client.aio.models.generate_content(
-            model=MODEL_NAME,
+            model="gemini-2.0-flash-lite",
             contents=[{"role": "user", "parts": [{"text": core_point_prompt}]}]
         )
 
@@ -131,7 +132,7 @@ async def create_question(request: QuestionRequest) -> QuestionResponse:
                         }}"""
 
         question_gen_response = await client.aio.models.generate_content(
-            model=MODEL_NAME,
+            model=CORE_POINT_MODEL,
             contents=[
                 {"role": "user", "parts": [{"text": system_prompt + "\n\n" + user_prompt}]}]
         )
