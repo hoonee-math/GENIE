@@ -4,7 +4,7 @@ from google import genai
 from fastapi import HTTPException
 from schemas.passage import PassageRequest, PassageResponse
 from utils.guidelines import get_passage_guidelines
-from utils.logger import logger 
+from utils.logger import logger, log_api_call_cost
 from dotenv import load_dotenv
 
 
@@ -20,8 +20,8 @@ try:
 
     # 사용 가능 모델 : gemini-2.5-flash-preview-04-17, gemini-2.5-pro-preview-03-25
     # 테스트 모델 : gemini-1.5-flash-8b 
-    MODEL_NAME = "gemini-2.5-pro-preview-03-25"
-    CORE_POINT_MODEL = "gemini-2.0-flash-lite"
+    GEMINI_PRO_MODEL = "gemini-2.5-pro-preview-03-25"
+    GEMINI_FLASH_MODEL = "gemini-2.0-flash-lite"
     
 except Exception as e:
     logger.critical(f"초기화 오류 발생: {e}")
@@ -69,11 +69,18 @@ async def create_passage(request: PassageRequest) -> PassageResponse:
                                 출력은 지문만 출력하고, 이외의 불필요한 정보는 포함하지 않도록 해라."""
 
             response = await client.aio.models.generate_content(
-                model=MODEL_NAME,
+                model=GEMINI_PRO_MODEL,
                 contents=[
                     {"role": "user", "parts": [{"text": system_prompt + "\n\n" + user_prompt}]}
                 ]
             )
+
+            usage_metadata = response.usage_metadata
+            log_api_call_cost(GEMINI_PRO_MODEL, {
+                "prompt_token_count": usage_metadata.prompt_token_count,
+                "total_token_count": usage_metadata.total_token_count,
+            })
+
 
             current_passage = response.text
             char_count = len(current_passage)
@@ -118,9 +125,15 @@ async def create_passage(request: PassageRequest) -> PassageResponse:
                                 출력은 불필요한 문자 없이 줄글 형태로만 출력해라."""
 
         core_point_response = await client.aio.models.generate_content(
-            model=CORE_POINT_MODEL,
+            model=GEMINI_FLASH_MODEL,
             contents=[{"role": "user", "parts": [{"text": core_point_prompt}]}]
         )
+
+        usage_metadata_core_point = core_point_response.usage_metadata
+        log_api_call_cost(GEMINI_FLASH_MODEL, {
+            "prompt_token_count": usage_metadata_core_point.prompt_token_count,
+            "total_token_count": usage_metadata_core_point.total_token_count,
+        })
 
         generated_core_point = core_point_response.text.strip()
         logger.debug(f"핵심 논점 생성 완료 : {generated_core_point[:30]}...")

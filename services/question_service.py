@@ -6,7 +6,7 @@ from fastapi import HTTPException
 from schemas.question import QuestionRequest, QuestionResponse
 from utils.guidelines import get_question_guidelines
 from utils.json_utils import process_json_response
-from utils.logger import logger
+from utils.logger import logger, log_api_call_cost
 
 try:
     # API 키 유효성 검증
@@ -17,9 +17,9 @@ try:
     client = genai.Client(api_key=GEMINI_API_KEY)
 
     # 사용 가능 모델 : gemini-2.5-flash-preview-04-17, gemini-2.5-pro-preview-03-25
-    # 테스트 모델 : gemini-1.5-flash-8b 
-    MODEL_NAME = "gemini-2.5-pro-preview-03-25"
-    CORE_POINT_MODEL = "gemini-2.0-flash-lite"
+    # 테스트 모델 : gemini-1.5-flash 
+    GEMINI_PRO_MODEL = "gemini-2.5-pro-preview-03-25"
+    GEMINI_FLASH_MODEL = "gemini-2.0-flash-lite"
     
 except Exception as e:
     logger.critical(f"초기화 오류 발생: {e}")
@@ -54,9 +54,15 @@ async def create_question(request: QuestionRequest) -> QuestionResponse:
                                 }}"""
 
         type_keyword_response = await client.aio.models.generate_content(
-            model=MODEL_NAME,
+            model=GEMINI_FLASH_MODEL,
             contents=[{"role": "user", "parts": [{"text": type_keyword_prompt}]}]
         )
+
+        usage_metadata_type_keyword = type_keyword_response.usage_metadata
+        log_api_call_cost(GEMINI_FLASH_MODEL, {
+            "prompt_token_count": usage_metadata_type_keyword.prompt_token_count,
+            "total_token_count": usage_metadata_type_keyword.total_token_count,
+        })
 
         type_keyword_result = process_json_response(type_keyword_response.text)
         type_passage = type_keyword_result.get("type_passage", "분야 추출 실패")
@@ -85,9 +91,15 @@ async def create_question(request: QuestionRequest) -> QuestionResponse:
                                 출력은 불필요한 문자 없이 줄글 형태로만 출력해라."""
 
         core_point_response = await client.aio.models.generate_content(
-            model="gemini-2.0-flash-lite",
+            model=GEMINI_FLASH_MODEL,
             contents=[{"role": "user", "parts": [{"text": core_point_prompt}]}]
         )
+
+        usage_metadata_core_point = core_point_response.usage_metadata
+        log_api_call_cost(GEMINI_FLASH_MODEL, {
+            "prompt_token_count": usage_metadata_core_point.prompt_token_count,
+            "total_token_count": usage_metadata_core_point.total_token_count,
+        })
 
         generated_core_point = core_point_response.text.strip()
         logger.debug(f"추출 논점 : {generated_core_point[:30]}...")
@@ -132,10 +144,16 @@ async def create_question(request: QuestionRequest) -> QuestionResponse:
                         }}"""
 
         question_gen_response = await client.aio.models.generate_content(
-            model=CORE_POINT_MODEL,
+            model=GEMINI_PRO_MODEL,
             contents=[
                 {"role": "user", "parts": [{"text": system_prompt + "\n\n" + user_prompt}]}]
         )
+
+        usage_metadata_question = question_gen_response.usage_metadata
+        log_api_call_cost(GEMINI_PRO_MODEL, {
+            "prompt_token_count": usage_metadata_question.prompt_token_count,
+            "total_token_count": usage_metadata_question.total_token_count,
+        })
 
         response_json = process_json_response(question_gen_response.text)
         logger.info("문항 생성 완료")
