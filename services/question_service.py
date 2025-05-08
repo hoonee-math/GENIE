@@ -86,7 +86,7 @@ async def create_question(request: QuestionRequest) -> QuestionResponse:
         # --- 2. 핵심 논점 추출 ---
         logger.info("지문 핵심 논점 추출 중...")
 
-        core_point_prompt = f"""다음은 수능 국어 영역 독서 분야 비문학 지문입니다.
+        core_point_prompt = f"""다음은 수능 국어 영역 독서 분야 비문학 지문이다.
 
 [지문]
 {request.custom_passage}
@@ -98,6 +98,7 @@ async def create_question(request: QuestionRequest) -> QuestionResponse:
 "첫째, 조세는 국가 운영과 공공 서비스 재정을 마련하는 중요한 수단으로 효율적인 자원 분배와 공평한 부담을 동시에 추구해야 한다.
 둘째, 조세 제도 설계 시 효율성과 공평성을 균형 있게 고려하여 경제 활동을 저해하지 않으면서도 재정 안정성을 보장할 필요가 있다.
 셋째, 다양한 이해관계자와 전문가의 의견을 수렴하고 구체적인 통계 자료를 토대로 합리적인 기준을 설정하여 조세 정책의 효율성과 공평성을 실현해야 한다."
+
 출력은 불필요한 문자 없이 줄글 형태로만 출력해라."""
 
         core_point_response = await client.aio.models.generate_content(
@@ -150,7 +151,7 @@ async def create_question(request: QuestionRequest) -> QuestionResponse:
 - 문항은 지문에서 측정하고자 하는 내용을 정확히 반영하고, 핵심 내용을 간결하고 구조적이며 체계적으로 구성한다.
 - 선지를 작성할 때는 문법적, 논리적으로 지문과 일치하도록 하며, 정답과 오답이 명확하게 구별되도록 해야한다.
 - 정답의 위치는 무작위로 배치한다.
-- 단순히 특정 어휘를 대체하는 방식으로 오답을 구성하지 않는다.
+*단순히 특정 어휘를 대체하는 방식으로 오답을 구성하지 않는다.
 
 ## {request.type_question} 유형 고려사항
 
