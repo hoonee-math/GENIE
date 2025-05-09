@@ -1,10 +1,11 @@
 import os
+import json
 import traceback
 from typing import List, Dict, Any
 from google import genai
 from google.genai import types
 from fastapi import HTTPException
-from schemas.question import QuestionRequest, QuestionResponse
+from schemas.question import QuestionRequest, PassageInfo, QuestionInfo, QuestionResponse
 from utils.guidelines import get_question_guidelines
 from utils.json_utils import process_json_response
 from utils.logger import logger, log_api_call_cost
@@ -36,14 +37,14 @@ async def create_question(request: QuestionRequest) -> QuestionResponse:
         logger.info("지문 유형 및 핵심 키워드 추출 중")
 
         type_keyword_prompt = f"""아래 수능 국어 독서 영역 비문학 지문을 5가지 주제 (인문, 예술, 사회, 기술, 과학) 중 하나로 분류하세요.
-그리고 20자 이내로 요약한 핵심 키워드를 1~3개 뽑아주세요. 각 키워드는 쉼표(,)로 구분해주세요.
+그리고 20자 이내로 요약한 핵심 키워드를 1~3개 뽑아주세요. 각 키워드는 쉼표(,)로 구분해 주세요.
 
 ## 주제 분류 기준
 
 - 인문: 인간의 존재와 관련된 문제, 그리고 인간의 사상과 문화 등을 다루고 있는 글이다. 인간의 본질이나 정신세계, 그리고 인간의 행위에 대한 이해를 목적으로 하는 글이다. 인간과 세계의 본질과 관련된 글, 인간의 행위 규범과 관련된 글, 인간의 의식 세계와 관련된 글, 사유의 형식이나 법칙과 관련된 글, 그리고 역사나 종교와 관련된 글 등을 포함한다.
 - 예술: 미의 본질이나 미를 추구하는 인간의 다양한 예술 행위에 대해 다루고 있는 글이다. 예술의 본질과 다양한 예술 행위의 특징을 이해하는 한편, 예술 작품을 수용하는 미적 안목을 향상하는 데 도움을 주기 위한 글이다. 예술의 본질에 대해 논의하는 글, 다양한 예술 행위의 특징을 설명하는 글, 주요 예술가나 예술 작품을 비평하는 글, 예술 사조에 대해 설명하는 글 등을 포함한다.
-- 사회: 사회에서 일어나거나 일어날 수 있는 다양한 문제를 소개하고 해결하는 방안을 제시하 는 글이다. 사회 현상이나 문화 현상을 다양한 관점에서 논리적, 체계적으로 설명하는 글이다. 법을 다룬 법학, 사회 제도 및 사회의 다양한 현상을 연구하는 사회학, 기업의 경영을 다룬 경영학, 경제 문제 및 경제 활동을 설명하는 경제학, 생물로서의 인간을 종합적으로 연구하는 인류학, 사회 구성원에 의해 이루어진 생활 양식 및 그와 관련하여 일어나는 여러 현상들을 연구하는 문화학과 관련된 글 등을 포함한다.
-- 기술: 인간의 삶을 편리하게 하는 산업 기술, 생활 기술 등 다양한 분야의 기술을 설명하는 글이다. 특정 과학 이론을 바탕으로 장치나 시스템에 적용되는 원리와 작동 과정, 한계 등을 구체적으로 서술한 글이다. 전기와 전자의 원리를 이용한 공학 기술, 컴퓨터를 이용한 공학 기술, 화학이나 생명 과학과 결합된 공학 기술, 토목이나 건축에 활용되는 토목건축 공학 기술과 관련된 글 둥을 포함한다.
+- 사회: 사회에서 일어나거나 일어날 수 있는 다양한 문제를 소개하고 해결하는 방안을 제시하는 글이다. 사회 현상이나 문화 현상을 다양한 관점에서 논리적, 체계적으로 설명하는 글이다. 법을 다룬 법학, 사회 제도 및 사회의 다양한 현상을 연구하는 사회학, 기업의 경영을 다룬 경영학, 경제 문제 및 경제 활동을 설명하는 경제학, 생물로서의 인간을 종합적으로 연구하는 인류학, 사회 구성원에 의해 이루어진 생활 양식 및 그와 관련하여 일어나는 여러 현상들을 연구하는 문화학과 관련된 글 등을 포함한다.
+- 기술: 인간의 삶을 편리하게 하는 산업 기술, 생활 기술 등 다양한 분야의 기술을 설명하는 글이다. 특정 과학 이론을 바탕으로 장치나 시스템에 적용되는 원리와 작동 과정, 한계 등을 구체적으로 서술한 글이다. 전기와 전자의 원리를 이용한 공학 기술, 컴퓨터를 이용한 공학 기술, 화학이나 생명 과학과 결합된 공학 기술, 토목이나 건축에 활용되는 토목건축 공학 기술과 관련된 글 등을 포함한다.
 - 과학: 자연 과학적 시각으로 물질계와 생태계, 우주를 탐구하는 인간의 정신 활동을 담고 있는 글이다. 수에 관하여 연구하는 수학, 물질의 물리적 성질과 운동 형태 등을 연구하는 물리학, 물질의 조성과 구조 · 성질 등을 연구하는 화학, 생물의 구조와 기능을 과학적으로 연구하는 생명 과학, 지구 및 천체를 연구하는 지구 과학과 관련된 글 등을 포함한다.
 
 ---
@@ -64,7 +65,9 @@ async def create_question(request: QuestionRequest) -> QuestionResponse:
             model=GEMINI_FLASH_MODEL,
             config=types.GenerateContentConfig(
                 system_instruction=type_keyword_prompt,
-                temperature=0.3
+                temperature=0.3,
+                response_mime_type="application/json", ## 아예 답변을 json으로 받기
+                response_schema=PassageInfo,
             ),
             contents=""
         )
@@ -75,7 +78,9 @@ async def create_question(request: QuestionRequest) -> QuestionResponse:
             "total_token_count": usage_metadata_type_keyword.total_token_count,
         })
 
-        type_keyword_result = process_json_response(type_keyword_response.text)
+        ## 구조화된 답변을 유도하는 설정
+        type_keyword_result = json.loads(type_keyword_response.text)
+        # type_keyword_result = process_json_response(type_keyword_response.text)
         type_passage = type_keyword_result.get("type_passage", "분야 추출 실패")
         keyword_str = type_keyword_result.get("keyword", "제재 추출 실패")
 
@@ -123,7 +128,7 @@ async def create_question(request: QuestionRequest) -> QuestionResponse:
         question_guidelines = get_question_guidelines(request.type_question)
         logger.debug(f"문항 생성 가이드라인 불러오기 : {question_guidelines[:30]}...")
 
-        system_prompt = f"""당신은 대한민국 대학수학능력시험(College Scholastic Ability Test, Republic of Korea) 국어 영역 독서 분야 비문학 지문에 대한한 문항을 작성하는 시험출제 전문가이다.
+        system_prompt = f"""당신은 대한민국 대학수학능력시험(College Scholastic Ability Test, Republic of Korea) 국어 영역 독서 분야 비문학 지문에 대한 한 개의 문항을 작성하는 시험 출제 전문가이다.
 아래 지문을 기반으로 제시된 문항 예시와 같은 형식의 {request.type_question} 유형 문항을 작성하라. 
 지문의 논점, 문항 작성 원칙은 다음과 같다.
 
@@ -149,7 +154,7 @@ async def create_question(request: QuestionRequest) -> QuestionResponse:
 ## 공통된 문항, 선지 작성 원칙
 
 - 문항은 지문에서 측정하고자 하는 내용을 정확히 반영하고, 핵심 내용을 간결하고 구조적이며 체계적으로 구성한다.
-- 선지를 작성할 때는 문법적, 논리적으로 지문과 일치하도록 하며, 정답과 오답이 명확하게 구별되도록 해야한다.
+- 선지를 작성할 때는 문법적, 논리적으로 지문과 일치하도록 하며, 정답과 오답이 명확하게 구별되도록 해야 한다.
 - 정답의 위치는 무작위로 배치한다.
 *단순히 특정 어휘를 대체하는 방식으로 오답을 구성하지 않는다.
 
@@ -162,7 +167,7 @@ async def create_question(request: QuestionRequest) -> QuestionResponse:
 
 ## 답변 출력 형식
 
-- 정답 및 해설은 선지 번호(①, ②, ③, ④, ⑤)를 활용하여 정답 선지의 근거와 오답의 틀린 이유를 포함한 상세 해설을 공백을 포함하여여 최소 100자, 최대 200자로 출력한다.
+- 정답 및 해설은 선지 번호(①, ②, ③, ④, ⑤)를 활용하여 정답 선지의 근거와 오답의 틀린 이유를 포함한 상세 해설을 공백을 포함하여 최소 100자, 최대 200자로 출력한다.
 - 정답은 선지 번호(①, ②, ③, ④, ⑤)로 출력하고, 선지 출력 결과 안에는 선지 번호(①, ②, ③, ④, ⑤)를 포함하지 않는다.
 - 마크다운 코드 블록(```) 없이, 반드시 아래 JSON 형식을 만족하는 답변을 출력한다.
 {{
@@ -176,7 +181,9 @@ async def create_question(request: QuestionRequest) -> QuestionResponse:
             model=GEMINI_PRO_MODEL,
             config=types.GenerateContentConfig(
                 system_instruction=system_prompt,
-                temperature=0.3
+                temperature=0.3,
+                response_mime_type="application/json",
+                response_schema=QuestionInfo,
             ),
             contents=user_prompt
         )
@@ -187,7 +194,9 @@ async def create_question(request: QuestionRequest) -> QuestionResponse:
             "total_token_count": usage_metadata_question.total_token_count,
         })
 
-        response_json = process_json_response(question_gen_response.text)
+        ## 구조화된 답변을 유도하는 설정
+        response_json = json.loads(question_gen_response.text)
+        # response_json = process_json_response(question_gen_response.text)
         logger.info("문항 생성 완료")
 
         return QuestionResponse(

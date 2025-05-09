@@ -46,7 +46,7 @@ async def create_passage(request: PassageRequest) -> PassageResponse:
         for attempt in range(max_attempts):
             logger.info(f"지문 생성 시도 {attempt + 1}/{max_attempts}")
 
-            system_prompt = f"""당신은 대한민국 대학수학능력시험(College Scholastic Ability Test, Republic of Korea) 국어 영역 독서 분야 비문학 지문을 작성하는 시험출제 전문가이다.
+            system_prompt = f"""당신은 대한민국 대학수학능력시험(College Scholastic Ability Test, Republic of Korea) 국어 영역 독서 분야 비문학 지문을 작성하는 시험 출제 전문가이다.
 {request.type_passage} 분야에서 '{keyword_str}'을 핵심 제재로 지문을 작성해야 한다.
 
 ---
@@ -62,7 +62,7 @@ async def create_passage(request: PassageRequest) -> PassageResponse:
 - 하나의 주제를 중심으로 지문 전체의 흐름을 유지한다.
 - 공정하고 객관적인 사실을 다룬다. 허구적인 사건 및 개념, 가상의 인물을 서술하는 것은 금지한다.
 - 적절한 예시나 개념적 설명을 포함하면서 자연스러운 흐름을 유지한다.
-- 동일한 내용이나 유사한 논지를 불필요하게 반복하지 않는다. 필요 시, 같은 내용이라도 다른 표현 방식으로 이해를 돕고, 추론을 이끌어낸다.
+- 동일한 내용이나 유사한 논지를 불필요하게 반복하지 않는다. 필요시, 같은 내용이라도 다른 표현 방식으로 이해를 돕고, 추론을 이끌어낸다.
 - 단순한 정보 나열보다 개념 간의 관계를 유기적으로 연결하여 논리적으로 서술한다.
 - 문항 출제자가 논리적 추론을 수행하는 문항을 낼 수 있도록 지문을 작성한다.
 - 지문의 글자 수는 한국어 기준 **공백을 포함해 최소 1400자, 최대 1600자**로 한다.
@@ -81,7 +81,7 @@ async def create_passage(request: PassageRequest) -> PassageResponse:
 분야 : {request.type_passage}
 핵심 제재 : {keyword_str}
 을 만족하는 논리적이고 구조적인 수능 국어 독서 영역 비문학 지문을 작성하라.
-생성한 지문이 **공백 포함 최소 1400자, 최대 1600자**를 충족하는지 꼭 검토해서 글자수를 반드시 만족하도록 한다.
+생성한 지문이 **공백 포함 최소 1400자, 최대 1600자**를 충족하는지 꼭 검토해서 글자 수를 반드시 만족하도록 한다.
 출력은 지문만 출력하고, 이외의 불필요한 정보는 포함하지 않도록 해라."""
 
             response = await client.aio.models.generate_content(

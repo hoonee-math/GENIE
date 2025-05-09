@@ -7,6 +7,19 @@ class QuestionRequest(BaseModel):
     type_question: str # 문항 유형
     question_example: str # 문항 예시
 
+## 중간 유통 과정 스키마 정리
+## ---------------------------------------------------------
+class PassageInfo(BaseModel):
+    type_passage: str # 분야
+    keyword: str # 제재
+
+class QuestionInfo(BaseModel):
+    generated_question: str # 질문
+    generated_option: List[str] # 선지 5개
+    generated_answer: str # 정답
+    generated_description: str # 해설
+## ---------------------------------------------------------
+
 class QuestionResponse(BaseModel):
     type_passage: str # 분야
     keyword: List[str] # 제재
