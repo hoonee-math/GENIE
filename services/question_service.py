@@ -182,8 +182,8 @@ async def create_question(request: QuestionRequest) -> QuestionResponse:
             config=types.GenerateContentConfig(
                 system_instruction=system_prompt,
                 temperature=0.3,
-                response_mime_type="application/json",
-                response_schema=QuestionInfo,
+                # response_mime_type="application/json",
+                # response_schema=QuestionInfo,
             ),
             contents=user_prompt
         )
@@ -195,8 +195,8 @@ async def create_question(request: QuestionRequest) -> QuestionResponse:
         })
 
         ## 구조화된 답변을 유도하는 설정
-        response_json = json.loads(question_gen_response.text)
-        # response_json = process_json_response(question_gen_response.text)
+        # response_json = json.loads(question_gen_response.text)
+        response_json = process_json_response(question_gen_response.text)
         logger.info("문항 생성 완료")
 
         return QuestionResponse(

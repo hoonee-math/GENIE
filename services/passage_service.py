@@ -4,7 +4,7 @@ from google import genai
 from google.genai import types
 from fastapi import HTTPException
 from schemas.passage import PassageRequest, PassageResponse
-from utils.guidelines import get_passage_guidelines
+from utils.guidelines import get_passage_guidelines, get_example_guidelines
 from utils.logger import logger, log_api_call_cost
 from dotenv import load_dotenv
 
@@ -35,7 +35,10 @@ async def create_passage(request: PassageRequest) -> PassageResponse:
         logger.info(f"지문 생성 요청 수신 -> 분야:{request.type_passage}, 키워드:{request.keyword}")
         
         passage_guidelines = get_passage_guidelines(request.type_passage)
-        logger.debug(f"지문 가이드라인 불러오기:{passage_guidelines[:50]}...")
+        logger.debug(f"지문 가이드라인 불러오기:{passage_guidelines[:25]}...")
+
+        passage_example = get_example_guidelines(request.type_passage)
+        logger.debug(f"지문 예시 불러오기:{passage_example[:25]}...")
 
         keyword_str = ", ".join(request.keyword)
 
@@ -75,7 +78,14 @@ async def create_passage(request: PassageRequest) -> PassageResponse:
 
 - 모든 문장은 한국어로 작성하며 문법에 맞게 작성한다.
 - 평어체, 문어체로 논리적이고 객관적으로 서술해야 하며 명확하고 완결성 있게 작성한다.
-*각 문장은 주어와 서술어의 호응을 고려하여 문장당 평균 17~25 어절이 되도록 작성한다."""
+*각 문장은 주어와 서술어의 호응을 고려하여 문장당 평균 17~25 어절이 되도록 작성한다.
+---
+
+## 참고용 예시 지문
+- 다음 예시 지문의 톤, 문장 길이, 단락 구성 방식의 참고 예시로 활용한다. 
+- 내용은 절대 활용하지 않는다.
+
+{passage_example}"""
 
             user_prompt = f"""출제 경향 및 작성 원칙, 지문 작성 및 문장 구성 원칙을 참고하여
 분야 : {request.type_passage}
