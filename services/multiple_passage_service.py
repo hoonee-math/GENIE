@@ -3,8 +3,8 @@ import traceback
 from google import genai
 from google.genai import types
 from fastapi import HTTPException
-from schemas.passage import PassageRequest, PassageResponse
-from utils.guidelines import get_passage_guidelines, get_example_guidelines
+from schemas.passage import MultiplePassageRequest, MultiplePassageResponse
+from utils.guidelines import get_passage_guidelines, get_passage_examples, get_passage_structures
 from utils.logger import logger, log_api_call_cost
 from dotenv import load_dotenv
 
@@ -21,8 +21,8 @@ try:
 
     # 사용 가능 모델 : gemini-2.5-flash-preview-04-17, gemini-2.5-pro-preview-03-25
     # 테스트 모델 : gemini-1.5-flash-8b 
-    GEMINI_PRO_MODEL = "gemini-2.5-pro-preview-03-25"
-    GEMINI_FLASH_MODEL = "gemini-2.0-flash-lite"
+    GEMINI_PRO_MODEL = "gemini-2.5-pro-preview-06-05"
+    GEMINI_FLASH_MODEL = "gemini-2.5-flash-preview-05-20"
     
 except Exception as e:
     logger.critical(f"초기화 오류 발생: {e}")
@@ -30,55 +30,73 @@ except Exception as e:
 
 
 
-async def create_passage(request: PassageRequest) -> PassageResponse:
+async def create_multiple_passage(request: MultiplePassageRequest) -> MultiplePassageResponse:
     try:
-        logger.info(f"지문 생성 요청 수신 -> 분야:{request.type_passage}, 키워드:{request.keyword}")
-        
-        passage_guidelines = get_passage_guidelines(request.type_passage)
-        logger.debug(f"지문 가이드라인 불러오기:{passage_guidelines[:25]}...")
+        logger.info(f"지문 생성 요청 수신 -> 복합지문, (가) 분야:{request.first_type_passage}, (가) 키워드:{request.first_keyword}, (나) 분야:{request.second_type_passage}, (나) 키워드:{request.second_keyword}")
 
-        passage_example = get_example_guidelines(request.type_passage)
+        first_passage_guidelines = get_passage_guidelines(request.first_type_passage)
+        logger.debug(f"(가) 지문 가이드라인 불러오기:{first_passage_guidelines[:25]}...")
+
+        second_passage_guidelines = get_passage_guidelines(request.second_type_passage)
+        logger.debug(f"(나) 지문 가이드라인 불러오기:{first_passage_guidelines[:25]}...")
+
+        passage_example = get_passage_examples("복합지문")
         logger.debug(f"지문 예시 불러오기:{passage_example[:25]}...")
 
-        keyword_str = ", ".join(request.keyword)
+        first_keyword_str = ", ".join(request.first_keyword)
+        second_keyword_str = ", ".join(request.second_keyword)
 
         max_attempts = 2
-        min_char_count_threshold = 1350
+        min_char_count_threshold = 1200
         generated_passages = []
 
         for attempt in range(max_attempts):
             logger.info(f"지문 생성 시도 {attempt + 1}/{max_attempts}")
 
             system_prompt = f"""당신은 대한민국 대학수학능력시험(College Scholastic Ability Test, Republic of Korea) 국어 영역 독서 분야 비문학 지문을 작성하는 시험 출제 전문가이다.
-{request.type_passage} 분야에서 '{keyword_str}'을 핵심 제재로 지문을 작성해야 한다.
+(가)(나) 복합형 지문을 작성해야 한다.
+(가)는 {request.first_type_passage} 분야로 (나)는 {request.second_type_passage} 분야로 지문을 작성한다.
+'{first_keyword_str}'을 (가) 지문의, '{second_keyword_str}'을 (나) 지문의 핵심 제재로 지문을 작성한다.
 
 ---
 
-## {request.type_passage} 분야 출제 경향 및 작성 원칙
+## {request.first_type_passage} 분야 출제 경향 및 작성 원칙
 
-{passage_guidelines}
+{first_passage_guidelines}
 
 ---
+"""
+            if request.first_type_passage != request.second_type_passage:
+                  system_prompt += f"""
+## {request.second_type_passage} 분야 출제 경향 및 작성 원칙
 
+{request.second_type_passage}
+
+---
+"""
+            system_prompt +=f"""
 ## 지문 작성 원칙
 
 - 하나의 주제를 중심으로 지문 전체의 흐름을 유지한다.
 - 공정하고 객관적인 사실을 다룬다. 허구적인 사건 및 개념, 가상의 인물을 서술하는 것은 금지한다.
 - 적절한 예시나 개념적 설명을 포함하면서 자연스러운 흐름을 유지한다.
-- 동일한 내용이나 유사한 논지를 불필요하게 반복하지 않는다. 필요시, 같은 내용이라도 다른 표현 방식으로 이해를 돕고, 추론을 이끌어낸다.
+- 동일한 내용이나 유사한 논지를 불필요하게 반복하지 않는다.
+- 같은 내용이라도 다른 표현 방식으로 이해를 돕고, 추론을 이끌어낸다.
 - 단순한 정보 나열보다 개념 간의 관계를 유기적으로 연결하여 논리적으로 서술한다.
 - 문항 출제자가 논리적 추론을 수행하는 문항을 낼 수 있도록 지문을 작성한다.
-- 지문의 글자 수는 한국어 기준 **공백을 포함해 최소 1400자, 최대 1600자**로 한다.
-- 문단을 4-5개로 적절히 나누고, 각 문단은 하나의 주제를 위한 각각의 중심 내용을 명확하게 전달한다.
-*'결국', '결론적으로', '결과적으로'와 같이 결론을 내리는 직접적인 문구를 사용하지 않는다.
+- 지문의 글자 수는 한국어 기준 **공백을 포함해 최소 1200자, 최대 1600자**로 한다.
+- 각각 공백 포함 약 700자로 나누어서 두 지문을 작성한다.
+- 문단을 4-5개로 나누고, 각 문단은 중심 내용을 명확하게 전달한다.
+*'결국', '결론적으로', '결과적으로'와 같은 결론 표현은 지양한다.
 
 ---
 
 ## 문장 구성 원칙
 
 - 모든 문장은 한국어로 작성하며 문법에 맞게 작성한다.
-- 평어체, 문어체로 논리적이고 객관적으로 서술해야 하며 명확하고 완결성 있게 작성한다.
-*각 문장은 주어와 서술어의 호응을 고려하여 문장당 평균 17~25 어절이 되도록 작성한다.
+- 평어체, 문어체로 논리적이고 객관적으로 서술하며 명확하게 작성한다.
+- 각 문장은 평균 17~25 어절로 작성하며, 주어-서술어의 호응에 유의한다.
+
 ---
 
 ## 참고용 예시 지문
@@ -87,12 +105,21 @@ async def create_passage(request: PassageRequest) -> PassageResponse:
 
 {passage_example}"""
 
-            user_prompt = f"""출제 경향 및 작성 원칙, 지문 작성 및 문장 구성 원칙을 참고하여
-분야 : {request.type_passage}
-핵심 제재 : {keyword_str}
-을 만족하는 논리적이고 구조적인 수능 국어 독서 영역 비문학 지문을 작성하라.
-생성한 지문이 **공백 포함 최소 1400자, 최대 1600자**를 충족하는지 꼭 검토해서 글자 수를 반드시 만족하도록 한다.
-출력은 지문만 출력하고, 이외의 불필요한 정보는 포함하지 않도록 해라."""
+            user_prompt = f"""출제 경향 및 작성 원칙, 지문 작성 및 문장 구성 원칙을 참고하여 (가) (나) 복합형 지문을 작성하라.
+분야 : (가) : {request.first_type_passage}, (나) : {request.second_type_passage}
+핵심 제재 : (가) : {first_keyword_str},
+(나) : {second_keyword_str}
+
+위 분야와 핵심 제재를 만족하는 논리적이고 구조적인 수능 국어 독서 영역 비문학 지문을 작성하라.
+각각 공백 포함 약 700자로 나누어서 두 지문을 작성하라.
+생성한 지문이 **공백 포함 최소 1200자, 최대 1600자**를 충족하는지 꼭 검토해서 글자 수를 반드시 만족하도록 한다.
+출력은 지문만 출력하고, 이외의 불필요한 정보는 포함하지 않도록 하라."""
+
+            if request.first_requirement and request.first_requirement.strip():
+                user_prompt += f"\n*(가) 지문 관련 추가 요청 사항 : {request.first_requirement.strip()}"
+
+            if request.second_requirement and request.second_requirement.strip():
+                user_prompt += f"\n*(나) 지문 관련 추가 요청 사항 : {request.second_requirement.strip()}"
 
             response = await client.aio.models.generate_content(
                 model=GEMINI_PRO_MODEL,
@@ -109,7 +136,6 @@ async def create_passage(request: PassageRequest) -> PassageResponse:
                 "total_token_count": usage_metadata.total_token_count,
             })
 
-
             current_passage = response.text
             char_count = len(current_passage)
             logger.debug(f"{attempt + 1}번째 시도 -> 생성 지문 길이 : {char_count}자")
@@ -117,18 +143,16 @@ async def create_passage(request: PassageRequest) -> PassageResponse:
             generated_passages.append((current_passage, char_count))
 
             if char_count >= min_char_count_threshold:
-                logger.info("생성된 지문이 최소 글자 수 조건을 만족했습니다.")
+                logger.info(f"생성된 지문이 최소 글자 수 ({min_char_count_threshold})자를 만족했습니다.")
                 break
-
-            if char_count < min_char_count_threshold:
-               logger.warning(f"생성 지문 길이 ({char_count})자가 최소 기준 ({min_char_count_threshold})보다 부족합니다. 다시 시도합니다.")
+            else:
+                logger.warning(f"생성 지문 길이 ({char_count})자가 최소 기준 ({min_char_count_threshold})보다 부족합니다. 다시 시도합니다.")
 
         if not generated_passages:
-             logger.error("모든 시도에서 지문을 생성하지 못했습니다.")
-             raise HTTPException(status_code=500, detail="지문 생성에 실패했습니다.")
+            logger.error("모든 시도에서 지문을 생성하지 못했습니다.")
+            raise HTTPException(status_code=500, detail="지문 생성에 실패했습니다.")
 
-        valid_passages = [(passage, count) for passage, count in generated_passages if count >= min_char_count_threshold]
-        
+        valid_passages = [(p, c) for p, c in generated_passages if c >= min_char_count_threshold]
         if valid_passages:
             generated_passage, max_char_count = max(valid_passages, key=lambda x: x[1])
         else:
@@ -169,11 +193,11 @@ async def create_passage(request: PassageRequest) -> PassageResponse:
         generated_core_point = core_point_response.text.strip()
         logger.debug(f"핵심 논점 생성 완료 : {generated_core_point[:30]}...")
 
-        return PassageResponse(
+        return MultiplePassageResponse(
             generated_passage=generated_passage,
             generated_core_point=generated_core_point
         )
-
+    
     except ValueError as ve:
          logger.error(f"입력값 오류 : {str(ve)}")
          raise HTTPException(status_code=400, detail=f"입력값 오류: {str(ve)}")

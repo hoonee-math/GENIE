@@ -20,8 +20,8 @@ try:
 
     # 사용 가능 모델 : gemini-2.5-flash-preview-04-17, gemini-2.5-pro-preview-03-25
     # 테스트 모델 : gemini-1.5-flash 
-    GEMINI_PRO_MODEL = "gemini-2.5-pro-preview-03-25"
-    GEMINI_FLASH_MODEL = "gemini-2.0-flash-lite"
+    GEMINI_PRO_MODEL = "gemini-2.5-pro-preview-06-05"
+    GEMINI_FLASH_MODEL = "gemini-2.5-flash-preview-05-20"
     
 except Exception as e:
     logger.critical(f"초기화 오류 발생: {e}")

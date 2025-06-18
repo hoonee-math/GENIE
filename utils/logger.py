@@ -68,7 +68,7 @@ def calculate_gemini_cost(model_name: str, prompt_tokens: int, total_tokens: int
     prompt_million = prompt_tokens / 1_000_000
     response_million = response_tokens / 1_000_000
 
-    if model_name == "gemini-2.5-pro-preview-03-25":
+    if model_name == "gemini-2.5-pro-preview-06-05":
         if prompt_tokens <= 200_000:
             prompt_cost_per_million = 1.25
             response_cost_per_million = 10.00
@@ -76,9 +76,9 @@ def calculate_gemini_cost(model_name: str, prompt_tokens: int, total_tokens: int
             prompt_cost_per_million = 2.50
             response_cost_per_million = 15.00
 
-    elif model_name == "gemini-2.0-flash-lite":
-        prompt_cost_per_million = 0.075
-        response_cost_per_million = 0.3
+    elif model_name == "gemini-2.5-flash-preview-05-20":
+        prompt_cost_per_million = 0.15
+        response_cost_per_million = 0.6
     else:
         raise ValueError(f"지원하지 않는 모델입니다: {model_name}")
 
