@@ -1,9 +1,26 @@
 import logging
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from logging.handlers import TimedRotatingFileHandler
 import threading
 import time
+
+class KSTFormatter(logging.Formatter):
+    KST = timezone(timedelta(hours=9))  # 한국 시간대
+
+    def converter(self, timestamp):
+        # timestamp (float, epoch seconds)를 KST datetime으로 변환
+        dt = datetime.fromtimestamp(timestamp, self.KST)
+        return dt
+
+    def formatTime(self, record, datefmt=None):
+        dt = self.converter(record.created)
+        if datefmt:
+            return dt.strftime(datefmt)
+        else:
+            # 기본 포맷
+            return dt.strftime("%Y-%m-%d %H:%M:%S")
+
 
 class CostTracker:
     _instance = None
@@ -31,33 +48,34 @@ def setup_logger():
     logger = logging.getLogger('Gemini_API') 
     logger.setLevel(logging.DEBUG)
 
-    if not logger.handlers:
-        log_dir = 'logs'
-        os.makedirs(log_dir, exist_ok=True)
-        
-        log_filename = os.path.join(log_dir, 'Gemini_API.log')
+    if logger.hasHandlers():
+        logger.handlers.clear()
 
-        # 로그 파일 하루마다 회전하고, 삭제 없이 계속 보관하게 합니다
-        file_handler = TimedRotatingFileHandler(
-            filename=log_filename,
-            when='midnight',      # 매일 자정 새 파일 회전
-            interval=1,           # 하루 단위
-            backupCount=0,        # 0 = 삭제 X, 1 = 하루 단위 삭제, 2 = 이틀 단위 삭제
-            encoding='utf-8',
-            utc=False
-        )
+    log_dir = 'logs'
+    os.makedirs(log_dir, exist_ok=True)
+    log_filename = os.path.join(log_dir, 'Gemini_API.log')
 
-        file_handler.setLevel(logging.DEBUG)
+    file_handler = TimedRotatingFileHandler(
+        filename=log_filename,
+        when='midnight',
+        interval=1,
+        backupCount=0,
+        encoding='utf-8',
+        utc=False,
+        delay=True
+    )
+    file_handler.setLevel(logging.DEBUG)
 
-        console_handler = logging.StreamHandler()
-        console_handler.setLevel(logging.INFO)
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
 
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        file_handler.setFormatter(formatter)
-        console_handler.setFormatter(formatter)
+    formatter = KSTFormatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-        logger.addHandler(file_handler)
-        logger.addHandler(console_handler)
+    file_handler.setFormatter(formatter)
+    console_handler.setFormatter(formatter)
+
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
 
     return logger
 
@@ -103,10 +121,15 @@ def log_api_call_cost(model_name: str, usage_metadata: dict) -> None:
 def schedule_dummy_log():
     now = datetime.now()
     # 다음 자정 계산
-    next_midnight = (now + timedelta(days=1)).replace(hour=0, minute=0, second=1, microsecond=0)
+    next_midnight = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=100000)
     delay = (next_midnight - now).total_seconds()
 
     def log_and_reschedule():
+        # ✅ 회전 강제 트리거 (안정성 보완용)
+        for handler in logger.handlers:
+            if isinstance(handler, TimedRotatingFileHandler):
+                handler.doRollover()
+
         logger.info('[DUMMY] 자정 더미 로그 - 로그 파일 회전 보장')
         schedule_dummy_log()
 
