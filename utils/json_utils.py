@@ -1,7 +1,7 @@
 import json
 import logging
 from fastapi import HTTPException
-3
+
 logger = logging.getLogger('Gemini_API')
 
 def process_json_response(response_content: str):
