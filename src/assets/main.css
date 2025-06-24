@@ -1,0 +1,13 @@
+body {
+    font-family: "Pretendard";
+}
+
+.brand-gradient {
+    background: linear-gradient(90deg, #0086ff 0%, #00c2ff 100%);
+}
+
+:root {
+    --primary: #0086ff;
+    --error: #ff4d4f;
+    --success: #52c41a;
+}

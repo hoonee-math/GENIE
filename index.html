@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" href="/src/assets/images/favicon.ico" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Genie</title>
+
+        <!-- Pretendard 폰트 불러오기 -->
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/pretendard/dist/web/static/pretendard.css"
+        />
+
+        <!-- Toss Payments 불러오기 -->
+        <script src="https://js.tosspayments.com/v2/standard"></script>
+
+        <!-- Tailwind.css 불러오기 -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        colors: {
+                            brand: "#0086FF",
+                        },
+                    },
+                },
+            };
+        </script>
+    </head>
+    <body>
+        <div id="app"></div>
+        <script type="module" src="/src/main.js"></script>
+    </body>
+</html>
