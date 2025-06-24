@@ -167,13 +167,6 @@ async def create_single_passage_question(request: QuestionRequest) -> SinglePass
 
 ---
 
-## 공통된 문항, 선지 작성 원칙
-
-- 문항은 지문에서 측정하고자 하는 내용을 정확히 반영하고, 핵심 내용을 간결하고 구조적이며 체계적으로 구성한다.
-- 선지를 작성할 때는 문법적, 논리적으로 지문과 일치하도록 하며, 정답과 오답이 명확하게 구별되도록 해야 한다.
-- 정답의 위치는 무작위로 배치한다.
-*단순히 특정 어휘를 대체하는 방식으로 오답을 구성하지 않는다.
-
 ## {request.type_question} 유형 고려사항
 
 {question_guidelines}"""
