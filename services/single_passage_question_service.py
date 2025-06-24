@@ -5,7 +5,7 @@ from typing import List, Dict, Any
 from google import genai
 from google.genai import types
 from fastapi import HTTPException
-from schemas.question import QuestionRequest, SinglePassageInfo, SinglePassageQuestionResponse # QuestionInfo, 
+from schemas.question import QuestionRequest, SinglePassageInfo, SinglePassageQuestionResponse # QuestionInfo
 from utils.guidelines import get_question_guidelines
 from utils.json_utils import process_json_response
 from utils.logger import logger, log_api_call_cost
@@ -129,7 +129,7 @@ async def create_single_passage_question(request: QuestionRequest) -> SinglePass
         logger.debug(f"문항 생성 가이드라인 불러오기 : {question_guidelines[:30]}...")
 
         system_prompt = f"""당신은 대한민국 대학수학능력시험(College Scholastic Ability Test, Republic of Korea) 국어 영역 독서 분야 비문학 지문에 대한 한 개의 문항을 작성하는 시험 출제 전문가이다.
-아래 지문을 기반으로 제시된 문항 예시와 같은 형식의 {request.type_question} 유형 문항을 작성하라. 
+아래 지문을 기반으로 제시된 문제문 예시와 같은 형식의 {request.type_question} 유형 문제문을 작성하라. 
 지문의 논점, 문항 작성 원칙은 다음과 같다.
 
 ---
@@ -139,7 +139,7 @@ async def create_single_passage_question(request: QuestionRequest) -> SinglePass
 {request.custom_passage}
 
 
-## 문항 형식
+## 문제문 형식
 
 {request.question_format}
 
@@ -167,7 +167,7 @@ async def create_single_passage_question(request: QuestionRequest) -> SinglePass
 
 ---
 
-## 공통된 문항, 선지 작성 원칙
+## 문항, 선지 작성 원칙
 
 - 문항은 지문에서 측정하고자 하는 내용을 정확히 반영하고, 핵심 내용을 간결하고 구조적이며 체계적으로 구성한다.
 - 선지를 작성할 때는 문법적, 논리적으로 지문과 일치하도록 하며, 정답과 오답이 명확하게 구별되도록 해야 한다.
