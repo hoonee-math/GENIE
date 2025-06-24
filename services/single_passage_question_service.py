@@ -5,7 +5,7 @@ from typing import List, Dict, Any
 from google import genai
 from google.genai import types
 from fastapi import HTTPException
-from schemas.question import QuestionRequest, PassageInfo, QuestionInfo, QuestionResponse
+from schemas.question import QuestionRequest, SinglePassageInfo, QuestionInfo, SinglePassageQuestionResponse
 from utils.guidelines import get_question_guidelines
 from utils.json_utils import process_json_response
 from utils.logger import logger, log_api_call_cost
@@ -28,7 +28,7 @@ except Exception as e:
     raise RuntimeError(f"초기화 실패: {e}")
 
 
-async def create_question(request: QuestionRequest) -> QuestionResponse:
+async def create_single_passage_question(request: QuestionRequest) -> SinglePassageQuestionResponse:
     try:
         logger.info(f"문항 생성 요청 수신 -> 유형:{request.type_question}")
         logger.debug(f"입력 지문 길이:{len(request.custom_passage)}자")
@@ -67,7 +67,7 @@ async def create_question(request: QuestionRequest) -> QuestionResponse:
                 system_instruction=type_keyword_prompt,
                 temperature=0.3,
                 response_mime_type="application/json", ## 아예 답변을 json으로 받기
-                response_schema=PassageInfo,
+                response_schema=SinglePassageInfo,
             ),
             contents=""
         )
@@ -139,15 +139,31 @@ async def create_question(request: QuestionRequest) -> QuestionResponse:
 {request.custom_passage}
 
 
-## 문항 예시
+## 문항 형식
 
-{request.question_example}
+{request.question_format}
 
 ---
 
-## 논점
+## 예시 문항의 질문, """
 
-{generated_core_point}
+        if request.question_subpassage_example and request.question_subpassage_example.strip():
+            system_prompt += "보기 지문, "
+
+        system_prompt +=f"""선지
+
+질문
+{request.question_statement_example}
+"""
+
+        if request.question_subpassage_example and request.question_subpassage_example.strip(): 
+            system_prompt += f"""
+보기 지문
+{request.question_subpassage_example}
+"""
+        system_prompt += f"""
+선지
+{request.question_choice_example}
 
 ---
 
@@ -162,19 +178,31 @@ async def create_question(request: QuestionRequest) -> QuestionResponse:
 
 {question_guidelines}"""
 
-        user_prompt = f"""제시된 지문을 기반으로 {request.type_question} 유형의 5개의 선지로 이루어진 문항 1개를 작성해라.
-지문의 논점을 반영하여 문항을 생성해라.
-
-## 답변 출력 형식
-
-- 정답 및 해설은 선지 번호(①, ②, ③, ④, ⑤)를 활용하여 정답 선지의 근거와 오답의 틀린 이유를 포함한 상세 해설을 공백을 포함하여 최소 100자, 최대 200자로 출력한다.
-- 정답은 선지 번호(①, ②, ③, ④, ⑤)로 출력하고, 선지 출력 결과 안에는 선지 번호(①, ②, ③, ④, ⑤)를 포함하지 않는다.
-- 마크다운 코드 블록(```) 없이, 반드시 아래 JSON 형식을 만족하는 답변을 출력한다.
+        user_prompt = f"""제시된 지문을 기반으로 {request.question_format} 형식의 5개의 선지"""
+        
+        if request.question_subpassage_example and request.question_subpassage_example.strip():
+            user_prompt += "와 보기 지문으"
+            
+            
+        user_prompt += f"""로 이루어진 문항 1개를 작성해라.
+문항에 기호가 있다면 해당 기호에 해당하는 인용문구가 포함된 문장을 출력해라.
+인용문구는 앞뒤로 <>로 구분해라. 예: <경마식 보도>는 경마 중계를 하듯 지지율 변화나 득표율 예측 등을 집중 보도하는 선거 방송의 한 방식이다.
+문항에 [A]가 포함되어 있는 경우, 해당 문단 전체를 그대로 출력하십시오.
+답변 출력 형식
+정답 및 해설은 선지 번호(①, ②, ③, ④, ⑤)를 활용하여 정답 선지의 근거와 오답의 틀린 이유를 포함한 상세 해설을 공백을 포함하여 최소 100자, 최대 200자로 출력한다.
+정답은 선지 번호(①, ②, ③, ④, ⑤)로 출력하고, 선지 출력 결과 안에는 선지 번호(①, ②, ③, ④, ⑤)를 포함하지 않는다.
+마크다운 코드 블록(```) 없이, 반드시 아래 JSON 형식을 만족하는 답변을 출력한다.
 {{
     "generated_question": String "질문",
     "generated_option": List ["선지1", "선지2", "선지3", "선지4", "선지5"],
     "generated_answer": String "정답",
     "generated_description": String "해설"
+    """
+        if request.question_subpassage_example and request.question_subpassage_example.strip():
+            user_prompt += '"generated_subpassage": String "보기 지문"'
+
+        user_prompt += f"""
+    "passage_quotation": Optional[str] "인용문구가 포함된 문장 또는 인용 문단 전체"
 }}"""
 
         question_gen_response = await client.aio.models.generate_content(
@@ -199,15 +227,29 @@ async def create_question(request: QuestionRequest) -> QuestionResponse:
         response_json = process_json_response(question_gen_response.text)
         logger.info("문항 생성 완료")
 
-        return QuestionResponse(
-            type_passage=type_passage,
-            keyword=keyword_list,
-            generated_core_point=generated_core_point,
-            generated_question=response_json.get("generated_question", "질문 생성 실패"),
-            generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
-            generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
-            generated_description=response_json.get("generated_description", "해설 생성 실패")
-        )
+        if request.question_subpassage_example and request.question_subpassage_example.strip():
+            return SinglePassageQuestionResponse(
+                type_passage=type_passage,
+                keyword=keyword_list,
+                generated_core_point=generated_core_point,
+                generated_question=response_json.get("generated_question", "질문 생성 실패"),
+                generated_subpassage=response_json.get("generated_subpassage", "보기 지문 생성 실패"),
+                generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
+                generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
+                generated_description=response_json.get("generated_description", "해설 생성 실패"),
+                passage_quotation= response_json.get("passage_quotation", "인용 문구 생성 실패")
+            )
+        else:
+            return SinglePassageQuestionResponse(
+                type_passage=type_passage,
+                keyword=keyword_list,
+                generated_core_point=generated_core_point,
+                generated_question=response_json.get("generated_question", "질문 생성 실패"),
+                generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
+                generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
+                generated_description=response_json.get("generated_description", "해설 생성 실패"),
+                passage_quotation= response_json.get("passage_quotation", "인용 문구 생성 실패")
+            )
 
     except ValueError as ve:
          logger.error(f"입력값 오류 : {str(ve)}")
