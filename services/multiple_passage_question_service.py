@@ -5,7 +5,7 @@ from typing import List, Dict, Any
 from google import genai
 from google.genai import types
 from fastapi import HTTPException
-from schemas.question import QuestionRequest, MultiplePassageInfo, QuestionInfo, MultiplePassageQuestionResponse
+from schemas.question import QuestionRequest, MultiplePassageInfo, MultiplePassageQuestionResponse # QuestionInfo
 from utils.guidelines import get_question_guidelines
 from utils.json_utils import process_json_response
 from utils.logger import logger, log_api_call_cost

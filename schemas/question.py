@@ -44,9 +44,9 @@ class SinglePassageQuestionResponse(BaseModel):
     
 class MultiplePassageQuestionResponse(BaseModel):
     first_passage_type: str # (가) 분야
-    first_passage_keyword: str # (가) 제재
+    first_passage_keyword: List[str] # (가) 제재
     second_passage_type: str # (나) 분야
-    second_passage_keyword: str # (나) 제재
+    second_passage_keyword: List[str] # (나) 제재
     first_passage_generated_core_point: str # 핵심 논점
     second_passage_generated_core_point: str # 핵심 논점
     generated_question: str # 질문

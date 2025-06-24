@@ -23,7 +23,7 @@ async def generate_question_endpoint(request: QuestionRequest):
         raise HTTPException(status_code=500, detail="문항 생성 중 서버 내부 오류가 발생했습니다.")
     
 
-@router.post("/generate-question", response_model=MultiplePassageQuestionResponse)
+@router.post("/generate-multiple-passage-question", response_model=MultiplePassageQuestionResponse)
 async def generate_question_endpoint(request: QuestionRequest):
     try:
         response = await create_multiple_passage_question(request)
