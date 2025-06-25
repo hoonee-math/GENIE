@@ -145,14 +145,14 @@ async def create_single_passage_question(request: QuestionRequest) -> SinglePass
 
 ---
 
-## 예시 문항의 질문, """
+## 예시 문항, """
 
         if request.question_subpassage_example and request.question_subpassage_example.strip():
             system_prompt += "보기 지문, "
 
         system_prompt +=f"""선지
 
-질문
+문제문
 {request.question_statement_example}
 """
 
@@ -167,13 +167,6 @@ async def create_single_passage_question(request: QuestionRequest) -> SinglePass
 
 ---
 
-## 문항, 선지 작성 원칙
-
-- 문항은 지문에서 측정하고자 하는 내용을 정확히 반영하고, 핵심 내용을 간결하고 구조적이며 체계적으로 구성한다.
-- 선지를 작성할 때는 문법적, 논리적으로 지문과 일치하도록 하며, 정답과 오답이 명확하게 구별되도록 해야 한다.
-- 정답의 위치는 무작위로 배치한다.
-*단순히 특정 어휘를 대체하는 방식으로 오답을 구성하지 않는다.
-
 ## {request.type_question} 유형 고려사항
 
 {question_guidelines}"""
@@ -185,16 +178,39 @@ async def create_single_passage_question(request: QuestionRequest) -> SinglePass
             
             
         user_prompt += f"""로 이루어진 문항 1개를 작성해라.
-1. 문항에 [A]가 포함되어 있는 경우, 해당 문단 전체를 그대로 출력해라.
-2. 문항에 ㉠과 같은 기호가 있다면 해당 기호에 해당하는 인용문구가 포함된 문장을 출력해라.
-중요사항: 인용문구는 앞뒤로 <>로 구분해라. 예: <경마식 보도>는 경마 중계를 하듯 지지율 변화나 득표율 예측 등을 집중 보도하는 선거 방송의 한 방식이다.
-3. 문항에 [A]와 ㉠과 같은 기호가 같이 있는 경우, 해당 문단 전체를 그대로 출력하되, 문단 안에서 기호에 해당하는 인용문구 앞뒤로 < >로 감싸서 표시할 것.
+
+passage_quotation 처리 로직
+출력 결과에 [A], ㉠ 같은 기호는 포함하지 않아야 한다.
+
+1. 문항에 [A]가 포함되어 있는 경우:
+- 해당 기호가 가리키는 **문단 전체**를 그대로 passage_quotation에 담아라.
+
+2. 문항에 ㉠과 같은 기호가 포함된 경우:
+- 해당 기호가 가리키는 문장 하나를 찾아, 그 문장을 passage_quotation에 담아라.
+- 해당 문장 내 인용 대상 어구는 반드시 < > 기호로 감싸 표시할 것.
+- 예
+<경마식 보도>는 경마 중계를 하듯 지지율 변화나 득표율 예측 등을 집중 보도하는 선거 방송의 한 방식이다.
+
+3. 문항에 [A]와 ㉠ 같은 기호가 **동시에 포함된 경우**:
+- 해당 문단 전체를 passage_quotation에 담되, 문단 안에 포함된 각 기호의 인용 대상 어구는 < >로 감싸서 표시하라.
+
+4. 문항에 ㉠, ㉡, ㉢, ㉣ 등 **여러 개의 기호가 포함된 경우**:
+- 각 기호가 가리키는 문장을 각각 찾아, 해당 문장을 passage_quotation의 `List[str]`에 **기호 순서대로 담아라**.
+- 각 문장에는 해당 기호가 가리키는 인용 대상 어구를 < >로 감싸서 표시하라.
+- 예
+[
+    "<수정 진동자>는 고유 주파수에 맞추어 진동을 유도하여 진동량을 측정하기 쉽게 만든 장치이다.",
+    "<경마식 보도>는 지지율 변화만을 중계하는 방식으로 선거 보도의 본질을 흐릴 수 있다.",
+    "<개방형 자율학습>은 학습자가 스스로 학습 목표와 진도를 조절할 수 있게 하는 방식이다.",
+    "<조세 정책의 효율성과 공평성>은 정책 설계의 양대 축으로 고려된다."
+]
+
 답변 출력 형식
 정답 및 해설은 선지 번호(①, ②, ③, ④, ⑤)를 활용하여 정답 선지의 근거와 오답의 틀린 이유를 포함한 상세 해설을 공백을 포함하여 최소 100자, 최대 200자로 출력한다.
 정답은 선지 번호(①, ②, ③, ④, ⑤)로 출력하고, 선지 출력 결과 안에는 선지 번호(①, ②, ③, ④, ⑤)를 포함하지 않는다.
 마크다운 코드 블록(```) 없이, 반드시 아래 JSON 형식을 만족하는 답변을 출력한다.
 {{
-    "generated_question": String "질문",
+    "generated_question": String "문제문",
     "generated_option": List ["선지1", "선지2", "선지3", "선지4", "선지5"],
     "generated_answer": String "정답",
     "generated_description": String "해설"
@@ -203,7 +219,7 @@ async def create_single_passage_question(request: QuestionRequest) -> SinglePass
             user_prompt += '"generated_subpassage": String "보기 지문"'
 
         user_prompt += f"""
-    "passage_quotation": Optional[str] "인용문구가 포함된 문장 또는 인용 문단 전체"
+    "passage_quotation": Optional[List[str]] "인용문구가 포함된 문장 또는 인용 문단 전체"
 }}"""
 
         question_gen_response = await client.aio.models.generate_content(
@@ -228,28 +244,36 @@ async def create_single_passage_question(request: QuestionRequest) -> SinglePass
         response_json = process_json_response(question_gen_response.text)
         logger.info("문항 생성 완료")
 
+        raw_quotation = response_json.get("passage_quotation", [])
+        if isinstance(raw_quotation, str):
+            passage_quotation = [raw_quotation]
+        elif isinstance(raw_quotation, list):
+            passage_quotation = raw_quotation
+        else:
+            passage_quotation = []
+        
         if request.question_subpassage_example and request.question_subpassage_example.strip():
             return SinglePassageQuestionResponse(
                 type_passage=type_passage,
                 keyword=keyword_list,
                 generated_core_point=generated_core_point,
-                generated_question=response_json.get("generated_question", "질문 생성 실패"),
+                generated_question=response_json.get("generated_question", "문제문 생성 실패"),
                 generated_subpassage=response_json.get("generated_subpassage", "보기 지문 생성 실패"),
                 generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
                 generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
                 generated_description=response_json.get("generated_description", "해설 생성 실패"),
-                passage_quotation= response_json.get("passage_quotation", "인용 문구 생성 실패")
+                passage_quotation= passage_quotation
             )
         else:
             return SinglePassageQuestionResponse(
                 type_passage=type_passage,
                 keyword=keyword_list,
                 generated_core_point=generated_core_point,
-                generated_question=response_json.get("generated_question", "질문 생성 실패"),
+                generated_question=response_json.get("generated_question", "문제문 생성 실패"),
                 generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
                 generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
                 generated_description=response_json.get("generated_description", "해설 생성 실패"),
-                passage_quotation= response_json.get("passage_quotation", "인용 문구 생성 실패")
+                passage_quotation= passage_quotation
             )
 
     except ValueError as ve:

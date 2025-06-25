@@ -23,7 +23,7 @@ class MultiplePassageInfo(BaseModel):
     second_passage_keyword: str # (나) 제재
 
 # class QuestionInfo(BaseModel):
-#     generated_question: str # 질문
+#     generated_question: str # 문제문
 #     generated_subpassage: Optional[str] # 보기
 #     generated_option: List[str] # 선지 5개
 #     generated_answer: str # 정답
@@ -35,13 +35,13 @@ class SinglePassageQuestionResponse(BaseModel):
     type_passage: str # 분야
     keyword: List[str] # 제재
     generated_core_point: str # 핵심 논점
-    generated_question: str # 질문
+    generated_question: str # 문제문
     generated_option: List[str] # 선지
     generated_answer: str # 정답
     generated_description: str # 해설
     generated_subpassage: Optional[str] = None # 보기
-    passage_quotation: Optional[str] = None # 인용문구가 있는 문장
-    
+    passage_quotation: Optional[List[str]] = None # 인용문구가 있는 문장
+
 class MultiplePassageQuestionResponse(BaseModel):
     first_passage_type: str # (가) 분야
     first_passage_keyword: List[str] # (가) 제재
@@ -49,9 +49,9 @@ class MultiplePassageQuestionResponse(BaseModel):
     second_passage_keyword: List[str] # (나) 제재
     first_passage_generated_core_point: str # 핵심 논점
     second_passage_generated_core_point: str # 핵심 논점
-    generated_question: str # 질문
+    generated_question: str # 문제문
     generated_option: List[str] # 선지
     generated_answer: str # 정답
     generated_description: str # 해설
     generated_subpassage: Optional[str] = None # 보기
-    passage_quotation: Optional[str] = None # 인용문구가 있는 문장
+    passage_quotation: Optional[List[str]] = None # 인용문구가 있는 문장
