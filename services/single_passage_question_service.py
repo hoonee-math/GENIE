@@ -10,6 +10,8 @@ from utils.guidelines import get_question_guidelines
 from utils.json_utils import process_json_response
 from utils.logger import logger, log_api_call_cost
 
+## 제미나이 모델을 불러오기 위해서 api key가 유효한지 확인합니다.
+## api key는 gcp(구글 클라우드 플랫폼)에서 프로젝트를 생성하고, google ai studio에서 해당 프로젝트 안에서 발급할 수 있습니다.
 try:
     # API 키 유효성 검증
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -18,9 +20,9 @@ try:
     
     client = genai.Client(api_key=GEMINI_API_KEY)
 
-    # 사용 가능 모델 : gemini-2.5-flash-preview-04-17, gemini-2.5-pro-preview-03-25
+    # 사용 가능 모델 : gemini-2.5-flash-preview-04-17, gemini-2.5-pro-preview-03-25, gemini-2.5-pro, gemini-2.5-pro-preview-05-06, gemini-2.5-pro-preview-06-05, gemini-2.5-flash-preview-05-20 등 docs에 꾸준히 업데이트되는 것을 확인할 수 있습니다.
     # 테스트 모델 : gemini-1.5-flash 
-    GEMINI_PRO_MODEL = "gemini-2.5-pro-preview-06-05"
+    GEMINI_PRO_MODEL = "gemini-2.5-pro"
     GEMINI_FLASH_MODEL = "gemini-2.5-flash-preview-05-20"
     
 except Exception as e:
@@ -28,16 +30,17 @@ except Exception as e:
     raise RuntimeError(f"초기화 실패: {e}")
 
 
+# 단일 지문, 독서론에 따른 문항을 만드는 함수를 만듭니다.
 async def create_single_passage_question(request: QuestionRequest) -> SinglePassageQuestionResponse:
     try:
         logger.info(f"문항 생성 요청 수신 -> 유형:{request.type_question}")
         logger.debug(f"입력 지문 길이:{len(request.custom_passage)}자")
 
-        # --- 1. 지문 분류 및 키워드 추출 ---
+        # --------------------- 1. 지문 분류 및 키워드 추출 : 먼저 사용자가 직접 입력 및 수정한 지문일 수 있기 때문에 지문의 유형과 제재를 추출합니다. -----------------------
         logger.info("지문 유형 및 핵심 키워드 추출 중")
 
         type_keyword_prompt = f"""아래 수능 국어 독서 영역 비문학 지문을 5가지 주제 (인문, 예술, 사회, 기술, 과학) 중 하나로 분류하세요.
-그리고 20자 이내로 요약한 핵심 키워드를 1~3개 뽑아주세요. 각 키워드는 쉼표(,)로 구분해 주세요.
+그리고 20자 이내로 요약한 핵심 키워드를 3개 뽑아주세요. 각 키워드는 쉼표(,)로 구분해 주세요.
 
 ## 주제 분류 기준
 
@@ -55,6 +58,12 @@ async def create_single_passage_question(request: QuestionRequest) -> SinglePass
 
 ---
 
+## 핵심 키워드 예시
+
+유서, 조선 전기, 실학자
+
+---
+
 반드시 아래 JSON 형식으로 답변하세요.
 {{
     "type_passage": String "인문" | "예술" | "사회" | "기술" | "과학",
@@ -65,13 +74,14 @@ async def create_single_passage_question(request: QuestionRequest) -> SinglePass
             model=GEMINI_FLASH_MODEL,
             config=types.GenerateContentConfig(
                 system_instruction=type_keyword_prompt,
-                temperature=0.3,
+                temperature=0.3, ## 일관된 답변을 위해 온도를 낮췄습니다.
                 response_mime_type="application/json", ## 아예 답변을 json으로 받기
-                response_schema=SinglePassageInfo,
+                response_schema=SinglePassageInfo, ## 나올 json의 key, value 값을 지정한 클래스입니다.
             ),
             contents=""
         )
 
+        # 사용된 토큰 값을 바탕으로 지불하는 비용을 계산합니다.
         usage_metadata_type_keyword = type_keyword_response.usage_metadata
         log_api_call_cost(GEMINI_FLASH_MODEL, {
             "prompt_token_count": usage_metadata_type_keyword.prompt_token_count,
@@ -88,7 +98,7 @@ async def create_single_passage_question(request: QuestionRequest) -> SinglePass
 
         keyword_list = [k.strip() for k in keyword_str.split(',')]
 
-        # --- 2. 핵심 논점 추출 ---
+        # -------------------------------------- 2. 핵심 논점 추출 : 지문의 핵심 논점을 추출합니다. -----------------------------------------
         logger.info("지문 핵심 논점 추출 중...")
 
         core_point_prompt = f"""다음은 수능 국어 영역 독서 분야 비문학 지문이다.
@@ -101,13 +111,16 @@ async def create_single_passage_question(request: QuestionRequest) -> SinglePass
 
 <작성 예시>
 "첫째, 조세는 국가 운영과 공공 서비스 재정을 마련하는 중요한 수단으로 효율적인 자원 분배와 공평한 부담을 동시에 추구해야 한다.
+
 둘째, 조세 제도 설계 시 효율성과 공평성을 균형 있게 고려하여 경제 활동을 저해하지 않으면서도 재정 안정성을 보장할 필요가 있다.
+
 셋째, 다양한 이해관계자와 전문가의 의견을 수렴하고 구체적인 통계 자료를 토대로 합리적인 기준을 설정하여 조세 정책의 효율성과 공평성을 실현해야 한다."
 
-출력은 불필요한 문자 없이 줄글 형태로만 출력해라."""
+
+출력은 불필요한 문자 없이 줄글 형태로만 출력하라."""
 
         core_point_response = await client.aio.models.generate_content(
-            model=GEMINI_FLASH_MODEL,
+            model=GEMINI_PRO_MODEL,
             config=types.GenerateContentConfig(
                 temperature=0.3
             ),
@@ -115,7 +128,7 @@ async def create_single_passage_question(request: QuestionRequest) -> SinglePass
         )
 
         usage_metadata_core_point = core_point_response.usage_metadata
-        log_api_call_cost(GEMINI_FLASH_MODEL, {
+        log_api_call_cost(GEMINI_PRO_MODEL, {
             "prompt_token_count": usage_metadata_core_point.prompt_token_count,
             "total_token_count": usage_metadata_core_point.total_token_count,
         })
@@ -123,13 +136,14 @@ async def create_single_passage_question(request: QuestionRequest) -> SinglePass
         generated_core_point = core_point_response.text.strip()
         logger.debug(f"추출 논점 : {generated_core_point[:30]}...")
 
-        # --- 3. 문항 생성 ---
+        # -------------------------------------------------- 3. 문항 생성 : 문항을 생성합니다. ----------------------------------------------------
         logger.info("문항 생성 중...")
+        ## 사실적, 추론적, 비판적, 어휘 각각의 유형에 따른 가이드라인을 가져옵니다.
         question_guidelines = get_question_guidelines(request.type_question)
         logger.debug(f"문항 생성 가이드라인 불러오기 : {question_guidelines[:30]}...")
 
         system_prompt = f"""당신은 대한민국 대학수학능력시험(College Scholastic Ability Test, Republic of Korea) 국어 영역 독서 분야 비문학 지문에 대한 한 개의 문항을 작성하는 시험 출제 전문가이다.
-아래 지문을 기반으로 제시된 문제문 예시와 같은 형식의 {request.type_question} 유형 문제문을 작성하라. 
+아래 지문을 기반으로 제시된 문제문 형식과 예시 문항을 참고하여 {request.type_question} 유형 문항을 작성하라. 
 지문의 논점, 문항 작성 원칙은 다음과 같다.
 
 ---
@@ -179,17 +193,19 @@ async def create_single_passage_question(request: QuestionRequest) -> SinglePass
             
         user_prompt += f"""로 이루어진 문항 1개를 작성해라.
 
-passage_quotation 처리 로직
+---
+
+## passage_quotation 처리 로직
+
 출력 결과에 [A], ㉠ 같은 기호는 포함하지 않아야 한다.
 
-1. 문항에 [A]가 포함되어 있는 경우:
-- 해당 기호가 가리키는 **문단 전체**를 그대로 passage_quotation에 담아라.
+1. 문제문에 [A]가 포함되어 있는 경우:
+- 해당 기호가 가리키는 **문단 전체**를 그대로 passage_quotation에 담는다.
 
 2. 문항에 ㉠과 같은 기호가 포함된 경우:
-- 해당 기호가 가리키는 문장 하나를 찾아, 그 문장을 passage_quotation에 담아라.
-- 해당 문장 내 인용 대상 어구는 반드시 < > 기호로 감싸 표시할 것.
-- 예
-<경마식 보도>는 경마 중계를 하듯 지지율 변화나 득표율 예측 등을 집중 보도하는 선거 방송의 한 방식이다.
+- 해당 기호가 가리키는 문장 하나를 찾아, 그 문장을 passage_quotation에 담는다.
+- 해당 문장 내 인용 대상 어구는 반드시 < > 기호로 감싸 표시한다.
+- ex) <경마식 보도>는 경마 중계를 하듯 지지율 변화나 득표율 예측 등을 집중 보도하는 선거 방송의 한 방식이다.
 
 3. 문항에 [A]와 ㉠ 같은 기호가 **동시에 포함된 경우**:
 - 해당 문단 전체를 passage_quotation에 담되, 문단 안에 포함된 각 기호의 인용 대상 어구는 < >로 감싸서 표시하라.
@@ -197,7 +213,7 @@ passage_quotation 처리 로직
 4. 문항에 ㉠, ㉡, ㉢, ㉣ 등 **여러 개의 기호가 포함된 경우**:
 - 각 기호가 가리키는 문장을 각각 찾아, 해당 문장을 passage_quotation의 `List[str]`에 **기호 순서대로 담아라**.
 - 각 문장에는 해당 기호가 가리키는 인용 대상 어구를 < >로 감싸서 표시하라.
-- 예
+- ex)
 [
     "<수정 진동자>는 고유 주파수에 맞추어 진동을 유도하여 진동량을 측정하기 쉽게 만든 장치이다.",
     "<경마식 보도>는 지지율 변화만을 중계하는 방식으로 선거 보도의 본질을 흐릴 수 있다.",
@@ -205,15 +221,18 @@ passage_quotation 처리 로직
     "<조세 정책의 효율성과 공평성>은 정책 설계의 양대 축으로 고려된다."
 ]
 
-답변 출력 형식
-정답 및 해설은 선지 번호(①, ②, ③, ④, ⑤)를 활용하여 정답 선지의 근거와 오답의 틀린 이유를 포함한 상세 해설을 공백을 포함하여 최소 100자, 최대 200자로 출력한다.
-정답은 선지 번호(①, ②, ③, ④, ⑤)로 출력하고, 선지 출력 결과 안에는 선지 번호(①, ②, ③, ④, ⑤)를 포함하지 않는다.
-마크다운 코드 블록(```) 없이, 반드시 아래 JSON 형식을 만족하는 답변을 출력한다.
+---
+
+## 답변 출력 형식
+
+- 해설은 선지 번호(①, ②, ③, ④, ⑤)를 활용하여 <정답 및 해설 예시>를 참고해 [정답해설]과 [오답피하기]로 작성한다.
+- 정답은 선지 번호(①, ②, ③, ④, ⑤)로 출력하고, 선지 출력 결과 안에는 선지 번호(①, ②, ③, ④, ⑤)를 포함하지 않는다.
+- 마크다운 코드 블록(```) 없이, 반드시 아래 JSON 형식을 만족하는 답변을 출력한다.
 {{
     "generated_question": String "문제문",
     "generated_option": List ["선지1", "선지2", "선지3", "선지4", "선지5"],
     "generated_answer": String "정답",
-    "generated_description": String "해설"
+    "generated_description": String "해설([정답해설],[오답피하기])"
     """
         if request.question_subpassage_example and request.question_subpassage_example.strip():
             user_prompt += '"generated_subpassage": String "보기 지문"'

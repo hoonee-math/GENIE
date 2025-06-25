@@ -86,7 +86,7 @@ def calculate_gemini_cost(model_name: str, prompt_tokens: int, total_tokens: int
     prompt_million = prompt_tokens / 1_000_000
     response_million = response_tokens / 1_000_000
 
-    if model_name == "gemini-2.5-pro-preview-06-05":
+    if model_name == "gemini-2.5-pro":
         if prompt_tokens <= 200_000:
             prompt_cost_per_million = 1.25
             response_cost_per_million = 10.00
