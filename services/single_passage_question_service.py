@@ -159,7 +159,7 @@ async def create_single_passage_question(request: QuestionRequest) -> SinglePass
 
 ---
 
-## 예시 문항, """
+## 예시 문제문, """
 
         if request.question_subpassage_example and request.question_subpassage_example.strip():
             system_prompt += "보기 지문, "
