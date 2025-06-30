@@ -241,9 +241,11 @@ const confirmCreatePassage = () => {
         const requestData = {
             type_passage: selectedCategory.value,
             keyword: [inputText.value],
+            type_structure : "", // 지문 구조 선택사항
+            requirement : "" // 추가 요청 선택사항
         };
 
-        fetch("/fastapi/generate-passage", {
+        fetch("/fastapi/generate-single-passage", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(requestData),

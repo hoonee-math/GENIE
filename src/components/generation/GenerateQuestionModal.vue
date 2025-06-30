@@ -257,7 +257,7 @@ const handleGenerateQuestion = async () => {
                     question_example: selectedQuestion.value.title,
                 };
 
-                const response = await fetch("/fastapi/generate-question", {
+                const response = await fetch("/fastapi/generate-single-passage-question", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

@@ -474,7 +474,7 @@ const handleRecreateGeneration = async () => {
 
         console.log("Request Data:", requestData);
 
-        const response = await fetch("/fastapi/generate-question", {
+        const response = await fetch("/fastapi/generate-single-passage-question", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -878,7 +878,7 @@ const handleQuestionGeneration = async () => {
 
         console.log("Request Data:", requestData);
 
-        const response = await fetch("/fastapi/generate-question", {
+        const response = await fetch("/fastapi/generate-single-passage-question", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
