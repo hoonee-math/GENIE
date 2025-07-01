@@ -164,6 +164,7 @@ import WarningModalComponent from "@/components/common/WarningModalComponent.vue
 import ConfirmModalComponent from "@/components/common/ConfirmModalComponent.vue";
 import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/composables/useAuth";
 
 // 비밀번호 변경 모달 상태 관리
 const showPasswordModal = ref(false);
@@ -187,6 +188,7 @@ const withdrawalInfo = ref({
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
+const { logout } = useAuth();
 
 // 원본 사용자 데이터 저장 (변경 감지용)
 const originalUserData = ref({
@@ -523,24 +525,25 @@ const saveUserInfo = () => {
 };
 // 로그아웃 처리 함수
 const handleLogout = () => {
-  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:9090";
+    logout();
+//   const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:9090";
 
-  fetch(`/api/auth/select/logout`, {
-    method: "POST",
-    credentials: "include",
-  })
-    .then((response) => {
-      localStorage.removeItem("authUser");
-      authStore.user = null;
-      authStore.isAuthenticated = false;
-      router.push("/login");
-    })
-    .catch((error) => {
-      localStorage.removeItem("authUser");
-      authStore.user = null;
-      authStore.isAuthenticated = false;
-      router.push("/login");
-    });
+//   fetch(`/api/auth/select/logout`, {
+//     method: "POST",
+//     credentials: "include",
+//   })
+//     .then((response) => {
+//       localStorage.removeItem("authUser");
+//       authStore.user = null;
+//       authStore.isAuthenticated = false;
+//       router.push("/login");
+//     })
+//     .catch((error) => {
+//       localStorage.removeItem("authUser");
+//       authStore.user = null;
+//       authStore.isAuthenticated = false;
+//       router.push("/login");
+//     });
 };
 
 // 페이지 로드 시 사용자 정보 가져오기

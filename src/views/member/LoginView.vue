@@ -158,6 +158,7 @@ import { ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useAuth } from "@/composables/useAuth";
 import { Icon } from "@iconify/vue";
+import { onMounted } from "vue";
 
 // 라우터 & 인증
 const router = useRouter();
@@ -237,4 +238,10 @@ function googleLogin() {
 }
 
 watch(email, validateEmail);
+
+onMounted(() => {
+    // 이미 로그인된 사용자는 홈으로 리다이렉트
+    const { requireGuest } = useAuth();
+    requireGuest('/home');
+});
 </script>
