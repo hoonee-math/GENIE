@@ -1,223 +1,347 @@
-// src/stores/auth.js
+// src/stores/auth.js - 보안 우선 메모리 기반 인증 시스템
 import { defineStore } from "pinia";
 
+/**
+ * 보안 우선 인증 스토어
+ * - access token: 메모리에만 저장 (XSS 완전 차단)
+ * - refresh token: httpOnly 쿠키로 서버가 관리 (JavaScript 접근 불가)
+ * - 사용자 정보: autoLogin 설정에 따라 선택적 localStorage 사용
+ * - 페이지 새로고침 시: httpOnly 쿠키로 토큰 자동 갱신
+ */
 export const useAuthStore = defineStore("auth", {
-    // state는 상태(데이터) 저장 -> 반응형이기 때문에 상태가 변경되면 컴포넌트에서 즉시 반영
     state: () => ({
-        // 사용자 인증 상태
+        // ========== 사용자 정보 (localStorage 허용) ==========
         user: null,
-        isAuthenticated: false, //초기 상태는 로그인 안 된 상태
-
-        // 로그인 관련 로딩 및 에러 상태
-        isLoading: false, //처음에 아무 작업을 안 하고 있으니까 false -> 작업이 시작하면 true -> 작업이 끝나고 다시 원래 상태인 false로 돌려준다.
-        error: null, //에러 메시지 저장
+        isAuthenticated: false,
+        
+        // ========== JWT 토큰 (메모리에만 저장) ==========
+        accessToken: null,        // 짧은 수명 (15분)
+        tokenType: 'Bearer',      // 고정값
+        expiresAt: null,          // 만료 시간
+        
+        // refresh token은 httpOnly 쿠키로 서버가 관리
+        // 프론트엔드에서는 접근 불가 (최고 보안)
+        
+        // ========== UI 상태 ==========
+        isLoading: false,
+        error: null,
+        
+        // ========== 토큰 갱신 상태 ==========
+        isRefreshing: false,      // 토큰 갱신 중 여부
+        refreshPromise: null,     // 중복 갱신 방지용
     }),
 
-    // 상태 읽기 및 가공
     getters: {
-        // 사용자가 로그인되어 있는지 확인
-        // (state)의 값을 가져와서, 사용자가 로그인 상태와 사용자 정보가 존재하는지 확인
+        // 로그인 상태 확인
         isLoggedIn: (state) => state.isAuthenticated && state.user !== null,
-        // 사용자 정보 반환
+        
+        // 사용자 정보
         userInfo: (state) => state.user,
-        //티켓 수량 반환
         userTicketCount: (state) => state.user?.ticketCount || 0,
+        
+        // 토큰 유효성 확인
+        hasValidToken: (state) => {
+            return !!state.accessToken && 
+                   state.expiresAt && 
+                   new Date().getTime() < state.expiresAt;
+        },
+        
+        // Authorization 헤더 문자열
+        authHeader: (state) => {
+            return state.accessToken ? `${state.tokenType} ${state.accessToken}` : null;
+        },
+        
+        // 토큰 만료까지 남은 시간 (ms)
+        tokenExpiresIn: (state) => {
+            if (!state.expiresAt) return 0;
+            return Math.max(0, state.expiresAt - new Date().getTime());
+        },
     },
 
-    //상태 수정 및 비동기 처리
-    //로그인 api 호출 후 상태 업데이트는 actions에서 처리
     actions: {
-        // 사용자 정보 설정 (로그인 페이지에서 직접 호출)
-        setUser(userData) {
-            this.user = userData;
-            this.isAuthenticated = true; //인증상태
-            this.error = null;
-            // console.log('Auth Store: 사용자 정보 설정됨', userData); // (추가) 로그: 사용자 정보 설정
-        },
-
-        //사용자 티켓 정보만 업데이트 하는 메서드
-        //티켓 업데이트 메서드 만들기 => welcomeinfo의 ticketCount 업데이트 하도록
-        updateTicketCount() {
-            if (!this.isAuthenticated) return;
-
-            return fetch(`/api/info/select/ticket`, {
-                method: "GET",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-            })
-                .then((respone) => {
-                    if (!respone.ok) throw new Error("티켓 정보 가져오기 실패");
-                    return respone.json();
-                })
-                .then((data) => {
-                    // user 객체 내부의 ticketCount만 업데이트
-                    if (this.user) {
-                        this.user.ticketCount = parseInt(data.balance) || 0;
-
-                        // 저장된 위치에 따라 업데이트 (localStorage 우선)
-                        if (localStorage.getItem("authUser")) {
-                            localStorage.setItem(
-                                "authUser",
-                                JSON.stringify(this.user)
-                            );
-                        } else if (sessionStorage.getItem("authUser")) {
-                            sessionStorage.setItem(
-                                "authUser",
-                                JSON.stringify(this.user)
-                            );
-                        }
-                    }
-                    return parseInt(data.balance) || 0;
-                })
-                .catch((error) => {
-                    return 0;
-                });
-        },
-
-        // 로그인 요청 (직접 사용하지 않음 - LoginView.vue에서 fetch 사용)
-        login(credentials) {
-            this.isLoading = true;
-            this.error = null;
-
-            // console.log('로그인 시도:', credentials); // (추가) 로그: 로그인 시도
-
-            return new Promise((resolve, reject) => {
-                //서버에 로그인 요청 보내기
-                fetch(`/api/auth/select/login`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include", // 쿠키를 포함시켜 세션 유지
-                    body: JSON.stringify(credentials),
-                })
-                    // 성공하면 .then()에서 처리 / 실패하면 .catch()에서 처리 / 완료되면 .finally()에서 처리
-                    .then((response) => {
-                        if (!response.ok) {
-                            return response.text().then((text) => {
-                                throw new Error(
-                                    text || "로그인에 실패했습니다."
-                                );
-                            });
-                        }
-                        return response.json(); // promise를 반환함. 반환된 값이 다음 then()의 매개변수로 자동 전달된다.
-                    })
-                    .then((userData) => {
-                        // console.log('로그인 성공:', userData); // (추가) 로그: 로그인 성공
-
-                        // 사용자 정보 상태 업데이트
-                        this.user = userData;
-                        this.isAuthenticated = true;
-
-                        // 로컬 스토리지에 사용자 상태 저장 (새로고침 시 상태 유지)
-                        localStorage.setItem(
-                            "authUser",
-                            JSON.stringify(userData)
-                        );
-
-                        // 성공 상태를 호출한 쪽에 반환
-                        resolve({ success: true, user: userData });
-                    })
-                    .catch((error) => {
-                        console.error("로그인 오류:", error); // (추가) 로그: 로그인 오류
-                        this.error =
-                            error.message || "로그인 중 오류가 발생했습니다.";
-                        reject({ success: false, error: this.error });
-                    })
-                    .finally(() => {
-                        this.isLoading = false;
-                    });
-            });
-        },
-
-        // 로그아웃 요청
-        logout() {
-            this.isLoading = true;
-
-            // console.log('로그아웃 시도'); // (추가) 로그: 로그아웃 시도
-
-            return new Promise((resolve, reject) => {
-                fetch(`/api/auth/select/logout`, {
-                    method: "POST",
-                    credentials: "include",
-                })
-                    .then((response) => {
-                        // 로컬 상태 초기화
-                        this.user = null;
-                        this.isAuthenticated = false;
-
-                        // 모든 스토리지에서 사용자 정보 제거
-                        localStorage.removeItem("authUser");
-                        localStorage.removeItem("autoLogin");
-                        sessionStorage.removeItem("authUser");
-
-                        // console.log('로그아웃 성공'); // (추가) 로그: 로그아웃 성공
-                        resolve({ success: true });
-                    })
-                    .catch((error) => {
-                        console.error("로그아웃 오류:", error); // (추가) 로그: 로그아웃 오류
-                        reject({ success: false, error: error.message });
-                    })
-                    .finally(() => {
-                        this.isLoading = false;
-                    });
-            });
-        },
-
-        // 새로고침 시 인증 상태 복원
-        initializeAuth() {
-            const autoLoginStatus = localStorage.getItem("autoLogin");
-            const localUser = localStorage.getItem("authUser");
-            const sessionUser = sessionStorage.getItem("authUser");
-
-            console.log("=== initializeAuth 디버깅 ===");
-            console.log("autoLogin 상태:", autoLoginStatus);
-            console.log("localStorage에 authUser 있음:", !!localUser);
-            console.log("sessionStorage에 authUser 있음:", !!sessionUser);
-
-            // 자동로그인이 명시적으로 "true"가 아닌 경우 무조건 로그아웃
-            if (autoLoginStatus !== "true") {
-                console.log("자동로그인이 true가 아님 - 강제 로그아웃");
-                this.forceLogout();
-                return;
+        // ========== 로그인 응답 처리 (메모리에만 저장) ==========
+        setTokens(loginResponse) {
+            this.accessToken = loginResponse.accessToken;
+            this.tokenType = loginResponse.tokenType || 'Bearer';
+            this.expiresAt = loginResponse.expiresAt;
+            
+            // 사용자 정보는 선택적으로 localStorage 저장
+            if (loginResponse.memberCode) {
+                this.user = {
+                    memberCode: loginResponse.memberCode,
+                    name: loginResponse.name,
+                    email: loginResponse.email,
+                    ticketCount: loginResponse.ticketCount || 0
+                };
+                this.isAuthenticated = true;
             }
-
-            // 자동로그인이 true인 경우에만 복원 시도
-            if (localUser) {
+            
+            this.error = null;
+            console.log('Access Token 메모리 저장됨 (보안 강화)');
+        },
+        
+        // ========== 사용자 정보 저장 (autoLogin 설정에 따라) ==========
+        saveUserInfo(autoLogin = false) {
+            if (autoLogin && this.user) {
+                localStorage.setItem('authUser', JSON.stringify(this.user));
+                localStorage.setItem('autoLogin', 'true');
+                sessionStorage.removeItem('authUser');
+                console.log('자동 로그인 활성화: 사용자 정보 localStorage 저장');
+            } else if (this.user) {
+                sessionStorage.setItem('authUser', JSON.stringify(this.user));
+                localStorage.setItem('autoLogin', 'false');
+                localStorage.removeItem('authUser');
+                console.log('일반 로그인: 사용자 정보 sessionStorage 저장');
+            }
+        },
+        
+        // ========== 페이지 새로고침 시 토큰 복원 ==========
+        async initializeAuth() {
+            console.log('=== 보안 우선 인증 초기화 ===');
+            
+            // 기존 데이터 마이그레이션 먼저 실행
+            this.migrateOldData();
+            
+            // 1. 사용자 정보 복원 (localStorage 또는 sessionStorage에서)
+            const autoLogin = localStorage.getItem('autoLogin') === 'true';
+            let userData = null;
+            
+            if (autoLogin) {
+                userData = localStorage.getItem('authUser');
+                console.log('자동 로그인 모드: localStorage에서 사용자 정보 복원 시도');
+            } else {
+                userData = sessionStorage.getItem('authUser');
+                console.log('일반 로그인 모드: sessionStorage에서 사용자 정보 복원 시도');
+            }
+            
+            if (userData) {
                 try {
-                    this.user = JSON.parse(localUser);
+                    this.user = JSON.parse(userData);
                     this.isAuthenticated = true;
-                    console.log("자동로그인으로 인증 상태 복원됨");
-                    return;
+                    console.log('사용자 정보 복원 성공:', this.user.name);
                 } catch (error) {
-                    console.error("localStorage 인증 정보 파싱 오류:", error);
+                    console.error('사용자 정보 파싱 오류:', error);
                     this.forceLogout();
-                    return;
+                    return false;
                 }
             }
-
-            // 여기까지 왔다면 자동로그인은 true인데 데이터가 없음
-            console.log(
-                "자동로그인은 true이지만 사용자 데이터 없음 - 로그아웃"
-            );
-            this.forceLogout();
+            
+            // 2. Access Token 재발급 (httpOnly 쿠키의 refresh token 사용)
+            return await this.refreshToken();
         },
+        
+        // ========== 토큰 갱신 (httpOnly 쿠키 사용) ==========
+        async refreshToken() {
+            // 이미 갱신 중이면 기존 Promise 반환 (중복 요청 방지)
+            if (this.isRefreshing && this.refreshPromise) {
+                return this.refreshPromise;
+            }
+            
+            this.isRefreshing = true;
+            
+            this.refreshPromise = (async () => {
+                try {
+                    console.log('httpOnly 쿠키로 토큰 갱신 시도...');
+                    
+                    const response = await fetch('/api/auth/refresh', {
+                        method: 'POST',
+                        credentials: 'include', // httpOnly 쿠키 포함
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const tokenData = await response.json();
+                        
+                        // 새로운 access token 저장 (메모리에만)
+                        this.accessToken = tokenData.accessToken;
+                        this.tokenType = tokenData.tokenType || 'Bearer';
+                        this.expiresAt = tokenData.expiresAt;
+                        
+                        console.log('httpOnly 쿠키로 토큰 갱신 성공');
+                        
+                        // 자동 갱신 스케줄링 (만료 5분 전)
+                        this.setupTokenRefresh();
+                        
+                        return true;
+                    } else {
+                        console.log('토큰 갱신 실패 - 재로그인 필요');
+                        this.forceLogout();
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('토큰 갱신 중 오류:', error);
+                    this.forceLogout();
+                    return false;
+                } finally {
+                    this.isRefreshing = false;
+                    this.refreshPromise = null;
+                }
+            })();
+            
+            return this.refreshPromise;
+        },
+        
+        // ========== 자동 토큰 갱신 스케줄링 ==========
+        setupTokenRefresh() {
+            if (!this.expiresAt) return;
+            
+            // 만료 5분 전에 갱신
+            const refreshTime = this.expiresAt - new Date().getTime() - (5 * 60 * 1000);
+            
+            if (refreshTime > 0) {
+                console.log(`토큰 자동 갱신 예약: ${Math.round(refreshTime / 1000)}초 후`);
+                
+                setTimeout(async () => {
+                    if (this.isAuthenticated) {
+                        await this.refreshToken();
+                    }
+                }, refreshTime);
+            }
+        },
+        
+        // ========== API 요청용 헤더 (메모리 토큰 사용) ==========
+        getApiHeaders(additionalHeaders = {}) {
+            const headers = {
+                'Content-Type': 'application/json',
+                ...additionalHeaders
+            };
+            
+            if (this.accessToken) {
+                headers.Authorization = `${this.tokenType} ${this.accessToken}`;
+            }
+            
+            return headers;
+        },
+        
+        // ========== 티켓 정보 업데이트 ==========
+        async updateTicketCount() {
+            if (!this.isAuthenticated || !this.accessToken) {
+                console.log('인증되지 않은 상태 - 티켓 업데이트 건너뜀');
+                return 0;
+            }
 
-        // 강제 로그아웃 메서드
+            try {
+                const response = await fetch('/api/info/select/ticket', {
+                    method: 'GET',
+                    headers: this.getApiHeaders(),
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const newTicketCount = parseInt(data.balance) || 0;
+
+                    if (this.user) {
+                        this.user.ticketCount = newTicketCount;
+                        
+                        // 업데이트된 사용자 정보 저장
+                        const autoLogin = localStorage.getItem('autoLogin') === 'true';
+                        this.saveUserInfo(autoLogin);
+                    }
+
+                    return newTicketCount;
+                } else if (response.status === 401) {
+                    // 토큰 만료 시 자동 갱신 시도
+                    await this.refreshToken();
+                    return this.updateTicketCount(); // 재귀 호출
+                }
+            } catch (error) {
+                console.error('티켓 정보 업데이트 오류:', error);
+            }
+            
+            return 0;
+        },
+        
+        // ========== 로그아웃 (httpOnly 쿠키도 삭제) ==========
+        async logout() {
+            this.isLoading = true;
+            
+            try {
+                // 서버에 로그아웃 요청 (httpOnly 쿠키 삭제)
+                await fetch('/api/auth/select/logout', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+            } catch (error) {
+                console.error('서버 로그아웃 오류:', error);
+            }
+            
+            // 로컬 상태 초기화
+            this.accessToken = null;
+            this.expiresAt = null;
+            this.user = null;
+            this.isAuthenticated = false;
+            this.error = null;
+            
+            // localStorage/sessionStorage 정리
+            this.clearAllStorageData();
+            
+            console.log('로그아웃 완료 (httpOnly 쿠키 포함)');
+            this.isLoading = false;
+        },
+        
+        // ========== 강제 로그아웃 (메모리만 정리) ==========
         forceLogout() {
-            console.log("강제 로그아웃 실행");
+            this.accessToken = null;
+            this.expiresAt = null;
             this.user = null;
             this.isAuthenticated = false;
-            localStorage.clear(); // 모든 localStorage 삭제
-            sessionStorage.clear(); // 모든 sessionStorage 삭제
-            console.log("모든 스토리지 삭제 완료");
+            this.error = null;
+            this.isRefreshing = false;
+            this.refreshPromise = null;
+            
+            this.clearAllStorageData();
+            
+            console.log('강제 로그아웃 - 메모리 정리 완료');
         },
-
-        // 모든 인증 정보 삭제 메서드
-        clearAllAuth() {
-            this.user = null;
-            this.isAuthenticated = false;
-            localStorage.removeItem("authUser");
-            sessionStorage.removeItem("authUser");
-            // autoLogin은 의도적으로 유지 (사용자 설정 기억)
+        
+        // ========== 모든 스토리지 데이터 정리 ==========
+        clearAllStorageData() {
+            // 기존 인증 정보 정리
+            localStorage.removeItem('authUser');
+            localStorage.removeItem('autoLogin');
+            sessionStorage.removeItem('authUser');
+            
+            // 기존 token 키 마이그레이션 정리
+            localStorage.removeItem('token');
+            sessionStorage.removeItem('authTokens');
+            
+            console.log('모든 스토리지 데이터 정리 완료');
+        },
+        
+        // ========== 기존 데이터 마이그레이션 ==========
+        migrateOldData() {
+            console.log('기존 localStorage 데이터 마이그레이션 시작...');
+            
+            // 기존 'token' 키 제거
+            const oldToken = localStorage.getItem('token');
+            if (oldToken) {
+                localStorage.removeItem('token');
+                console.log('기존 token 키 삭제 완료');
+            }
+            
+            // 기존 'authTokens' 키 제거 (보안상 위험)
+            const oldTokens = localStorage.getItem('authTokens');
+            if (oldTokens) {
+                localStorage.removeItem('authTokens');
+                console.log('기존 authTokens 키 삭제 완료 (보안 강화)');
+            }
+            
+            sessionStorage.removeItem('authTokens');
+            console.log('마이그레이션 완료');
+        },
+        
+        // ========== 사용자 정보만 설정 (세션 로그인용) ==========
+        setUser(userData) {
+            this.user = userData;
+            this.isAuthenticated = true;
+            this.error = null;
+            console.log('사용자 정보 설정됨:', userData.name);
         },
     },
 });
