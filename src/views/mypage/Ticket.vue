@@ -400,6 +400,7 @@
 import { ref, computed, onMounted, nextTick } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { apiGet, apiPost } from "@/utils/api"; // 보안 우선 API 시스템
 import UsageHistoryModal from "@/components/mypage/UsageHistoryModal.vue";
 import WarningModalComponent from "@/components/common/WarningModalComponent.vue";
 import ConfirmModalComponent from "@/components/common/ConfirmModalComponent.vue";
@@ -440,44 +441,32 @@ const maxVisiblePages = 5;
 // 임시 결제 내역 데이터 (실제로는 API 요청으로 대체)
 const paymentHistory = ref([]);
 
-const fetchPaymentHistory = () => {
-  // 날짜가 비어있으면 기본값 설정
-  const startDateEncoded = encodeURIComponent(startDate.value || "1970-01-01");
-  const endDateEncoded = encodeURIComponent(
-    endDate.value || getTodayFormatted()
-  );
+// 결제 내역 조회 - 보안 우선 API 시스템 사용
+const fetchPaymentHistory = async () => {
+  try {
+    // 날짜가 비어있으면 기본값 설정
+    const startDateEncoded = encodeURIComponent(startDate.value || "1970-01-01");
+    const endDateEncoded = encodeURIComponent(
+      endDate.value || getTodayFormatted()
+    );
 
-  fetch(
-    `/api/paym/select/list?startDate=${startDateEncoded}&endDate=${endDateEncoded}&page=${currentPage.value}&size=${itemsPerPage}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    }
-  )
-    .then((response) => {
-      if (!response.ok) {
-        if (response.status === 401) {
-          router.push({ path: "/login" });
-          throw new Error("인증이 필요합니다");
-        }
-        return response.json().then((text) => {
-          throw new Error(text);
-        });
-      }
-      return response.json();
-    })
-    .then((data) => {
-      paymentHistory.value = data.map((item) => ({
-        payCode: item.payCode,
-        payName: item.payName,
-        price: item.price,
-        date: item.date,
-      }));
-    })
-    .catch((error) => {});
+    // 마이그레이션 가이드에 따른 새로운 API 호출 방식
+    const data = await apiGet(
+      `/api/paym/select/list?startDate=${startDateEncoded}&endDate=${endDateEncoded}&page=${currentPage.value}&size=${itemsPerPage}`
+    );
+    
+    paymentHistory.value = data.map((item) => ({
+      payCode: item.payCode,
+      payName: item.payName,
+      price: item.price,
+      date: item.date,
+    }));
+    
+    console.log('결제 내역 조회 성공 - 보안 우선 시스템 사용');
+  } catch (error) {
+    console.error('결제 내역 조회 오류:', error);
+    // 에러 처리는 apiGet에서 자동으로 처리됨 (401 에러 포함)
+  }
 };
 
 // 필터링된 내역 계산
@@ -702,50 +691,22 @@ onMounted(() => {
   fetchPaymentHistory(); // 결제 내역 조회
 });
 
-// 티켓 정보 조회 함수
-function getTicketCount() {
-  // fetch를 사용한 티켓 정보 조회 요청
-  fetch(`/api/info/select/ticket`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include", // 쿠키를 포함시켜 세션 유지
-  })
-    .then((response) => {
-      if (!response.ok) {
-        // 인증 오류 처리 (401)
-        if (response.status === 401) {
-          // (추가) 로그 - 인증 오류 감지
-
-          // 인증 상태 초기화
-          authStore.user = null;
-          authStore.isAuthenticated = false;
-          localStorage.removeItem("authUser");
-
-          // 로그인 페이지로 리다이렉트
-          router.push({
-            path: "/login",
-            query: { redirect: route.fullPath },
-          });
-
-          // 추가 처리를 중단하기 위한 에러 발생
-          throw new Error("인증이 필요합니다");
-        }
-
-        return response.text().then((text) => {
-          if (!text) throw new Error("빈 응답");
-          return JSON.parse(text);
-        });
-      }
-      return response.json();
-    })
-    .then((data) => {
-      // 티켓 정보 갱신
-
-      ticketCount.value = data.balance;
-    })
-    .catch((error) => {});
+// 티켓 정보 조회 함수 - 보안 우선 API 시스템 사용
+async function getTicketCount() {
+  try {
+    console.log('티켓 정보 조회 시작 - 보안 우선 시스템 사용');
+    
+    // 마이그레이션 가이드에 따른 새로운 API 호출 방식
+    const data = await apiGet('/api/info/select/ticket');
+    
+    // 티켓 정보 갱신
+    ticketCount.value = data.balance;
+    
+    console.log('티켓 정보 조회 성공:', data.balance);
+  } catch (error) {
+    console.error('티켓 정보 조회 오류:', error);
+    // 에러 처리는 apiGet에서 자동으로 처리됨 (401 에러 포함)
+  }
 }
 
 // 컴포넌트 마운트 시 초기화

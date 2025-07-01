@@ -156,12 +156,12 @@
 <script setup>
 import { ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/composables/useAuth";
 import { Icon } from "@iconify/vue";
 
-// 라우터 & 스토어
+// 라우터 & 인증
 const router = useRouter();
-const authStore = useAuthStore();
+const { login, isLoading: authLoading, error: authError } = useAuth();
 
 // 폼 상태
 const email = ref("");
@@ -169,14 +169,14 @@ const password = ref("");
 const emailError = ref("");
 const loginFailed = ref(false);
 const autoLogin = ref(localStorage.getItem("autoLogin") === "true");
-const isLoading = ref(false);
+// isLoading은 useAuth의 authLoading 사용
 
 // 이메일/비밀번호 동시 유효성 검사용
 const canSubmit = computed(() => {
     const validEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[A-Za-z]{2,}$/.test(
         email.value
     );
-    return validEmail && password.value.trim() !== "" && !isLoading.value;
+    return validEmail && password.value.trim() !== "" && !authLoading.value;
 });
 
 // 이메일 포맷 체크
@@ -189,50 +189,45 @@ function validateEmail() {
 }
 
 // 로그인 처리
+// 로그인 처리 - 보안 우선 인증 시스템 사용
 async function loginHandler() {
+    console.log('=== LoginView: 로그인 처리 시작 ===');
+    
     validateEmail();
-    if (!canSubmit.value) return;
+    if (!canSubmit.value) {
+        console.log('LoginView: 폼 유효성 검사 실패');
+        return;
+    }
 
     loginFailed.value = false;
-    isLoading.value = true;
+    console.log('LoginView: 로그인 시도', {
+        email: email.value,
+        autoLogin: autoLogin.value,
+        loginFunction: typeof login
+    });
 
     try {
-        const res = await fetch("/api/auth/select/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({
-                memEmail: email.value,
-                memPassword: password.value,
-            }),
-        });
-        if (!res.ok) throw new Error(await res.text());
-        const userData = await res.json();
-
-        authStore.setUser(userData);
-
-        console.log("자동로그인 확인 : ", autoLogin.value);
-        if (autoLogin.value) {
-            console.log("자동로그인 확인 localStorage : ", autoLogin.value);
-            // 자동로그인 체크 시: localStorage에 저장 (브라우저 종료해도 유지)
-            localStorage.setItem("authUser", JSON.stringify(userData));
-            localStorage.setItem("autoLogin", "true");
-            // sessionStorage 정리
-            sessionStorage.removeItem("authUser");
+        // 마이그레이션 가이드에 따른 새로운 로그인 방식 사용
+        console.log('LoginView: useAuth.login() 호출 전');
+        const success = await login(email.value, password.value, autoLogin.value);
+        console.log('LoginView: useAuth.login() 결과:', success);
+        
+        if (success) {
+            console.log('로그인 성공 - 새로운 보안 우선 시스템 적용');
+            console.log('LoginView: /home으로 리다이렉트 시도');
+            router.push("/home");
         } else {
-            console.log("자동로그인 확인 sessionStorage : ", autoLogin.value);
-            // 자동로그인 체크 안 함: sessionStorage에 저장 (브라우저 종료 시 삭제)
-            sessionStorage.setItem("authUser", JSON.stringify(userData));
-            localStorage.setItem("autoLogin", "false");
-            // localStorage 정리
-            localStorage.removeItem("authUser");
+            console.log('LoginView: 로그인 실패 - success = false');
+            loginFailed.value = true;
         }
-
-        router.push("/home");
-    } catch {
+    } catch (error) {
+        console.error('LoginView: 로그인 오류:', error);
+        console.error('LoginView: 에러 상세 정보:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+        });
         loginFailed.value = true;
-    } finally {
-        isLoading.value = false;
     }
 }
 
