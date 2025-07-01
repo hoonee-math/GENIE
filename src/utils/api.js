@@ -57,16 +57,24 @@ export async function apiRequest(url, options = {}) {
                 // 새로운 토큰으로 헤더 업데이트
                 defaultOptions.headers.Authorization = authStore.authHeader;
                 
-                // API 재시도
-                return await fetch(url, defaultOptions);
+                // API 재시도 및 새로운 응답 반환
+                const retryResponse = await fetch(url, defaultOptions);
+                console.log(`API 재시도 완료: ${retryResponse.status}`);
+                return retryResponse;
             } else {
                 console.log('토큰 갱신 실패 - 로그인 페이지로 리다이렉트 필요');
                 throw new APIError('인증이 만료되었습니다. 다시 로그인해주세요.', 401);
             }
         }
+        console.log("정상 응답 수신:", {
+            status: response.status,
+            statusText: response.statusText,
+            ok: response.ok,
+            headers: Object.fromEntries(response.headers.entries())
+        });
         
+        // 정상 응답 반환 (401이 아닌 경우)
         return response;
-        
     } catch (error) {
         console.error(`API 요청 오류 (${url}):`, error);
         
@@ -80,22 +88,69 @@ export async function apiRequest(url, options = {}) {
 
 // ========== HTTP 메서드별 편의 함수 ==========
 
-/**
- * GET 요청
- */
-export async function apiGet(url, options = {}) {
-    const response = await apiRequest(url, {
-        method: 'GET',
-        ...options
-    });
-    
-    if (!response.ok) {
-        const errorData = await response.text();
-        throw new APIError(`GET ${url} 실패: ${errorData}`, response.status);
+
+ export async function apiGet(url, options = {}) {
+     console.log(`apiGet 시작: ${url}`);
+     
+     const response = await apiRequest(url, {
+         method: 'GET',
+         ...options
+     });
+     
+     console.log(`apiGet 응답 받음:`, {
+         url,
+         status: response.status,
+         ok: response.ok,
+         contentType: response.headers.get('content-type'),
+         bodyUsed: response.bodyUsed, // 중요: body가 이미 사용되었는지 확인
+         redirected: response.redirected
+     });
+     if (!response.ok) {
+         const errorData = await response.text();
+         console.error(`apiGet 에러:`, { url, status: response.status, errorData });
+         throw new APIError(`GET ${url} 실패: ${errorData}`, response.status);
+     }
+     
+     console.log(`apiGet JSON 파싱 시도: ${url}`);
+     console.log(`JSON 파싱 전 bodyUsed 상태:`, response.bodyUsed);
+     
+     // Response를 미리 clone해두기 (에러 시 대안 방법용)
+     const responseClone = response.clone();
+     
+     try {
+         // Response가 이미 사용되었다면 clone을 사용
+         const responseToUse = response.bodyUsed ? responseClone : response;
+         
+         // 타임아웃 추가 (10초로 단축)
+         const timeoutPromise = new Promise((_, reject) => 
+             setTimeout(() => reject(new Error('JSON 파싱 타임아웃')), 10000)
+         );
+         
+         const jsonPromise = responseToUse.json();
+         
+         const jsonData = await Promise.race([jsonPromise, timeoutPromise]);
+         console.log(`apiGet JSON 파싱 성공:`, { url, data: jsonData });
+         return jsonData;
+     } catch (jsonError) {
+         console.error(`apiGet JSON 파싱 실패:`, { url, error: jsonError.message });
+         
+         // 대안: 텍스트로 읽어서 직접 파싱
+         try {
+             console.log(`대안 방법: 텍스트로 읽기 시도...`);
+             const responseText = await response.clone().text();
+             console.log(`응답 텍스트:`, responseText);
+             
+             const parsedData = JSON.parse(responseText);
+             console.log(`대안 방법 성공:`, { url, data: parsedData });
+             return parsedData;
+         } catch (textError) {
+             console.error(`대안 방법도 실패:`, textError.message);
+         }
+         
+         throw new APIError(`JSON 파싱 실패: ${jsonError.message}`, response.status);
     }
-    
-    return await response.json();
 }
+
 
 /**
  * POST 요청
