@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import Frame from "@/views/layout/Frame.vue";
 import ExampleView from "@/views/ExampleView.vue";
 import { useAuthGuard } from "@/composables/useAuth";
+import { useAuthStore } from "@/stores/auth"; // authStore 사용을 위해 추가
 
 // 각 페이지의 라우트들 import
 import LandingView from "@/views/landing/LandingView.vue";
@@ -12,12 +13,24 @@ import generationRoutes from "./generation.routes";
 import myPageRoutes from "./mypage.routes";
 import strageRoutes from "./storage.routes";
 import payRoutes from "./payment.routes";
-
 // 로그인 상태 체크 가드 - 보안 우선 인증 시스템 사용
 const requireAuth = async (to, from, next) => {
+    const authStore = useAuthStore(); // authStore 초기화
+    
     console.log('=== 보안 우선 인증 가드 실행 ===');
     console.log('현재 이동하려는 페이지:', to.path);
+    console.log('이전 페이지:', from.path);
     
+    // 로그인 페이지에서 오는 경우 간단한 체크만
+    if (from.path === '/login') {
+        console.log('로그인 페이지에서 이동 - 간단한 인증 체크');
+        if (authStore.isLoggedIn && authStore.hasValidToken) {
+            console.log('로그인 상태 확인됨 - 페이지 접근 허용');
+            next();
+            return;
+        }
+    }
+
     try {
         // 마이그레이션 가이드에 따른 새로운 인증 체크 방식
         const { checkAuth } = useAuthGuard();

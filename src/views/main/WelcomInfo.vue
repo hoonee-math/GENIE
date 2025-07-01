@@ -168,6 +168,7 @@
 import { ref, onMounted, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { apiGet } from "@/utils/api"; // 보안 우선 API 시스템
 
 const router = useRouter();
 const route = useRoute();
@@ -189,40 +190,26 @@ const gaugeWidth = computed(() => {
 onMounted(() => {
     getTicketCount();
 });
-
-function getTicketCount() {
-    fetch(`/api/info/select/ticket`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        credentials: "include",
-    })
-        .then((response) => {
-            if (!response.ok) {
-                if (response.status === 401) {
-                    authStore.user = null;
-                    authStore.isAuthenticated = false;
-                    localStorage.removeItem("authUser");
-                    router.push({
-                        path: "/login",
-                        query: { redirect: route.fullPath },
-                    });
-                    throw new Error("인증이 필요합니다");
-                }
-                return response.text().then((text) => {
-                    throw new Error(text);
-                });
-            }
-            return response.json();
-        })
-        .then((data) => {
-            //console.log("Ticket data:", data); // 디버깅을 위한 로그 추가
-            ticketCount.value = Number(data.balance) || 0;
-            maxTicketCount.value = Number(data.total) || 0;
-        })
-        .catch((error) => {
-            //console.error("Error fetching ticket data:", error);
-        });
+// 보안 우선 API 시스템을 사용하여 티켓 정보 조회
+async function getTicketCount() {
+    try {
+        console.log('WelcomInfo: 티켓 정보 요청 시작');
+        
+        // 새로운 보안 우선 API 시스템 사용
+        // 자동 토큰 갱신, Authorization 헤더 자동 추가, 401 에러 자동 처리
+        const data = await apiGet('/api/info/select/ticket');
+        
+        console.log('WelcomInfo: 티켓 데이터 수신 성공:', data);
+        
+        ticketCount.value = Number(data.balance) || 0;
+        maxTicketCount.value = Number(data.total) || 0;
+        
+    } catch (error) {
+        console.error('WelcomInfo: 티켓 정보 요청 실패:', error);
+        
+        // 에러 처리는 apiGet에서 자동으로 처리됨 (토큰 갱신, 로그인 리다이렉트 등)
+        // 여기서는 UI에만 영향을 주는 처리
+        ticketCount.value = 0;
+    }
 }
 </script>

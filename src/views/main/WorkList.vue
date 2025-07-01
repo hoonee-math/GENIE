@@ -566,6 +566,7 @@ import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import FileSelectModal from "@/components/common/FileSelectModal.vue";
 import NotionLink from "@/views/main/NotionLink.vue";
+import { apiGet } from '@/utils/api';
 
 // 라우터와 스토어 초기화
 const router = useRouter();
@@ -699,49 +700,34 @@ const setupTableResize = () => {
 };
 
 // 최근 작업 내역 리스트 가져오기
-const fetchWorkItems = () => {
-  fetch(`/api/pass/select/recelist`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  })
-    .then((response) => {
-      if (!response.ok) {
-        // 인증 오류 처리 (401)
-        if (response.status === 401) {
-          // 인증 상태 초기화
-          authStore.user = null;
-          authStore.isAuthenticated = false;
-          localStorage.removeItem("authUser");
-
-          // 로그인 페이지로 리다이렉트
-          router.push({
-            path: "/login",
-            query: { redirect: route.fullPath },
-          });
-
-          throw new Error("인증이 필요합니다");
-        }
-        return response.text().then((text) => {
-          throw new Error(text);
-        });
-      }
-      return response.json();
-    })
-    .then((data) => {
-      // 응답 데이터 구조에 맞게 매핑
-      workItems.value = data.map((item) => ({
-        PAS_CODE: item.pasCode,
-        PAS_TITLE: item.title,
-        PAS_KEYWORD: item.keyword,
-        PAS_IS_GENERATED: item.isGenerated === 1 ? "지문" : "문항",
-        PAS_DATE: item.date,
-        PAS_IS_FAVORITE: item.isFavorite === 1,
-      }));
-    })
-    .catch((error) => {});
+const fetchWorkItems = async () => {
+  try {
+    console.log('WorkList: 작업 목록 요청 시작');
+    
+    // 보안 우선 API 시스템 사용
+    const data = await apiGet('/api/pass/select/recelist');
+    
+    console.log('WorkList: 작업 목록 수신 성공:', data);
+    
+    // 기존 데이터 처리 로직 그대로 유지
+    if (data && data.length > 0) {
+        // workItems.value = data;
+        workItems.value = data.map((item) => ({
+            PAS_CODE: item.pasCode,
+            PAS_TITLE: item.title,
+            PAS_KEYWORD: item.keyword,
+            PAS_IS_GENERATED: item.isGenerated === 1 ? "지문" : "문항",
+            PAS_DATE: item.date,
+            PAS_IS_FAVORITE: item.isFavorite === 1,
+        }));
+    } else {
+      workItems.value = [];
+    }
+    
+  } catch (error) {
+    console.error('WorkList: 작업 목록 요청 실패:', error);
+    workItems.value = [];
+  }
 };
 
 // 작업명 클릭시, 해당 화면으로 이동
