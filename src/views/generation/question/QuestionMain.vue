@@ -164,36 +164,49 @@ const handleCreateQuestion = (data) => {
 };
 
 // 최근 작업 내역 개수 가져오기
-const fetchListCount = () => {
-    fetch(`/api/pass/select/count/recent`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        credentials: "include",
-    })
-        .then((response) => {
-            if (!response.ok) {
-                if (response.status === 401) {
-                    authStore.user = null;
-                    authStore.isAuthenticated = false;
-                    localStorage.removeItem("authUser");
-                    router.push({
-                        path: "/login",
-                        query: { redirect: route.fullPath },
-                    });
-                    throw new Error("인증이 필요합니다");
-                }
-                return response.text().then((text) => {
-                    throw new Error(text);
-                });
-            }
-            return response.json();
-        })
-        .then((data) => {
+const fetchListCount = async () => {
+
+    try{
+        console.log("api 요청?????");
+        const responseData = await apiGet('/api/pass/select/count/recent');
+        console.log("응답데이터: ",responseData);
+        if(responseData) {
             recentListCount.value = data;
-        })
-        .catch((error) => {});
+        } else {
+        }
+    } catch (error) {
+        console.log('작업 내역 개수 확인 요청 실패:', error);
+    }
+
+    // fetch(`/api/pass/select/count/recent`, {
+    //     method: "GET",
+    //     headers: {
+    //         "Content-Type": "application/json",
+    //     },
+    //     credentials: "include",
+    // })
+    //     .then((response) => {
+    //         if (!response.ok) {
+    //             if (response.status === 401) {
+    //                 authStore.user = null;
+    //                 authStore.isAuthenticated = false;
+    //                 localStorage.removeItem("authUser");
+    //                 router.push({
+    //                     path: "/login",
+    //                     query: { redirect: route.fullPath },
+    //                 });
+    //                 throw new Error("인증이 필요합니다");
+    //             }
+    //             return response.text().then((text) => {
+    //                 throw new Error(text);
+    //             });
+    //         }
+    //         return response.json();
+    //     })
+    //     .then((data) => {
+    //         recentListCount.value = data;
+    //     })
+    //     .catch((error) => {});
 };
 
 // 검증 및 모달 관련 함수
@@ -281,7 +294,7 @@ const resetContent = computed(() => {
 
 // 컴포넌트 마운트 시 실행
 onMounted(() => {
-    fetchListCount();
+    // fetchListCount();
     const savedPassageData = localStorage.getItem("tempPassageData");
     if (savedPassageData) {
         try {

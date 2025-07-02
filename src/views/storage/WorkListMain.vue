@@ -613,6 +613,8 @@ import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import FileSelectModal from "@/components/common/FileSelectModal.vue";
 import WarningModalComponent from "@/components/common/WarningModalComponent.vue";
+import { apiGet, apiPut, apiPatch } from '@/utils/api';
+import { useAuth } from '@/composables/useAuth';
 
 // 라우터와 스토어 초기화
 const router = useRouter();
@@ -628,154 +630,84 @@ onMounted(() => {
 });
 
 // 최근 작업 내역 리스트 가져오기
-const fetchWorkItems = () => {
-  const apiUrl = import.meta.env.VITE_API_URL;
-
-  fetch(`/api/pass/select/recelist`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  })
-    .then((response) => {
-      if (!response.ok) {
-        // 인증 오류 처리 (401)
-        if (response.status === 401) {
-          // (추가) 로그 - 인증 오류 감지
-
-          // 인증 상태 초기화
-          authStore.user = null;
-          authStore.isAuthenticated = false;
-          localStorage.removeItem("authUser");
-
-          // 로그인 페이지로 리다이렉트
-          router.push({
-            path: "/login",
-            query: { redirect: route.fullPath },
-          });
-
-          // 추가 처리를 중단하기 위한 에러 발생
-          throw new Error("인증이 필요합니다");
-        }
-        return response.text().then((text) => {
-          throw new Error(text);
-        });
-      }
-      return response.json();
-    })
-    .then((data) => {
-      // 응답 데이터 구조에 맞게 매핑
-      workItems.value = data.map((item) => ({
-        PAS_CODE: item.pasCode,
-        PAS_TYPE: item.pasType,
-        PAS_TITLE: item.title,
-        PAS_TYPE : item.pasType,
-        PAS_KEYWORD: item.keyword,
-        PAS_IS_GENERATED: item.isGenerated === 1 ? "지문" : "문항",
-        PAS_DATE: item.date,
-        PAS_IS_FAVORITE: item.isFavorite === 1,
-        checked: false, // 체크박스 상태 추가
-      }));
-    })
-    .catch((error) => {});
+const fetchWorkItems = async () => {
+  try {
+    // console.log('WorkList: 작업 목록 요청 시작');
+    
+    // 보안 우선 API 시스템 사용
+    const data = await apiGet('/api/pass/select/recelist');
+    
+    // console.log('WorkList: 작업 목록 수신 성공:', data);
+    
+    // 응답 데이터 구조에 맞게 매핑
+    workItems.value = data.map((item) => ({
+      PAS_CODE: item.pasCode,
+      PAS_TYPE: item.pasType,
+      PAS_TITLE: item.title,
+      PAS_TYPE : item.pasType,
+      PAS_KEYWORD: item.keyword,
+      PAS_IS_GENERATED: item.isGenerated === 1 ? "지문" : "문항",
+      PAS_DATE: item.date,
+      PAS_IS_FAVORITE: item.isFavorite === 1,
+      checked: false, // 체크박스 상태 추가
+    }));
+    
+  } catch (error) {
+    console.error('WorkList: 작업 목록 요청 실패:', error);
+    // workItems.value = [];
+  }
 };
 
 // 작업명 클릭시, 해당 화면으로 이동
-const handleWorkItemClick = (item) => {
-  const apiUrl = import.meta.env.VITE_API_URL;
-  const pasCode = item.PAS_CODE;
-  // PAS_IS_GENERATED 값에 따라 API 및 페이지 분기처리
-  const isGeneratedText = item.PAS_IS_GENERATED;
-  const isPassage = isGeneratedText === "지문";
-  // '지문'인 경우 true, '문항'인 경우 false
-  // api 엔드 포인트 결정
-  const endpoint = isPassage
-    ? `/api/pass/select/${pasCode}`
-    : `/api/pass/ques/select/${pasCode}`;
-  // api 호출
-  fetch(endpoint, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  })
-    .then((response) => {
-      if (!response.ok) {
-        // 인증 오류 처리 (401)
-        if (response.status === 401) {
-          // 인증 상태 초기화
-          authStore.user = null;
-          authStore.isAuthenticated = false;
-          localStorage.removeItem("authUser");
+const handleWorkItemClick = async (item) => {
+    try{
+        const pasCode = item.PAS_CODE;
 
-          // 로그인 페이지로 리다이렉트
-          router.push({
-            path: "/login",
-            query: { redirect: route.fullPath },
-          });
+        // PAS_IS_GENERATED 값에 따라 API 및 페이지 분기처리
+        const isGeneratedText = item.PAS_IS_GENERATED === "지문";
+        const endpoint = isGeneratedText ? `/api/pass/select/${pasCode}` : `/api/pass/ques/select/${pasCode}`;
+        
+        const data = await apiGet(endpoint);
 
-          throw new Error("인증이 필요합니다");
+        if (isGeneratedText) {
+            // 지문인 경우 - PassageContent.vue로 이동
+            // 데이터 형식 변환 및 저장
+            const passageData = {
+                pasCode: data.pasCode,  title: data.title,      type: data.type,
+                keyword: data.keyword,  content: data.content,  gist: data.gist,
+            };
+
+            // 통합 키로 저장
+            localStorage.setItem("genieq-passage-data",JSON.stringify(passageData));
+
+            // 지문 생성 페이지로 이동
+            router.push("/passage/create");
+        } else {
+            // 문항인 경우 - GenerateQuestion.vue로 이동
+            // 데이터 형식 변환 및 저장
+            const questionData = {
+                passage: {
+                    pasCode: data.pasCode,  title: data.title,      type: data.type,
+                    keyword: data.keyword,  content: data.content,  gist: data.gist,
+                    questions: data.questions.map((q) => ({
+                        queCode: q.queCode,     queQuery: q.queQuery,   queOption: q.queOption,
+                        queAnswer: q.queAnswer, description: q.description,
+                    })),
+                },
+            };
+
+            // 로컬 스토리지에 저장
+            localStorage.setItem("saveResponse",JSON.stringify(questionData));
+
+            // 문항 생성 페이지로 이동
+            router.push({
+                path: "/questions/generate",
+                query: { from: route.path }, // 현재 경로 전달
+            });
         }
-        return response.text().then((text) => {
-          throw new Error(text);
-        });
-      }
-      return response.json();
-    })
-    .then((data) => {
-      if (isPassage) {
-        // 지문인 경우 - PassageContent.vue로 이동
-        // 데이터 형식 변환 및 저장
-        const passageData = {
-          pasCode: data.pasCode,
-          title: data.title,
-          type: data.type,
-          keyword: data.keyword,
-          content: data.content,
-          gist: data.gist,
-        };
-        // 통합 키로 저장
-        localStorage.setItem(
-          "genieq-passage-data",
-          JSON.stringify(passageData)
-        );
-        // 지문 생성 페이지로 이동
-        router.push("/passage/create");
-      } else {
-        // 문항인 경우 - GenerateQuestion.vue로 이동
-        // 데이터 형식 변환 및 저장
-        const questionData = {
-          passage: {
-            pasCode: data.pasCode,
-            title: data.title,
-            type: data.type,
-            keyword: data.keyword,
-            content: data.content,
-            gist: data.gist,
-            questions: data.questions.map((q) => ({
-              queCode: q.queCode,
-              queQuery: q.queQuery,
-              queOption: q.queOption,
-              queAnswer: q.queAnswer,
-              description: q.description,
-            })),
-          },
-        };
-        // 로컬 스토리지에 저장
-        localStorage.setItem("saveResponse", JSON.stringify(questionData));
-
-        // 문항 생성 페이지로 이동
-        router.push({
-          path: "/questions/generate",
-          query: { from: route.path }, // 현재 경로 전달
-        });
-      }
-    })
-    .catch((error) => {
-      alert("데이터를 가져오는 중 오류가 발생했습니다.");
-    });
+    } catch(error) {
+        alert("데이터를 가져오는 중 오류가 발생했습니다.");
+    }
 };
 
 // 검색 관련 상태
@@ -858,63 +790,35 @@ onUnmounted(() => {
 });
 
 // 편집 완료 및 서버 업데이트
-const finishEditing = () => {
-  if (editingIndex.value >= 0) {
-    const item = computedWorkItems.value[editingIndex.value];
-    const apiUrl = import.meta.env.VITE_API_URL;
-
-    // API 호출하여 제목 업데이트 (PATCH 메서드 사용)
-    fetch(`/api/pass/update/title`, {
-      method: "put", // PUT에서 PATCH로 변경 기존 // 2025-03-21 each -> title  PATCH-> PUT 로 수정완료
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        pasCode: item.PAS_CODE,
-        title: item.PAS_TITLE,
-        content: item.PAS_KEYWORD || "", // content 필드가 필요한 경우 기존 값 유지
-      }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("이름 변경 실패");
+const finishEditing = async () => {
+    if (editingIndex.value >= 0) {
+        const item = computedWorkItems.value[editingIndex.value];
+        try{
+            const data = await apiPut('/api/pass/update/title',{
+                pasCode: item.PAS_CODE,
+                title: item.PAS_TITLE,
+                content: item.PAS_KEYWORD || "", // content 필드가 필요한 경우 기존 값 유지
+            });
+            // 원본 workItems 배열에서 해당 항목 찾아 업데이트
+            const originalItem = workItems.value.find(
+                (i) => i.PAS_CODE === item.PAS_CODE
+            );
+            if (originalItem) {
+                originalItem.PAS_TITLE = item.PAS_TITLE;
+            }
+        } catch(error) {
+            // 실패해도 UI는 업데이트 (사용자 경험을 위해)
+            const originalItem = workItems.value.find(i => i.PAS_CODE === item.PAS_CODE);
+            if (originalItem) {originalItem.PAS_TITLE = item.PAS_TITLE;}
+        } finally {
+            // 편집 모드 종료
+            editingIndex.value = -1;
         }
-
-        // 응답 형식 확인
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-          return response.json();
-        } else {
-          return { success: true };
-        }
-      })
-      .then((data) => {
-        // 원본 workItems 배열에서 해당 항목 찾아 업데이트
-        const originalItem = workItems.value.find(
-          (i) => i.PAS_CODE === item.PAS_CODE
-        );
-        if (originalItem) {
-          originalItem.PAS_TITLE = item.PAS_TITLE;
-        }
-      })
-      .catch((error) => {
-        // 실패해도 UI는 업데이트 (사용자 경험을 위해)
-        const originalItem = workItems.value.find(
-          (i) => i.PAS_CODE === item.PAS_CODE
-        );
-        if (originalItem) {
-          originalItem.PAS_TITLE = item.PAS_TITLE;
-        }
-      })
-      .finally(() => {
-        // 편집 모드 종료
+    } else {
         editingIndex.value = -1;
-      });
-  } else {
-    editingIndex.value = -1;
-  }
-};
+    }
+
+}
 
 // 메소드 정의 - 화살표 함수로 작성합니다
 const extractItem = (item) => {
@@ -941,42 +845,24 @@ const handleFileSelection = (fileType) => {
   // 파일 추출 로직 구현
 };
 
-const toggleFavorite = (index) => {
-  const item = computedWorkItems.value[index];
-  const apiUrl = import.meta.env.VITE_API_URL;
+const toggleFavorite = async (index) => {
+    const item = workItems.value[index];
 
-  // 즐겨찾기 토글 로직
-  const newFavoriteStatus = !item.PAS_IS_FAVORITE;
+    // 즐겨찾기 토글 로직
+    const newFavoriteStatus = !item.PAS_IS_FAVORITE;
 
-  // API 호출
-  fetch(`/api/pass/favo`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-    body: JSON.stringify({
-      pasCode: item.PAS_CODE,
-    }),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("즐겨찾기 업데이트 실패");
-      }
-      return response.json();
-    })
-    .then((data) => {
-      // 서버에서 반환한 업데이트된 데이터로 항목 상태 갱신
-      if (data.isFavorite !== undefined) {
-        item.PAS_IS_FAVORITE = data.isFavorite === 1;
-      } else {
-        // 서버에서 업데이트된 상태를 반환하지 않는 경우, 로컬에서 토글
-        item.PAS_IS_FAVORITE = newFavoriteStatus;
-      }
-    })
-    .catch((error) => {
-      // 에러 시 사용자에게 알림을 표시할 수 있습니다
-    });
+    try {
+        const data = await apiPatch('/api/pass/favo',{pasCode: item.PAS_CODE});
+        // 서버에서 반환한 업데이트된 데이터로 항목 상태 갱신
+        if (data.isFavorite !== undefined) {
+            item.PAS_IS_FAVORITE = data.isFavorite === 1;
+        } else {
+            // 서버에서 업데이트된 상태를 반환하지 않는 경우, 로컬에서 토글
+            item.PAS_IS_FAVORITE = newFavoriteStatus;
+        }
+    } catch(error) {
+        console.error("즐겨찾기 업데이트 실패")
+    }
 };
 
 // 페이지네이션 관련 상태
@@ -1118,51 +1004,35 @@ const openDeleteModal = () => {
   }
 };
 
-const confirmDelete = () => {
-  const selectedPasCodes = selectedItems.value.map((item) => item.PAS_CODE);
+const confirmDelete = async () => {
+    try {
+        const selectedPasCodes = selectedItems.value.map((item) => item.PAS_CODE);
+        // 선택된 항목이 없으면 작업 중단
+        if (selectedPasCodes.length === 0) {
+            return;
+        }
+        const data = await apiPut('/api/pass/remove/each',{pasCodeList: selectedPasCodes});
 
-  // 선택된 항목이 없으면 작업 중단
-  if (selectedPasCodes.length === 0) {
-    return;
-  }
+        // UI에서 선택된 항목 제거
+        workItems.value = workItems.value.filter(
+            (item) => !selectedPasCodes.includes(item.PAS_CODE)
+        );
 
-  // API 호출
-  fetch(`/api/pass/remove/each`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-    body: JSON.stringify({
-      pasCodeList: selectedPasCodes,
-    }),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("항목 삭제 실패");
-      }
-      // 응답 형식 확인
-      const contentType = response.headers.get("content-type");
-      if (contentType && contentType.includes("application/json")) {
-        return response.json();
-      } else {
-        return response.text().then((text) => {
-          return { message: text };
-        });
-      }
-    })
-    .then((data) => {
-      // UI에서 선택된 항목 제거
-      workItems.value = workItems.value.filter((item) => !item.checked);
+        // 모달 닫기
+        isDeleteModalOpen.value = false;
 
-      // 모달 닫기
-      isDeleteModalOpen.value = false;
+        // 마지막 페이지가 비게 되면 이전 페이지로 이동
+        if (totalPages.value === 0) {
+            currentPage.value = 1;
+        } else if (currentPage.value > totalPages.value) {
+            currentPage.value = totalPages.value;
+        }
+    } catch(error) {
+        console.error("confirmDelete: ",error);
+        isDeleteModalOpen.value = false;
+    }
 
-      // 페이지 재계산
-      currentPage.value = Math.min(currentPage.value, totalPages.value);
-    })
-    .catch((error) => {});
-};
+}
 
 // 삭제 모달 닫기
 const closeDeleteModal = () => {

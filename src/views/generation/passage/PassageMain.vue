@@ -101,6 +101,7 @@ import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import LoadingModal from "@/components/common/LoadingModal.vue";
 import CreatePassageMainMobile from "@/views/generation/passage/CreatePassageMainMobile.vue";
+import { apiGet } from '@/utils/api';
 
 // 라우터 및 인증 스토어
 const router = useRouter();
@@ -166,7 +167,7 @@ const resetButton = () => {
 };
 
 // 지문 생성하기 버튼 클릭 핸들러
-const handleCreatePassage = () => {
+const handleCreatePassage = async () => {
     try {
         const titleElement = document.querySelector("#passage-title");
         passageTitle.value = titleElement ? titleElement.value : "지문 작업";
@@ -176,41 +177,56 @@ const handleCreatePassage = () => {
         passageTitle.value = "지문 작업";
     }
 
-    // 작업 내역 개수 확인 (150 개 이상인 경우 경고)
-    fetch(`/api/pass/select/count/recent`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        credentials: "include",
-    })
-        .then((response) => {
-            if (!response.ok) {
-                if (response.status === 401) {
-                    authStore.user = null;
-                    authStore.isAuthenticated = false;
-                    localStorage.removeItem("authUser");
-                    router.push({
-                        path: "/login",
-                        query: { redirect: route.fullPath },
-                    });
-                    throw new Error("인증이 필요합니다");
-                }
-                throw new Error("API 호출 실패: " + response.status);
-            }
-            return response.json();
-        })
-        .then((count) => {
+    try{
+        const responseData = await apiGet('/api/pass/select/count/recent');
+        if(responseData) {
             recentListCount.value = count;
             if (count >= 150) {
                 isListLimitModalOpen.value = true;
             } else {
                 isConfirmModalOpen.value = true;
             }
-        })
-        .catch((error) => {
-            // console.error('작업 내역 확인 중 오류 발생:', error);
-        });
+        } else {
+                isConfirmModalOpen.value = true;
+        }
+    } catch (error) {
+        console.log('작업 내역 개수 확인 요청 실패:', error);
+    }
+    // // 작업 내역 개수 확인 (150 개 이상인 경우 경고)
+    // fetch(`/api/pass/select/count/recent`, {
+    //     method: "GET",
+    //     headers: {
+    //         "Content-Type": "application/json",
+    //     },
+    //     credentials: "include",
+    // })
+    //     .then((response) => {
+    //         if (!response.ok) {
+    //             if (response.status === 401) {
+    //                 authStore.user = null;
+    //                 authStore.isAuthenticated = false;
+    //                 localStorage.removeItem("authUser");
+    //                 router.push({
+    //                     path: "/login",
+    //                     query: { redirect: route.fullPath },
+    //                 });
+    //                 throw new Error("인증이 필요합니다");
+    //             }
+    //             throw new Error("API 호출 실패: " + response.status);
+    //         }
+    //         return response.json();
+    //     })
+    //     .then((count) => {
+    //         recentListCount.value = count;
+    //         if (count >= 150) {
+    //             isListLimitModalOpen.value = true;
+    //         } else {
+    //             isConfirmModalOpen.value = true;
+    //         }
+    //     })
+    //     .catch((error) => {
+    //         // console.error('작업 내역 확인 중 오류 발생:', error);
+    //     });
 };
 // 현재 "최근 작업 내역"의 개수 // 작업 내역 150개 이상인 경우, 띄울 모달창 정보
 const recentListCount = ref(0);

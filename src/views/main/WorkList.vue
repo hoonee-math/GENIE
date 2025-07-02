@@ -713,12 +713,12 @@ const fetchWorkItems = async () => {
     if (data && data.length > 0) {
         // workItems.value = data;
         workItems.value = data.map((item) => ({
-            PAS_CODE: item.pasCode,
-            PAS_TITLE: item.title,
-            PAS_KEYWORD: item.keyword,
-            PAS_IS_GENERATED: item.isGenerated === 1 ? "지문" : "문항",
-            PAS_DATE: item.date,
-            PAS_IS_FAVORITE: item.isFavorite === 1,
+          PAS_CODE: item.pasCode,
+          PAS_TITLE: item.title,
+          PAS_KEYWORD: item.keyword,
+          PAS_IS_GENERATED: item.isGenerated === 1 ? "지문" : "문항",
+          PAS_DATE: item.date,
+          PAS_IS_FAVORITE: item.isFavorite === 1,
         }));
     } else {
       workItems.value = [];

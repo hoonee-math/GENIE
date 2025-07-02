@@ -117,155 +117,87 @@ const displayItems = computed(() => {
 });
 
 // 최근 작업 내역 리스트 가져오기
-const fetchWorkItems = () => {
-  const apiUrl = import.meta.env.VITE_API_URL;
-
-  fetch(`/api/pass/select/recelist`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  })
-    .then((response) => {
-      if (!response.ok) {
-        // 인증 오류 처리 (401)
-        if (response.status === 401) {
-          // 인증 상태 초기화
-          authStore.user = null;
-          authStore.isAuthenticated = false;
-          localStorage.removeItem("authUser");
-
-          // 로그인 페이지로 리다이렉트
-          router.push({
-            path: "/login",
-            query: { redirect: route.fullPath },
-          });
-
-          throw new Error("인증이 필요합니다");
-        }
-        return response.text().then((text) => {
-          throw new Error(text);
-        });
-      }
-      return response.json();
-    })
-    .then((data) => {
-      // 응답 데이터 구조에 맞게 매핑
-      workItems.value = data.map((item) => ({
-        PAS_CODE: item.pasCode,
-        PAS_TITLE: item.title,
-        PAS_KEYWORD: item.keyword,
-        PAS_IS_GENERATED: item.isGenerated === 1 ? "지문" : "문항",
-        PAS_DATE: item.date,
-        PAS_IS_FAVORITE: item.isFavorite === 1,
-      }));
-    })
-    .catch((error) => {});
+const fetchWorkItems = async () => {
+  try {
+    // console.log('WorkList: 작업 목록 요청 시작');
+    
+    // 보안 우선 API 시스템 사용
+    const data = await apiGet('/api/pass/select/recelist');
+    
+    // console.log('WorkList: 작업 목록 수신 성공:', data);
+    
+    // 기존 데이터 처리 로직 그대로 유지
+    if (data && data.length > 0) {
+        // workItems.value = data;
+        workItems.value = data.map((item) => ({
+          PAS_CODE: item.pasCode,
+          PAS_TITLE: item.title,
+          PAS_KEYWORD: item.keyword,
+          PAS_IS_GENERATED: item.isGenerated === 1 ? "지문" : "문항",
+          PAS_DATE: item.date,
+          PAS_IS_FAVORITE: item.isFavorite === 1,
+        }));
+    } else {
+      workItems.value = [];
+    }
+    
+  } catch (error) {
+    console.error('WorkList: 작업 목록 요청 실패:', error);
+    workItems.value = [];
+  }
 };
 
 // 작업명 클릭시, 해당 화면으로 이동
-const handleWorkItemClick = (item) => {
-  const apiUrl = import.meta.env.VITE_API_URL;
-  const pasCode = item.PAS_CODE;
+const handleWorkItemClick = async (item) => {
+  try{
+    const pasCode = item.PAS_CODE;
 
-  // PAS_IS_GENERATED 값에 따라 API 및 페이지 분기처리
-  const isGeneratedText = item.PAS_IS_GENERATED;
-  const isPassage = isGeneratedText === "지문";
-  // '지문'인 경우 true, '문항'인 경우 false
+    // PAS_IS_GENERATED 값에 따라 API 및 페이지 분기처리
+    const isGeneratedText = item.PAS_IS_GENERATED === "지문";
+    const endpoint = isGeneratedText ? `/api/pass/select/${pasCode}` : `/api/pass/ques/select/${pasCode}`;
+    
+    const data = await apiGet(endpoint);
+    if (isGeneratedText) {
+      // 지문인 경우 - PassageContent.vue로 이동
+      // 데이터 형식 변환 및 저장
+          const passageData = {
+              pasCode: data.pasCode,  title: data.title,      type: data.type,
+              keyword: data.keyword,  content: data.content,  gist: data.gist,
+          };
 
-  // api 엔드 포인트 결정
-  const endpoint = isPassage
-    ? `/api/pass/select/${pasCode}`
-    : `/api/pass/ques/select/${pasCode}`;
+      // 통합 키로 저장
+      localStorage.setItem("genieq-passage-data",JSON.stringify(passageData));
 
-  // api 호출
-  fetch(endpoint, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  })
-    .then((response) => {
-      if (!response.ok) {
-        // 인증 오류 처리 (401)
-        if (response.status === 401) {
-          // 인증 상태 초기화
-          authStore.user = null;
-          authStore.isAuthenticated = false;
-          localStorage.removeItem("authUser");
-
-          // 로그인 페이지로 리다이렉트
-          router.push({
-            path: "/login",
-            query: { redirect: route.fullPath },
-          });
-
-          throw new Error("인증이 필요합니다");
-        }
-        return response.text().then((text) => {
-          throw new Error(text);
-        });
-      }
-      return response.json();
-    })
-    .then((data) => {
-      if (isPassage) {
-        // 지문인 경우 - PassageContent.vue로 이동
-        // 데이터 형식 변환 및 저장
-        const passageData = {
-          pasCode: data.pasCode,
-          title: data.title,
-          type: data.type,
-          keyword: data.keyword,
-          content: data.content,
-          gist: data.gist,
-        };
-
-        // 통합 키로 저장
-        localStorage.setItem(
-          "genieq-passage-data",
-          JSON.stringify(passageData)
-        );
-
-        // 지문 생성 페이지로 이동
-        router.push("/passage/create");
-      } else {
-        // 문항인 경우 - GenerateQuestion.vue로 이동
-        // 데이터 형식 변환 및 저장
+      // 지문 생성 페이지로 이동
+      router.push("/passage/create");
+    } 
+    else {
+      // 문항인 경우 - GenerateQuestion.vue로 이동
+      // 데이터 형식 변환 및 저장
         const questionData = {
           passage: {
-            pasCode: data.pasCode,
-            title: data.title,
-            type: data.type,
-            keyword: data.keyword,
-            content: data.content,
-            gist: data.gist,
+            pasCode: data.pasCode,  title: data.title,      type: data.type,
+            keyword: data.keyword,  content: data.content,  gist: data.gist,
             questions: data.questions.map((q) => ({
-              queCode: q.queCode,
-              queQuery: q.queQuery,
-              queOption: q.queOption,
-              queAnswer: q.queAnswer,
-              description: q.description,
+              queCode: q.queCode,     queQuery: q.queQuery,   queOption: q.queOption,
+              queAnswer: q.queAnswer, description: q.description,
             })),
-          },
-        };
+        },
+      };
 
-        // 로컬 스토리지에 저장
-        localStorage.setItem("saveResponse", JSON.stringify(questionData));
+      // 로컬 스토리지에 저장
+      localStorage.setItem("saveResponse", JSON.stringify(questionData));
 
-        // 문항 생성 페이지로 이동
-        router.push({
-          path: "/questions/generate",
-          query: { from: route.path }, // 현재 경로 전달
-        });
-      }
-    })
-    .catch((error) => {
-      alert("데이터를 가져오는 중 오류가 발생했습니다.");
-    });
-};
+      // 문항 생성 페이지로 이동
+      router.push({
+        path: "/questions/generate",
+        query: { from: route.path }, // 현재 경로 전달
+      });
+    }
+  } catch(error) {
+    alert("데이터를 가져오는 중 오류가 발생했습니다.");
+  }
+}
 
 // 모달 상태 관리
 const isModalOpen = ref(false);
@@ -287,40 +219,24 @@ const handleFileSelection = (fileType) => {
   // 파일 추출 로직 구현
 };
 
-const toggleFavorite = (index) => {
-  const item = displayItems.value[index];
-  const apiUrl = import.meta.env.VITE_API_URL;
+const toggleFavorite = async (index) => {
+  const item = workItems.value[index];
 
   // 즐겨찾기 토글 로직
   const newFavoriteStatus = !item.PAS_IS_FAVORITE;
 
-  // API 호출
-  fetch(`/api/pass/favo`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-    body: JSON.stringify({
-      pasCode: item.PAS_CODE,
-    }),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("즐겨찾기 업데이트 실패");
-      }
-      return response.json();
-    })
-    .then((data) => {
-      // 서버에서 반환한 업데이트된 데이터로 항목 상태 갱신
-      if (data.isFavorite !== undefined) {
-        item.PAS_IS_FAVORITE = data.isFavorite === 1;
-      } else {
-        // 서버에서 업데이트된 상태를 반환하지 않는 경우, 로컬에서 토글
-        item.PAS_IS_FAVORITE = newFavoriteStatus;
-      }
-    })
-    .catch((error) => {});
+  try {
+    const data = await apiPatch('/api/pass/favo',{pasCode: item.PAS_CODE});
+    // 서버에서 반환한 업데이트된 데이터로 항목 상태 갱신
+    if (data.isFavorite !== undefined) {
+      item.PAS_IS_FAVORITE = data.isFavorite === 1;
+    } else {
+      // 서버에서 업데이트된 상태를 반환하지 않는 경우, 로컬에서 토글
+      item.PAS_IS_FAVORITE = newFavoriteStatus;
+    }
+  } catch(error) {
+    console.error("즐겨찾기 업데이트 실패")
+  }
 };
 </script>
 
