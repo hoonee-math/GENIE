@@ -40,7 +40,7 @@ export async function apiRequest(url, options = {}) {
     }
     
     try {
-        console.log(`API 요청: ${options.method || 'GET'} ${url}`);
+        // console.log(`API 요청: ${options.method || 'GET'} ${url}`);
         
         const response = await fetch(url, defaultOptions);
         
@@ -66,12 +66,12 @@ export async function apiRequest(url, options = {}) {
                 throw new APIError('인증이 만료되었습니다. 다시 로그인해주세요.', 401);
             }
         }
-        console.log("정상 응답 수신:", {
-            status: response.status,
-            statusText: response.statusText,
-            ok: response.ok,
-            headers: Object.fromEntries(response.headers.entries())
-        });
+        // console.log("정상 응답 수신:", {
+        //     status: response.status,
+        //     statusText: response.statusText,
+        //     ok: response.ok,
+        //     headers: Object.fromEntries(response.headers.entries())
+        // });
         
         // 정상 응답 반환 (401이 아닌 경우)
         return response;
@@ -89,65 +89,65 @@ export async function apiRequest(url, options = {}) {
 // ========== HTTP 메서드별 편의 함수 ==========
 
 
- export async function apiGet(url, options = {}) {
-     console.log(`apiGet 시작: ${url}`);
+export async function apiGet(url, options = {}) {
+    // console.log(`apiGet 시작: ${url}`);
      
-     const response = await apiRequest(url, {
-         method: 'GET',
-         ...options
-     });
+    const response = await apiRequest(url, {
+        method: 'GET',
+        ...options
+    });
      
-     console.log(`apiGet 응답 받음:`, {
-         url,
-         status: response.status,
-         ok: response.ok,
-         contentType: response.headers.get('content-type'),
-         bodyUsed: response.bodyUsed, // 중요: body가 이미 사용되었는지 확인
-         redirected: response.redirected
-     });
-     if (!response.ok) {
-         const errorData = await response.text();
-         console.error(`apiGet 에러:`, { url, status: response.status, errorData });
-         throw new APIError(`GET ${url} 실패: ${errorData}`, response.status);
-     }
+    // console.log(`apiGet 응답 받음:`, {
+    //     url,
+    //     status: response.status,
+    //     ok: response.ok,
+    //     contentType: response.headers.get('content-type'),
+    //     bodyUsed: response.bodyUsed, // 중요: body가 이미 사용되었는지 확인
+    //     redirected: response.redirected
+    // });
+    if (!response.ok) {
+        const errorData = await response.text();
+        console.error(`apiGet 에러:`, { url, status: response.status, errorData });
+        throw new APIError(`GET ${url} 실패: ${errorData}`, response.status);
+    }
      
-     console.log(`apiGet JSON 파싱 시도: ${url}`);
-     console.log(`JSON 파싱 전 bodyUsed 상태:`, response.bodyUsed);
+    //  console.log(`apiGet JSON 파싱 시도: ${url}`);
+    //  console.log(`JSON 파싱 전 bodyUsed 상태:`, response.bodyUsed); // 계속 false 뜸.
      
-     // Response를 미리 clone해두기 (에러 시 대안 방법용)
-     const responseClone = response.clone();
+    // Response를 미리 clone해두기 (에러 시 대안 방법용)
+    const responseClone = response.clone();
      
-     try {
-         // Response가 이미 사용되었다면 clone을 사용
-         const responseToUse = response.bodyUsed ? responseClone : response;
+    try {
+        // Response가 이미 사용되었다면 clone을 사용
+        const responseToUse = response.bodyUsed ? responseClone : response;
+       
+        // 타임아웃 추가 (10초로 단축)
+        const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('JSON 파싱 타임아웃')), 10000)
+        );
          
-         // 타임아웃 추가 (10초로 단축)
-         const timeoutPromise = new Promise((_, reject) => 
-             setTimeout(() => reject(new Error('JSON 파싱 타임아웃')), 10000)
-         );
+        const jsonPromise = responseToUse.json();
+        
+        const jsonData = await Promise.race([jsonPromise, timeoutPromise]);
+        console.log(`apiGet JSON 파싱 성공:`, { url, data: jsonData });
+        return jsonData;
+    } catch (jsonError) {
+        console.error(`apiGet JSON 파싱 실패:`, { url, error: jsonError.message });
          
-         const jsonPromise = responseToUse.json();
-         
-         const jsonData = await Promise.race([jsonPromise, timeoutPromise]);
-         console.log(`apiGet JSON 파싱 성공:`, { url, data: jsonData });
-         return jsonData;
-     } catch (jsonError) {
-         console.error(`apiGet JSON 파싱 실패:`, { url, error: jsonError.message });
-         
-         // 대안: 텍스트로 읽어서 직접 파싱
-         try {
-             console.log(`대안 방법: 텍스트로 읽기 시도...`);
-             const responseText = await response.clone().text();
-             console.log(`응답 텍스트:`, responseText);
+        // 대안: 텍스트로 읽어서 직접 파싱
+        //  try {
+        //      console.log(`대안 방법: 텍스트로 읽기 시도...`);
+        //      const responseText = await response.clone().text();
+        //      console.log(`응답 텍스트:`, responseText);
              
-             const parsedData = JSON.parse(responseText);
-             console.log(`대안 방법 성공:`, { url, data: parsedData });
-             return parsedData;
-         } catch (textError) {
-             console.error(`대안 방법도 실패:`, textError.message);
-         }
+        //      const parsedData = JSON.parse(responseText);
+        //      console.log(`대안 방법 성공:`, { url, data: parsedData });
+        //      return parsedData;
+        //  } catch (textError) {
+        //      console.error(`대안 방법도 실패:`, textError.message);
+        //  }
          
-         throw new APIError(`JSON 파싱 실패: ${jsonError.message}`, response.status);
+        throw new APIError(`JSON 파싱 실패: ${jsonError.message}`, response.status);
     }
 }
 

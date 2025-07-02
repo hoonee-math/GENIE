@@ -702,12 +702,12 @@ const setupTableResize = () => {
 // 최근 작업 내역 리스트 가져오기
 const fetchWorkItems = async () => {
   try {
-    console.log('WorkList: 작업 목록 요청 시작');
+    // console.log('WorkList: 작업 목록 요청 시작');
     
     // 보안 우선 API 시스템 사용
     const data = await apiGet('/api/pass/select/recelist');
     
-    console.log('WorkList: 작업 목록 수신 성공:', data);
+    // console.log('WorkList: 작업 목록 수신 성공:', data);
     
     // 기존 데이터 처리 로직 그대로 유지
     if (data && data.length > 0) {

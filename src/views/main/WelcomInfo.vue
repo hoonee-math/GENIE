@@ -193,13 +193,13 @@ onMounted(() => {
 // 보안 우선 API 시스템을 사용하여 티켓 정보 조회
 async function getTicketCount() {
     try {
-        console.log('WelcomInfo: 티켓 정보 요청 시작');
+        // console.log('WelcomInfo: 티켓 정보 요청 시작');
         
         // 새로운 보안 우선 API 시스템 사용
         // 자동 토큰 갱신, Authorization 헤더 자동 추가, 401 에러 자동 처리
         const data = await apiGet('/api/info/select/ticket');
         
-        console.log('WelcomInfo: 티켓 데이터 수신 성공:', data);
+        // console.log('WelcomInfo: 티켓 데이터 수신 성공:', data);
         
         ticketCount.value = Number(data.balance) || 0;
         maxTicketCount.value = Number(data.total) || 0;

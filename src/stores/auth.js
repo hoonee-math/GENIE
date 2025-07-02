@@ -77,7 +77,7 @@ export const useAuthStore = defineStore("auth", {
             }
             
             this.error = null;
-            console.log('Access Token 메모리 저장됨 (보안 강화)');
+            // console.log('Access Token 메모리 저장됨 (보안 강화)');
         },
         
         // ========== 사용자 정보 저장 (autoLogin 설정에 따라) ==========
@@ -86,18 +86,18 @@ export const useAuthStore = defineStore("auth", {
                 localStorage.setItem('authUser', JSON.stringify(this.user));
                 localStorage.setItem('autoLogin', 'true');
                 sessionStorage.removeItem('authUser');
-                console.log('자동 로그인 활성화: 사용자 정보 localStorage 저장');
+                // console.log('자동 로그인 활성화: 사용자 정보 localStorage 저장');
             } else if (this.user) {
                 sessionStorage.setItem('authUser', JSON.stringify(this.user));
                 localStorage.setItem('autoLogin', 'false');
                 localStorage.removeItem('authUser');
-                console.log('일반 로그인: 사용자 정보 sessionStorage 저장');
+                // console.log('일반 로그인: 사용자 정보 sessionStorage 저장');
             }
         },
         
         // ========== 페이지 새로고침 시 토큰 복원 ==========
         async initializeAuth() {
-            console.log('=== 보안 우선 인증 초기화 ===');
+            // console.log('=== 보안 우선 인증 초기화 initializeAuth() ===');
             
             // 기존 데이터 마이그레이션 먼저 실행
             this.migrateOldData();
@@ -191,7 +191,7 @@ export const useAuthStore = defineStore("auth", {
             const refreshTime = this.expiresAt - new Date().getTime() - (5 * 60 * 1000);
             
             if (refreshTime > 0) {
-                console.log(`토큰 자동 갱신 예약: ${Math.round(refreshTime / 1000)}초 후`);
+                // console.log(`토큰 자동 갱신 예약: ${Math.round(refreshTime / 1000)}초 후`);
                 
                 setTimeout(async () => {
                     if (this.isAuthenticated) {
@@ -281,7 +281,7 @@ export const useAuthStore = defineStore("auth", {
             // localStorage/sessionStorage 정리
             this.clearAllStorageData();
             
-            console.log('로그아웃 완료 (httpOnly 쿠키 포함)');
+            // console.log('로그아웃 완료 (httpOnly 쿠키 포함)');
             this.isLoading = false;
         },
         
@@ -316,7 +316,7 @@ export const useAuthStore = defineStore("auth", {
         
         // ========== 기존 데이터 마이그레이션 ==========
         migrateOldData() {
-            console.log('기존 localStorage 데이터 마이그레이션 시작...');
+            // console.log('기존 localStorage 데이터 마이그레이션 시작...');
             
             // 기존 'token' 키 제거
             const oldToken = localStorage.getItem('token');
@@ -333,7 +333,7 @@ export const useAuthStore = defineStore("auth", {
             }
             
             sessionStorage.removeItem('authTokens');
-            console.log('마이그레이션 완료');
+            // console.log('마이그레이션 완료');
         },
         
         // ========== 사용자 정보만 설정 (세션 로그인용) ==========

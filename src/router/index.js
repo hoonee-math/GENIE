@@ -17,7 +17,7 @@ import payRoutes from "./payment.routes";
 const requireAuth = async (to, from, next) => {
     const authStore = useAuthStore(); // authStore 초기화
     
-    console.log('=== 보안 우선 인증 가드 실행 ===');
+    console.log('=== 보안 우선 인증 가드 실행 requireAuth(to,from,next) ===');
     console.log('현재 이동하려는 페이지:', to.path);
     console.log('이전 페이지:', from.path);
     
@@ -35,9 +35,10 @@ const requireAuth = async (to, from, next) => {
         // 마이그레이션 가이드에 따른 새로운 인증 체크 방식
         const { checkAuth } = useAuthGuard();
         const isAuthenticated = await checkAuth();
+        // console.log('인증 상태:', isAuthenticated);
         
         if (isAuthenticated) {
-            console.log('인증 성공 - 페이지 접근 허용');
+            // console.log('인증 성공 - 페이지 접근 허용');
             next();
         } else {
             console.log('인증 실패 - 로그인 페이지로 리다이렉트');
