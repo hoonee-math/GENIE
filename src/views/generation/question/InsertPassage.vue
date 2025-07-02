@@ -69,7 +69,7 @@
             </div>
         </div>
 
-        <WarningModalComponent
+        <!-- <WarningModalComponent
             :isOpen="isWarningModalOpen"
             title="지문 내용을 초기화하시겠습니까?"
             message="현재 입력된 지문 내용이 모두 삭제됩니다."
@@ -77,13 +77,14 @@
             confirmText="확인"
             @close="closeWarningModal"
             @confirm="confirmWarningModal"
-        />
+        /> -->
     </div>
 </template>
 
 <script setup>
 import StoresInsertPassage from "@/views/generation/question/StoresInsertPassage.vue";
 import UserInsertPassage from "@/views/generation/question/UserInsertPassage.vue";
+import WarningModalComponent from '@/components/common/WarningModalComponent.vue';
 
 import { ref, inject, computed, watch, defineExpose, onMounted } from "vue";
 
