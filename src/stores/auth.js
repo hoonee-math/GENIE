@@ -154,12 +154,10 @@ export const useAuthStore = defineStore("auth", {
                     if (response.ok) {
                         const tokenData = await response.json();
                         
-                        // 새로운 access token 저장 (메모리에만)
-                        this.accessToken = tokenData.accessToken;
-                        this.tokenType = tokenData.tokenType || 'Bearer';
-                        this.expiresAt = tokenData.expiresAt;
+                        // 로그인과 동일한 방식으로 토큰 및 사용자 정보 업데이트
+                        this.setTokens(tokenData);
                         
-                        console.log('httpOnly 쿠키로 토큰 갱신 성공');
+                        console.log('httpOnly 쿠키로 토큰 및 사용자 정보 갱신 성공');
                         
                         // 자동 갱신 스케줄링 (만료 5분 전)
                         this.setupTokenRefresh();

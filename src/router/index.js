@@ -21,16 +21,6 @@ const requireAuth = async (to, from, next) => {
     console.log('현재 이동하려는 페이지:', to.path);
     console.log('이전 페이지:', from.path);
     
-    // 로그인 페이지에서 오는 경우 간단한 체크만
-    if (from.path === '/login') {
-        console.log('로그인 페이지에서 이동 - 간단한 인증 체크');
-        if (authStore.isLoggedIn && authStore.hasValidToken) {
-            console.log('로그인 상태 확인됨 - 페이지 접근 허용');
-            next();
-            return;
-        }
-    }
-
     try {
         // 마이그레이션 가이드에 따른 새로운 인증 체크 방식
         const { checkAuth } = useAuthGuard();
