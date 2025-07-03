@@ -57,14 +57,38 @@ export async function apiRequest(url, options = {}) {
                 // 새로운 토큰으로 헤더 업데이트
                 defaultOptions.headers.Authorization = authStore.authHeader;
                 
-                // API 재시도 및 새로운 응답 반환
+                // ✅ 디버깅: 새로운 토큰 헤더 확인
+                console.log('재시도 전 Authorization 헤더:', defaultOptions.headers.Authorization);
+                
+                // API 재시도
                 const retryResponse = await fetch(url, defaultOptions);
                 console.log(`API 재시도 완료: ${retryResponse.status}`);
+                
+                // ✅ 재시도도 401이면 에러 처리
+                if (retryResponse.status === 401) {
+                    console.error('재시도도 401 에러 - 백엔드 JWT 필터 문제 의심');
+                    throw new APIError('인증 토큰이 유효하지 않습니다. 백엔드 권한 설정을 확인해주세요.', 401);
+                }
+                
                 return retryResponse;
             } else {
                 console.log('토큰 갱신 실패 - 로그인 페이지로 리다이렉트 필요');
                 throw new APIError('인증이 만료되었습니다. 다시 로그인해주세요.', 401);
             }
+            // if (refreshSuccess) {
+            //     console.log('토큰 갱신 성공 - API 재시도');
+                
+            //     // 새로운 토큰으로 헤더 업데이트
+            //     defaultOptions.headers.Authorization = authStore.authHeader;
+                
+            //     // API 재시도 및 새로운 응답 반환
+            //     const retryResponse = await fetch(url, defaultOptions);
+            //     console.log(`API 재시도 완료: ${retryResponse.status}`);
+            //     return retryResponse;
+            // } else {
+            //     console.log('토큰 갱신 실패 - 로그인 페이지로 리다이렉트 필요');
+            //     throw new APIError('인증이 만료되었습니다. 다시 로그인해주세요.', 401);
+            // }
         }
         // console.log("정상 응답 수신:", {
         //     status: response.status,

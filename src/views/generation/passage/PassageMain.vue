@@ -101,7 +101,7 @@ import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import LoadingModal from "@/components/common/LoadingModal.vue";
 import CreatePassageMainMobile from "@/views/generation/passage/CreatePassageMainMobile.vue";
-import { apiGet } from '@/utils/api';
+import { apiGet, apiPost } from '@/utils/api';
 
 // 라우터 및 인증 스토어
 const router = useRouter();
@@ -178,8 +178,8 @@ const handleCreatePassage = async () => {
     }
 
     try{
-        const responseData = await apiGet('/api/pass/select/count/recent');
-        if(responseData) {
+        const count = await apiGet('/api/pass/select/count/recent');
+        if(count) {
             recentListCount.value = count;
             if (count >= 150) {
                 isListLimitModalOpen.value = true;
@@ -306,75 +306,136 @@ const confirmCreatePassage = () => {
     }
 };
 
-const savePassageToBackend = (data) => {
-    loadingMessage.value = "생성된 지문을 저장 중입니다...";
+const savePassageToBackend = async (data) => {
+    try {
+        loadingMessage.value = "생성된 지문을 저장 중입니다...";
+        
+        // ✅ 지문 생성 후 토큰 갱신 (3분 경과로 인한 만료 대비)
+        console.log('지문 저장 전 토큰 갱신 시도...');
+        const tokenRefreshSuccess = await authStore.refreshToken();
+        if (!tokenRefreshSuccess) {
+            throw new Error('토큰 갱신 실패 - 재로그인이 필요합니다.');
+        }
+        console.log('토큰 갱신 성공 - 지문 저장 진행');
 
-    const saveData = {
-        type: data.type_passage || selectedCategory.value,
-        keyword: data.keyword || inputText.value,
-        title: passageTitle.value || "지문 작업",
-        content: data.generated_passage,
-        gist: data.generated_core_point,
-        isGenerated: 1,
-    };
+        // const saveData = {
+        //     type: data.type_passage || selectedCategory.value,
+        //     keyword: data.keyword || inputText.value,
+        //     title: passageTitle.value || "지문 작업",
+        //     content: data.content || "",
+        //     gist: data.gist || [],
+        //     isGenerated: 1,
+        // };
+        const saveData = {
+            type: data.type_passage || selectedCategory.value,
+            keyword: Array.isArray(data.keyword) ? data.keyword.join(', ') : (data.keyword || inputText.value),
+            title: passageTitle.value || "지문 작업",
+            content: data.content || "",
+            gist: Array.isArray(data.gist) ? data.gist.join(', ') : (data.gist || ""),
+            isGenerated: 1,
+        };
+        // 백엔드 API 호출
+        
+        const responseData = await apiPost('/api/pass/insert/each', saveData);
 
-    // 백엔드 API 호출
-    fetch(`/api/pass/insert/each`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(saveData),
-    })
-        .then((response) => {
-            if (!response.ok) {
-                if (response.status === 401) {
-                    authStore.user = null;
-                    authStore.isAuthenticated = false;
-                    localStorage.removeItem("authUser");
-                    router.push({
-                        path: "/login",
-                        query: { redirect: router.currentRoute.value.fullPath },
-                    });
-                    throw new Error("인증이 필요합니다");
-                }
-                return response.text().then((text) => {
-                    throw new Error("저장 API 호출 실패: " + text);
-                });
-            }
-            return response.json();
-        })
-        .then((responseData) => {
-            authStore.updateTicketCount(); // 차감된 이용권으로 update
+        authStore.updateTicketCount(); // 차감된 이용권으로 update
 
-            // 로컬 스토리지에 저장할 데이터 구조 수정
-            const passageData = {
-                pasCode: responseData.pasCode,
-                title: saveData.title,
-                type: saveData.type,
-                keyword: saveData.keyword,
-                content: saveData.content,
-                gist: saveData.gist,
-            };
+        // 로컬 스토리지에 저장할 데이터 구조 수정
+        const passageData = {
+            pasCode: responseData.pasCode,
+            title: saveData.title,
+            type: saveData.type,
+            keyword: saveData.keyword,
+            content: saveData.content,
+            gist: saveData.gist,
+        };
 
-            // 로컬 스토리지에 저장
-            localStorage.setItem(
-                "genieq-passage-data",
-                JSON.stringify(passageData)
-            );
+        // 로컬 스토리지에 저장
+        localStorage.setItem(
+            "genieq-passage-data",
+            JSON.stringify(passageData)
+        );
 
-            // 지문 생성 페이지로 이동
-            router.push("/passage/create");
-
-            // 상태 초기화
-            isLoading.value = false;
-            isProcessing.value = false;
-        })
-        .catch((error) => {
-            alert("저장 중 오류가 발생했습니다: " + error.message);
-            isLoading.value = false;
-            isProcessing.value = false;
-        });
+        // 지문 생성 페이지로 이동
+        router.push("/passage/create");
+    } catch (error) {
+        alert("저장 중 오류가 발생했습니다: " + error.message);
+    } finally {
+        isLoading.value = false;
+        isProcessing.value = false;
+    }
 };
+
+
+// const savePassageToBackend2 = (data) => {
+//     loadingMessage.value = "생성된 지문을 저장 중입니다...";
+
+//     const saveData = {
+//         type: data.type_passage || selectedCategory.value,
+//         keyword: data.keyword || inputText.value,
+//         title: passageTitle.value || "지문 작업",
+//         content: data.generated_passage,
+//         gist: data.generated_core_point,
+//         isGenerated: 1,
+//     };
+
+//     // 백엔드 API 호출
+//     fetch(`/api/pass/insert/each`, {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         credentials: "include",
+//         body: JSON.stringify(saveData),
+//     })
+//         .then((response) => {
+//             if (!response.ok) {
+//                 if (response.status === 401) {
+//                     authStore.user = null;
+//                     authStore.isAuthenticated = false;
+//                     localStorage.removeItem("authUser");
+//                     router.push({
+//                         path: "/login",
+//                         query: { redirect: router.currentRoute.value.fullPath },
+//                     });
+//                     throw new Error("인증이 필요합니다");
+//                 }
+//                 return response.text().then((text) => {
+//                     throw new Error("저장 API 호출 실패: " + text);
+//                 });
+//             }
+//             return response.json();
+//         })
+//         .then((responseData) => {
+//             authStore.updateTicketCount(); // 차감된 이용권으로 update
+
+//             // 로컬 스토리지에 저장할 데이터 구조 수정
+//             const passageData = {
+//                 pasCode: responseData.pasCode,
+//                 title: saveData.title,
+//                 type: saveData.type,
+//                 keyword: saveData.keyword,
+//                 content: saveData.content,
+//                 gist: saveData.gist,
+//             };
+
+//             // 로컬 스토리지에 저장
+//             localStorage.setItem(
+//                 "genieq-passage-data",
+//                 JSON.stringify(passageData)
+//             );
+
+//             // 지문 생성 페이지로 이동
+//             router.push("/passage/create");
+
+//             // 상태 초기화
+//             isLoading.value = false;
+//             isProcessing.value = false;
+//         })
+//         .catch((error) => {
+//             alert("저장 중 오류가 발생했습니다: " + error.message);
+//             isLoading.value = false;
+//             isProcessing.value = false;
+//         });
+// };
 
 onMounted(() => {
     localStorage.removeItem("genieq-passage-data");
