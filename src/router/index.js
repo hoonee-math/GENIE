@@ -11,7 +11,7 @@ import mainRoutes from "./main.routes";
 import memberRoutes from "./member.routes";
 import generationRoutes from "./generation.routes";
 import myPageRoutes from "./mypage.routes";
-import strageRoutes from "./storage.routes";
+import storageRoutes from "./storage.routes";
 import payRoutes from "./payment.routes";
 // 로그인 상태 체크 가드 - 보안 우선 인증 시스템 사용
 const requireAuth = async (to, from, next) => {
@@ -21,6 +21,21 @@ const requireAuth = async (to, from, next) => {
     console.log('현재 이동하려는 페이지:', to.path);
     console.log('이전 페이지:', from.path);
     
+    // 1차: 기본 상태 체크
+    if (!authStore.isLoggedIn || !authStore.accessToken || !authStore.user) {
+        console.log('❌ 기본 인증 상태 실패 - 로그인 필요');
+        next('/login');
+        return;
+    }
+    
+    // 2차: 토큰 유효성 체크
+    if (!authStore.hasValidToken) {
+        console.log('❌ 토큰 무효 - 로그인 필요');
+        next('/login');
+        return;
+    }
+    
+    // 3차: 서버 검증 (선택사항)
     try {
         // 마이그레이션 가이드에 따른 새로운 인증 체크 방식
         const { checkAuth } = useAuthGuard();
@@ -58,7 +73,7 @@ const router = createRouter({
                 ...mainRoutes,
                 ...generationRoutes,
                 ...myPageRoutes,
-                ...strageRoutes,
+                ...storageRoutes,
                 ...payRoutes,
             ],
         },

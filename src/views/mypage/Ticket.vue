@@ -415,7 +415,7 @@ const route = useRoute();
 const authStore = useAuthStore();
 
 // 사용자 정보를 computed 속성으로 가져오기
-const userData = computed(() => authStore.userInfo);
+const userData = computed(() => authStore.user);
 console.log(userData);
 
 // 모달 상태 관리

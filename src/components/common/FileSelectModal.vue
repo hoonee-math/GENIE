@@ -48,6 +48,7 @@ import BaseButton from "@/components/common/BaseButton.vue";
 import { Icon } from "@iconify/vue";
 import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { apiGet } from "@/utils/api";
 
 // 라우터와 스토어 초기화
 const router = useRouter();
@@ -96,47 +97,10 @@ const getFile = async () => {
   const apiUrl = import.meta.env.VITE_API_URL;
 
   try {
-    const response = await fetch(
-      `/api/pass/export/each/${props.pasCode}?type=${selectedFile.value}`,
-      {
-        method: "GET",
-        headers: {
-          Accept: "application/octet-stream",
-        },
-        credentials: "include", // ✅ 인증 쿠키 포함
-      }
-    );
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        // console.error('인증 오류(401): 로그인이 필요합니다');
-
-        //인증 상태 초기화
-        authStore.user = null;
-        authStore.isAuthenticated = false;
-        localStorage.removeItem("authUser");
-
-        // 로그인 페이지로 이동
-        router.push({
-          path: "/login",
-          query: { redirect: route.fullPath },
-        });
-
-        throw new Error("인증이 필요합니다");
-      }
-
-      if (response.status === 403) {
-        // console.error('권한 오류(403): 권한이 없습니다.');
-        alert("파일 다운로드에 필요한 권한이 없습니다.");
-        throw new Error("파일 다운로드 권한이 없습니다.");
-      }
-
-      const errorText = await response.text();
-      throw new Error(`파일 다운로드 실패: ${errorText}`);
-    }
+    const responseData = await apiGet(`/api/pass/export/each/${props.pasCode}?type=${selectedFile.value}`);
 
     // 응답을 blob으로 변환
-    const blob = await response.blob();
+    const blob = await responseData.blob();
 
     // 다운로드 링크 생성
     const url = window.URL.createObjectURL(blob);
@@ -146,7 +110,7 @@ const getFile = async () => {
     a.href = url;
 
     //  Content-Disposition에서 파일 이름 추출 정규식 수정
-    const contentDisposition = response.headers.get("Content-Disposition");
+    const contentDisposition = responseData.headers.get("Content-Disposition");
     let fileName = `file.${
       selectedFile.value === "word" ? "docx" : selectedFile.value
     }`;

@@ -123,6 +123,7 @@
 import { Icon } from "@iconify/vue";
 import { ref, watch, computed, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
+import { checkEmailAPI, resetPasswordAPI } from '@/utils/api';
 const router = useRouter();
 import emailjs from "@emailjs/browser";
 const email = ref("");
@@ -197,81 +198,62 @@ const isButtonEnabled = computed(() => {
 });
 
 // 데이터베이스에 존재하는 이메일만 인증 코드 발송하도록 수정
-const sendVerificationEmail = () => {
+const sendVerificationEmail = async () => {
     validateEmail();
     if (isEmailValid.value && !isSending.value) {
         // 로딩 상태 표시
         isSending.value = true;
 
-        // API URL 설정
-        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:9090";
+        try {
+            // 이메일 존재 여부 확인 (전용 API 함수 사용)
+            const emailCheckResult = await checkEmailAPI(email.value);
+            
+            // 이메일이 존재하지 않는 경우
+            if (!emailCheckResult.exists) {
+                throw new Error("존재하지 않는 이메일입니다.");
+            }
 
-        // 이메일 URL 인코딩
-        const encodedEmail = encodeURIComponent(email.value);
+            // 이메일이 존재하는 경우 - 인증 코드 생성 및 발송 진행
+            generatedCode.value = generateVerificationCode();
 
-        // 디버깅용 로그
+            const templateParams = {
+                to_name: email.value.split("@")[0],
+                from_name: "GenieQ",
+                message: `인증 코드: ${generatedCode.value}`,
+                verification_code: generatedCode.value,
+                to_email: email.value,
+                reply_to: "no-reply@genieq.com",
+            };
 
-        // GET 요청
-        fetch(`/api/auth/select/email?email=${encodedEmail}`, {
-            method: "GET",
-            headers: {
-                Accept: "application/json",
-            },
-        })
-            .then((response) => {
-                // 응답 상태 디버깅
+            // 이메일 발송 (EmailJS 사용)
+            const result = await emailjs.send(
+                "service_8820vki",
+                "template_oyzgwht",
+                templateParams
+            );
 
-                // 403 상태 코드를 받으면 이메일이 존재하지 않는 것으로 처리
-                if (response.status === 403) {
-                    throw new Error("존재하지 않는 이메일입니다.");
-                }
+            // 이메일 발송 성공
+            isEmailSent.value = true;
+            startTimer(); // 타이머 시작
 
-                // 그 외 성공이 아닌 응답도 오류로 처리 + 무슨 에러인지 모르겠어서 일단 모든 오류에서 존재하지 않는 이메일 입니다. 라고
-                if (!response.ok) {
-                    throw new Error("존재하지 않는 이메일입니다.");
-                }
+        } catch (error) {
+            // 에러 처리
+            console.error('이메일 발송 실패:', error);
+            
+            if (error.message === "존재하지 않는 이메일입니다.") {
+                emailError.value = "존재하지 않는 이메일입니다.";
+            } else {
+                emailError.value = "인증 메일 발송에 실패했습니다. 다시 시도해주세요.";
+            }
 
-                // 응답이 성공적이면 인증 코드 생성 및 발송 진행
-                // 인증코드 생성
-                generatedCode.value = generateVerificationCode();
-
-                const templateParams = {
-                    to_name: email.value.split("@")[0],
-                    from_name: "GenieQ",
-                    message: `인증 코드: ${generatedCode.value}`,
-                    verification_code: generatedCode.value,
-                    to_email: email.value,
-                    reply_to: "no-reply@genieq.com",
-                };
-
-                return emailjs.send(
-                    "service_8820vki",
-                    "template_oyzgwht",
-                    templateParams
-                );
-            })
-            .then((result) => {
-                // 이 블록은 이메일 발송이 성공한 경우에만 실행됨
-
-                isEmailSent.value = true;
-                startTimer(); // 타이머 시작
-            })
-            .catch((error) => {
-                // 에러 메시지 설정
-                if (error.message === "존재하지 않는 이메일입니다.") {
-                    emailError.value = "존재하지 않는 이메일입니다.";
-                } else {
-                    emailError.value =
-                        "인증 메일 발송에 실패했습니다. 다시 시도해주세요.";
-                }
-
-                // 상태 초기화
-                isEmailSent.value = false;
-                generatedCode.value = "";
-            })
-            .finally(() => {
-                isSending.value = false;
-            });
+            // 상태 초기화
+            isEmailSent.value = false;
+            generatedCode.value = "";
+            
+        } finally {
+            // 로딩 상태 해제
+            isSending.value = false;
+        }
     }
 };
 
@@ -321,17 +303,6 @@ const startTimer = () => {
                 "인증 시간이 만료되었습니다. 다시 요청해주세요.";
         }
     }, 1000);
-};
-
-// 인증코드 재발송 함수
-const resendVerificationCode = () => {
-    // 타이머가 실행 중이지 않을 때만 재발송 가능
-    if (!isTimerRunning.value) {
-        isEmailSent.value = false;
-        verificationCode.value = "";
-        verificationError.value = "";
-        sendVerificationEmail();
-    }
 };
 
 // 이메일 유효성 검사
@@ -391,7 +362,7 @@ const generateTempPassword = () => {
 };
 
 // 임시 비밀번호 발송 함수
-const sendTempPassword = () => {
+const sendTempPassword = async () => {
     // 이메일 인증이 완료되었는지 확인
     if (!isVerified.value) {
         alert("이메일 인증을 먼저 완료해주세요.");
@@ -404,50 +375,39 @@ const sendTempPassword = () => {
     // 로딩 상태 표시
     isSending.value = true;
 
-    fetch(`/api/auth/update/temporal`, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + (localStorage.getItem("token") || ""),
-        },
-        body: JSON.stringify({
-            memEmail: email.value,
-            tempPassword: tempPassword,
-        }),
-    }).then((response) => {
-        if (!response.ok) {
-            return response.text().then((errorText) => {
-                throw new Error(
-                    errorText || "서버에서 비밀번호 변경에 실패했습니다."
-                );
-            });
-        }
+    try {
+        // 서버에 임시 비밀번호 설정 (전용 API 함수 사용)
+        await resetPasswordAPI(email.value, tempPassword);
 
-        return response.text(); // 성공 메시지 반환 (필요하면)
-    });
+        // EmailJS로 이메일 전송
+        const templateParams = {
+            to_name: email.value.split("@")[0],
+            from_name: "GenieQ",
+            verification_code: tempPassword, // 임시 비밀번호를 verification_code로 전달
+            to_email: email.value,
+            reply_to: "no-reply@genieq.com",
+        };
 
-    // EmailJS로 이메일 전송
-    const templateParams = {
-        to_name: email.value.split("@")[0],
-        from_name: "GenieQ",
-        verification_code: tempPassword, // 임시 비밀번호를 verification_code로 전달
-        to_email: email.value,
-        reply_to: "no-reply@genieq.com",
-    };
+        // 이메일 발송
+        await emailjs.send("service_8820vki", "template_ka2ltcr", templateParams);
 
-    emailjs
-        .send("service_8820vki", "template_ka2ltcr", templateParams)
-        .then(() => {
-            isSending.value = false;
-            // 다음 페이지로 이동 (Router-link 대신 프로그래밍 방식으로 이동)
-            router.push({
-                path: "/temppasswordnotice",
-                query: { email: email.value },
-            });
-        })
-        .catch((error) => {
-            alert("임시 비밀번호 발송에 실패했습니다. 다시 시도해주세요.");
-            isSending.value = false;
+        // 성공 시 다음 페이지로 이동
+        router.push({
+            path: "/temppasswordnotice",
+            query: { email: email.value },
         });
+
+    } catch (error) {
+        console.error('임시 비밀번호 처리 실패:', error);
+        
+        if (error.message.includes("비밀번호 재설정 실패")) {
+            alert("서버에서 비밀번호 변경에 실패했습니다: " + error.message);
+        } else {
+            alert("임시 비밀번호 발송에 실패했습니다. 다시 시도해주세요.");
+        }
+        
+    } finally {
+        isSending.value = false;
+    }
 };
 </script>

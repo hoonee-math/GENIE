@@ -27,6 +27,7 @@ coverage
 *.sln
 *.sw?
 *merged.md
+.gemini
 
 *.tsbuildinfo
 

@@ -1,5 +1,6 @@
 // src/utils/api.js - 보안 우선 API 요청 시스템
 import { useAuthStore } from '@/stores/auth';
+import { useRouter } from 'vue-router';
 
 /**
  * 보안 우선 API 요청 함수
@@ -23,6 +24,7 @@ export class APIError extends Error {
 // ========== 기본 API 요청 함수 ==========
 export async function apiRequest(url, options = {}) {
     const authStore = useAuthStore();
+    const router = useRouter();
     
     // 기본 설정
     const defaultOptions = {
@@ -72,7 +74,8 @@ export async function apiRequest(url, options = {}) {
                 
                 return retryResponse;
             } else {
-                console.log('토큰 갱신 실패 - 로그인 페이지로 리다이렉트 필요');
+                console.log('토큰 갱신 실패 - 로그인 페이지로 리다이렉트');
+                router.push('/login');
                 throw new APIError('인증이 만료되었습니다. 다시 로그인해주세요.', 401);
             }
             // if (refreshSuccess) {
