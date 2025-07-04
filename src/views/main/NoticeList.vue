@@ -54,12 +54,7 @@
 
 <script setup>
 import { onMounted, ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/auth";
-
-const router = useRouter();
-const route = useRoute();
-const authStore = useAuthStore();
+import { apiGet } from '@/utils/api';
 
 const notices = ref([]);
 
@@ -76,45 +71,22 @@ const isNewNotice = (date) => {
   return diffDays <= 7;
 };
 
-const fetchNotices = () => {
-  fetch(`/api/noti/select/list`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  })
-    .then((response) => {
-      if (!response.ok) {
-        if (response.status === 401) {
-          authStore.user = null;
-          authStore.isAuthenticated = false;
-          localStorage.removeItem("authUser");
-          router.push({
-            path: "/login",
-            query: { redirect: route.fullPath },
-          });
-          throw new Error("인증이 필요합니다");
-        }
-        return response.text().then((text) => {
-          throw new Error(text);
-        });
-      }
-      return response.json();
-    })
-    .then((data) => {
-      notices.value = data
-        .map((item) => ({
-          NOT_CODE: item.notCode,
-          NOT_TYPE: item.type,
-          NOT_TITLE: item.title,
-          NOT_DATE: item.date,
-          NOT_CONTENT: item.content || "",
-        }))
-        .slice(0, 4);
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-    });
-};
+const fetchNotices = async () => {
+  try {
+    
+    const responseData = await apiGet('/api/noti/select/list');
+
+    notices.value = responseData.map((item) => ({
+      NOT_CODE: item.notCode,
+      NOT_TYPE: item.type,
+      NOT_TITLE: item.title,
+      NOT_DATE: item.date,
+      NOT_CONTENT: item.content || "",
+    })).slice(0, 4);
+
+  } catch(error) {
+    console.error("공지사항 조회 실패:", error);
+  }
+
+}
 </script>

@@ -93,6 +93,7 @@
 import { ref, computed, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { apiGet } from "@/utils/api";
 
 // 라우터와 스토어 초기화
 const router = useRouter();
@@ -118,54 +119,28 @@ onMounted(() => {
 });
 
 // 공지사항 데이터 가져오기
-const fetchNotices = () => {
-  const apiUrl = import.meta.env.VITE_API_URL;
+const fetchNotices = async () => {
+  try {
 
-  fetch(`/api/noti/select/list`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  })
-    .then((response) => {
-      if (!response.ok) {
-        // 인증 오류 처리 (401)
-        if (response.status === 401) {
-          // (추가) 로그 - 인증 오류 감지
+    const responseData = await apiGet('/api/noti/select/list');
+      
+    // 응답 데이터 구조에 맞게 매핑
+    notices.value = responseData.map((item) => ({
+      NOT_CODE: item.notCode,
+      NOT_TYPE: item.type,
+      NOT_TITLE: item.title,
+      NOT_DATE: item.date,
+      NOT_CONTENT: item.content || "",
+    }));
 
-          // 인증 상태 초기화
-          authStore.user = null;
-          authStore.isAuthenticated = false;
-          localStorage.removeItem("authUser");
+  } catch(error) {
+    console.error(error);
 
-          // 로그인 페이지로 리다이렉트
-          router.push({
-            path: "/login",
-            query: { redirect: route.fullPath },
-          });
-
-          // 추가 처리를 중단하기 위한 에러 발생
-          throw new Error("인증이 필요합니다");
-        }
-        return response.text().then((text) => {
-          throw new Error(text);
-        });
-      }
-      return response.json();
-    })
-    .then((data) => {
-      // 응답 데이터 구조에 맞게 매핑
-      notices.value = data.map((item) => ({
-        NOT_CODE: item.notCode,
-        NOT_TYPE: item.type,
-        NOT_TITLE: item.title,
-        NOT_DATE: item.date,
-        NOT_CONTENT: item.content || "",
-      }));
-    })
-    .catch((error) => {});
-};
+    // 기본값 설정으로 UI 안정성 확보
+    notices.value = [];
+  }
+  
+}
 
 /* 필터링된 공지사항 목록 */
 const filteredNotices = computed(() => {

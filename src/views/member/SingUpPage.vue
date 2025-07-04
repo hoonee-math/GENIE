@@ -366,6 +366,7 @@ import { useRouter } from "vue-router";
 import PrivacyModal from "@/components/member/PrivacyModal.vue";
 import TermsModal from "@/components/member/TermsModal.vue";
 import emailjs from "@emailjs/browser";
+import { checkEmailAPI, signUpAPI } from '@/utils/api';
 
 // 모달 관련 상태
 const showPrivacyModal = ref(false);
@@ -478,66 +479,51 @@ const isButtonEnabled = computed(() => {
     );
 });
 
-// 이메일 발송 함수
-const sendVerificationEmail = () => {
+// 이메일 중복확인 함수 (회원가입용)
+const sendVerificationEmail = async () => {
     validateEmail();
     if (isEmailValid.value && !isSending.value) {
         // 로딩 상태 표시
         isSending.value = true;
 
-        // 이메일 URL 인코딩
-        const encodedEmail = encodeURIComponent(email.value);
+        try {
+            // 이메일 중복 체크 API 호출
+            const emailCheckResult = await checkEmailAPI(email.value);
+            
+            // 이메일이 이미 존재하는 경우 (회원가입 불가)
+            if (emailCheckResult.exists) {
+                emailError.value = "이미 존재하는 이메일입니다.";
+                return; // 인증 코드 발송하지 않음
+            }
 
-        // 이메일 중복 체크 API 호출
-        fetch(`/api/auth/select/email?email=${encodedEmail}`, {
-            method: "GET",
-            headers: {
-                Accept: "application/json",
-            },
-        })
-            .then((response) => {
-                // 서버 응답 상태에 따른 처리
-                if (response.status === 200) {
-                    // 200 응답: 이메일이 존재함
-                    emailError.value = "이미 존재하는 이메일입니다.";
-                    isSending.value = false;
-                    return null;
-                } else if (response.status === 404) {
-                    // 404 응답: 이메일이 존재하지 않음 -> 인증 코드 발송
-                    generatedCode.value = generateVerificationCode();
+            // 이메일이 존재하지 않는 경우 - 회원가입 가능 → 인증 코드 발송
+            generatedCode.value = generateVerificationCode();
+            
+            const templateParams = {
+                to_name: email.value.split("@")[0],
+                from_name: "GenieQ",
+                message: `인증 코드: ${generatedCode.value}`,
+                verification_code: generatedCode.value,
+                to_email: email.value,
+                reply_to: "no-reply@genieq.com",
+            };
 
-                    const templateParams = {
-                        to_name: email.value.split("@")[0],
-                        from_name: "GenieQ",
-                        message: `인증 코드: ${generatedCode.value}`,
-                        verification_code: generatedCode.value,
-                        to_email: email.value,
-                        reply_to: "no-reply@genieq.com",
-                    };
+            // 이메일 발송 (EmailJS 사용)
+            const result = await emailjs.send("service_8820vki","template_oyzgwht",templateParams);
 
-                    return emailjs.send(
-                        "service_8820vki",
-                        "template_oyzgwht",
-                        templateParams
-                    );
-                } else {
-                    // 기타 오류
-                    throw new Error("서버 통신 중 오류가 발생했습니다.");
-                }
-            })
-            .then((result) => {
-                // 이메일 전송 결과가 있는 경우에만 처리
-                if (result) {
-                    isEmailSent.value = true;
-                    isSending.value = false;
-                    startTimer(); // 타이머 시작
-                }
-            })
-            .catch((error) => {
-                emailError.value =
-                    "인증 메일 발송에 실패했습니다. 다시 시도해주세요.";
-                isSending.value = false;
-            });
+            // 이메일 발송 성공
+            isEmailSent.value = true;
+            startTimer(); // 타이머 시작
+
+        } catch (error) {
+            // 에러 처리
+            console.error('이메일 발송 실패:', error);
+            emailError.value = "인증 메일 발송에 실패했습니다. 다시 시도해주세요.";
+            
+        } finally {
+            // 로딩 상태 해제
+            isSending.value = false;
+        }
     }
 };
 
@@ -587,17 +573,6 @@ const startTimer = () => {
                 "인증 시간이 만료되었습니다. 다시 요청해주세요.";
         }
     }, 1000);
-};
-
-// 인증코드 재발송 함수
-const resendVerificationCode = () => {
-    // 타이머가 실행 중이지 않을 때만 재발송 가능
-    if (!isTimerRunning.value) {
-        isEmailSent.value = false;
-        verificationCode.value = "";
-        verificationError.value = "";
-        sendVerificationEmail();
-    }
 };
 
 // 이메일 유효성 검사
@@ -714,63 +689,45 @@ const validateName = () => {
     }
 };
 
-// 성별 선택 함수
-const selectGender = (selectedGender) => {
-    gender.value = selectedGender;
-};
-
 const isSubmitting = ref(false);
 
 // 폼 제출 함수
-const submitForm = (event) => {
+const submitForm = async (event) => {
     event.stopPropagation(); // 이벤트 전파 방지
     if (isSubmitting.value) return; // ✅ 중복 실행 방지
     isSubmitting.value = true;
-
+    
     if (isButtonEnabled.value) {
-        // API 요청에 필요한 데이터 구성
-        const signUpData = {
-            memEmail: email.value,
-            memPassword: password.value,
-            memName: username.value,
-            memGender: gender.value,
-            memType: selectedOption.value,
-        };
-        // console.log(signUpData);
+        try {
+            // API 요청에 필요한 데이터 구성
+            const signUpData = {
+                memEmail: email.value,
+                memPassword: password.value,
+                memName: username.value,
+                memGender: gender.value,
+                memType: selectedOption.value,
+            };
 
-        const apiUrl = import.meta.env.VITE_API_URL;
-        // 회원가입 API 요청
-        fetch(`/api/auth/insert/signup`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(signUpData),
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    // 서버 응답이 OK가 아닌 경우 에러 처리
-                    return response.text().then((errorText) => {
-                        throw new Error(errorText);
-                    });
-                }
-                return response.text(); // 성공 메시지가 응답으로 오는 경우
-            })
-            .then((data) => {
-                alert("회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.");
-                router.push("/login"); // 로그인 페이지로 이동
-            })
-            .catch((error) => {
-                // 에러 메시지 표시
-                if (error.message.includes("이미 존재하는 이메일")) {
-                    alert("이미 등록된 이메일입니다.");
-                } else {
-                    alert(
-                        "회원가입 처리 중 오류가 발생했습니다: " + error.message
-                    );
-                }
-            })
-            .finally(() => {
-                isSubmitting.value = false; // ✅ 상태 초기화
-            });
+            // 전용 API 함수 사용 (자동 에러 처리)
+            const result = await signUpAPI(signUpData);
+            
+            // 성공 시 처리
+            alert("회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.");
+            router.push("/login"); // 로그인 페이지로 이동
+
+        } catch (error) {
+            // 에러 처리
+            console.error('회원가입 실패:', error);
+            
+            if (error.message.includes("이미 존재하는 이메일")) {
+                alert("이미 등록된 이메일입니다.");
+            } else {
+                alert("회원가입 처리 중 오류가 발생했습니다: " + error.message);
+            }
+            
+        } finally {
+            isSubmitting.value = false; // 상태 초기화
+        }
     }
 };
 

@@ -1052,42 +1052,28 @@ const handleFileSelection = (fileType) => {
     // 파일 추출 로직 구현
 };
 
-const toggleFavorite = (index) => {
+const toggleFavorite = async (index) => {
     const item = workItems.value[index];
 
     // 즐겨찾기 토글 로직
     const newFavoriteStatus = !item.PAS_IS_FAVORITE;
 
-    // API 호출
-    fetch(`/api/pass/favo`, {
-        method: "PATCH",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-            pasCode: item.PAS_CODE,
-        }),
-    })
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error("즐겨찾기 업데이트 실패");
-            }
-            return response.json();
-        })
-        .then((data) => {
-            // 서버에서 반환한 업데이트된 데이터로 항목 상태 갱신
-            if (data.isFavorite !== undefined) {
-                item.PAS_IS_FAVORITE = data.isFavorite === 1;
-            } else {
-                // 서버에서 업데이트된 상태를 반환하지 않는 경우, 로컬에서 토글
-                item.PAS_IS_FAVORITE = newFavoriteStatus;
-            }
-        })
-        .catch((error) => {
-            // 에러 시 사용자에게 알림을 표시할 수 있습니다
-        });
-};
+    try {
+        const responseData = apiPatch('/api/pass/favo',{pasCode: item.PAS_CODE});
+
+        // 서버에서 반환한 업데이트된 데이터로 항목 상태 갱신
+        if (responseData.isFavorite !== undefined) {
+            item.PAS_IS_FAVORITE = responseData.isFavorite === 1;
+        } else {
+            // 서버에서 업데이트된 상태를 반환하지 않는 경우, 로컬에서 토글
+            item.PAS_IS_FAVORITE = newFavoriteStatus;
+        }
+
+    } catch(error) {
+        console.error('즐겨찾기 업데이트 실패', error);
+    }
+
+}
 
 // 페이지네이션 관련 상태
 const currentPage = ref(1);

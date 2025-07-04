@@ -117,6 +117,7 @@ import BaseModal from "@/components/common/BaseModal.vue";
 import BaseButton from "@/components/common/BaseButton.vue";
 import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { apiGet } from '@/utils/api';
 
 // 사용자 정보를 computed 속성으로 가져오기
 const userData = computed(() => authStore.userInfo);
@@ -258,54 +259,29 @@ const initialState = () => {
   usageHistory.value = [];
 };
 
-const loadUsageList = () => {
+const loadUsageList = async () => {
   const start = startDate.value || "1970-01-01";
   const end = endDate.value || getTodayFormatted();
 
-  const apiUrl = import.meta.env.VITE_API_URL;
+  try {
+    // 쿼리 파라미터와 함께 API 호출 (자동 토큰 갱신 및 401 에러 처리)
+    const data = await apiGet(`/api/usag/select/list?startDate=${start}&endDate=${end}`);
 
-  fetch(`/api/usag/select/list?startDate=${start}&endDate=${end}`, {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-  })
-    .then((response) => {
-      // 인증 오류 처리 (401)
-      if (!response.ok) {
-        if (response.status === 401) {
-          // (추가) 로그 - 인증 오류 감지
+    // 응답 데이터 구조에 맞게 매핑
+    usageHistory.value = data.map((item) => ({
+      USA_CODE: item.usaCode,
+      USA_TYPE: item.usaType,
+      USA_COUNT: item.usaCount,
+      USA_BALANCE: item.usaBalance,
+      USA_DATE: item.usaDate,
+    }));
 
-          // 인증 상태 초기화
-          authStore.user = null;
-          authStore.isAuthenticated = false;
-          localStorage.removeItem("authUser");
-
-          // 로그인 페이지로 리다이렉트
-          router.push({
-            path: "/login",
-            query: { redirect: route.fullPath },
-          });
-
-          // 추가 처리를 중단하기 위한 에러 발생
-          throw new Error("인증이 필요합니다");
-        }
-        return response.text().then((text) => {
-          throw new Error(text);
-        });
-      }
-      return response.json();
-    })
-    .then((data) => {
-      // 응답 데이터 구조에 맞게 매핑
-      usageHistory.value = data.map((item) => ({
-        USA_CODE: item.usaCode,
-        USA_TYPE: item.usaType,
-        USA_COUNT: item.usaCount,
-        USA_BALANCE: item.usaBalance,
-        USA_DATE: item.usaDate,
-      }));
-    })
-    .catch((error) => {});
+  } catch (error) {
+    console.error('사용량 내역 조회 실패:', error);
+    
+    // 기본값 설정
+    usageHistory.value = [];
+  }
 };
 </script>
 

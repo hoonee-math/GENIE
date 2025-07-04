@@ -165,6 +165,7 @@ import ConfirmModalComponent from "@/components/common/ConfirmModalComponent.vue
 import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useAuth } from "@/composables/useAuth";
+import { withdrawAPI, getUserInfoAPI, updateUserNameAPI, updateUserTypeAPI } from '@/utils/api';
 
 // 비밀번호 변경 모달 상태 관리
 const showPasswordModal = ref(false);
@@ -244,46 +245,29 @@ const closeWithdrawalWarning = () => {
 };
 
 // 회원탈퇴 진행
-const processWithdrawal = () => {
+const processWithdrawal = async  () => {
   isLoading.value = true;
   error.value = null;
 
-  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:9090";
+  try {
+    // 전용 API 함수 사용 (자동 토큰 갱신 및 에러 처리)
+    const result = await withdrawAPI(userData.value.email);
 
-  // API 요청 (PUT 메서드 사용)
-  fetch(`/api/auth/remove/withdrawal`, {
-    method: "PUT",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      memEmail: userData.value.email,
-    }),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        return response.text().then((errorText) => {
-          throw new Error(errorText || "회원탈퇴에 실패했습니다");
-        });
-      }
+    // 경고 모달 닫기
+    showWithdrawalWarning.value = false;
 
-      return response.text();
-    })
-    .then((data) => {
-      // 경고 모달 닫기
-      showWithdrawalWarning.value = false;
+    // 완료 모달 표시
+    showWithdrawalComplete.value = true;
 
-      // 완료 모달 표시
-      showWithdrawalComplete.value = true;
-    })
-    .catch((err) => {
-      alert("회원탈퇴 처리 중 오류가 발생했습니다: " + err.message);
-    })
-    .finally(() => {
-      isLoading.value = false;
-    });
+  } catch (error) {
+    console.error('회원탈퇴 실패:', error);
+    alert("회원탈퇴 처리 중 오류가 발생했습니다: " + error.message);
+    
+  } finally {
+    isLoading.value = false;
+  }
 };
+
 // 회원탈퇴 완료 모달 닫기
 const closeWithdrawalComplete = () => {
   showWithdrawalComplete.value = false;
@@ -299,142 +283,73 @@ const redirectAfterWithdrawal = () => {
   router.push("/login");
 };
 
-// 사용자 정보 가져오는 함수
-const fetchUserInfo = () => {
-  // 로그인 상태 확인
-  if (!authStore.isAuthenticated) {
-    router.push("/login");
-    return;
-  }
-
-  isLoading.value = true;
-  error.value = null;
-
-  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:9090";
-
-  // API 요청
-  fetch(`/api/info/select/entire`, {
-    method: "GET",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-  })
-    .then((response) => {
-      if (!response.ok) {
-        return response.text().then((errorText) => {
-          throw new Error(errorText);
-        });
-      }
-      return response.json();
-    })
-    .then((data) => {
-      // 반응형 userData 업데이트
-      userData.value = {
-        name: data.name || "",
-        email: data.email || "",
-        gender: data.gender || "",
-        memType: data.memType || "",
-      };
-
-      // 원본 데이터 저장
-      originalUserData.value = {
-        name: data.name || "",
-        memType: data.memType || "",
-      };
-    })
-    .catch((error) => {
-      error.value = `사용자 정보를 불러오는 중 오류가 발생했습니다: ${error.message}`;
-    })
-    .finally(() => {
-      isLoading.value = false;
-    });
+const fetchUserInfo = async () => {
+    isLoading.value = true;
+    
+    try {
+        // ✅ 실제로 존재하는 함수
+        const data = await getUserInfoAPI();
+        
+        userData.value = {
+            name: data.name || "",
+            email: data.email || "",
+            gender: data.gender || "",
+            memType: data.memType || "",
+        };
+        
+        // // 원본 데이터 저장
+        // originalUserData.value = {
+        //   name: data.name || "",
+        //   memType: data.memType || "",
+        // };
+        
+    } catch (error) {
+        console.error('사용자 정보를 불러오는 중 오류가 발생했습니다: ',error);
+    } finally {
+        isLoading.value = false;
+    }
 };
 
 // 이름 업데이트 함수
-const updateName = () => {
+const updateName = async () => {
   // 이름이 변경되지 않았으면 업데이트 하지 않음
   if (userData.value.name === originalUserData.value.name) {
     return Promise.resolve();
   }
 
-  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:9090";
-
-  // 요청 데이터
-  const nameData = {
-    memName: userData.value.name,
-  };
-
-  return fetch(`/api/info/update/name`, {
-    method: "PATCH",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + (localStorage.getItem("token") || ""),
-    },
-    body: JSON.stringify(nameData),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        return response.text().then((errorText) => {
-          throw new Error(errorText || "이름 업데이트에 실패했습니다");
-        });
-      }
-
-      // 응답이 JSON인지 확인하고 적절히 처리
-      const contentType = response.headers.get("content-type");
-      if (contentType && contentType.includes("application/json")) {
-        return response.json();
-      } else {
-        return response.text();
-      }
-    })
-    .then((data) => {
-      originalUserData.value.name = userData.value.name;
-      return true;
-    });
+  try {
+    // 전용 API 함수 사용 (자동 토큰 갱신 및 에러 처리)
+    const result = await updateUserNameAPI(userData.value.name);
+    
+    // 성공 시 원본 데이터 업데이트
+    originalUserData.value.name = userData.value.name;
+    return true;
+    
+  } catch (error) {
+    console.error('이름 업데이트 실패:', error);
+    throw new Error(error.message || "이름 업데이트에 실패했습니다");
+  }
 };
 
 // 소속 업데이트 함수
-const updateType = () => {
+const updateType = async () => {
   // 소속이 변경되지 않았으면 업데이트 하지 않음
   if (userData.value.memType === originalUserData.value.memType) {
     return Promise.resolve();
   }
 
-  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:9090";
-
-  // 요청 데이터
-  const typeData = {
-    memType: userData.value.memType,
-  };
-
-  return fetch(`/api/info/update/type`, {
-    method: "PATCH",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + (localStorage.getItem("token") || ""),
-    },
-    body: JSON.stringify(typeData),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        return response.text().then((errorText) => {
-          throw new Error(errorText || "소속 업데이트에 실패했습니다");
-        });
-      }
-
-      // 응답이 JSON인지 확인하고 적절히 처리
-      const contentType = response.headers.get("content-type");
-      if (contentType && contentType.includes("application/json")) {
-        return response.json();
-      } else {
-        return response.text();
-      }
-    })
-    .then((data) => {
-      originalUserData.value.memType = userData.value.memType;
-      return true;
-    });
+  try {
+    // 전용 API 함수 사용 (자동 토큰 갱신 및 에러 처리)
+    const result = await updateUserTypeAPI(userData.value.memType);
+    
+    // 성공 시 원본 데이터 업데이트
+    originalUserData.value.memType = userData.value.memType;
+    return true;
+    
+  } catch (error) {
+    console.error('소속 업데이트 실패:', error);
+    throw new Error(error.message || "소속 업데이트에 실패했습니다");
+  }
 };
 
 // 사용자 정보 저장하는 함수 (이름과 소속을 각각 업데이트)
@@ -526,24 +441,6 @@ const saveUserInfo = () => {
 // 로그아웃 처리 함수
 const handleLogout = () => {
     logout();
-//   const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:9090";
-
-//   fetch(`/api/auth/select/logout`, {
-//     method: "POST",
-//     credentials: "include",
-//   })
-//     .then((response) => {
-//       localStorage.removeItem("authUser");
-//       authStore.user = null;
-//       authStore.isAuthenticated = false;
-//       router.push("/login");
-//     })
-//     .catch((error) => {
-//       localStorage.removeItem("authUser");
-//       authStore.user = null;
-//       authStore.isAuthenticated = false;
-//       router.push("/login");
-//     });
 };
 
 // 페이지 로드 시 사용자 정보 가져오기

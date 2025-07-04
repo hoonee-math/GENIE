@@ -62,6 +62,7 @@ import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import MyPageContent from "@/views/mypage/MyPageContent.vue";
+import { apiGet } from "@/utils/api";
 
 // 라우터와 스토어 초기화
 const route = useRoute();
@@ -110,52 +111,22 @@ onMounted(() => {
   fetchNoticeDetails();
 });
 
-const fetchNoticeDetails = () => {
-  const apiUrl = import.meta.env.VITE_API_URL;
+const fetchNoticeDetails = async () => {
+  try{
+    
+    const responseData = await apiGet(`/api/noti/select/each?notCode=${notCode}`);
+    
+    // 응답 데이터 구조에 맞게 매핑
+    noticeDetails.value = {
+      NOT_CODE: responseData.notCode,
+      NOT_TYPE: responseData.type,
+      NOT_TITLE: responseData.title,
+      NOT_DATE: responseData.date,
+      NOT_CONTENT: responseData.content || "",
+    };
+  } catch(error) {
+    console.log(error);
+  }
 
-  fetch(`/api/noti/select/each?notCode=${notCode}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  })
-    .then((response) => {
-      if (!response.ok) {
-        // 인증 오류 처리 (401)
-        if (response.status === 401) {
-          // (추가) 로그 - 인증 오류 감지
-
-          // 인증 상태 초기화
-          authStore.user = null;
-          authStore.isAuthenticated = false;
-          localStorage.removeItem("authUser");
-
-          // 로그인 페이지로 리다이렉트
-          router.push({
-            path: "/login",
-            query: { redirect: route.fullPath },
-          });
-
-          // 추가 처리를 중단하기 위한 에러 발생
-          throw new Error("인증이 필요합니다");
-        }
-        return response.text().then((text) => {
-          throw new Error(text);
-        });
-      }
-      return response.json();
-    })
-    .then((data) => {
-      // 응답 데이터 구조에 맞게 매핑
-      noticeDetails.value = {
-        NOT_CODE: data.notCode,
-        NOT_TYPE: data.type,
-        NOT_TITLE: data.title,
-        NOT_DATE: data.date,
-        NOT_CONTENT: data.content || "",
-      };
-    })
-    .catch((error) => {});
 };
 </script>
