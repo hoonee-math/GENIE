@@ -11,7 +11,7 @@ import mainRoutes from "./main.routes";
 import memberRoutes from "./member.routes";
 import generationRoutes from "./generation.routes";
 import myPageRoutes from "./mypage.routes";
-import strageRoutes from "./storage.routes";
+import storageRoutes from "./storage.routes";
 import payRoutes from "./payment.routes";
 // 로그인 상태 체크 가드 - 보안 우선 인증 시스템 사용
 const requireAuth = async (to, from, next) => {
@@ -68,7 +68,7 @@ const router = createRouter({
                 ...mainRoutes,
                 ...generationRoutes,
                 ...myPageRoutes,
-                ...strageRoutes,
+                ...storageRoutes,
                 ...payRoutes,
             ],
         },
