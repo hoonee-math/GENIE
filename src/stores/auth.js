@@ -1,5 +1,6 @@
 // src/stores/auth.js - 보안 우선 메모리 기반 인증 시스템
 import { defineStore } from "pinia";
+import { logoutAPI } from "@/utils/api"; // 로그아웃 API 호출 함수
 
 /**
  * 보안 우선 인증 스토어
@@ -254,33 +255,28 @@ export const useAuthStore = defineStore("auth", {
         
         // ========== 로그아웃 (httpOnly 쿠키도 삭제) ==========
         async logout() {
-            this.isLoading = true;
+            console.log('=== 보안 우선 로그아웃 시작 ===');
             
             try {
-                // 서버에 로그아웃 요청 (httpOnly 쿠키 삭제)
-                await fetch('/api/auth/select/logout', {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
+                // 1. 토큰이 있을 때 서버 로그아웃 먼저 호출 (중요!)
+                if (this.accessToken) {
+                    await logoutAPI();
+                    console.log('서버 로그아웃 성공');
+                }
             } catch (error) {
-                console.error('서버 로그아웃 오류:', error);
+                console.error('서버 로그아웃 실패:', error);
+                // 서버 로그아웃 실패해도 로컬 정리는 계속 진행
             }
             
-            // 로컬 상태 초기화
+            // 2. 로컬 상태 정리 (토큰 삭제 후)
+            this.clearAllStorageData();
             this.accessToken = null;
-            this.expiresAt = null;
             this.user = null;
             this.isAuthenticated = false;
-            this.error = null;
+            this.userTicketCount = 0;
+            this.tokenExpiresAt = null;
             
-            // localStorage/sessionStorage 정리
-            this.clearAllStorageData();
-            
-            // console.log('로그아웃 완료 (httpOnly 쿠키 포함)');
-            this.isLoading = false;
+            console.log('로그아웃 완료');
         },
         
         // ========== 강제 로그아웃 (메모리만 정리) ==========
