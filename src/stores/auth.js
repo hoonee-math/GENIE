@@ -98,21 +98,21 @@ export const useAuthStore = defineStore("auth", {
         
         // ========== 페이지 새로고침 시 토큰 복원 ==========
         async initializeAuth() {
-            // console.log('=== 보안 우선 인증 초기화 initializeAuth() ===');
+            console.log('=== 인증 초기화 시작 ===');
             
-            // 기존 데이터 마이그레이션 먼저 실행
+            // 기존 데이터 마이그레이션
             this.migrateOldData();
             
-            // 1. 사용자 정보 복원 (localStorage 또는 sessionStorage에서)
+            // 1. 사용자 정보 복원
             const autoLogin = localStorage.getItem('autoLogin') === 'true';
             let userData = null;
             
             if (autoLogin) {
                 userData = localStorage.getItem('authUser');
-                console.log('자동 로그인 모드: localStorage에서 사용자 정보 복원 시도');
+                console.log('자동 로그인 모드: localStorage 복원 시도');
             } else {
                 userData = sessionStorage.getItem('authUser');
-                console.log('일반 로그인 모드: sessionStorage에서 사용자 정보 복원 시도');
+                console.log('일반 로그인 모드: sessionStorage 복원 시도');
             }
             
             if (userData) {
@@ -127,8 +127,13 @@ export const useAuthStore = defineStore("auth", {
                 }
             }
             
-            // 2. Access Token 재발급 (httpOnly 쿠키의 refresh token 사용)
-            return await this.refreshToken();
+            // 2. Access Token 재발급 (사용자 정보가 있을 때만)
+            if (this.user) {
+                return await this.refreshToken();
+            } else {
+                console.log('저장된 사용자 정보 없음 - 로그인 필요');
+                return false;
+            }
         },
         
         // ========== 토큰 갱신 (httpOnly 쿠키 사용) ==========
@@ -154,24 +159,21 @@ export const useAuthStore = defineStore("auth", {
                     
                     if (response.ok) {
                         const tokenData = await response.json();
-                        
-                        // 로그인과 동일한 방식으로 토큰 및 사용자 정보 업데이트
                         this.setTokens(tokenData);
-                        
-                        console.log('httpOnly 쿠키로 토큰 및 사용자 정보 갱신 성공');
-                        
-                        // 자동 갱신 스케줄링 (만료 5분 전)
+                        console.log('토큰 갱신 성공');
                         this.setupTokenRefresh();
-                        
                         return true;
                     } else {
-                        console.log('토큰 갱신 실패 - 재로그인 필요');
-                        this.forceLogout();
+                        console.log('토큰 갱신 실패:', response.status);
+                        // 401이 아닌 경우도 고려
+                        if (response.status === 401) {
+                            this.forceLogout();
+                        }
                         return false;
                     }
                 } catch (error) {
-                    console.error('토큰 갱신 중 오류:', error);
-                    this.forceLogout();
+                    console.error('토큰 갱신 오류:', error);
+                    // 네트워크 오류 시에는 강제 로그아웃 하지 않음
                     return false;
                 } finally {
                     this.isRefreshing = false;
@@ -181,7 +183,6 @@ export const useAuthStore = defineStore("auth", {
             
             return this.refreshPromise;
         },
-        
         // ========== 자동 토큰 갱신 스케줄링 ==========
         setupTokenRefresh() {
             if (!this.expiresAt) return;

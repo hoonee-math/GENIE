@@ -157,12 +157,22 @@
 import { ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useAuth } from "@/composables/useAuth";
+import { useAuthStore } from "@/stores/auth";
 import { Icon } from "@iconify/vue";
 import { onMounted } from "vue";
 
 // 라우터 & 인증
 const router = useRouter();
-const { login, isLoading: authLoading, error: authError } = useAuth();
+const authStore = useAuthStore();
+
+// getAuth 함수 - 필요할 때만 useAuth 호출
+let authComposable = null;
+const getAuth = () => {
+    if (!authComposable) {
+        authComposable = useAuth();
+    }
+    return authComposable;
+};
 
 // 폼 상태
 const email = ref("");
@@ -177,7 +187,7 @@ const canSubmit = computed(() => {
     const validEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[A-Za-z]{2,}$/.test(
         email.value
     );
-    return validEmail && password.value.trim() !== "" && !authLoading.value;
+    return validEmail && password.value.trim() !== "";
 });
 
 // 이메일 포맷 체크
@@ -199,16 +209,12 @@ async function loginHandler() {
         console.log('LoginView: 폼 유효성 검사 실패');
         return;
     }
-
+    
     loginFailed.value = false;
-    console.log('LoginView: 로그인 시도', {
-        email: email.value,
-        autoLogin: autoLogin.value,
-        loginFunction: typeof login
-    });
-
+    
     try {
-        // 마이그레이션 가이드에 따른 새로운 로그인 방식 사용
+        // 필요할 때만 useAuth 호출
+        const { login } = getAuth();
         console.log('LoginView: useAuth.login() 호출 전');
         const success = await login(email.value, password.value, autoLogin.value);
         console.log('LoginView: useAuth.login() 결과:', success);
@@ -222,13 +228,9 @@ async function loginHandler() {
             loginFailed.value = true;
         }
     } catch (error) {
-        console.error('LoginView: 로그인 오류:', error);
-        console.error('LoginView: 에러 상세 정보:', {
-            message: error.message,
-            stack: error.stack,
-            name: error.name
-        });
+        console.error('LoginView: 로그인 중 오류 발생:', error);
         loginFailed.value = true;
+        alert('로그인 중 오류가 발생했습니다. 다시 시도해 주세요.');
     }
 }
 
@@ -241,7 +243,8 @@ watch(email, validateEmail);
 
 onMounted(() => {
     // 이미 로그인된 사용자는 홈으로 리다이렉트
-    const { requireGuest } = useAuth();
-    requireGuest('/home');
+    if (authStore.isLoggedIn) {
+        router.push('/home');
+    }
 });
 </script>
