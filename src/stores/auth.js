@@ -1,7 +1,8 @@
 // src/stores/auth.js - Setup Store로 전환 (보안 우선 메모리 기반 인증 시스템)
 import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
-import { logoutAPI } from '@/utils/api'; // 로그아웃 API 호출 함수
+import { logoutAPI, refreshTokenAPI } from '@/api/auth'; // ✅ API 모듈에서 import
+import { getUserTicketDirectAPI } from '@/api/user'; // ✅ 티켓 API 추가
 
 /**
  * 보안 우선 인증 스토어 (Setup Store)
@@ -102,9 +103,6 @@ export const useAuthStore = defineStore('auth', () => {
     async function initializeAuth() {
         console.log('=== 인증 초기화 시작 ===');
         
-        // 기존 데이터 마이그레이션
-        migrateOldData();
-        
         // 1. 사용자 정보 복원
         const autoLogin = localStorage.getItem('autoLogin') === 'true';
         let userData = null;
@@ -151,30 +149,20 @@ export const useAuthStore = defineStore('auth', () => {
             try {
                 console.log('httpOnly 쿠키로 토큰 갱신 시도...');
                 
-                const response = await fetch('/api/auth/refresh', {
-                    method: 'POST',
-                    credentials: 'include', // httpOnly 쿠키 포함
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                if (response.ok) {
-                    const tokenData = await response.json();
-                    setTokens(tokenData);
-                    console.log('토큰 갱신 성공');
-                    setupTokenRefresh();
-                    return true;
-                } else {
-                    console.log('토큰 갱신 실패:', response.status);
-                    // 401이 아닌 경우도 고려
-                    if (response.status === 401) {
-                        forceLogout();
-                    }
-                    return false;
-                }
+                // ✅ API 모듈 사용으로 변경
+                const tokenData = await refreshTokenAPI();
+                setTokens(tokenData);
+                console.log('토큰 갱신 성공');
+                setupTokenRefresh();
+                return true;
             } catch (err) {
                 console.error('토큰 갱신 오류:', err);
+                
+                // 401 에러일 때만 강제 로그아웃
+                if (err.status === 401) {
+                    forceLogout();
+                }
+                
                 // 네트워크 오류 시에는 강제 로그아웃 하지 않음
                 return false;
             } finally {
@@ -204,54 +192,35 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
     
-    // API 요청용 헤더 (메모리 토큰 사용)
-    function getApiHeaders(additionalHeaders = {}) {
-        const headers = {
-            'Content-Type': 'application/json',
-            ...additionalHeaders
-        };
-        
-        if (accessToken.value) {
-            headers.Authorization = `${tokenType.value} ${accessToken.value}`;
-        }
-        
-        return headers;
-    }
-    
     // 티켓 정보 업데이트
     async function updateTicketCount() {
         if (!isAuthenticated.value || !accessToken.value) {
-            console.log('인증되지 않은 상태 - 티켓 업데이트 건너뜀');
+            console.log('인증되지 않은 상태 - 티켓 업데이트 건너뛰기');
             return 0;
         }
-
+    
         try {
-            const response = await fetch('/api/info/select/ticket', {
-                method: 'GET',
-                headers: getApiHeaders(),
-                credentials: 'include'
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                const newTicketCount = parseInt(data.balance) || 0;
-
-                if (user.value) {
-                    user.value.ticketCount = newTicketCount;
-                    
-                    // 업데이트된 사용자 정보 저장
-                    const autoLogin = localStorage.getItem('autoLogin') === 'true';
-                    saveUserInfo(autoLogin);
-                }
-
-                return newTicketCount;
-            } else if (response.status === 401) {
-                // 토큰 만료 시 자동 갱신 시도
+            // ✅ API 모듈 사용으로 변경
+            const data = await getUserTicketDirectAPI();
+            const newTicketCount = parseInt(data.balance) || 0;
+    
+            if (user.value) {
+                user.value.ticketCount = newTicketCount;
+                
+                // 업데이트된 사용자 정보 저장
+                const autoLogin = localStorage.getItem('autoLogin') === 'true';
+                saveUserInfo(autoLogin);
+            }
+    
+            return newTicketCount;
+        } catch (err) {
+            console.error('티켓 정보 업데이트 오류:', err);
+            
+            // 401 에러 시 자동 갱신 시도
+            if (err.status === 401) {
                 await refreshToken();
                 return updateTicketCount(); // 재귀 호출
             }
-        } catch (err) {
-            console.error('티켓 정보 업데이트 오류:', err);
         }
         
         return 0;
@@ -311,28 +280,6 @@ export const useAuthStore = defineStore('auth', () => {
         console.log('모든 스토리지 데이터 정리 완료');
     }
     
-    // 기존 데이터 마이그레이션
-    function migrateOldData() {
-        // console.log('기존 localStorage 데이터 마이그레이션 시작...');
-        
-        // 기존 'token' 키 제거
-        const oldToken = localStorage.getItem('token');
-        if (oldToken) {
-            localStorage.removeItem('token');
-            console.log('기존 token 키 삭제 완료');
-        }
-        
-        // 기존 'authTokens' 키 제거 (보안상 위험)
-        const oldTokens = localStorage.getItem('authTokens');
-        if (oldTokens) {
-            localStorage.removeItem('authTokens');
-            console.log('기존 authTokens 키 삭제 완료 (보안 강화)');
-        }
-        
-        sessionStorage.removeItem('authTokens');
-        // console.log('마이그레이션 완료');
-    }
-    
     // 사용자 정보만 설정 (세션 로그인용)
     function setUser(userData) {
         user.value = userData;
@@ -368,12 +315,10 @@ export const useAuthStore = defineStore('auth', () => {
         initializeAuth,
         refreshToken,
         setupTokenRefresh,
-        getApiHeaders,
         updateTicketCount,
         logout,
         forceLogout,
         clearAllStorageData,
-        migrateOldData,
         setUser
     };
 });
