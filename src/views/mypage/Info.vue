@@ -275,11 +275,8 @@ const closeWithdrawalComplete = () => {
 
 // 회원탈퇴 후 리다이렉트
 const redirectAfterWithdrawal = () => {
-  // 로그아웃 처리 및 로그인 페이지로 이동
-  localStorage.removeItem("authUser");
-  localStorage.removeItem("token");
-  authStore.user = null;
-  authStore.isAuthenticated = false;
+  // ✅ 개선: Store 액션 사용으로 안전한 로그아웃 처리
+  authStore.forceLogout(); // Setup Store의 forceLogout 액션 사용
   router.push("/login");
 };
 

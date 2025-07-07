@@ -166,7 +166,6 @@ import {
     nextTick,
 } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { usePassageStore } from "@/stores/passage";
 import { useAuthStore } from "@/stores/auth";
 // UI 상태 관리
 const isFileModalOpen = ref(false);
@@ -203,7 +202,6 @@ const subject = ref("");
 // 라우터 관련 정보 가져오기
 const route = useRoute();
 const router = useRouter();
-const passageStore = usePassageStore();
 const authStore = useAuthStore();
 
 const paymentUsageModalRef = ref(null);

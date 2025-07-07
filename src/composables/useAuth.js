@@ -19,11 +19,11 @@ export function useAuth() {
     const isLoading = ref(false);
     const error = ref(null);
     
-    // ========== 컴퓨티드 속성 ==========
-    const isLoggedIn = computed(() => authStore.isLoggedIn);
-    const user = computed(() => authStore.user);
-    const userTicketCount = computed(() => authStore.userTicketCount);
-    const hasValidToken = computed(() => authStore.hasValidToken);
+    // ========== Store 상태 직접 참조 (Setup Store에서 이미 computed 반환) ==========
+    const isLoggedIn = authStore.isLoggedIn;        // 이미 computed이므로 직접 사용
+    const user = authStore.user;                    // ref이므로 직접 사용
+    const userTicketCount = authStore.userTicketCount;  // 이미 computed이므로 직접 사용
+    const hasValidToken = authStore.hasValidToken;      // 이미 computed이므로 직접 사용
     
     // ========== 로그인 함수 ==========
     async function login(email, password, autoLogin = false) {
@@ -231,11 +231,11 @@ export function useAuthState() {
     const authStore = useAuthStore();
     
     return {
-        isLoggedIn: computed(() => authStore.isLoggedIn),
-        user: computed(() => authStore.user),
-        userTicketCount: computed(() => authStore.userTicketCount),
-        hasValidToken: computed(() => authStore.hasValidToken),
-        isAuthenticated: computed(() => authStore.isAuthenticated)
+        isLoggedIn: authStore.isLoggedIn,           // 이미 computed
+        user: authStore.user,                       // ref
+        userTicketCount: authStore.userTicketCount, // 이미 computed
+        hasValidToken: authStore.hasValidToken,     // 이미 computed
+        isAuthenticated: authStore.isAuthenticated  // ref
     };
 }
 
@@ -246,9 +246,9 @@ export function useAuthToken() {
     const authStore = useAuthStore();
     
     return {
-        hasValidToken: computed(() => authStore.hasValidToken),
-        tokenExpiresIn: computed(() => authStore.tokenExpiresIn),
-        authHeader: computed(() => authStore.authHeader),
+        hasValidToken: authStore.hasValidToken,     // 이미 computed
+        tokenExpiresIn: authStore.tokenExpiresIn,   // 이미 computed
+        authHeader: authStore.authHeader,           // 이미 computed
         refreshToken: () => authStore.refreshToken()
     };
 }
