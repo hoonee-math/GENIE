@@ -54,7 +54,7 @@
 
 <script setup>
 import { onMounted, ref } from "vue";
-import { apiGet } from '@/utils/api';
+import { apiGet } from '@/utils/http';
 
 const notices = ref([]);
 

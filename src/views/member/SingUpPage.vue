@@ -366,7 +366,7 @@ import { useRouter } from "vue-router";
 import PrivacyModal from "@/components/member/PrivacyModal.vue";
 import TermsModal from "@/components/member/TermsModal.vue";
 import emailjs from "@emailjs/browser";
-import { checkEmailAPI, signUpAPI } from '@/utils/api';
+import { checkEmailAPI, signUpAPI } from '@/api/auth';
 
 // 모달 관련 상태
 const showPrivacyModal = ref(false);

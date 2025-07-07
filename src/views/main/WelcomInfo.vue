@@ -168,7 +168,7 @@
 import { ref, onMounted, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
-import { apiGet } from "@/utils/api"; // 보안 우선 API 시스템
+import { apiGet } from "@/utils/http";
 
 const router = useRouter();
 const route = useRoute();

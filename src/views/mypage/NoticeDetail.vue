@@ -62,7 +62,7 @@ import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import MyPageContent from "@/views/mypage/MyPageContent.vue";
-import { apiGet } from "@/utils/api";
+import { apiGet } from "@/utils/http";
 
 // 라우터와 스토어 초기화
 const route = useRoute();

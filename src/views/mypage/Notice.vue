@@ -93,7 +93,7 @@
 import { ref, computed, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
-import { apiGet } from "@/utils/api";
+import { apiGet } from "@/utils/http";
 
 // 라우터와 스토어 초기화
 const router = useRouter();

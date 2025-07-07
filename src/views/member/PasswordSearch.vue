@@ -123,7 +123,7 @@
 import { Icon } from "@iconify/vue";
 import { ref, watch, computed, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
-import { checkEmailAPI, resetPasswordAPI } from '@/utils/api';
+import { checkEmailAPI, resetPasswordAPI } from '@/api/auth';
 const router = useRouter();
 import emailjs from "@emailjs/browser";
 const email = ref("");

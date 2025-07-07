@@ -2,7 +2,8 @@
 import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-import { loginAPI, logoutAPI, APIError, getErrorMessage } from '@/utils/api';
+import { APIError, getErrorMessage } from '@/utils/http';
+import { loginAPI, logoutAPI } from '@/api/auth';
 
 /**
  * 인증 관련 Vue Composition API

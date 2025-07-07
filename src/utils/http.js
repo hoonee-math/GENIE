@@ -66,6 +66,7 @@ export async function apiRequest(url, options = {}) {
                 return retryResponse;
             } else {
                 console.log('토큰 갱신 실패');
+                // router.push('/login');
                 throw new APIError('인증이 만료되었습니다. 다시 로그인해주세요.', 401);
             }
         }
@@ -97,16 +98,22 @@ export async function apiGet(url, options = {}) {
         throw new APIError(`GET ${url} 실패: ${errorData}`, response.status);
     }
     
-    // JSON 파싱 with 타임아웃
-    const responseClone = response.clone();
+    // // JSON 파싱 with 타임아웃
+    // const responseClone = response.clone();
     
     try {
+        // // Response가 이미 사용되었다면 clone을 사용
+        // const responseToUse = response.bodyUsed ? responseClone : response;
+
         const timeoutPromise = new Promise((_, reject) => 
             setTimeout(() => reject(new Error('JSON 파싱 타임아웃')), 10000)
         );
         
         const jsonPromise = response.json();
+        // // Response가 이미 사용되었다면 clone을 사용
+        // const jsonPromise = responseToUse.json();
         const jsonData = await Promise.race([jsonPromise, timeoutPromise]);
+        console.log(`apiGet JSON 파싱 성공:`, { url, data: jsonData });
         
         return jsonData;
     } catch (jsonError) {

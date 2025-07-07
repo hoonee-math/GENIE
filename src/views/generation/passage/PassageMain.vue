@@ -101,7 +101,7 @@ import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import LoadingModal from "@/components/common/LoadingModal.vue";
 import CreatePassageMainMobile from "@/views/generation/passage/CreatePassageMainMobile.vue";
-import { apiGet, apiPost } from '@/utils/api';
+import { apiGet, apiPost } from '@/utils/http';
 
 // 라우터 및 인증 스토어
 const router = useRouter();

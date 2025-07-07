@@ -566,7 +566,7 @@ import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import FileSelectModal from "@/components/common/FileSelectModal.vue";
 import NotionLink from "@/views/main/NotionLink.vue";
-import { apiGet, apiPatch } from '@/utils/api';
+import { apiGet, apiPatch } from '@/utils/http';
 
 // 라우터와 스토어 초기화
 const router = useRouter();

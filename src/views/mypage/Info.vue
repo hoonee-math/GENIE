@@ -165,7 +165,8 @@ import ConfirmModalComponent from "@/components/common/ConfirmModalComponent.vue
 import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useAuth } from "@/composables/useAuth";
-import { withdrawAPI, getUserInfoAPI, updateUserNameAPI, updateUserTypeAPI } from '@/utils/api';
+import { getUserInfoAPI, updateUserNameAPI, updateUserTypeAPI } from '@/api/user';
+import { withdrawAPI } from '@/api/auth';
 
 // 비밀번호 변경 모달 상태 관리
 const showPasswordModal = ref(false);

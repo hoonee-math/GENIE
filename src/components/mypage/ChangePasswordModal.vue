@@ -156,7 +156,7 @@ import { Icon } from "@iconify/vue";
 import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import ConfirmModalComponent from "@/components/common/ConfirmModalComponent.vue";
-import { apiPatch } from "@/utils/api";
+import { apiPatch } from "@/utils/http";
 
 const emit = defineEmits([
   "close",

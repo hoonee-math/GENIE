@@ -613,7 +613,7 @@ import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import FileSelectModal from "@/components/common/FileSelectModal.vue";
 import WarningModalComponent from "@/components/common/WarningModalComponent.vue";
-import { apiGet, apiPut, apiPatch } from '@/utils/api';
+import { apiGet, apiPut, apiPatch } from '@/utils/http';
 import { useAuth } from '@/composables/useAuth';
 
 // 라우터와 스토어 초기화

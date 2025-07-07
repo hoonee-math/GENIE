@@ -117,7 +117,7 @@ import BaseModal from "@/components/common/BaseModal.vue";
 import BaseButton from "@/components/common/BaseButton.vue";
 import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
-import { apiGet } from '@/utils/api';
+import { apiGet } from '@/utils/http';
 
 // 사용자 정보를 computed 속성으로 가져오기
 const userData = computed(() => authStore.userInfo);

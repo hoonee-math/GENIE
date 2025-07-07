@@ -400,7 +400,7 @@
 import { ref, computed, onMounted, nextTick } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
-import { apiGet, apiPost } from "@/utils/api"; // 보안 우선 API 시스템
+import { apiGet } from "@/utils/http"; // 보안 우선 API 시스템
 import UsageHistoryModal from "@/components/mypage/UsageHistoryModal.vue";
 import WarningModalComponent from "@/components/common/WarningModalComponent.vue";
 import ConfirmModalComponent from "@/components/common/ConfirmModalComponent.vue";
