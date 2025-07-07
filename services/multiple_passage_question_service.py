@@ -206,31 +206,35 @@ async def create_multiple_passage_question(request: QuestionRequest) -> Multiple
 
 ---
 
-## passage_quotation 처리 로직
-
-출력 결과에 [A], ㉠ 같은 기호는 포함하지 않아야 한다.
+## quoted_paragraph, quoted_sentence, quoted_word 처리 로직
 
 1. 문제문에 [A]가 포함되어 있는 경우:
-- 해당 기호가 가리키는 **문단 전체**를 그대로 passage_quotation에 담는다.
+- [A]가 가리킬 **문단 1개(\\n\\n으로 각 문단이 구분되어 있다.)**를 그대로 quoted_paragraph에 담는다.
 
-2. 문항에 ㉠과 같은 기호가 포함된 경우:
-- 해당 기호가 가리키는 문장 하나를 찾아, 그 문장을 passage_quotation에 담는다.
-- 해당 문장 내 인용 대상 어구는 반드시 < > 기호로 감싸 표시한다.
-- ex) <경마식 보도>는 경마 중계를 하듯 지지율 변화나 득표율 예측 등을 집중 보도하는 선거 방송의 한 방식이다.
-
-3. 문항에 [A]와 ㉠ 같은 기호가 **동시에 포함된 경우**:
-- 해당 문단 전체를 passage_quotation에 담되, 문단 안에 포함된 각 기호의 인용 대상 어구는 < >로 감싸서 표시하라.
-
-4. 문항에 ㉠, ㉡, ㉢, ㉣ 등 **여러 개의 기호가 포함된 경우**:
-- 각 기호가 가리키는 문장을 각각 찾아, 해당 문장을 passage_quotation의 `List[str]`에 **기호 순서대로 담아라**.
-- 각 문장에는 해당 기호가 가리키는 인용 대상 어구를 < >로 감싸서 표시하라.
+2. 문제문에 ㉠과 같은 기호가 포함된 경우:
+- 해당 기호가 가리키는 어구를 포함하는 지문 속 문장을 찾아, 그 문장을 quoted_sentence에 담는다.
+- 해당 기호가 가리키는 어구 자체는 quoted_word에 담는다.
 - ex)
+quoted_sentence : 경마식 보도는 경마 중계를 하듯 지지율 변화나 득표율 예측 등을 집중 보도하는 선거 방송의 한 방식이다.
+quoted_word : 경마식 보도
+
+3. 문제문에 [A]와 ㉠ 같은 기호가 **동시에 포함된 경우**:
+- [A]가 나타내는 문단은 quoted_paragraph에 담고, 문단 안에 ㉠이 나타내는 단어를 포함한 문장은 quoted_sentence에, 단어는 quoted_word에 담는다.
+
+4. 문제문에 ㉠, ㉡, ㉢, ㉣ 등 **여러 개의 기호가 포함된 경우**:
+- ㉠, ㉡, ㉢, ㉣은 지문 내에서 순서대로 나와야 한다.
+- 각 어구가 가리키는 단어를 포함하는 문장을 지문에서 찾아, 해당 문장을 quoted_sentence의 `List[str]`에 **기호 순서대로 담는다.**.
+- 각 어구가 가리키는 단어 자체는 quoted_word의 `List[str]`에 **기호 순서대로 담는다.**.
+- ex)
+quoted_sentence
 [
-    "<수정 진동자>는 고유 주파수에 맞추어 진동을 유도하여 진동량을 측정하기 쉽게 만든 장치이다.",
-    "<경마식 보도>는 지지율 변화만을 중계하는 방식으로 선거 보도의 본질을 흐릴 수 있다.",
-    "<개방형 자율학습>은 학습자가 스스로 학습 목표와 진도를 조절할 수 있게 하는 방식이다.",
-    "<조세 정책의 효율성과 공평성>은 정책 설계의 양대 축으로 고려된다."
-]
+    "수정 진동자는 고유 주파수에 맞추어 진동을 유도하여 진동량을 측정하기 쉽게 만든 장치이다.",
+    "경마식 보도는 지지율 변화만을 중계하는 방식으로 선거 보도의 본질을 흐릴 수 있다.",
+    "개방형 자율학습은 학습자가 스스로 학습 목표와 진도를 조절할 수 있게 하는 방식이다.",
+    "조세 정책의 효율성과 공평성은 정책 설계의 양대 축으로 고려된다."
+],
+quoted_word
+["수정 진동자", "경마식 보도", "개방형 자율학습", "조세 정책의 효율성과 공평성"]
 
 ---
 
@@ -243,13 +247,15 @@ async def create_multiple_passage_question(request: QuestionRequest) -> Multiple
     "generated_question": String "문제문",
     "generated_option": List ["선지1", "선지2", "선지3", "선지4", "선지5"],
     "generated_answer": String "정답",
-    "generated_description": String "해설([정답해설],[오답피하기])"
+    "generated_description": List ["정답해설", "오답피하기"]",
     """
         if request.question_subpassage_example and request.question_subpassage_example.strip():
-            user_prompt += '"generated_subpassage": String "보기 지문"'
+            user_prompt += '"generated_subpassage": String "보기 지문",'
 
         user_prompt += f"""
-    "passage_quotation": Optional[List[str]] "인용문구가 포함된 문장 또는 인용 문단 전체"
+    "quoted_paragraph" : Optional[str] "인용된 문단",
+    "quoted_sentence" : Optional[List[str]], "인용문구가 포함된 문장
+    "quoted_word": Optional[List[str]] "인용문구"
 }}"""
 
         question_gen_response = await client.aio.models.generate_content(
@@ -274,43 +280,135 @@ async def create_multiple_passage_question(request: QuestionRequest) -> Multiple
         response_json = process_json_response(question_gen_response.text)
         logger.info("문항 생성 완료")
 
-        raw_quotation = response_json.get("passage_quotation", [])
-        if isinstance(raw_quotation, str):
-            passage_quotation = [raw_quotation]
-        elif isinstance(raw_quotation, list):
-            passage_quotation = raw_quotation
-        else:
-            passage_quotation = []
 
+        quoted_paragraph = response_json.get("quoted_paragraph", "")
+        quoted_sentence = response_json.get("quoted_sentence", [])
+        quoted_word = response_json.get("quoted_word", [])
+
+
+        
         if request.question_subpassage_example and request.question_subpassage_example.strip():
-            return MultiplePassageQuestionResponse(
-                first_passage_type=first_passage_type,
-                first_passage_keyword=first_keyword_list,
-                second_passage_type=second_passage_type,
-                second_passage_keyword=second_keyword_list,
-                first_passage_generated_core_point=first_generated_core_point,
-                second_passage_generated_core_point=second_generated_core_point,
-                generated_question=response_json.get("generated_question", "문제문 생성 실패"),
-                generated_subpassage=response_json.get("generated_subpassage", "보기 지문 생성 실패"),
-                generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
-                generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
-                generated_description=response_json.get("generated_description", "해설 생성 실패"),
-                passage_quotation= passage_quotation
-            )
+            if (quoted_paragraph=="") and (quoted_sentence == []) and (quoted_word == []):
+                return MultiplePassageQuestionResponse(
+                    first_passage_type=first_passage_type,
+                    first_passage_keyword=first_keyword_list,
+                    second_passage_type=second_passage_type,
+                    second_passage_keyword=second_keyword_list,
+                    first_passage_generated_core_point=first_generated_core_point,
+                    second_passage_generated_core_point=second_generated_core_point,
+                    generated_question=response_json.get("generated_question", "문제문 생성 실패"),
+                    generated_subpassage=response_json.get("generated_subpassage", "보기 지문 생성 실패"),
+                    generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
+                    generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
+                    generated_description=response_json.get("generated_description", "해설 생성 실패")
+                )
+            elif (quoted_paragraph!="") and (quoted_sentence == []) and (quoted_word == []):
+                return MultiplePassageQuestionResponse(
+                    first_passage_type=first_passage_type,
+                    first_passage_keyword=first_keyword_list,
+                    second_passage_type=second_passage_type,
+                    second_passage_keyword=second_keyword_list,
+                    first_passage_generated_core_point=first_generated_core_point,
+                    second_passage_generated_core_point=second_generated_core_point,
+                    generated_question=response_json.get("generated_question", "문제문 생성 실패"),
+                    generated_subpassage=response_json.get("generated_subpassage", "보기 지문 생성 실패"),
+                    generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
+                    generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
+                    generated_description=response_json.get("generated_description", "해설 생성 실패"),
+                    quoted_paragraph=quoted_paragraph
+                )
+            elif (quoted_paragraph!="") and (quoted_sentence != []) and (quoted_word != []):
+                return MultiplePassageQuestionResponse(
+                    first_passage_type=first_passage_type,
+                    first_passage_keyword=first_keyword_list,
+                    second_passage_type=second_passage_type,
+                    second_passage_keyword=second_keyword_list,
+                    first_passage_generated_core_point=first_generated_core_point,
+                    second_passage_generated_core_point=second_generated_core_point,
+                    generated_question=response_json.get("generated_question", "문제문 생성 실패"),
+                    generated_subpassage=response_json.get("generated_subpassage", "보기 지문 생성 실패"),
+                    generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
+                    generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
+                    generated_description=response_json.get("generated_description", "해설 생성 실패"),
+                    quoted_paragraph=quoted_paragraph,
+                    quoted_sentence=quoted_sentence,
+                    quoted_word=quoted_word
+                )
+            elif (quoted_paragraph=="") and (quoted_sentence != []) and (quoted_word != []):
+                return MultiplePassageQuestionResponse(
+                    first_passage_type=first_passage_type,
+                    first_passage_keyword=first_keyword_list,
+                    second_passage_type=second_passage_type,
+                    second_passage_keyword=second_keyword_list,
+                    first_passage_generated_core_point=first_generated_core_point,
+                    second_passage_generated_core_point=second_generated_core_point,
+                    generated_question=response_json.get("generated_question", "문제문 생성 실패"),
+                    generated_subpassage=response_json.get("generated_subpassage", "보기 지문 생성 실패"),
+                    generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
+                    generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
+                    generated_description=response_json.get("generated_description", "해설 생성 실패"),
+                    quoted_sentence=quoted_sentence,
+                    quoted_word=quoted_word
+                )
         else:
-            return MultiplePassageQuestionResponse(
-                first_passage_type=first_passage_type,
-                first_passage_keyword=first_keyword_list,
-                second_passage_type=second_passage_type,
-                second_passage_keyword=second_keyword_list,
-                first_passage_generated_core_point=first_generated_core_point,
-                second_passage_generated_core_point=second_generated_core_point,
-                generated_question=response_json.get("generated_question", "문제문 생성 실패"),
-                generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
-                generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
-                generated_description=response_json.get("generated_description", "해설 생성 실패"),
-                passage_quotation= passage_quotation
-            )
+            if (quoted_paragraph=="") and (quoted_sentence == []) and (quoted_word == []):
+                return MultiplePassageQuestionResponse(
+                    first_passage_type=first_passage_type,
+                    first_passage_keyword=first_keyword_list,
+                    second_passage_type=second_passage_type,
+                    second_passage_keyword=second_keyword_list,
+                    first_passage_generated_core_point=first_generated_core_point,
+                    second_passage_generated_core_point=second_generated_core_point,
+                    generated_question=response_json.get("generated_question", "문제문 생성 실패"),
+                    generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
+                    generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
+                    generated_description=response_json.get("generated_description", "해설 생성 실패")
+                )
+            elif (quoted_paragraph!="") and (quoted_sentence == []) and (quoted_word == []):
+                return MultiplePassageQuestionResponse(
+                    first_passage_type=first_passage_type,
+                    first_passage_keyword=first_keyword_list,
+                    second_passage_type=second_passage_type,
+                    second_passage_keyword=second_keyword_list,
+                    first_passage_generated_core_point=first_generated_core_point,
+                    second_passage_generated_core_point=second_generated_core_point,
+                    generated_question=response_json.get("generated_question", "문제문 생성 실패"),
+                    generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
+                    generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
+                    generated_description=response_json.get("generated_description", "해설 생성 실패"),
+                    quoted_paragraph=quoted_paragraph
+                )
+            elif (quoted_paragraph!="") and (quoted_sentence != []) and (quoted_word != []):
+                return MultiplePassageQuestionResponse(
+                    first_passage_type=first_passage_type,
+                    first_passage_keyword=first_keyword_list,
+                    second_passage_type=second_passage_type,
+                    second_passage_keyword=second_keyword_list,
+                    first_passage_generated_core_point=first_generated_core_point,
+                    second_passage_generated_core_point=second_generated_core_point,
+                    generated_question=response_json.get("generated_question", "문제문 생성 실패"),
+                    generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
+                    generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
+                    generated_description=response_json.get("generated_description", "해설 생성 실패"),
+                    quoted_paragraph=quoted_paragraph,
+                    quoted_sentence=quoted_sentence,
+                    quoted_word=quoted_word
+                )
+            elif (quoted_paragraph=="") and (quoted_sentence != []) and (quoted_word != []):
+                return MultiplePassageQuestionResponse(
+                    first_passage_type=first_passage_type,
+                    first_passage_keyword=first_keyword_list,
+                    second_passage_type=second_passage_type,
+                    second_passage_keyword=second_keyword_list,
+                    first_passage_generated_core_point=first_generated_core_point,
+                    second_passage_generated_core_point=second_generated_core_point,
+                    generated_question=response_json.get("generated_question", "문제문 생성 실패"),
+                    generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
+                    generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
+                    generated_description=response_json.get("generated_description", "해설 생성 실패"),
+                    quoted_sentence=quoted_sentence,
+                    quoted_word=quoted_word
+                )
 
     except ValueError as ve:
          logger.error(f"입력값 오류 : {str(ve)}")

@@ -5,7 +5,7 @@ from typing import List, Dict, Any
 from google import genai
 from google.genai import types
 from fastapi import HTTPException
-from schemas.question import QuestionRequest, SinglePassageInfo, SinglePassageQuestionResponse # QuestionInfo
+from schemas.question import QuestionRequest, ReadingPassageInfo, ReadingPassageQuestionResponse # QuestionInfo
 from utils.guidelines import get_question_guidelines
 from utils.json_utils import process_json_response
 from utils.logger import logger, log_api_call_cost
@@ -31,7 +31,7 @@ except Exception as e:
 
 
 # 단일 지문, 독서론에 따른 문항을 만드는 함수를 만듭니다.
-async def create_single_passage_question(request: QuestionRequest) -> SinglePassageQuestionResponse:
+async def create_reading_passage_question(request: QuestionRequest) -> ReadingPassageQuestionResponse:
     try:
         logger.info(f"문항 생성 요청 수신 -> 유형:{request.type_question}")
         logger.debug(f"입력 지문 길이:{len(request.custom_passage)}자")
@@ -39,16 +39,7 @@ async def create_single_passage_question(request: QuestionRequest) -> SinglePass
         # --------------------- 1. 지문 분류 및 키워드 추출 : 먼저 사용자가 직접 입력 및 수정한 지문일 수 있기 때문에 지문의 유형과 제재를 추출합니다. -----------------------
         logger.info("지문 유형 및 핵심 키워드 추출 중")
 
-        type_keyword_prompt = f"""아래 수능 국어 독서 영역 비문학 지문을 5가지 주제 (인문, 예술, 사회, 기술, 과학) 중 하나로 분류하세요.
-그리고 20자 이내로 요약한 핵심 키워드를 3개 뽑아주세요. 각 키워드는 쉼표(,)로 구분해 주세요.
-
-## 주제 분류 기준
-
-- 인문: 인간의 존재와 관련된 문제, 그리고 인간의 사상과 문화 등을 다루고 있는 글이다. 인간의 본질이나 정신세계, 그리고 인간의 행위에 대한 이해를 목적으로 하는 글이다. 인간과 세계의 본질과 관련된 글, 인간의 행위 규범과 관련된 글, 인간의 의식 세계와 관련된 글, 사유의 형식이나 법칙과 관련된 글, 그리고 역사나 종교와 관련된 글 등을 포함한다.
-- 예술: 미의 본질이나 미를 추구하는 인간의 다양한 예술 행위에 대해 다루고 있는 글이다. 예술의 본질과 다양한 예술 행위의 특징을 이해하는 한편, 예술 작품을 수용하는 미적 안목을 향상하는 데 도움을 주기 위한 글이다. 예술의 본질에 대해 논의하는 글, 다양한 예술 행위의 특징을 설명하는 글, 주요 예술가나 예술 작품을 비평하는 글, 예술 사조에 대해 설명하는 글 등을 포함한다.
-- 사회: 사회에서 일어나거나 일어날 수 있는 다양한 문제를 소개하고 해결하는 방안을 제시하는 글이다. 사회 현상이나 문화 현상을 다양한 관점에서 논리적, 체계적으로 설명하는 글이다. 법을 다룬 법학, 사회 제도 및 사회의 다양한 현상을 연구하는 사회학, 기업의 경영을 다룬 경영학, 경제 문제 및 경제 활동을 설명하는 경제학, 생물로서의 인간을 종합적으로 연구하는 인류학, 사회 구성원에 의해 이루어진 생활 양식 및 그와 관련하여 일어나는 여러 현상들을 연구하는 문화학과 관련된 글 등을 포함한다.
-- 기술: 인간의 삶을 편리하게 하는 산업 기술, 생활 기술 등 다양한 분야의 기술을 설명하는 글이다. 특정 과학 이론을 바탕으로 장치나 시스템에 적용되는 원리와 작동 과정, 한계 등을 구체적으로 서술한 글이다. 전기와 전자의 원리를 이용한 공학 기술, 컴퓨터를 이용한 공학 기술, 화학이나 생명 과학과 결합된 공학 기술, 토목이나 건축에 활용되는 토목건축 공학 기술과 관련된 글 등을 포함한다.
-- 과학: 자연 과학적 시각으로 물질계와 생태계, 우주를 탐구하는 인간의 정신 활동을 담고 있는 글이다. 수에 관하여 연구하는 수학, 물질의 물리적 성질과 운동 형태 등을 연구하는 물리학, 물질의 조성과 구조 · 성질 등을 연구하는 화학, 생물의 구조와 기능을 과학적으로 연구하는 생명 과학, 지구 및 천체를 연구하는 지구 과학과 관련된 글 등을 포함한다.
+        type_keyword_prompt = f"""아래 수능 국어 독서 영역 비문학(독서론) 지문에서 20자 이내로 요약한 핵심 키워드를 3개 뽑아주세요. 각 키워드는 쉼표(,)로 구분해 주세요.
 
 ---
 
@@ -66,7 +57,6 @@ async def create_single_passage_question(request: QuestionRequest) -> SinglePass
 
 반드시 아래 JSON 형식으로 답변하세요.
 {{
-    "type_passage": String "인문" | "예술" | "사회" | "기술" | "과학",
     "keyword": String "string1, string2, string3"
 }}"""
 
@@ -76,7 +66,7 @@ async def create_single_passage_question(request: QuestionRequest) -> SinglePass
                 system_instruction=type_keyword_prompt,
                 temperature=0.3, ## 일관된 답변을 위해 온도를 낮췄습니다.
                 response_mime_type="application/json", ## 아예 답변을 json으로 받기
-                response_schema=SinglePassageInfo, ## 나올 json의 key, value 값을 지정한 클래스입니다.
+                response_schema=ReadingPassageInfo, ## 나올 json의 key, value 값을 지정한 클래스입니다.
             ),
             contents=""
         )
@@ -91,10 +81,9 @@ async def create_single_passage_question(request: QuestionRequest) -> SinglePass
         ## 구조화된 답변을 유도하는 설정
         type_keyword_result = json.loads(type_keyword_response.text)
         # type_keyword_result = process_json_response(type_keyword_response.text)
-        type_passage = type_keyword_result.get("type_passage", "분야 추출 실패")
         keyword_str = type_keyword_result.get("keyword", "제재 추출 실패")
 
-        logger.debug(f"추출 지문 유형:{type_passage}, 키워드:{keyword_str}")
+        logger.debug(f"추출 지문 유형:'독서론', 키워드:{keyword_str}")
 
         keyword_list = [k.strip() for k in keyword_str.split(',')]
 
@@ -278,8 +267,8 @@ quoted_word
         
         if request.question_subpassage_example and request.question_subpassage_example.strip():
             if (quoted_paragraph=="") and (quoted_sentence == []) and (quoted_word == []):
-                return SinglePassageQuestionResponse(
-                    type_passage=type_passage,
+                return ReadingPassageQuestionResponse(
+                    type_passage="독서론",
                     keyword=keyword_list,
                     generated_core_point=generated_core_point,
                     generated_question=response_json.get("generated_question", "문제문 생성 실패"),
@@ -289,8 +278,8 @@ quoted_word
                     generated_description=response_json.get("generated_description", "해설 생성 실패")
                 )
             elif (quoted_paragraph!="") and (quoted_sentence == []) and (quoted_word == []):
-                return SinglePassageQuestionResponse(
-                    type_passage=type_passage,
+                return ReadingPassageQuestionResponse(
+                    type_passage="독서론",
                     keyword=keyword_list,
                     generated_core_point=generated_core_point,
                     generated_question=response_json.get("generated_question", "문제문 생성 실패"),
@@ -301,8 +290,8 @@ quoted_word
                     quoted_paragraph=quoted_paragraph
                 )
             elif (quoted_paragraph!="") and (quoted_sentence != []) and (quoted_word != []):
-                return SinglePassageQuestionResponse(
-                    type_passage=type_passage,
+                return ReadingPassageQuestionResponse(
+                    type_passage="독서론",
                     keyword=keyword_list,
                     generated_core_point=generated_core_point,
                     generated_question=response_json.get("generated_question", "문제문 생성 실패"),
@@ -315,8 +304,8 @@ quoted_word
                     quoted_word=quoted_word
                 )
             elif (quoted_paragraph=="") and (quoted_sentence != []) and (quoted_word != []):
-                return SinglePassageQuestionResponse(
-                    type_passage=type_passage,
+                return ReadingPassageQuestionResponse(
+                    type_passage="독서론",
                     keyword=keyword_list,
                     generated_core_point=generated_core_point,
                     generated_question=response_json.get("generated_question", "문제문 생성 실패"),
@@ -329,8 +318,8 @@ quoted_word
                 )
         else:
             if (quoted_paragraph=="") and (quoted_sentence == []) and (quoted_word == []):
-                return SinglePassageQuestionResponse(
-                    type_passage=type_passage,
+                return ReadingPassageQuestionResponse(
+                    type_passage="독서론",
                     keyword=keyword_list,
                     generated_core_point=generated_core_point,
                     generated_question=response_json.get("generated_question", "문제문 생성 실패"),
@@ -339,8 +328,8 @@ quoted_word
                     generated_description=response_json.get("generated_description", "해설 생성 실패")
                 )
             elif (quoted_paragraph!="") and (quoted_sentence == []) and (quoted_word == []):
-                return SinglePassageQuestionResponse(
-                    type_passage=type_passage,
+                return ReadingPassageQuestionResponse(
+                    type_passage="독서론",
                     keyword=keyword_list,
                     generated_core_point=generated_core_point,
                     generated_question=response_json.get("generated_question", "문제문 생성 실패"),
@@ -350,8 +339,8 @@ quoted_word
                     quoted_paragraph=quoted_paragraph
                 )
             elif (quoted_paragraph!="") and (quoted_sentence != []) and (quoted_word != []):
-                return SinglePassageQuestionResponse(
-                    type_passage=type_passage,
+                return ReadingPassageQuestionResponse(
+                    type_passage="독서론",
                     keyword=keyword_list,
                     generated_core_point=generated_core_point,
                     generated_question=response_json.get("generated_question", "문제문 생성 실패"),
@@ -363,8 +352,8 @@ quoted_word
                     quoted_word=quoted_word
                 )
             elif (quoted_paragraph=="") and (quoted_sentence != []) and (quoted_word != []):
-                return SinglePassageQuestionResponse(
-                    type_passage=type_passage,
+                return ReadingPassageQuestionResponse(
+                    type_passage="독서론",
                     keyword=keyword_list,
                     generated_core_point=generated_core_point,
                     generated_question=response_json.get("generated_question", "문제문 생성 실패"),

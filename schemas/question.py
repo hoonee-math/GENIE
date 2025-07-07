@@ -12,6 +12,9 @@ class QuestionRequest(BaseModel):
 
 ## 중간 유통 과정 스키마 정리
 ## ---------------------------------------------------------
+class ReadingPassageInfo(BaseModel):
+    keyword: str # 제재
+
 class SinglePassageInfo(BaseModel):
     type_passage: str # 분야
     keyword: str # 제재
@@ -31,6 +34,19 @@ class MultiplePassageInfo(BaseModel):
 #     passage_quotation: Optional[str] # 인용문구가 있는 문장
 ## ---------------------------------------------------------
 
+class ReadingPassageQuestionResponse(BaseModel):
+    type_passage: str # 분야
+    keyword: List[str] # 제재
+    generated_core_point: str # 핵심 논점
+    generated_question: str # 문제문
+    generated_option: List[str] # 선지
+    generated_answer: str # 정답
+    generated_description: List[str] # 해설
+    generated_subpassage: Optional[str] = None # 보기
+    quoted_paragraph: Optional[str] = None # 인용문단
+    quoted_sentence: Optional[List[str]] = None # 인용문구가 담긴 문장
+    quoted_word: Optional[List[str]] = None # 인용문구
+
 class SinglePassageQuestionResponse(BaseModel):
     type_passage: str # 분야
     keyword: List[str] # 제재
@@ -38,9 +54,11 @@ class SinglePassageQuestionResponse(BaseModel):
     generated_question: str # 문제문
     generated_option: List[str] # 선지
     generated_answer: str # 정답
-    generated_description: str # 해설
+    generated_description: List[str] # 해설
     generated_subpassage: Optional[str] = None # 보기
-    passage_quotation: Optional[List[str]] = None # 인용문구가 있는 문장
+    quoted_paragraph: Optional[str] = None # 인용문단
+    quoted_sentence: Optional[List[str]] = None # 인용문구가 담긴 문장
+    quoted_word: Optional[List[str]] = None # 인용문구
 
 class MultiplePassageQuestionResponse(BaseModel):
     first_passage_type: str # (가) 분야
@@ -52,6 +70,8 @@ class MultiplePassageQuestionResponse(BaseModel):
     generated_question: str # 문제문
     generated_option: List[str] # 선지
     generated_answer: str # 정답
-    generated_description: str # 해설
+    generated_description: List[str] # 해설
     generated_subpassage: Optional[str] = None # 보기
-    passage_quotation: Optional[List[str]] = None # 인용문구가 있는 문장
+    quoted_paragraph: Optional[str] = None # 인용문단
+    quoted_sentence: Optional[List[str]] = None # 인용문구가 담긴 문장
+    quoted_word: Optional[List[str]] = None # 인용문구
