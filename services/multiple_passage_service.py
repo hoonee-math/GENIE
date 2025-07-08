@@ -47,7 +47,7 @@ async def create_multiple_passage(request: MultiplePassageRequest) -> MultiplePa
         second_keyword_str = request.second_keyword
 
         max_attempts = 2
-        min_char_count_threshold = 1200
+        min_char_count_threshold = 1600
         generated_passages = []
 
         for attempt in range(max_attempts):
@@ -85,7 +85,7 @@ async def create_multiple_passage(request: MultiplePassageRequest) -> MultiplePa
 - 단순한 정보 나열보다 개념 간의 관계를 유기적으로 연결하여 논리적으로 서술한다.
 - 문항 출제자가 논리적 추론을 수행하는 문항을 낼 수 있도록 지문을 작성한다.
 - 지문의 글자 수는 한국어 기준 **공백을 포함해 최소 1200자, 최대 1600자**로 한다.
-- 각각 공백 포함 약 700자로 나누어서 두 지문을 작성한다.
+- 각각 공백 포함 약 1000자로 나누어서 두 지문을 작성한다.
 - 문단을 4-5개로 나누고, 각 문단은 중심 내용을 명확하게 전달한다.
 *'결국', '결론적으로', '결과적으로'와 같은 결론 표현은 지양한다.
 
@@ -111,8 +111,8 @@ async def create_multiple_passage(request: MultiplePassageRequest) -> MultiplePa
 (나) : {second_keyword_str}
 
 위 분야와 핵심 제재를 만족하는 논리적이고 구조적인 수능 국어 독서 영역 비문학 지문을 작성하라.
-각각 공백 포함 약 700자로 나누어서 두 지문을 작성하라.
-생성한 지문이 **공백 포함 최소 1200자, 최대 1600자**를 충족하는지 꼭 검토해서 글자 수를 반드시 만족하도록 한다.
+각각 공백 포함 약 1000자로 나누어서 두 지문을 작성하라.
+생성한 지문이 **공백 포함 최소 1800자, 최대 2400자**를 충족하는지 꼭 검토해서 글자 수를 반드시 만족하도록 한다.
 출력은 지문만 출력하고, 이외의 불필요한 정보는 포함하지 않도록 하라."""
 
             if request.first_requirement and request.first_requirement.strip():

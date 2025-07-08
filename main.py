@@ -1,10 +1,11 @@
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from routers import passage as passage_router
 from routers import question as question_router
 from utils.logger import logger
+# from utils.jwt_utils import set_user_id_in_context
 
 load_dotenv()
 
@@ -20,6 +21,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# # JWT 토큰에서 사용자 ID를 추출하는 미들웨어 추가
+# @app.middleware("http")
+# async def jwt_middleware(request: Request, call_next):
+#     # 요청 헤더에서 JWT 토큰을 추출하고 사용자 ID를 문맥에 저장
+#     set_user_id_in_context(request)
+#     response = await call_next(request)
+#     return response
 
 # 라우터 등록
 app.include_router(passage_router.router)

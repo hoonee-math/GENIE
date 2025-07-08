@@ -4,6 +4,10 @@ from datetime import datetime, timedelta, timezone
 from logging.handlers import TimedRotatingFileHandler
 import threading
 import time
+# import contextvars
+
+# # 사용자 ID를 저장할 컨텍스트 변수
+# user_id_var = contextvars.ContextVar('user_id', default='unknown')
 
 class KSTFormatter(logging.Formatter):
     KST = timezone(timedelta(hours=9))  # 한국 시간대
@@ -20,6 +24,11 @@ class KSTFormatter(logging.Formatter):
         else:
             # 기본 포맷
             return dt.strftime("%Y-%m-%d %H:%M:%S")
+            
+    # def format(self, record):
+    #     # 사용자 ID를 로그 레코드에 추가
+    #     record.user_id = user_id_var.get()
+    #     return super().format(record)
 
 
 class CostTracker:
@@ -70,6 +79,7 @@ def setup_logger():
     console_handler.setLevel(logging.INFO)
 
     formatter = KSTFormatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    # formatter = KSTFormatter('%(asctime)s - [사용자: %(user_id)s] - %(name)s - %(levelname)s - %(message)s')
 
     file_handler.setFormatter(formatter)
     console_handler.setFormatter(formatter)
