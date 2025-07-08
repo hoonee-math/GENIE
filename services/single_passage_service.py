@@ -52,7 +52,7 @@ async def create_single_passage(request: SinglePassageRequest) -> SinglePassageR
         else:
             passage_structure_section = ""
 
-        keyword_str = ", ".join(request.keyword)
+        keyword_str = request.keyword
 
         max_attempts = 2
         min_char_count_threshold = 1350

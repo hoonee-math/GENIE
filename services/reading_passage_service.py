@@ -40,7 +40,7 @@ async def create_reading_passage(request: ReadingPassageRequest) -> ReadingPassa
         passage_example = get_passage_examples("독서론")
         logger.debug(f"지문 예시 불러오기:{passage_example[:25]}...")
 
-        keyword_str = ", ".join(request.keyword)
+        keyword_str = request.keyword
 
         max_attempts = 2
         min_char_count_threshold = 900

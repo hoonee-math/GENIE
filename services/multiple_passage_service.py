@@ -43,8 +43,8 @@ async def create_multiple_passage(request: MultiplePassageRequest) -> MultiplePa
         passage_example = get_passage_examples("복합지문")
         logger.debug(f"지문 예시 불러오기:{passage_example[:25]}...")
 
-        first_keyword_str = ", ".join(request.first_keyword)
-        second_keyword_str = ", ".join(request.second_keyword)
+        first_keyword_str = request.first_keyword
+        second_keyword_str = request.second_keyword
 
         max_attempts = 2
         min_char_count_threshold = 1200
