@@ -19,7 +19,7 @@ coverage
 
 # Editor directories and files
 .vscode/*
-!.vscode/extensions.json
+# !.vscode/extensions.json
 .idea
 *.suo
 *.ntvs*
@@ -33,3 +33,5 @@ coverage
 
 .env
 vite.config.js
+tailwind.config.js
+src/views/temp/*
