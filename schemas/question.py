@@ -1,14 +1,24 @@
 # schemas/question.py
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional
+from enum import Enum
 
+
+# ✅ 문항 분야 Enum 정의
+class QuestionType(str, Enum):
+    사실적읽기 = "사실적 읽기"
+    추론적읽기 = "추론적 읽기"
+    비판적읽기 = "비판적 읽기"
+    어휘및문법 = "어휘 및 문법"
+
+# ✅ 문항 요청
 class QuestionRequest(BaseModel):
-    custom_passage: str # 사용자 입력 지문 Or 생성 지문을 사용자가 편집한 지문
-    type_question: str # 문항 유형
-    question_format: str # 문항 형식
-    question_statement_example : str # 문항 문제문 예시
-    question_subpassage_example : Optional[str] = None # 문항 보기 지문 예시
-    question_choice_example : str # 문항 선지 예시
+    custom_passage: str = Field(..., description="사용자가 입력하거나 편집한 지문")
+    type_question: QuestionType = Field(..., description="문항 유형", example="사실적 읽기/추론적 읽기/비판적 읽기/어휘 및 문법")
+    question_format: str = Field(..., description="문제문 형식", example="글에서 알 수 있는 'OOO'의 생각으로 적절한 것은?")
+    question_statement_example: str = Field(..., description="문제문 예시", example="윗글에서 베카리아의 관점으로 보기 어려운 것은?")
+    question_subpassage_example: Optional[str] = Field(None, description="문항 보기 지문 예시 (선택사항)", example="선택 사항입니다. 없을 시 제거해주세요.")
+    question_choice_example: str = Field(..., description="문항 선지 예시")
 
 ## 중간 유통 과정 스키마 정리
 ## ---------------------------------------------------------
@@ -47,31 +57,47 @@ class ReadingPassageQuestionResponse(BaseModel):
     quoted_sentence: Optional[List[str]] = None # 인용문구가 담긴 문장
     quoted_word: Optional[List[str]] = None # 인용문구
 
-class SinglePassageQuestionResponse(BaseModel):
-    type_passage: str # 분야
-    keyword: List[str] # 제재
-    generated_core_point: str # 핵심 논점
-    generated_question: str # 문제문
-    generated_option: List[str] # 선지
-    generated_answer: str # 정답
-    generated_description: List[str] # 해설
-    generated_subpassage: Optional[str] = None # 보기
-    quoted_paragraph: Optional[str] = None # 인용문단
-    quoted_sentence: Optional[List[str]] = None # 인용문구가 담긴 문장
-    quoted_word: Optional[List[str]] = None # 인용문구
+# ✅ 독서 지문 기반 문항 응답
+class ReadingPassageQuestionResponse(BaseModel):
+    type_passage: str = Field(..., description="독서론")
+    keyword: List[str] = Field(..., description="지문 제재 키워드", example=["독서", "공감적 읽기"])
+    generated_core_point: str = Field(..., description="생성된 핵심 논점")
+    generated_question: str = Field(..., description="생성된 문제문")
+    generated_option: List[str] = Field(..., description="생성된 선지 목록")
+    generated_answer: str = Field(..., description="정답")
+    generated_description: List[str] = Field(..., description="정답해설 + 오답피하기")
+    generated_subpassage: Optional[str] = Field(None, description="문항 보기 지문 (선택 사항)")
+    quoted_paragraph: Optional[str] = Field(None, description="인용 문단 (선택 사항)")
+    quoted_sentence: Optional[List[str]] = Field(None, description="인용 문장이 포함된 문장 목록 (선택 사항)")
+    quoted_word: Optional[List[str]] = Field(None, description="인용 문구 목록 (선택 사항)")
 
+# ✅ 단일 지문 기반 문항 응답
+class SinglePassageQuestionResponse(BaseModel):
+    type_passage: str = Field(..., description="지문의 분야")
+    keyword: List[str] = Field(..., description="지문 제재 키워드", example=["독서", "공감적 읽기"])
+    generated_core_point: str = Field(..., description="생성된 핵심 논점")
+    generated_question: str = Field(..., description="생성된 문제문")
+    generated_option: List[str] = Field(..., description="생성된 선지 목록")
+    generated_answer: str = Field(..., description="정답")
+    generated_description: List[str] = Field(..., description="정답해설 + 오답피하기")
+    generated_subpassage: Optional[str] = Field(None, description="문항 보기 지문 (선택 사항)")
+    quoted_paragraph: Optional[str] = Field(None, description="인용 문단 (선택 사항)")
+    quoted_sentence: Optional[List[str]] = Field(None, description="인용 문장이 포함된 문장 목록 (선택 사항)")
+    quoted_word: Optional[List[str]] = Field(None, description="인용 문구 목록 (선택 사항)")
+
+# ✅ 복합 지문 기반 문항 응답
 class MultiplePassageQuestionResponse(BaseModel):
-    first_passage_type: str # (가) 분야
-    first_passage_keyword: List[str] # (가) 제재
-    second_passage_type: str # (나) 분야
-    second_passage_keyword: List[str] # (나) 제재
-    first_passage_generated_core_point: str # 핵심 논점
-    second_passage_generated_core_point: str # 핵심 논점
-    generated_question: str # 문제문
-    generated_option: List[str] # 선지
-    generated_answer: str # 정답
-    generated_description: List[str] # 해설
-    generated_subpassage: Optional[str] = None # 보기
-    quoted_paragraph: Optional[str] = None # 인용문단
-    quoted_sentence: Optional[List[str]] = None # 인용문구가 담긴 문장
-    quoted_word: Optional[List[str]] = None # 인용문구
+    first_passage_type: str = Field(..., description="(가) 지문 분야", example="기술")
+    first_passage_keyword: List[str] = Field(..., description="(가) 지문 키워드")
+    second_passage_type: str = Field(..., description="(나) 지문 분야")
+    second_passage_keyword: List[str] = Field(..., description="(나) 지문 키워드")
+    first_passage_generated_core_point: str = Field(..., description="(가) 지문 핵심 논점")
+    second_passage_generated_core_point: str = Field(..., description="(나) 지문 핵심 논점")
+    generated_question: str = Field(..., description="생성된 문제문")
+    generated_option: List[str] = Field(..., description="생성된 선지 목록")
+    generated_answer: str = Field(..., description="정답")
+    generated_description: List[str] = Field(..., description="정답해설 + 오답피하기")
+    generated_subpassage: Optional[str] = Field(None, description="문항 보기 지문 (선택 사항)")
+    quoted_paragraph: Optional[str] = Field(None, description="인용 문단 (선택 사항)")
+    quoted_sentence: Optional[List[str]] = Field(None, description="인용 문장이 포함된 문장 목록 (선택 사항)")
+    quoted_word: Optional[List[str]] = Field(None, description="인용 문구 목록 (선택 사항)")
