@@ -100,7 +100,7 @@ async def create_multiple_passage(request: MultiplePassageRequest) -> MultiplePa
 ---
 
 ## 참고용 예시 지문
-- 다음 예시 지문의 톤, 문장 길이, 단락 구성 방식의 참고 예시로 활용한다. 
+- 다음 예시 지문의 톤, 문장 길이, 단락 구성 방식의 참고 예시로 활용한다.
 - 내용은 절대 활용하지 않는다.
 
 {passage_example}"""
