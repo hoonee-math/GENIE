@@ -34,4 +34,3 @@ coverage
 .env
 vite.config.js
 tailwind.config.js
-src/views/temp/*

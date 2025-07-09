@@ -1,0 +1,397 @@
+<template>
+    <div class="min-h-screen flex justify-center items-center mx-auto p-4 sm:p-8 w-full ">
+<!-- hidden md:block flex flex-col gap-3 mx-auto p-4 sm:p-8 w-full -->
+        <div class="w-[1312px]">
+            <!-- 헤더 -->
+            <div>
+                <div class="flex items-center max-w-screen-2xl mx-auto">
+                    <h1 class="text-3xl font-bold text-gray-900">{{ documentTitle }}</h1>
+                    <button class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                        <svg width="24" height="24" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M13.631 23.4322L24.3548 12.7084C22.5507 11.9547 20.9122 10.8542 19.5322 9.46921C18.1466 8.08892 17.0455 6.44991 16.2916 4.64523L5.56779 15.369C4.73117 16.2057 4.31214 16.6247 3.95255 17.0858C3.52829 17.6302 3.16416 18.2189 2.86654 18.8417C2.6157 19.3695 2.42866 19.932 2.05457 21.0543L0.0797406 26.9744C-0.0111512 27.2455 -0.0246364 27.5365 0.0408006 27.8148C0.106237 28.0931 0.248003 28.3477 0.450161 28.5498C0.652319 28.752 0.906857 28.8938 1.18516 28.9592C1.46347 29.0246 1.75451 29.0112 2.02557 28.9203L7.94571 26.9454C9.06942 26.5713 9.63055 26.3843 10.1583 26.1335C10.7837 25.8357 11.369 25.4737 11.9142 25.0474C12.3753 24.6879 12.7943 24.2688 13.631 23.4322ZM27.3301 9.7331C28.3993 8.66386 29 7.21365 29 5.70152C29 4.18938 28.3993 2.73918 27.3301 1.66994C26.2608 0.600694 24.8106 1.12663e-08 23.2985 0C21.7863 -1.12663e-08 20.3361 0.600694 19.2669 1.66994L17.9808 2.95604L18.0359 3.11698C18.6695 4.93055 19.7067 6.57655 21.0692 7.93081C22.4639 9.3341 24.1676 10.3917 26.044 11.0192L27.3301 9.7331Z"
+                                fill="currentColor" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 메인 콘텐츠 -->
+            <div class="max-w-screen-2xl mx-auto">
+                <div class="grid grid-cols-21">
+
+
+                    <!-- 탭 네비게이션 -->
+                    <div class="flex space-x-2 px-2">
+                        <button v-for="tab in tabs" :key="tab.key" @click="activeTab = tab.key" :class="[
+                            'flex items-center px-6 py-3 text-base text-nowrap font-medium rounded-t transition-all duration-200',
+                            activeTab === tab.key
+                                ? 'border border-gray-300'
+                                : 'text-gray-600 bg-white hover:border-brand hover:text-brand'
+                        ]">
+                            {{ tab.label }}
+
+                            <!-- Tooltip 적용 -->
+                            <BaseTooltip v-if="tab.tooltip" :content="tab.tooltipContent" position="top" class="ml-2">
+                                <template #trigger>
+                                    <svg width="17" height="17" viewBox="0 0 17 17" fill="currentColor"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" d="M8.50033 6.02083C8.21853 6.02083..." />
+                                        <path fill-rule="evenodd" d="M2.47949 8.5013C2.47949 6.90448..." />
+                                    </svg>
+                                </template>
+                            </BaseTooltip>
+                        </button>
+                    </div>
+
+                    <!-- 메인 영역 -->
+                    <div class="col-span-8 bg-white rounded-lg p-9 border h-[752px]">
+                        <PassageGenerationFormSplitLayout v-if="activeTab === 'single'">
+                            <template #left>
+                                <!-- 지문 분야 선택 -->
+                                <div>
+                                    <h3 class="text-2xl font-semibold text-gray-900 mb-6">
+                                        지문 분야 선택 <span class="text-red-500">*</span>
+                                    </h3>
+                                    <div class="grid grid-cols-3 gap-8">
+                                        <button v-for="category in categories" :key="category"
+                                            @click="singleForm.type_passage = category" :class="[
+                                                'py-6 px-6 text-xl font-medium rounded-lg border-2 transition-all duration-200',
+                                                singleForm.type_passage === category
+                                                    ? 'bg-brand/20 border-brand text-brand'
+                                                    : 'bg-white border-gray-300 text-gray-700 hover:border-brand hover:text-brand'
+                                            ]">
+                                            {{ category }}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- 지문 제재 입력 -->
+                                <div>
+                                    <h3 class="text-2xl font-semibold text-gray-900 mb-6">
+                                        지문 제재 입력 <span class="text-red-500">*</span>
+                                    </h3>
+                                    <textarea v-model="singleForm.keyword"
+                                        placeholder="50자 이내의 원하는 지문의 제재, 필수 포함 키워드를 작성해 주세요.&#10;(ex : 인공지능, 기계학습)"
+                                        rows="8"
+                                        class="w-full p-6 text-xl border-2 border-gray-300 rounded-lg resize-none focus:border-brand focus:outline-none transition-colors duration-200" />
+                                </div>
+                            </template>
+
+                            <template #right>
+                                <!-- 지문 구조 설계 (선택) -->
+                                <div>
+                                    <h3 class="text-2xl font-semibold text-gray-900 mb-6">
+                                        지문 구조 설계 (선택)
+                                    </h3>
+                                    <div class="grid grid-cols-3 gap-8">
+                                        <button v-for="structure in structures" :key="structure"
+                                            @click="singleForm.structure = structure" :class="[
+                                                'py-6 text-xl text-nowrap font-medium rounded-lg border-2 transition-all duration-200',
+                                                singleForm.structure === structure
+                                                    ? 'bg-brand/20 border-brand text-brand'
+                                                    : 'bg-white border-gray-300 text-gray-700 hover:border-brand hover:text-brand'
+                                            ]">
+                                            {{ structure }}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- 추가 요청 사항 (선택) -->
+                                <div>
+                                    <h3 class="text-2xl font-semibold text-gray-900 mb-6">
+                                        추가 요청 사항 (선택)
+                                    </h3>
+                                    <textarea v-model="singleForm.additionalRequest"
+                                        placeholder="지문 작성에 유의할 점이 있다면 작성해 주세요." rows="8"
+                                        class="w-full p-6 text-xl border-2 border-gray-300 rounded-lg resize-none focus:border-brand focus:outline-none transition-colors duration-200" />
+                                </div>
+                            </template>
+                        </PassageGenerationFormSplitLayout>
+
+                        <PassageGenerationFormSplitLayout v-if="activeTab === 'multiple'">
+                            <template #left>
+                                <h2 class="text-2xl font-bold text-gray-900">(가) 지문</h2>
+
+                                <div>
+                                    <h3 class="text-2xl font-semibold text-gray-900 mb-6">
+                                        분야 선택 <span class="text-red-500">*</span>
+                                    </h3>
+                                    <div class="grid grid-cols-5 gap-3">
+                                        <button v-for="category in categories" :key="'first-' + category"
+                                            @click="multipleForm.first_type_passage = category" :class="[
+                                                'py-3 px-4 text-xl font-medium rounded-lg border-2 transition-all duration-200',
+                                                multipleForm.first_type_passage === category
+                                                    ? 'bg-brand/20 border-brand text-brand'
+                                                    : 'bg-white border-gray-300 text-gray-700 hover:border-brand hover:text-brand'
+                                            ]">
+                                            {{ category }}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h3 class="text-2xl font-semibold text-gray-900 mb-6">
+                                        제재 입력 <span class="text-red-500">*</span>
+                                    </h3>
+                                    <textarea v-model="multipleForm.first_keyword"
+                                        placeholder="20자 이내의 원하는 지문의 제재, 필수 포함 키워드를 작성해 주세요. (ex : 인공지능, 기계학습)" rows="3"
+                                        class="w-full p-4 text-xl border-2 border-gray-300 rounded-lg resize-none focus:border-brand focus:outline-none transition-colors duration-200" />
+                                </div>
+
+                                <div>
+                                    <h3 class="text-2xl font-semibold text-gray-900 mb-6">
+                                        추가 요청 사항 (선택)
+                                    </h3>
+                                    <textarea v-model="multipleForm.first_requirement"
+                                        placeholder="지문 작성에 유의할 점이 있다면 작성해 주세요." rows="5"
+                                        class="w-full p-4 text-xl border-2 border-gray-300 rounded-lg resize-none focus:border-brand focus:outline-none transition-colors duration-200" />
+                                </div>
+                            </template>
+
+                            <template #right>
+                                <h2 class="text-2xl font-bold text-gray-900">(나) 지문</h2>
+
+                                <div>
+                                    <h3 class="text-2xl font-semibold text-gray-900 mb-6">
+                                        분야 선택 <span class="text-red-500">*</span>
+                                    </h3>
+                                    <div class="grid grid-cols-5 gap-3">
+                                        <button v-for="category in categories" :key="'second-' + category"
+                                            @click="multipleForm.second_type_passage = category" :class="[
+                                                'py-3 px-4 text-xl font-medium rounded-lg border-2 transition-all duration-200',
+                                                multipleForm.second_type_passage === category
+                                                    ? 'bg-brand/20 border-brand text-brand'
+                                                    : 'bg-white border-gray-300 text-gray-700 hover:border-brand hover:text-brand'
+                                            ]">
+                                            {{ category }}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h3 class="text-2xl font-semibold text-gray-900 mb-6">
+                                        제재 입력 <span class="text-red-500">*</span>
+                                    </h3>
+                                    <textarea v-model="multipleForm.second_keyword"
+                                        placeholder="20자 이내의 원하는 지문의 제재, 필수 포함 키워드를 작성해 주세요. (ex : 인공지능, 기계학습)" rows="3"
+                                        class="w-full p-4 text-xl border-2 border-gray-300 rounded-lg resize-none focus:border-brand focus:outline-none transition-colors duration-200" />
+                                </div>
+
+                                <div>
+                                    <h3 class="text-2xl font-semibold text-gray-900 mb-6">
+                                        추가 요청 사항 (선택)
+                                    </h3>
+                                    <textarea v-model="multipleForm.second_requirement"
+                                        placeholder="지문 작성에 유의할 점이 있다면 작성해 주세요." rows="5"
+                                        class="w-full p-4 text-xl border-2 border-gray-300 rounded-lg resize-none focus:border-brand focus:outline-none transition-colors duration-200" />
+                                </div>
+                            </template>
+                        </PassageGenerationFormSplitLayout>
+
+                        <PassageGenerationFormSplitLayout v-if="activeTab === 'reading'">
+                            <template #left>
+                                <!-- 지문 제재 입력 -->
+                                <div>
+                                    <h3 class="text-2xl font-semibold text-gray-900 mb-6">
+                                        지문 제재 입력 <span class="text-red-500">*</span>
+                                    </h3>
+                                    <textarea v-model="readingForm.keyword"
+                                        placeholder="20자 이내의 원하는 지문의 제재, 필수 포함 키워드를 작성해 주세요. (ex : 인공지능, 기계학습)" rows="7"
+                                        class="w-full p-6 text-xl border-2 border-gray-300 rounded-lg resize-none focus:border-brand focus:outline-none transition-colors duration-200" />
+                                </div>
+
+                                <!-- 추가 요청 사항 -->
+                                <div>
+                                    <h3 class="text-2xl font-semibold text-gray-900 mb-6">
+                                        추가 요청 사항 (선택)
+                                    </h3>
+                                    <textarea v-model="readingForm.requirement" placeholder="지문 작성에 유의할 점이 있다면 작성해 주세요."
+                                        rows="7"
+                                        class="w-full p-6 text-xl border-2 border-gray-300 rounded-lg resize-none focus:border-brand focus:outline-none transition-colors duration-200" />
+                                </div>
+                            </template>
+
+                            <template #right>
+                            </template>
+                        </PassageGenerationFormSplitLayout>
+                    </div>
+
+                </div>
+
+                <!-- 하단 버튼 -->
+                <div class="flex justify-end space-x-4 mt-12">
+                    <button @click="generatePassage"
+                        class="px-8 py-4 text-lg font-medium bg-brand text-white rounded-lg hover:bg-blue-600 transition-colors duration-200">
+                        지문 생성하기
+                    </button>
+                    <button @click="resetForm"
+                        class="px-8 py-4 text-lg font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors duration-200">
+                        초기화
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script setup>
+import { ref, reactive, computed } from 'vue'
+import PassageGenerationFormSplitLayout from './PassageGenerationFormSplitLayout.vue'
+import BaseTooltip from '@/components/common/BaseTooltip.vue'
+
+// 문서 제목
+const documentTitle = ref('Untitled')
+
+// 탭 데이터
+const tabs = [
+    { key: 'single', label: '단일 지문', tooltip: true, tooltipContent: '하나의 주제와 분야로 출제되는 지문 유형입니다.'},
+    { key: 'multiple', label: '복합 지문', tooltip: true, tooltipContent: '서로 다른 주제나 분야의 지문 두 개가 조합되어 하나의 세트로 출제되는 지문 유형입니다.' },
+    { key: 'reading', label: '독서 지문', tooltip: true, tooltipContent: '독서의 방법론이나 독서 과정, 독서에 대한 이론 등을 다루는 지문 유형입니다.'}
+]
+
+// 현재 활성 탭
+const activeTab = ref('single')
+
+// 카테고리 데이터
+const categories = ['인문', '사회', '과학', '기술', '예술']
+
+// 지문 구조 데이터
+const structures = ['설명과 분석', '비교와 대조', '문제와 해결', '흐름과 과정', 'AI 추천 설정']
+
+// 폼 데이터
+const singleForm = reactive({
+    type_passage: '',
+    keyword: '',
+    type_structure: '',
+    requirement: ''
+})
+
+const multipleForm = reactive({
+    first_type_passage: '',
+    first_keyword: '',
+    first_requirement: '',
+    second_type_passage: '',
+    second_keyword: '',
+    second_requirement: ''
+})
+
+const readingForm = reactive({
+    keyword: '',
+    requirement: ''
+})
+
+// 현재 분석 정보
+const currentAnalysis = computed(() => {
+    if (activeTab.value === 'single') {
+        return {
+            type: singleForm.type_passage,
+            subject: singleForm.keyword,
+            corePoint: '-'
+        }
+    } else if (activeTab.value === 'multiple') {
+        const subjects = []
+        if (multipleForm.first_keyword) subjects.push(multipleForm.first_keyword)
+        if (multipleForm.second_keyword) subjects.push(multipleForm.second_keyword)
+
+        return {
+            type: multipleForm.first_type_passage || multipleForm.second_type_passage,
+            subject: subjects.join(', '),
+            corePoint: '-'
+        }
+    } else {
+        return {
+            type: '독서',
+            subject: readingForm.keyword,
+            corePoint: '-'
+        }
+    }
+})
+
+// 폼 초기화
+const resetForm = () => {
+    if (activeTab.value === 'single') {
+        Object.assign(singleForm, {
+            type_passage: '',
+            keyword: '',
+            type_structure: '',
+            requirement: ''
+        })
+    } else if (activeTab.value === 'multiple') {
+        Object.assign(multipleForm, {
+            first_type_passage: '',
+            first_keyword: '',
+            first_requirement: '',
+            second_type_passage: '',
+            second_keyword: '',
+            second_requirement: ''
+        })
+    } else {
+        Object.assign(readingForm, {
+            keyword: '',
+            requirement: ''
+        })
+    }
+}
+
+// 지문 생성
+const generatePassage = () => {
+    let requestData = {}
+
+    if (activeTab.value === 'single') {
+        requestData = {
+            type_passage: singleForm.type_passage,
+            keyword: singleForm.keyword,
+            type_structure: singleForm.type_structure || null,
+            requirement: singleForm.requirement || null
+        }
+    } else if (activeTab.value === 'multiple') {
+        requestData = {
+            first_type_passage: multipleForm.first_type_passage,
+            first_keyword: multipleForm.first_keyword,
+            second_type_passage: multipleForm.second_type_passage,
+            second_keyword: multipleForm.second_keyword,
+            first_requirement: multipleForm.first_requirement || null,
+            second_requirement: multipleForm.second_requirement || null
+        }
+    } else {
+        requestData = {
+            keyword: readingForm.keyword,
+            requirement: readingForm.requirement || null
+        }
+    }
+
+    console.log('지문 생성 요청:', requestData)
+    // TODO: API 호출
+}
+</script>
+
+<style scoped>
+.bg-brand {
+    background-color: #0086FF;
+}
+
+.text-brand {
+    color: #0086FF;
+}
+
+.border-brand {
+    border-color: #0086FF;
+}
+
+.hover\:bg-blue-600:hover {
+    background-color: #004499;
+}
+
+.hover\:border-brand:hover {
+    border-color: #0086FF;
+}
+
+.hover\:text-brand:hover {
+    color: #0086FF;
+}
+
+.focus\:border-brand:focus {
+    border-color: #0086FF;
+}
+</style>
