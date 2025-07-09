@@ -24,7 +24,7 @@
           <div
             class="h-6 font-pretendard font-semibold text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030]"
           >
-            {{ creditCount }}회
+            {{ creditcount }}회
           </div>
         </div>
 
@@ -39,12 +39,12 @@
           <div
             class="h-6 font-pretendard font-semibold text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030]"
           >
-            <span class="text-[#0086ff]">{{ usageCount }}</span>회
+            <span class="text-[#0086ff]">1</span>회
           </div>
         </div>
 
         <div
-          v-if="creditCount > 0"
+          v-if="creditcount > 0"
           class="box-border flex flex-row justify-between items-center px-3 md:px-4 lg:px-6 py-2 gap-2 w-full min-w-0 h-10 md:h-12 bg-[#7fc7ff2e] border-none rounded-b-lg"
         >
           <div
@@ -55,7 +55,7 @@
           <div
             class="h-6 font-pretendard font-semibold text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030]"
           >
-            {{ remainingCount }}회
+            {{ creditcount - 1 }}회
           </div>
         </div>
         <div
@@ -79,68 +79,45 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, watch, onMounted } from "vue";
+import { useAuthStore } from "@/stores/auth";
 
-// ========== Props & Emits ==========
-const props = defineProps({
-  // 외부에서 이용권 수를 직접 설정할 수 있도록 허용
-  initialCreditCount: {
-    type: Number,
-    default: 5
-  },
-  initialUsageCount: {
-    type: Number, 
-    default: 1
-  }
-});
+const creditcount = ref(0); // 초기값 0
+const authStore = useAuthStore();
 
+// 이벤트 정의
 const emit = defineEmits(["credit-update"]);
 
-// ========== Reactive State ==========
-// 하드코딩된 예시 데이터로 시작
-const creditCount = ref(props.initialCreditCount); // 보유 이용권
-const usageCount = ref(props.initialUsageCount);   // 사용 예정 이용권
-
-// ========== Computed Properties ==========
-const remainingCount = computed(() => {
-  return Math.max(0, creditCount.value - usageCount.value);
-});
-
-// ========== Methods ==========
-// 외부에서 이용권 수를 업데이트할 수 있는 메서드
-function updateCreditCount(count) {
-  if (typeof count === 'number' && count >= 0) {
-    creditCount.value = count;
-    emit("credit-update", creditCount.value);
-  }
-}
-
-// 사용 예정 이용권 변경
-function updateUsageCount(count) {
-  if (typeof count === 'number' && count >= 0) {
-    usageCount.value = count;
-  }
-}
-
-// ========== Watchers ==========
-// 이용권 수 변경 감지
-watch(creditCount, (newValue) => {
+// creditcount 변경 감지
+watch(creditcount, (newValue) => {
   emit("credit-update", newValue);
 });
 
-// ========== Lifecycle ==========
+// creditcount를 외부에 노출
+const updateCreditCount = (count) => {
+  creditcount.value = count || authStore.userTicketCount;
+  emit("credit-update", creditcount.value);
+};
+
+// 컴포넌트 마운트 시 이벤트 발생
 onMounted(() => {
-  // 초기 이용권 수 emit
-  emit("credit-update", creditCount.value);
+  // authStore의 updateTicketCount 메서드 호출
+  authStore
+    .updateTicketCount()
+    .then((count) => {
+      creditcount.value = count; // 반환된 값으로 creditcount 업데이트
+      emit("credit-update", creditcount.value);
+    })
+    .catch((error) => {
+      // 에러 발생 시 기본값 혹은 현재 authStore에 있는 값 사용
+      creditcount.value = authStore.userTicketCount;
+      emit("credit-update", creditcount.value);
+    });
 });
 
-// ========== Expose ==========
-// 외부에서 접근 가능한 메서드들
+// 외부에서 사용할 수 있도록 defineExpose 사용
 defineExpose({
-  creditCount,
-  usageCount,
-  remainingCount,
+  creditcount,
   updateCreditCount,
-  updateUsageCount
-});  
+});
 </script>
