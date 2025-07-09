@@ -4,12 +4,17 @@ from datetime import datetime, timedelta, timezone
 from logging.handlers import TimedRotatingFileHandler
 import threading
 import time
-# import contextvars
+import contextvars  # 비동기 환경에서 컨텍스트 변수를 안전하게 관리하는 라이브러리
 
-# # 사용자 ID를 저장할 컨텍스트 변수
-# user_id_var = contextvars.ContextVar('user_id', default='unknown')
+# 사용자 ID를 저장할 컨텍스트 변수
+# - 비동기 요청 간에 격리된 저장소 제공 (각 요청마다 독립적으로 값 유지)
+# - main.py의 jwt_middleware에서 set_user_id_in_context 함수를 통해 설정됨
+# - 기본값은 'anonymous'로 설정 (토큰이 없거나 유효하지 않은 경우)
+user_id_var = contextvars.ContextVar('user_id', default='anonymous')
 
 class KSTFormatter(logging.Formatter):
+    """한국 시간대(KST)로 로그 메시지를 포맷팅하고 사용자 ID를 포함하는 포맷터"""
+    
     KST = timezone(timedelta(hours=9))  # 한국 시간대
 
     def converter(self, timestamp):
@@ -18,6 +23,7 @@ class KSTFormatter(logging.Formatter):
         return dt
 
     def formatTime(self, record, datefmt=None):
+        # 로그 시간을 KST로 포맷팅
         dt = self.converter(record.created)
         if datefmt:
             return dt.strftime(datefmt)
@@ -25,10 +31,15 @@ class KSTFormatter(logging.Formatter):
             # 기본 포맷
             return dt.strftime("%Y-%m-%d %H:%M:%S")
             
-    # def format(self, record):
-    #     # 사용자 ID를 로그 레코드에 추가
-    #     record.user_id = user_id_var.get()
-    #     return super().format(record)
+    def format(self, record):
+        # ========== 로그에 사용자 ID 포함하는 핵심 부분 ==========
+        # 1. contextvars에 저장된 현재 요청의 사용자 ID 가져오기
+        # 2. jwt_utils.py의 set_user_id_in_context()에서 설정된 값을 사용
+        # 3. 사용자 ID가 없으면 기본값인 'anonymous' 사용
+        record.user_id = user_id_var.get()
+        
+        # 로그 형식에 %(user_id)s가 포함되어 있으면 여기서 설정한 값이 표시됨
+        return super().format(record)
 
 
 class CostTracker:
@@ -78,14 +89,53 @@ def setup_logger():
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.INFO)
 
-    formatter = KSTFormatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    # formatter = KSTFormatter('%(asctime)s - [사용자: %(user_id)s] - %(name)s - %(levelname)s - %(message)s')
+    # 사용자 ID가 포함된 로그 형식
+    # 여기서 %(user_id)s는 KSTFormatter.format 메서드에서 설정된 record.user_id 값이 들어감
+    user_formatter = KSTFormatter('%(asctime)s - [사용자: %(user_id)s] - %(name)s - %(levelname)s - %(message)s')
+    
+    # 시스템 이벤트용 로그 형식 (사용자 ID 제외)
+    system_formatter = KSTFormatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-    file_handler.setFormatter(formatter)
-    console_handler.setFormatter(formatter)
+    file_handler.setFormatter(user_formatter)
+    console_handler.setFormatter(user_formatter)
 
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
+    
+    # 원본 logger 객체에 시스템 로그 기능 추가
+    logger.system_formatter = system_formatter
+    logger.user_formatter = user_formatter
+    logger.file_handler = file_handler
+    logger.console_handler = console_handler
+    
+    # 시스템 이벤트를 로깅하기 위한 메서드 추가
+    def system_log(level, msg, *args, **kwargs):
+        # 임시로 포맷터 변경
+        logger.file_handler.setFormatter(logger.system_formatter)
+        logger.console_handler.setFormatter(logger.system_formatter)
+        
+        # 로그 기록
+        if level == 'debug':
+            logger.debug(msg, *args, **kwargs)
+        elif level == 'info':
+            logger.info(msg, *args, **kwargs)
+        elif level == 'warning':
+            logger.warning(msg, *args, **kwargs)
+        elif level == 'error':
+            logger.error(msg, *args, **kwargs)
+        elif level == 'critical':
+            logger.critical(msg, *args, **kwargs)
+        
+        # 포맷터 원복
+        logger.file_handler.setFormatter(logger.user_formatter)
+        logger.console_handler.setFormatter(logger.user_formatter)
+    
+    # 각 로그 레벨별 시스템 로그 메서드 추가
+    logger.system_debug = lambda msg, *args, **kwargs: system_log('debug', msg, *args, **kwargs)
+    logger.system_info = lambda msg, *args, **kwargs: system_log('info', msg, *args, **kwargs)
+    logger.system_warning = lambda msg, *args, **kwargs: system_log('warning', msg, *args, **kwargs)
+    logger.system_error = lambda msg, *args, **kwargs: system_log('error', msg, *args, **kwargs)
+    logger.system_critical = lambda msg, *args, **kwargs: system_log('critical', msg, *args, **kwargs)
 
     return logger
 
