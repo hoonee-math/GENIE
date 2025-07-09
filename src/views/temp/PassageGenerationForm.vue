@@ -86,9 +86,9 @@
                                     </h3>
                                     <div class="grid grid-cols-3 gap-8">
                                         <button v-for="structure in structures" :key="structure"
-                                            @click="singleForm.structure = structure" :class="[
+                                            @click="singleForm.type_structure = structure" :class="[
                                                 'py-6 text-xl text-nowrap font-medium rounded-lg border-2 transition-all duration-200',
-                                                singleForm.structure === structure
+                                                singleForm.type_structure === structure
                                                     ? 'bg-brand/20 border-brand text-brand'
                                                     : 'bg-white border-gray-300 text-gray-700 hover:border-brand hover:text-brand'
                                             ]">
@@ -102,7 +102,7 @@
                                     <h3 class="text-2xl font-semibold text-gray-900 mb-6">
                                         추가 요청 사항 (선택)
                                     </h3>
-                                    <textarea v-model="singleForm.additionalRequest"
+                                    <textarea v-model="singleForm.requirement"
                                         placeholder="지문 작성에 유의할 점이 있다면 작성해 주세요." rows="8"
                                         class="w-full p-6 text-xl border-2 border-gray-300 rounded-lg resize-none focus:border-brand focus:outline-none transition-colors duration-200" />
                                 </div>
@@ -239,6 +239,7 @@
 import { ref, reactive, computed } from 'vue'
 import PassageGenerationFormSplitLayout from './PassageGenerationFormSplitLayout.vue'
 import BaseTooltip from '@/components/common/BaseTooltip.vue'
+import { generateSinglePassageAPI, generateReadingPassageAPI, generateMultiplePassageAPI } from '@/api/generate'
 
 // 문서 제목
 const documentTitle = ref('Untitled')
@@ -334,31 +335,65 @@ const resetForm = () => {
     }
 }
 
-// 지문 생성
+// 지문 생성 요청 데이터 (request data)
 const generatePassage = () => {
     let requestData = {}
 
     if (activeTab.value === 'single') {
         requestData = {
             type_passage: singleForm.type_passage,
-            keyword: singleForm.keyword,
-            type_structure: singleForm.type_structure || null,
-            requirement: singleForm.requirement || null
+            keyword: singleForm.keyword
         }
+        // Optional 필드들은 값이 있을 때만 추가
+        if (singleForm.type_structure) {
+            requestData.type_structure = singleForm.type_structure
+        }
+        if (singleForm.requirement && singleForm.requirement.trim()) {
+            requestData.requirement = singleForm.requirement
+        }
+        generateSinglePassageAPI(requestData)
+            .then(response => {
+                console.log('지문 생성 성공:', response)
+            })
+            .catch(error => {
+                console.error('지문 생성 실패:', error)
+            })
     } else if (activeTab.value === 'multiple') {
         requestData = {
             first_type_passage: multipleForm.first_type_passage,
             first_keyword: multipleForm.first_keyword,
             second_type_passage: multipleForm.second_type_passage,
-            second_keyword: multipleForm.second_keyword,
-            first_requirement: multipleForm.first_requirement || null,
-            second_requirement: multipleForm.second_requirement || null
+            second_keyword: multipleForm.second_keyword
         }
-    } else {
+        // Optional 필드들은 값이 있을 때만 추가
+        if (multipleForm.first_requirement && multipleForm.first_requirement.trim()) {
+            requestData.first_requirement = multipleForm.first_requirement
+        }
+        if (multipleForm.second_requirement && multipleForm.second_requirement.trim()) {
+            requestData.second_requirement = multipleForm.second_requirement
+        }
+        generateMultiplePassageAPI(requestData)
+            .then(response => {
+                console.log('복합 지문 생성 성공:', response)
+            })
+            .catch(error => {
+                console.error('복합 지문 생성 실패:', error)
+            })
+    } else if (activeTab.value === 'reading') {
         requestData = {
-            keyword: readingForm.keyword,
-            requirement: readingForm.requirement || null
+            keyword: readingForm.keyword
         }
+        // Optional 필드들은 값이 있을 때만 추가
+        if (readingForm.requirement && readingForm.requirement.trim()) {
+            requestData.requirement = readingForm.requirement
+        }
+        generateReadingPassageAPI(requestData)
+            .then(response => {
+                console.log('독서 지문 생성 성공:', response)
+            })
+            .catch(error => {
+                console.error('독서 지문 생성 실패:', error)
+            })
     }
 
     console.log('지문 생성 요청:', requestData)
