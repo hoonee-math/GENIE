@@ -8,19 +8,31 @@
                 generated_passage
             </template>
             <template #right>
-                generated_core_point
-                <PassageSummary>
-                    <template #subject>d</template>
-                    <template #keyword>d</template>
-                    <template #gistText>d</template>
-                </PassageSummary>
+                <!-- 지문 분석 (generated_core_point) -->
+                <PassageSummaryLayout>
+                    <!-- 지문 분야 -->
+                    <template #type_passage>{{requestData.type_passage}}</template>
+                    <!-- 지문 제재 -->
+                    <template #keyword>{{requestData.keyword}}</template>
+                    <!-- 핵심 논점 -->
+                    <template #generated_core_point>{{generatedData.generated_core_point[0]}}</template>
+                </PassageSummaryLayout>
             </template>
         </PassageAndQuestionLayout>
     </div>
 </template>
 <script setup>
 import PassageAndQuestionLayout from './PassageAndQuestionLayout.vue';
-import PassageSummary from './PassageSummaryLayout.vue';
+import PassageSummaryLayout from './PassageSummaryLayout.vue';
+
+const requestData = {
+    type_passage : '인문/예술/사회/과학/기술',
+    keyword : '인공지능, 머신러닝, 딥러닝',
+}
+const generatedData = {
+    generated_passage : '',
+    generated_core_point : ['12','123123']
+}
 </script>
 <style scoped>
     
