@@ -4,14 +4,31 @@
             <p class="font-bold text-2xl md:text-xl leading-[150%] tracking-[-0.02em] text-[#303030]">
                 지문 분석
             </p>
+            
+            <!-- 탭 네비게이션 (복수 지문일 때만 표시) -->
+            <div v-if="showTabs" class="flex border-b border-gray-200 w-full">
+                <button
+                    v-for="(tab, index) in corePointTabs"
+                    :key="index"
+                    @click="activeTabIndex = index"
+                    :class="[
+                        'px-4 py-2 text-sm font-medium border-b-2 transition-colors',
+                        activeTabIndex === index
+                            ? 'border-brand text-brand'
+                            : 'border-transparent text-gray-500 hover:text-gray-700'
+                    ]"
+                >
+                    {{ tab.label }}
+                </button>
+            </div>
+            
             <div class="box-border flex flex-col flex-1 items-start px-4 py-4 gap-4 w-full bg-white border border-[#E5E7EB] rounded-xl shadow-sm">
                 <div class="flex flex-row items-center w-full gap-4">
                     <p class="font-bold text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030]">
                         지문 분야
                     </p>
                     <p class="font-normal text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030] break-words flex-1">
-
-                        <slot name="type_passage" />
+                        <slot name="type_passage">{{ passageSubject }}</slot>
                     </p>
                 </div>
                 <div class="flex flex-row items-start w-full gap-4">
@@ -20,8 +37,7 @@
                     </p>
                     <div class="flex-1 min-w-0">
                         <p class="font-normal text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030] break-words whitespace-pre-wrap overflow-hidden">
-
-                            <slot name="keyword" />
+                            <slot name="keyword">{{ passageKeyword }}</slot>
                         </p>
                     </div>
                 </div>
@@ -30,13 +46,56 @@
                     <p class="font-bold text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030] min-w-[80px] shrink-0">
                         핵심 논점
                     </p>
-                    <div class="w-full font-normal text-sm md:text-base leading-[200%] tracking-[-0.02em] text-[#303030]">
-                        <slot name="generated_core_point" />
+                    <div class="w-full font-normal text-sm md:text-base leading-[200%] tracking-[-0.02em] text-[#303030] flex-1 overflow-auto">
+                        <slot name="generated_core_point">{{ currentCorePoint }}</slot>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </template>
+
 <script setup>
+import { ref, computed, watch } from 'vue'
+import { usePassageStore } from '@/stores/passage'
+
+// Pinia store 사용
+const passageStore = usePassageStore()
+
+// 현재 활성 탭
+const activeTabIndex = ref(0)
+
+// Store에서 데이터 가져오기
+const corePointTabs = computed(() => passageStore.corePointTabs)
+
+// 탭 표시 여부 (복수 지문일 때만)
+const showTabs = computed(() => corePointTabs.value.length > 1)
+
+// 현재 선택된 탭의 데이터
+const currentTabData = computed(() => {
+  if (corePointTabs.value.length === 0) return { type_passage: '', keyword: '', content: '' }
+  return corePointTabs.value[activeTabIndex.value] || { type_passage: '', keyword: '', content: '' }
+})
+
+// 각 탭별 데이터 (탭이 바뀔 때마다 다른 값 표시)
+const passageSubject = computed(() => currentTabData.value.type_passage)
+const passageKeyword = computed(() => currentTabData.value.keyword)
+const currentCorePoint = computed(() => currentTabData.value.content)
+
+// 탭이 변경될 때 activeTabIndex 초기화
+watch(corePointTabs, (newTabs) => {
+  if (newTabs.length > 0 && activeTabIndex.value >= newTabs.length) {
+    activeTabIndex.value = 0
+  }
+}, { immediate: true })
 </script>
+
+<style scoped>
+.text-brand {
+  color: #0086FF;
+}
+
+.border-brand {
+  border-color: #0086FF;
+}
+</style>

@@ -381,6 +381,7 @@ const generatePassage = () => {
             })
     } else if (activeTab.value === 'reading') {
         requestData = {
+            type_passage: '독서론',
             keyword: readingForm.keyword
         }
         // Optional 필드들은 값이 있을 때만 추가
