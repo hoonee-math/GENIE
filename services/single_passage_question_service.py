@@ -281,7 +281,7 @@ quoted_word
                 return SinglePassageQuestionResponse(
                     type_passage=type_passage,
                     keyword=keyword_list,
-                    generated_core_point=generated_core_point,
+                    generated_core_point=[generated_core_point],
                     generated_question=response_json.get("generated_question", "문제문 생성 실패"),
                     generated_subpassage=response_json.get("generated_subpassage", "보기 지문 생성 실패"),
                     generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
@@ -292,7 +292,7 @@ quoted_word
                 return SinglePassageQuestionResponse(
                     type_passage=type_passage,
                     keyword=keyword_list,
-                    generated_core_point=generated_core_point,
+                    generated_core_point=[generated_core_point],
                     generated_question=response_json.get("generated_question", "문제문 생성 실패"),
                     generated_subpassage=response_json.get("generated_subpassage", "보기 지문 생성 실패"),
                     generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
@@ -304,7 +304,7 @@ quoted_word
                 return SinglePassageQuestionResponse(
                     type_passage=type_passage,
                     keyword=keyword_list,
-                    generated_core_point=generated_core_point,
+                    generated_core_point=[generated_core_point],
                     generated_question=response_json.get("generated_question", "문제문 생성 실패"),
                     generated_subpassage=response_json.get("generated_subpassage", "보기 지문 생성 실패"),
                     generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
@@ -318,7 +318,7 @@ quoted_word
                 return SinglePassageQuestionResponse(
                     type_passage=type_passage,
                     keyword=keyword_list,
-                    generated_core_point=generated_core_point,
+                    generated_core_point=[generated_core_point],
                     generated_question=response_json.get("generated_question", "문제문 생성 실패"),
                     generated_subpassage=response_json.get("generated_subpassage", "보기 지문 생성 실패"),
                     generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
@@ -332,7 +332,7 @@ quoted_word
                 return SinglePassageQuestionResponse(
                     type_passage=type_passage,
                     keyword=keyword_list,
-                    generated_core_point=generated_core_point,
+                    generated_core_point=[generated_core_point],
                     generated_question=response_json.get("generated_question", "문제문 생성 실패"),
                     generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
                     generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
@@ -342,7 +342,7 @@ quoted_word
                 return SinglePassageQuestionResponse(
                     type_passage=type_passage,
                     keyword=keyword_list,
-                    generated_core_point=generated_core_point,
+                    generated_core_point=[generated_core_point],
                     generated_question=response_json.get("generated_question", "문제문 생성 실패"),
                     generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
                     generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
@@ -353,7 +353,7 @@ quoted_word
                 return SinglePassageQuestionResponse(
                     type_passage=type_passage,
                     keyword=keyword_list,
-                    generated_core_point=generated_core_point,
+                    generated_core_point=[generated_core_point],
                     generated_question=response_json.get("generated_question", "문제문 생성 실패"),
                     generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
                     generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
@@ -366,7 +366,7 @@ quoted_word
                 return SinglePassageQuestionResponse(
                     type_passage=type_passage,
                     keyword=keyword_list,
-                    generated_core_point=generated_core_point,
+                    generated_core_point=[generated_core_point],
                     generated_question=response_json.get("generated_question", "문제문 생성 실패"),
                     generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
                     generated_answer=response_json.get("generated_answer", "정답 생성 실패"),

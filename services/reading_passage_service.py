@@ -176,7 +176,7 @@ async def create_reading_passage(request: ReadingPassageRequest) -> ReadingPassa
 
         return ReadingPassageResponse(
             generated_passage=generated_passage,
-            generated_core_point=generated_core_point
+            generated_core_point=[generated_core_point]
         )
     
     except ValueError as ve:

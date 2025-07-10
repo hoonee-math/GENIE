@@ -194,7 +194,7 @@ async def create_single_passage(request: SinglePassageRequest) -> SinglePassageR
 
         return SinglePassageResponse(
             generated_passage=generated_passage,
-            generated_core_point=generated_core_point
+            generated_core_point=[generated_core_point]
         )
     
     except ValueError as ve:

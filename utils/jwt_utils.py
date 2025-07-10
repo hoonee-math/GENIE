@@ -2,6 +2,9 @@ from jose import jwt, JWTError  # JWT 토큰 처리 라이브러리
 import os
 from fastapi import Request, HTTPException, Depends, status, Request
 from utils.logger import user_id_var  # contextvars로 만든 사용자 ID 저장용 변수
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
 
 # .env 파일에서 JWT 설정 가져오기
 # .env 파일 예시:

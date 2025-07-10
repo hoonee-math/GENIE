@@ -44,24 +44,11 @@ class MultiplePassageInfo(BaseModel):
 #     passage_quotation: Optional[str] # 인용문구가 있는 문장
 ## ---------------------------------------------------------
 
-class ReadingPassageQuestionResponse(BaseModel):
-    type_passage: str # 분야
-    keyword: List[str] # 제재
-    generated_core_point: str # 핵심 논점
-    generated_question: str # 문제문
-    generated_option: List[str] # 선지
-    generated_answer: str # 정답
-    generated_description: List[str] # 해설
-    generated_subpassage: Optional[str] = None # 보기
-    quoted_paragraph: Optional[str] = None # 인용문단
-    quoted_sentence: Optional[List[str]] = None # 인용문구가 담긴 문장
-    quoted_word: Optional[List[str]] = None # 인용문구
-
 # ✅ 독서 지문 기반 문항 응답
 class ReadingPassageQuestionResponse(BaseModel):
     type_passage: str = Field(..., description="독서론")
     keyword: List[str] = Field(..., description="지문 제재 키워드", example=["독서", "공감적 읽기"])
-    generated_core_point: str = Field(..., description="생성된 핵심 논점")
+    generated_core_point: List[str] = Field(..., description="생성된 핵심 논점")
     generated_question: str = Field(..., description="생성된 문제문")
     generated_option: List[str] = Field(..., description="생성된 선지 목록")
     generated_answer: str = Field(..., description="정답")
@@ -75,7 +62,7 @@ class ReadingPassageQuestionResponse(BaseModel):
 class SinglePassageQuestionResponse(BaseModel):
     type_passage: str = Field(..., description="지문의 분야")
     keyword: List[str] = Field(..., description="지문 제재 키워드", example=["독서", "공감적 읽기"])
-    generated_core_point: str = Field(..., description="생성된 핵심 논점")
+    generated_core_point: List[str] = Field(..., description="생성된 핵심 논점")
     generated_question: str = Field(..., description="생성된 문제문")
     generated_option: List[str] = Field(..., description="생성된 선지 목록")
     generated_answer: str = Field(..., description="정답")
@@ -91,8 +78,7 @@ class MultiplePassageQuestionResponse(BaseModel):
     first_passage_keyword: List[str] = Field(..., description="(가) 지문 키워드")
     second_passage_type: str = Field(..., description="(나) 지문 분야")
     second_passage_keyword: List[str] = Field(..., description="(나) 지문 키워드")
-    first_passage_generated_core_point: str = Field(..., description="(가) 지문 핵심 논점")
-    second_passage_generated_core_point: str = Field(..., description="(나) 지문 핵심 논점")
+    generated_core_point: List[str] = Field(..., description="(가) 지문 핵심 논점과 (나) 지문 핵심 논점")
     generated_question: str = Field(..., description="생성된 문제문")
     generated_option: List[str] = Field(..., description="생성된 선지 목록")
     generated_answer: str = Field(..., description="정답")

@@ -28,7 +28,7 @@ class SinglePassageRequest(BaseModel):
 # ✅ 단일 지문 응답
 class SinglePassageResponse(BaseModel):
     generated_passage: str = Field(..., description="생성된 지문")
-    generated_core_point: str = Field(..., description="지문의 핵심 논점")
+    generated_core_point: List[str] = Field(..., description="지문의 핵심 논점")
 
 # ✅ 독서 지문 요청
 class ReadingPassageRequest(BaseModel):
@@ -38,7 +38,7 @@ class ReadingPassageRequest(BaseModel):
 # ✅ 독서 지문 응답
 class ReadingPassageResponse(BaseModel):
     generated_passage: str = Field(..., description="생성된 지문")
-    generated_core_point: str = Field(..., description="지문의 핵심 논점")
+    generated_core_point: List[str] = Field(..., description="지문의 핵심 논점")
 
 # ✅ 복수 지문 요청
 class MultiplePassageRequest(BaseModel):
@@ -52,4 +52,4 @@ class MultiplePassageRequest(BaseModel):
 # ✅ 복수 지문 응답
 class MultiplePassageResponse(BaseModel):
     generated_passage: str = Field(..., description="생성된 지문")
-    generated_core_point: str = Field(..., description="지문의 핵심 논점")
+    generated_core_point: List[str] = Field(..., description="(가) 지문의 핵심 논점과 (나) 지문 핵심 논점")

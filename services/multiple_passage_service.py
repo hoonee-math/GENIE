@@ -195,7 +195,7 @@ async def create_multiple_passage(request: MultiplePassageRequest) -> MultiplePa
 
         return MultiplePassageResponse(
             generated_passage=generated_passage,
-            generated_core_point=generated_core_point
+            generated_core_point=[generated_core_point]
         )
     
     except ValueError as ve:
