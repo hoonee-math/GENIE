@@ -37,13 +37,13 @@ export const usePassageStore = defineStore('passage', {
             label: '(가) 지문',
             type_passage: state.responseData.description[0].type_passage,
             keyword: state.requestData?.first_keyword || '',
-            content: state.responseData.description[0].core_point
+            core_point: state.responseData.description[0].core_point
           },
           {
             label: '(나) 지문', 
             type_passage: state.responseData.description[1].type_passage,
             keyword: state.requestData?.second_keyword || '',
-            content: state.responseData.description[1].core_point
+            core_point: state.responseData.description[1].core_point
           }
         ]
       } else {
@@ -52,7 +52,7 @@ export const usePassageStore = defineStore('passage', {
             label: '지문 분석',
             type_passage: state.responseData.description[0]?.type_passage || '',
             keyword: state.requestData?.keyword || '',
-            content: state.responseData.description[0]?.core_point || ''
+            core_point: state.responseData.description[0]?.core_point || ''
           }
         ]
       }
