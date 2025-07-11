@@ -40,7 +40,7 @@ class ReadingPassageResponse(BaseModel):
     generated_passage: str = Field(..., description="생성된 지문")
     generated_core_point: List[str] = Field(..., description="지문의 핵심 논점")
 
-# ✅ 복수 지문 요청
+# ✅ 복합 지문 요청
 class MultiplePassageRequest(BaseModel):
     first_type_passage: PassageType = Field(..., description="(가) 지문의 분야", example="인문/예술/사회/과학/기술")
     first_keyword: str = Field(..., description="(가) 지문 키워드 목록", example="계층, 평등")
@@ -49,7 +49,7 @@ class MultiplePassageRequest(BaseModel):
     first_requirement: Optional[str] = Field(None, description="(가) 추가 요청 사항 (선택 사항)", example="비판적인 시각 강조")
     second_requirement: Optional[str] = Field(None, description="(나) 추가 요청 사항 (선택 사항)", example="객관적 서술")
 
-# ✅ 복수 지문 응답
+# ✅ 복합 지문 응답
 class MultiplePassageResponse(BaseModel):
     generated_passage: str = Field(..., description="생성된 지문")
     generated_core_point: List[str] = Field(..., description="(가) 지문의 핵심 논점과 (나) 지문 핵심 논점")
