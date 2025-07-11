@@ -16,7 +16,7 @@ export const usePassageStore = defineStore('passage', {
     // 단일 지문 여부
     isSinglePassage: (state) => state.passageType === 'single',
     
-    // 복수 지문 여부
+    // 복합 지문 여부
     isMultiplePassage: (state) => state.passageType === 'multiple',
     
     // 독서 지문 여부

@@ -5,7 +5,7 @@
                 지문 분석
             </p>
             
-            <!-- 탭 네비게이션 (복수 지문일 때만 표시) -->
+            <!-- 탭 네비게이션 (복합 지문일 때만 표시) -->
             <div v-if="showTabs" class="flex border-b border-gray-200 w-full">
                 <button
                     v-for="(tab, index) in corePointTabs"
@@ -68,7 +68,7 @@ const activeTabIndex = ref(0)
 // Store에서 데이터 가져오기
 const corePointTabs = computed(() => passageStore.corePointTabs)
 
-// 탭 표시 여부 (복수 지문일 때만)
+// 탭 표시 여부 (복합 지문일 때만)
 const showTabs = computed(() => corePointTabs.value.length > 1)
 
 // 현재 선택된 탭의 데이터
