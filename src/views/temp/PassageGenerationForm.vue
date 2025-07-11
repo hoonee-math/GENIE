@@ -219,14 +219,46 @@
 
                 </div>
 
+                <!-- 에러 메시지 -->
+                <div v-if="errorMessage" class="flex justify-center mt-6">
+                    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg max-w-md w-full">
+                        <div class="flex">
+                            <svg class="w-5 h-5 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span>{{ errorMessage }}</span>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- 하단 버튼 -->
                 <div class="flex justify-end space-x-4 mt-12">
-                    <button @click="generatePassage"
-                        class="px-8 py-4 text-lg font-medium bg-brand text-white rounded-lg hover:bg-blue-600 transition-colors duration-200">
-                        지문 생성하기
+                    <button @click="generatePassage" :disabled="isLoading"
+                        :class="[
+                            'px-8 py-4 text-lg font-medium rounded-lg transition-all duration-200',
+                            isLoading 
+                                ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+                                : 'bg-brand text-white hover:bg-blue-600'
+                        ]">
+                        <!-- 로딩 스피너 -->
+                        <div v-if="isLoading" class="flex items-center">
+                            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span v-if="loadingStep === 'generating'">지문 생성 중...</span>
+                            <span v-else-if="loadingStep === 'saving'">지문 저장 중...</span>
+                            <span v-else>처리 중...</span>
+                        </div>
+                        <span v-else>지문 생성하기</span>
                     </button>
-                    <button @click="resetForm"
-                        class="px-8 py-4 text-lg font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors duration-200">
+                    <button @click="resetForm" :disabled="isLoading"
+                        :class="[
+                            'px-8 py-4 text-lg font-medium rounded-lg transition-colors duration-200',
+                            isLoading
+                                ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                                : 'text-gray-700 bg-gray-200 hover:bg-gray-300'
+                        ]">
                         초기화
                     </button>
                 </div>
@@ -237,10 +269,21 @@
 
 <script setup>
 import { ref, reactive, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import PassageGenerationFormSplitLayout from './PassageGenerationFormSplitLayout.vue'
 import BaseTooltip from '@/components/common/BaseTooltip.vue'
 import { generateSinglePassageAPI, generateReadingPassageAPI, generateMultiplePassageAPI } from '@/api/generate'
+import { savePassageToDatabase } from '@/api/passage'
+import { usePassageStore } from '@/stores/passage'
 
+// Router 및 Store 설정
+const router = useRouter()
+const passageStore = usePassageStore()
+
+// 로딩 및 에러 상태
+const isLoading = ref(false)
+const loadingStep = ref('') // 'generating' | 'saving' | ''
+const errorMessage = ref('')
 // 문서 제목
 const documentTitle = ref('Untitled')
 
@@ -335,70 +378,172 @@ const resetForm = () => {
     }
 }
 
-// 지문 생성 요청 데이터 (request data)
-const generatePassage = () => {
-    let requestData = {}
+// 데이터 변환 함수들
 
-    if (activeTab.value === 'single') {
-        requestData = {
-            type_passage: singleForm.type_passage,
-            keyword: singleForm.keyword
-        }
-        // Optional 필드들은 값이 있을 때만 추가
-        if (singleForm.type_structure) {
-            requestData.type_structure = singleForm.type_structure
-        }
-        if (singleForm.requirement && singleForm.requirement.trim()) {
-            requestData.requirement = singleForm.requirement
-        }
-        generateSinglePassageAPI(requestData)
-            .then(response => {
-                console.log('지문 생성 성공:', response)
-            })
-            .catch(error => {
-                console.error('지문 생성 실패:', error)
-            })
-    } else if (activeTab.value === 'multiple') {
-        requestData = {
-            first_type_passage: multipleForm.first_type_passage,
-            first_keyword: multipleForm.first_keyword,
-            second_type_passage: multipleForm.second_type_passage,
-            second_keyword: multipleForm.second_keyword
-        }
-        // Optional 필드들은 값이 있을 때만 추가
-        if (multipleForm.first_requirement && multipleForm.first_requirement.trim()) {
-            requestData.first_requirement = multipleForm.first_requirement
-        }
-        if (multipleForm.second_requirement && multipleForm.second_requirement.trim()) {
-            requestData.second_requirement = multipleForm.second_requirement
-        }
-        generateMultiplePassageAPI(requestData)
-            .then(response => {
-                console.log('복합 지문 생성 성공:', response)
-            })
-            .catch(error => {
-                console.error('복합 지문 생성 실패:', error)
-            })
-    } else if (activeTab.value === 'reading') {
-        requestData = {
-            type_passage: '독서론',
-            keyword: readingForm.keyword
-        }
-        // Optional 필드들은 값이 있을 때만 추가
-        if (readingForm.requirement && readingForm.requirement.trim()) {
-            requestData.requirement = readingForm.requirement
-        }
-        generateReadingPassageAPI(requestData)
-            .then(response => {
-                console.log('독서 지문 생성 성공:', response)
-            })
-            .catch(error => {
-                console.error('독서 지문 생성 실패:', error)
-            })
+// 제목 생성 함수
+const generateTitle = (passageType, requestData) => {
+    const now = new Date()
+    const dateStr = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`
+    
+    if (passageType === 'single') {
+        return `단일 지문_${requestData.type_passage}_${dateStr}`
+    } else if (passageType === 'multiple') {
+        return `복수 지문_${requestData.first_type_passage}+${requestData.second_type_passage}_${dateStr}`
+    } else if (passageType === 'reading') {
+        return `독서론 지문_${dateStr}`
     }
+    return `지문_${dateStr}`
+}
 
-    console.log('지문 생성 요청:', requestData)
-    // TODO: API 호출
+// 키워드 추출 함수
+const extractKeywords = (requestData, passageType) => {
+    if (passageType === 'single') {
+        return requestData.keyword
+    } else if (passageType === 'multiple') {
+        return `${requestData.first_keyword}, ${requestData.second_keyword}`
+    } else if (passageType === 'reading') {
+        return requestData.keyword
+    }
+    return ''
+}
+
+// FastAPI 응답을 백엔드 저장 형식으로 변환
+const transformApiResponseToDbFormat = (apiResponse, requestData, passageType) => {
+    return {
+        type: passageType,
+        keyword: extractKeywords(requestData, passageType),
+        title: generateTitle(passageType, requestData),
+        content: apiResponse.generated_passage,
+        gist: apiResponse.generated_core_point.join('\n'), // 배열을 개행 문자로 연결
+        isGenerated: 1
+    }
+}
+
+// 지문 생성 요청 데이터 (request data)
+const generatePassage = async () => {
+    // 에러 및 로딩 상태 초기화
+    errorMessage.value = ''
+    isLoading.value = true
+    
+    try {
+        let requestData = {}
+        let passageType = ''
+        let apiFunction = null
+
+        // 1. 요청 데이터 구성
+        if (activeTab.value === 'single') {
+            passageType = 'single'
+            requestData = {
+                type_passage: singleForm.type_passage,
+                keyword: singleForm.keyword
+            }
+            // Optional 필드들은 값이 있을 때만 추가
+            if (singleForm.type_structure) {
+                requestData.type_structure = singleForm.type_structure
+            }
+            if (singleForm.requirement && singleForm.requirement.trim()) {
+                requestData.requirement = singleForm.requirement
+            }
+            apiFunction = generateSinglePassageAPI
+            
+        } else if (activeTab.value === 'multiple') {
+            passageType = 'multiple'
+            requestData = {
+                first_type_passage: multipleForm.first_type_passage,
+                first_keyword: multipleForm.first_keyword,
+                second_type_passage: multipleForm.second_type_passage,
+                second_keyword: multipleForm.second_keyword
+            }
+            // Optional 필드들은 값이 있을 때만 추가
+            if (multipleForm.first_requirement && multipleForm.first_requirement.trim()) {
+                requestData.first_requirement = multipleForm.first_requirement
+            }
+            if (multipleForm.second_requirement && multipleForm.second_requirement.trim()) {
+                requestData.second_requirement = multipleForm.second_requirement
+            }
+            apiFunction = generateMultiplePassageAPI
+            
+        } else if (activeTab.value === 'reading') {
+            passageType = 'reading'
+            requestData = {
+                type_passage: '독서론',
+                keyword: readingForm.keyword
+            }
+            // Optional 필드들은 값이 있을 때만 추가
+            if (readingForm.requirement && readingForm.requirement.trim()) {
+                requestData.requirement = readingForm.requirement
+            }
+            apiFunction = generateReadingPassageAPI
+        }
+
+        console.log('🚀 지문 생성 시작:', { passageType, requestData })
+
+        // 2. FastAPI 호출 (지문 생성)
+        loadingStep.value = 'generating'
+        const apiResponse = await apiFunction(requestData)
+        console.log('✅ FastAPI 응답 성공:', apiResponse)
+
+        // 3. 데이터 변환 (백엔드 저장 형식)
+        const dbData = transformApiResponseToDbFormat(apiResponse, requestData, passageType)
+        console.log('🔄 DB 저장용 데이터 변환:', dbData)
+
+        // 4. 백엔드 DB 저장
+        loadingStep.value = 'saving'
+        const savedPassage = await savePassageToDatabase(dbData)
+        console.log('✅ DB 저장 성공:', savedPassage)
+
+        // 5. Store에 데이터 저장
+        passageStore.setRequestData(requestData, passageType)
+        passageStore.setResponseData({
+            pas_title: savedPassage.title,
+            pas_content: savedPassage.content,
+            description: parseGistToDescriptions(savedPassage.gist, requestData, passageType)
+        })
+        
+        // 6. 결과 페이지로 이동
+        console.log('📫 결과 페이지로 이동:', `/passage/view/${savedPassage.pasCode}`)
+        await router.push(`/passage/view/${savedPassage.pasCode}`)
+        
+    } catch (error) {
+        console.error('❌ 지문 생성 실패:', error)
+        
+        // 에러 메시지 설정
+        if (loadingStep.value === 'generating') {
+            errorMessage.value = '지문 생성에 실패했습니다. 다시 시도해 주세요.'
+        } else if (loadingStep.value === 'saving') {
+            errorMessage.value = '지문 저장에 실패했습니다. 다시 시도해 주세요.'
+        } else {
+            errorMessage.value = '예기치 못한 오류가 발생했습니다.'
+        }
+    } finally {
+        isLoading.value = false
+        loadingStep.value = ''
+    }
+}
+
+// gist 문자열을 description 배열로 변환 (현재 스키마용)
+const parseGistToDescriptions = (gist, requestData, passageType) => {
+    const corePoints = gist.split('\n').filter(point => point.trim())
+    
+    if (passageType === 'multiple' && corePoints.length >= 2) {
+        return [
+            {
+                type_passage: requestData.first_type_passage,
+                core_point: corePoints[0]
+            },
+            {
+                type_passage: requestData.second_type_passage,
+                core_point: corePoints[1]
+            }
+        ]
+    } else {
+        return [
+            {
+                type_passage: passageType === 'reading' ? '독서론' : requestData.type_passage,
+                core_point: corePoints[0] || gist
+            }
+        ]
+    }
 }
 </script>
 
