@@ -1,0 +1,46 @@
+import { apiGet, apiPost } from "@/utils/http";
+
+/**
+ * Passage Storage API 모듈
+ * 이 모듈은 백엔드 지문 및 문항 저장 관련 API 호출을 처리합니다.
+ * '@/utils/http'를 이용하여 JWT 토큰 기반 인증을 사용합니다.
+ */
+
+// 지문 개별 저장 (/api/pass/insert/each)
+export async function savePassageToDatabase(passageData) {
+    try {
+        console.log('💾 [DB SAVE] 지문 저장 요청:', passageData);
+        const response = await apiPost('/api/pass/insert/each', passageData);
+        console.log('💾 [DB SAVE] 지문 저장 성공:', response);
+        return response;
+    } catch (error) {
+        console.error('💾 [DB SAVE] 지문 저장 실패:', error);
+        throw error;
+    }
+}
+
+// 지문 개별 조회 (/api/pass/select/{pasCode})
+export async function getPassageFromDatabase(pasCode) {
+    try {
+        console.log('📖 [DB GET] 지문 조회 요청:', pasCode);
+        const response = await apiGet(`/api/pass/select/${pasCode}`);
+        console.log('📖 [DB GET] 지문 조회 성공:', response);
+        return response;
+    } catch (error) {
+        console.error('📖 [DB GET] 지문 조회 실패:', error);
+        throw error;
+    }
+}
+
+// 지문 수정 (/api/pass/update/each)
+export async function updatePassageInDatabase(passageData) {
+    try {
+        console.log('✏️ [DB UPDATE] 지문 수정 요청:', passageData);
+        const response = await apiPost('/api/pass/update/each', passageData);
+        console.log('✏️ [DB UPDATE] 지문 수정 성공:', response);
+        return response;
+    } catch (error) {
+        console.error('✏️ [DB UPDATE] 지문 수정 실패:', error);
+        throw error;
+    }
+}
