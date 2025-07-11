@@ -6,6 +6,9 @@
             </template>
             <template #left>
                 {{ generatedPassage }}
+                <!-- TipTapEditor (1) savedContent 값을 props 로 자식 컴포넌트의 initialContent 변수로 전달 -->
+                <!-- TipTapEditor (2) 자식 컴포넌트에서 emit 으로 부모 컴포넌트에 전달, 자식이 emit 한 데이터를 받는 함수 handleContentChange -->
+                <PassageEditor :max-length=numberLength :initialContent="savedContent" @content-changed="handleContentChange"/>
             </template>
             <template #right>
                 <!-- 지문 분석 (Pinia Store에서 자동으로 데이터 가져옴) -->
@@ -18,8 +21,22 @@
 <script setup>
 import PassageAndQuestionLayout from './PassageAndQuestionLayout.vue'
 import PassageSummaryLayout from './PassageSummaryLayout.vue'
+import PassageEditor from './PassageEditor.vue'
 import { usePassageStore } from '@/stores/passage'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+
+// TipTapEditor (1) GeneratedPassageView 진입시 보여줄 지문 데이터를 TipTapEditor 에 전달하기 위한 변수
+const savedContent = ref('<p>서버에서 <span class="boxed">가져온</span> 기존 내용</p>')
+const currentLength = ref(0)
+
+// TipTapEditor (2) TipTapEditor 에서 가져온 데이터
+const handleContentChange = ({ content, textLength }) => {
+  console.log('Content:', content)
+  console.log('Length:', textLength)
+
+  savedContent.value = content
+  currentLength.value = textLength
+}
 
 // Pinia store 사용
 const passageStore = usePassageStore()
