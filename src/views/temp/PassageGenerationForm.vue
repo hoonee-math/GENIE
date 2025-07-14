@@ -520,7 +520,7 @@ const generatePassage = async () => {
         passageStore.setResponseData({
             pas_title: savedPassage.title,
             pas_content: savedPassage.content,
-            description: parseGistToDescriptions(savedPassage.gist, requestData, generateType)
+            description: savedPassage.descriptions
         })
         
         // 6. 결과 페이지로 이동

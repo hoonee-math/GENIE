@@ -115,75 +115,11 @@ const loadPassageData = async () => {
 
 // DB 응답을 Store 형식으로 변환
 const transformDbResponseToStoreFormat = (dbResponse) => {
-  // 지문 타입 추론 (현재 스키마에서는 type 필드를 사용)
-  let methodType = 'single' // 기본값
-  
-  if (dbResponse.type === 'multiple') {
-    methodType = 'multiple'
-  } else if (dbResponse.type === 'reading') {
-    methodType = 'reading'
-  }
-  
-  // 키워드 분리 (문자열에서 배열로)
-  const keywords = dbResponse.keyword ? dbResponse.keyword.split(', ') : []
-  
-  // gist 분리 (개행 문자로 분리)
-  const corePoints = dbResponse.gist ? dbResponse.gist.split('\n').filter(point => point.trim()) : []
-  
-  // requestData 재구성 (추론)
-  let requestData = {}
-  if (methodType === 'multiple' && keywords.length >= 2) {
-    requestData = {
-      first_type_passage: '과학', // 임시값 (정확한 데이터는 2단계에서 처리)
-      first_keyword: keywords[0],
-      second_type_passage: '기술', // 임시값
-      second_keyword: keywords[1]
-    }
-  } else {
-    requestData = {
-      type_passage: dbResponse.type === 'reading' ? '독서론' : '인문', // 임시값
-      keyword: keywords[0] || dbResponse.keyword
-    }
-  }
-  
-  // responseData 구성
-  const responseData = {
-    pas_title: dbResponse.title,
-    pas_content: dbResponse.content,
-    description: parseGistToDescriptions(dbResponse.gist, methodType)
-  }
-  
+  // DB 응답을 그대로 Store에 저장하면 됨!
   return {
-    methodType,
-    requestData, 
-    responseData
-  }
-}
-
-// gist를 description 배열로 변환
-const parseGistToDescriptions = (gist, methodType) => {
-  if (!gist) return []
-  
-  const corePoints = gist.split('\n').filter(point => point.trim())
-  
-  if (methodType === 'multiple' && corePoints.length >= 2) {
-    return [
-      {
-        type_passage: '과학', // 임시값
-        core_point: corePoints[0]
-      },
-      {
-        type_passage: '기술', // 임시값
-        core_point: corePoints[1]
-      }
-    ]
-  } else {
-    return [
-      {
-        type_passage: methodType === 'reading' ? '독서론' : '인문', // 임시값
-        core_point: corePoints[0] || gist
-      }
-    ]
+    methodType: dbResponse.descriptions.length > 1 ? 'multiple' : 'single',
+    requestData: null, // 또는 적절히 추론
+    responseData: dbResponse  // ← 그냥 이렇게!
   }
 }
 

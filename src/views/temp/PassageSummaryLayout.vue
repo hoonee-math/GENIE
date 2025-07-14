@@ -28,7 +28,7 @@
                         지문 분야
                     </p>
                     <p class="font-normal text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030] break-words flex-1">
-                        <slot name="type_passage">{{ passageSubject }}</slot>
+                        <slot name="type_passage">{{ pasType }}</slot>
                     </p>
                 </div>
                 <div class="flex flex-row items-start w-full gap-4">
@@ -37,7 +37,7 @@
                     </p>
                     <div class="flex-1 min-w-0">
                         <p class="font-normal text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030] break-words whitespace-pre-wrap overflow-hidden">
-                            <slot name="keyword">{{ passageKeyword }}</slot>
+                            <slot name="keyword">{{ keyword }}</slot>
                         </p>
                     </div>
                 </div>
@@ -47,7 +47,7 @@
                         핵심 논점
                     </p>
                     <div class="w-full font-normal text-sm md:text-base leading-[200%] tracking-[-0.02em] text-[#303030] flex-1 overflow-auto">
-                        <slot name="generated_core_point">{{ currentCorePoint }}</slot>
+                        <slot name="generated_core_point">{{ gist }}</slot>
                     </div>
                 </div>
             </div>
@@ -78,9 +78,9 @@ const currentTabData = computed(() => {
 })
 
 // 각 탭별 데이터 (탭이 바뀔 때마다 다른 값 표시)
-const passageSubject = computed(() => currentTabData.value.type_passage)
-const passageKeyword = computed(() => currentTabData.value.keyword)
-const currentCorePoint = computed(() => currentTabData.value.core_point)
+const pasType = computed(() => currentTabData.value.type_passage)
+const keyword = computed(() => currentTabData.value.keyword)
+const gist = computed(() => currentTabData.value.core_point)
 
 // 탭이 변경될 때 activeTabIndex 초기화
 watch(corePointTabs, (newTabs) => {

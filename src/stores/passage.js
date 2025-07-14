@@ -22,50 +22,45 @@ export const usePassageStore = defineStore('passage', {
     // 독서 지문 여부
     isReadingPassage: (state) => state.generateType === 'reading',
     
-    // 지문 분석 데이터가 여러 개인지 확인 (DB의 description 배열 길이 기준)
+    // 지문 분석 데이터가 여러 개인지 확인 (DB의 descriptions 배열 길이 기준)
     hasMultipleCorePoints: (state) => {
-      return state.responseData?.description?.length > 1
+      return state.responseData?.descriptions?.length > 1
     },
     
     // 탭별 데이터 구성 (DB 구조 기반)
     corePointTabs: (state) => {
-      if (!state.responseData?.description) return []
-      
-      if (state.generateType === 'multiple' && state.responseData.description.length > 1) {
-        return [
-          {
-            label: '(가) 지문',
-            type_passage: state.responseData.description[0].type_passage,
-            keyword: state.requestData?.first_keyword || '',
-            core_point: state.responseData.description[0].core_point
-          },
-          {
-            label: '(나) 지문', 
-            type_passage: state.responseData.description[1].type_passage,
-            keyword: state.requestData?.second_keyword || '',
-            core_point: state.responseData.description[1].core_point
-          }
-        ]
-      } else {
-        return [
-          {
+        if (!state.responseData?.descriptions) return []
+  
+        const descriptions = state.responseData.descriptions
+        
+        // descriptions 길이로만 분기 처리
+        if (descriptions.length > 1) {
+            // 복합 지문 (2개 이상)
+            return descriptions.map((desc, index) => ({
+            label: `(${String.fromCharCode(65 + index)}) 지문`,  // (가), (나), (다)...
+            type_passage: desc.pasType,
+            keyword: desc.keyword,
+            core_point: desc.gist
+            }))
+        } else {
+            // 단일 지문 (1개)
+            return [{
             label: '지문 분석',
-            type_passage: state.responseData.description[0]?.type_passage || '',
-            keyword: state.requestData?.keyword || '',
-            core_point: state.responseData.description[0]?.core_point || ''
-          }
-        ]
-      }
+            type_passage: descriptions[0]?.pasType || '',
+            keyword: descriptions[0]?.keyword || '',
+            core_point: descriptions[0]?.gist || ''
+            }]
+        }
     },
     
     // 전체 지문 분야 (화면 헤더용)
     passageSubject: (state) => {
-      if (!state.responseData?.description) return ''
+      if (!state.responseData?.descriptions) return ''
       
-      if (state.generateType === 'multiple' && state.responseData.description.length > 1) {
-        return `${state.responseData.description[0].type_passage}, ${state.responseData.description[1].type_passage}`
+      if (state.generateType === 'multiple' && state.responseData.descriptions.length > 1) {
+        return `${state.responseData.descriptions[0].pasType}, ${state.responseData.descriptions[1].pasType}`
       } else {
-        return state.responseData.description[0]?.type_passage || ''
+        return state.responseData.descriptions[0]?.pasType || ''
       }
     },
     
