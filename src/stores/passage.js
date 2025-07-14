@@ -7,20 +7,20 @@ export const usePassageStore = defineStore('passage', {
     // 응답 데이터 (DB 구조 기반)
     responseData: null,
     // 지문 타입 ('single', 'multiple', 'reading')
-    passageType: null,
+    generateType: null,
     // 로딩 상태
     isLoading: false
   }),
 
   getters: {
     // 단일 지문 여부
-    isSinglePassage: (state) => state.passageType === 'single',
+    isSinglePassage: (state) => state.generateType === 'single',
     
     // 복합 지문 여부
-    isMultiplePassage: (state) => state.passageType === 'multiple',
+    isMultiplePassage: (state) => state.generateType === 'multiple',
     
     // 독서 지문 여부
-    isReadingPassage: (state) => state.passageType === 'reading',
+    isReadingPassage: (state) => state.generateType === 'reading',
     
     // 지문 분석 데이터가 여러 개인지 확인 (DB의 description 배열 길이 기준)
     hasMultipleCorePoints: (state) => {
@@ -31,7 +31,7 @@ export const usePassageStore = defineStore('passage', {
     corePointTabs: (state) => {
       if (!state.responseData?.description) return []
       
-      if (state.passageType === 'multiple' && state.responseData.description.length > 1) {
+      if (state.generateType === 'multiple' && state.responseData.description.length > 1) {
         return [
           {
             label: '(가) 지문',
@@ -62,7 +62,7 @@ export const usePassageStore = defineStore('passage', {
     passageSubject: (state) => {
       if (!state.responseData?.description) return ''
       
-      if (state.passageType === 'multiple' && state.responseData.description.length > 1) {
+      if (state.generateType === 'multiple' && state.responseData.description.length > 1) {
         return `${state.responseData.description[0].type_passage}, ${state.responseData.description[1].type_passage}`
       } else {
         return state.responseData.description[0]?.type_passage || ''
@@ -73,11 +73,11 @@ export const usePassageStore = defineStore('passage', {
     passageKeyword: (state) => {
       if (!state.requestData) return ''
       
-      if (state.passageType === 'single') {
+      if (state.generateType === 'single') {
         return state.requestData.keyword
-      } else if (state.passageType === 'multiple') {
+      } else if (state.generateType === 'multiple') {
         return `${state.requestData.first_keyword}, ${state.requestData.second_keyword}`
-      } else if (state.passageType === 'reading') {
+      } else if (state.generateType === 'reading') {
         return state.requestData.keyword
       }
       return ''
@@ -88,7 +88,7 @@ export const usePassageStore = defineStore('passage', {
     // 지문 생성 요청 데이터 저장
     setRequestData(data, type) {
       this.requestData = data
-      this.passageType = type
+      this.generateType = type
     },
     
     // 지문 생성 응답 데이터 저장 (DB 구조 기반)
@@ -106,7 +106,7 @@ export const usePassageStore = defineStore('passage', {
     clearData() {
       this.requestData = null
       this.responseData = null
-      this.passageType = null
+      this.generateType = null
       this.isLoading = false
     }
   }

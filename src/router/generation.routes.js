@@ -11,11 +11,11 @@ const generationRoutes = [
     path: "passage",
     name: "passage",
     children: [
-      { path: "", name: "passage-main", component: PassageMain },
+      { path: "", name: "passage-main", component: PassageGenerationForm },
       { path: "create", name: "passage-create", component: PassageContent },
       // 새로 만든 임시 주소
       { path: "form", name: "passage-form", component: PassageGenerationForm },
-      { path: "generated", name: "passage-generated", component: GeneratedPassageView },
+      { path: "view/:pasCode", name: "passage-view", component: GeneratedPassageView },
     ],
   },
   {

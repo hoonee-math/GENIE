@@ -54,14 +54,14 @@
                                         지문 분야 선택 <span class="text-red-500">*</span>
                                     </h3>
                                     <div class="grid grid-cols-3 gap-8">
-                                        <button v-for="category in categories" :key="category"
-                                            @click="singleForm.type_passage = category" :class="[
+                                        <button v-for="pasType in pasTypes" :key="pasType"
+                                            @click="singleForm.type_passage = pasType" :class="[
                                                 'py-6 px-6 text-xl font-medium rounded-lg border-2 transition-all duration-200',
-                                                singleForm.type_passage === category
+                                                singleForm.type_passage === pasType
                                                     ? 'bg-brand/20 border-brand text-brand'
                                                     : 'bg-white border-gray-300 text-gray-700 hover:border-brand hover:text-brand'
                                             ]">
-                                            {{ category }}
+                                            {{ pasType }}
                                         </button>
                                     </div>
                                 </div>
@@ -118,14 +118,14 @@
                                         분야 선택 <span class="text-red-500">*</span>
                                     </h3>
                                     <div class="grid grid-cols-5 gap-3">
-                                        <button v-for="category in categories" :key="'first-' + category"
-                                            @click="multipleForm.first_type_passage = category" :class="[
+                                        <button v-for="pasType in pasTypes" :key="'first-' + pasType"
+                                            @click="multipleForm.first_type_passage = pasType" :class="[
                                                 'py-3 px-4 text-xl font-medium rounded-lg border-2 transition-all duration-200',
-                                                multipleForm.first_type_passage === category
+                                                multipleForm.first_type_passage === pasType
                                                     ? 'bg-brand/20 border-brand text-brand'
                                                     : 'bg-white border-gray-300 text-gray-700 hover:border-brand hover:text-brand'
                                             ]">
-                                            {{ category }}
+                                            {{ pasType }}
                                         </button>
                                     </div>
                                 </div>
@@ -157,14 +157,14 @@
                                         분야 선택 <span class="text-red-500">*</span>
                                     </h3>
                                     <div class="grid grid-cols-5 gap-3">
-                                        <button v-for="category in categories" :key="'second-' + category"
-                                            @click="multipleForm.second_type_passage = category" :class="[
+                                        <button v-for="pasType in pasTypes" :key="'second-' + pasType"
+                                            @click="multipleForm.second_type_passage = pasType" :class="[
                                                 'py-3 px-4 text-xl font-medium rounded-lg border-2 transition-all duration-200',
-                                                multipleForm.second_type_passage === category
+                                                multipleForm.second_type_passage === pasType
                                                     ? 'bg-brand/20 border-brand text-brand'
                                                     : 'bg-white border-gray-300 text-gray-700 hover:border-brand hover:text-brand'
                                             ]">
-                                            {{ category }}
+                                            {{ pasType }}
                                         </button>
                                     </div>
                                 </div>
@@ -298,7 +298,7 @@ const tabs = [
 const activeTab = ref('single')
 
 // 카테고리 데이터
-const categories = ['인문', '사회', '과학', '기술', '예술']
+const pasTypes = ['인문', '사회', '과학', '기술', '예술']
 
 // 지문 구조 데이터
 const structures = ['설명과 분석', '비교와 대조', '문제와 해결', '흐름과 과정', 'AI 추천 설정']
@@ -381,41 +381,64 @@ const resetForm = () => {
 // 데이터 변환 함수들
 
 // 제목 생성 함수
-const generateTitle = (passageType, requestData) => {
+const generateTitle = (generateType, requestData) => {
+    if (documentTitle === "Untitled") {
+        return documentTitle;
+    }
+
     const now = new Date()
     const dateStr = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`
     
-    if (passageType === 'single') {
-        return `단일 지문_${requestData.type_passage}_${dateStr}`
-    } else if (passageType === 'multiple') {
-        return `복수 지문_${requestData.first_type_passage}+${requestData.second_type_passage}_${dateStr}`
-    } else if (passageType === 'reading') {
-        return `독서론 지문_${dateStr}`
+    if (generateType === 'single') {
+        return `[단일 지문] ${requestData.keyword.slice(0, 10)} (${dateStr})`
+    } else if (generateType === 'multiple') {
+        return `[복수 지문] ${requestData.first_type_passage} & ${requestData.second_type_passage} (${dateStr})`
+    } else if (generateType === 'reading') {
+        return `[독서론 지문] ${requestData.keyword.slice(0, 10)} (${dateStr})`
     }
-    return `지문_${dateStr}`
+    return documentTitle;
 }
 
-// 키워드 추출 함수
-const extractKeywords = (requestData, passageType) => {
-    if (passageType === 'single') {
-        return requestData.keyword
-    } else if (passageType === 'multiple') {
-        return `${requestData.first_keyword}, ${requestData.second_keyword}`
-    } else if (passageType === 'reading') {
-        return requestData.keyword
+// DescriptionDto 구조에 맞춰 생성
+const createDescriptions = (apiResponse, requestData, generateType) => {
+    if (generateType === 'single') {
+        return [{
+            pasType: requestData.type_passage,
+            keyword: requestData.keyword,
+            gist: apiResponse.generated_core_point[0],
+            order: 1
+        }]
+    } else if (generateType === 'multiple') {
+        return [
+            {
+                pasType: requestData.first_type_passage,
+                keyword: requestData.first_keyword,
+                gist: apiResponse.generated_core_point[0],
+                order: 1
+            },
+            {
+                pasType: requestData.second_type_passage,
+                keyword: requestData.second_keyword,
+                gist: apiResponse.generated_core_point[1],
+                order: 2
+            }
+        ]
+    } else if (generateType === 'reading') {
+        return [{
+            pasType: '독서론',
+            keyword: requestData.keyword,
+            gist: apiResponse.generated_core_point[0],
+            order: 1
+        }]
     }
-    return ''
 }
 
-// FastAPI 응답을 백엔드 저장 형식으로 변환
-const transformApiResponseToDbFormat = (apiResponse, requestData, passageType) => {
+const transformApiResponseToDbFormat = (apiResponse, requestData, generateType) => {
     return {
-        type: passageType,
-        keyword: extractKeywords(requestData, passageType),
-        title: generateTitle(passageType, requestData),
+        title: generateTitle(generateType, requestData),
         content: apiResponse.generated_passage,
-        gist: apiResponse.generated_core_point.join('\n'), // 배열을 개행 문자로 연결
-        isGenerated: 1
+        isGenerated: 1,
+        descriptions: createDescriptions(apiResponse, requestData, generateType) // ← 새로 추가
     }
 }
 
@@ -427,12 +450,12 @@ const generatePassage = async () => {
     
     try {
         let requestData = {}
-        let passageType = ''
+        let generateType = ''
         let apiFunction = null
 
         // 1. 요청 데이터 구성
         if (activeTab.value === 'single') {
-            passageType = 'single'
+            generateType = 'single'
             requestData = {
                 type_passage: singleForm.type_passage,
                 keyword: singleForm.keyword
@@ -447,7 +470,7 @@ const generatePassage = async () => {
             apiFunction = generateSinglePassageAPI
             
         } else if (activeTab.value === 'multiple') {
-            passageType = 'multiple'
+            generateType = 'multiple'
             requestData = {
                 first_type_passage: multipleForm.first_type_passage,
                 first_keyword: multipleForm.first_keyword,
@@ -464,7 +487,7 @@ const generatePassage = async () => {
             apiFunction = generateMultiplePassageAPI
             
         } else if (activeTab.value === 'reading') {
-            passageType = 'reading'
+            generateType = 'reading'
             requestData = {
                 type_passage: '독서론',
                 keyword: readingForm.keyword
@@ -476,7 +499,7 @@ const generatePassage = async () => {
             apiFunction = generateReadingPassageAPI
         }
 
-        console.log('🚀 지문 생성 시작:', { passageType, requestData })
+        console.log('🚀 지문 생성 시작:', { generateType, requestData })
 
         // 2. FastAPI 호출 (지문 생성)
         loadingStep.value = 'generating'
@@ -484,7 +507,7 @@ const generatePassage = async () => {
         console.log('✅ FastAPI 응답 성공:', apiResponse)
 
         // 3. 데이터 변환 (백엔드 저장 형식)
-        const dbData = transformApiResponseToDbFormat(apiResponse, requestData, passageType)
+        const dbData = transformApiResponseToDbFormat(apiResponse, requestData, generateType)
         console.log('🔄 DB 저장용 데이터 변환:', dbData)
 
         // 4. 백엔드 DB 저장
@@ -493,11 +516,11 @@ const generatePassage = async () => {
         console.log('✅ DB 저장 성공:', savedPassage)
 
         // 5. Store에 데이터 저장
-        passageStore.setRequestData(requestData, passageType)
+        passageStore.setRequestData(requestData, generateType)
         passageStore.setResponseData({
             pas_title: savedPassage.title,
             pas_content: savedPassage.content,
-            description: parseGistToDescriptions(savedPassage.gist, requestData, passageType)
+            description: parseGistToDescriptions(savedPassage.gist, requestData, generateType)
         })
         
         // 6. 결과 페이지로 이동
@@ -521,30 +544,6 @@ const generatePassage = async () => {
     }
 }
 
-// gist 문자열을 description 배열로 변환 (현재 스키마용)
-const parseGistToDescriptions = (gist, requestData, passageType) => {
-    const corePoints = gist.split('\n').filter(point => point.trim())
-    
-    if (passageType === 'multiple' && corePoints.length >= 2) {
-        return [
-            {
-                type_passage: requestData.first_type_passage,
-                core_point: corePoints[0]
-            },
-            {
-                type_passage: requestData.second_type_passage,
-                core_point: corePoints[1]
-            }
-        ]
-    } else {
-        return [
-            {
-                type_passage: passageType === 'reading' ? '독서론' : requestData.type_passage,
-                core_point: corePoints[0] || gist
-            }
-        ]
-    }
-}
 </script>
 
 <style scoped>
