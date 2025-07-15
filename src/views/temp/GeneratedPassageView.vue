@@ -44,6 +44,8 @@
                 <PassageSummaryLayout />
             </template>
         </PassageAndQuestionLayout>
+
+        <!-- 재생성하기, 문항 이어서 생성하기, 저장하기, 추출하기 버튼 추가 예정 -->
     </div>
 </template>
 

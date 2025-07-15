@@ -1,104 +1,63 @@
 <template>
     <!-- 데스크톱 버전 -->
     <div class="hidden md:flex flex-col gap-8 p-8 box-border w-full">
-        <p
-            class="font-pretendard font-bold text-base leading-[150%] tracking-[-0.02em] text-[#16252d]"
-        >
+        <p class="font-pretendard font-bold text-base leading-[150%] tracking-[-0.02em] text-[#16252d]">
             문항 생성
         </p>
 
         <div class="flex flex-col gap-8">
             <div class="flex flex-col lg:flex-row gap-4">
                 <div class="flex-1">
-                    <p
-                        class="font-bold text-2xl md:text-xl leading-[150%] tracking-[-0.02em] text-black pb-2"
-                    >
+                    <p class="font-bold text-2xl md:text-xl leading-[150%] tracking-[-0.02em] text-black pb-2">
                         지문
                     </p>
                     <div class="w-full">
-                        <EditPassage
-                            ref="editPassageRef"
-                            :initialTitle="passageData.title"
-                            :initialContent="passageData.content"
-                            @content-changed="handlePassageChange"
-                        />
+                        <EditPassage ref="editPassageRef" :initialTitle="passageData.title"
+                            :initialContent="passageData.content" @content-changed="handlePassageChange" />
                     </div>
                 </div>
 
-                <PassageSummary
-                    id="passage-summary"
-                    class="w-full lg:max-w-[35%] lg:max-w-[35%]"
-                />
+                <PassageSummary id="passage-summary" class="w-full lg:max-w-[35%] lg:max-w-[35%]" />
             </div>
 
             <div class="flex flex-col lg:flex-row gap-4">
                 <!-- 문항 캐러셀 -->
                 <div class="flex-1 overflow-hidden">
-                    <p
-                        class="h-[41px] font-bold text-2xl md:text-xl leading-[150%] tracking-[-0.02em] text-black"
-                    >
+                    <p class="h-[41px] font-bold text-2xl md:text-xl leading-[150%] tracking-[-0.02em] text-black">
                         문항
                     </p>
-                    <div
-                        class="flex flex-row flex-nowrap w-auto transition-transform duration-300"
-                        :style="{
-                            transform: `translateX(-${currentSlide * 100}%)`,
-                        }"
-                    >
-                        <div
-                            v-for="(item, index) in questionsData"
-                            :key="index"
-                            class="flex-none min-w-full w-full h-full"
-                        >
-                            <EditQuestion
-                                ref="editQuestionRefs"
-                                :questions="item.queOption"
-                                :questionTitle="item.queQuery"
-                                :isEditing="isEditingGlobal"
-                                :isFromRoute="isFromRoute"
-                                @edit-mode-changed="updateEditingMode"
-                                @question-changed="
+                    <div class="flex flex-row flex-nowrap w-auto transition-transform duration-300" :style="{
+                        transform: `translateX(-${currentSlide * 100}%)`,
+                    }">
+                        <div v-for="(item, index) in questionsData" :key="index"
+                            class="flex-none min-w-full w-full h-full">
+                            <EditQuestion ref="editQuestionRefs" :questions="item.queOption"
+                                :questionTitle="item.queQuery" :isEditing="isEditingGlobal" :isFromRoute="isFromRoute"
+                                @edit-mode-changed="updateEditingMode" @question-changed="
                                     handleQuestionChange($event, index)
-                                "
-                                @request-edit-mode="openEditWarningModal"
-                                @recreate-question="
+                                    " @request-edit-mode="openEditWarningModal" @recreate-question="
                                     handleRecreateButtonClick(index)
-                                "
-                            />
+                                    " />
                         </div>
                     </div>
                 </div>
 
                 <div class="w-full lg:max-w-[35%] lg:max-w-[35%]">
                     <!-- 해설 캐러셀 -->
-                    <p
-                        class="font-semibold text-2xl md:text-xl leading-8 text-black pb-2"
-                    >
+                    <p class="font-semibold text-2xl md:text-xl leading-8 text-black pb-2">
                         문제 해설
                     </p>
                     <div class="box-border overflow-hidden rounded-xl">
-                        <div
-                            class="flex w-full transition-transform duration-300"
-                            :style="{
-                                transform: `translateX(-${
-                                    currentSlide * 100
+                        <div class="flex w-full transition-transform duration-300" :style="{
+                            transform: `translateX(-${currentSlide * 100
                                 }%)`,
-                            }"
-                        >
-                            <div
-                                v-for="(item, index) in questionsData"
-                                :key="index"
-                                class="flex-none w-full min-w-full h-full box-border flex flex-col"
-                            >
-                                <QuestionDescription
-                                    :isEditing="isEditingGlobal"
-                                    :queAnswer="item.queAnswer"
-                                    :description="item.description"
-                                    :slideIndex="index"
-                                    @description-changed="
+                        }">
+                            <div v-for="(item, index) in questionsData" :key="index"
+                                class="flex-none w-full min-w-full h-full box-border flex flex-col">
+                                <QuestionDescription :isEditing="isEditingGlobal" :queAnswer="item.queAnswer"
+                                    :description="item.description" :slideIndex="index" @description-changed="
                                         handleDescriptionChange($event, index)
-                                    "
-                                />
+                                        " />
                             </div>
                         </div>
                     </div>
@@ -109,67 +68,32 @@
             <div class="flex flex-row items-center p-0 gap-3 justify-center">
                 <button
                     class="hover:bg-gray-100 hover:shadow-sm bg-transparent border-none cursor-pointer flex justify-center items-center text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                    :disabled="currentSlide === 0"
-                    @click="prevSlide"
-                >
-                    <Icon
-                        icon="ep:arrow-left-bold"
-                        width="18px"
-                        height="18px"
-                        class="text-[#303030]"
-                    />
+                    :disabled="currentSlide === 0" @click="prevSlide">
+                    <Icon icon="ep:arrow-left-bold" width="18px" height="18px" class="text-[#303030]" />
                 </button>
                 <div
-                    class="flex flex-row justify-center items-center gap-2 w-[100px] h-[30px] font-pretendard text-base"
-                >
+                    class="flex flex-row justify-center items-center gap-2 w-[100px] h-[30px] font-pretendard text-base">
                     <span class="text-[#0086ff] text-base">{{
                         currentSlide + 1
-                    }}</span>
+                        }}</span>
                     / {{ questionsData.length }}
                 </div>
                 <button
                     class="hover:bg-gray-100 hover:shadow-sm bg-transparent border-none cursor-pointer flex justify-center items-center text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                    :disabled="currentSlide === questionsData.length - 1"
-                    @click="nextSlide"
-                >
-                    <Icon
-                        icon="ep:arrow-right-bold"
-                        width="18px"
-                        height="18px"
-                        class="text-[#303030]"
-                    />
+                    :disabled="currentSlide === questionsData.length - 1" @click="nextSlide">
+                    <Icon icon="ep:arrow-right-bold" width="18px" height="18px" class="text-[#303030]" />
                 </button>
             </div>
         </div>
 
         <div class="hidden md:flex flex-row items-center gap-6 justify-end">
-            <BaseButton
-                text="문항 추가하기"
-                type="type2"
-                width="248px"
-                height="54px"
-                :disabled="isContentChanged || isFromRoute"
-                @click="validateAndOpenModal('generate')"
-                class="flex-none order-0 flex-grow-0"
-            />
-            <BaseButton
-                text="저장하기"
-                type="type2"
-                width="248px"
-                height="54px"
-                :disabled="!isContentChanged"
-                @click="handleSaveButtonClick"
-                class="flex-none order-1 flex-grow-0"
-            />
-            <BaseButton
-                text="추출하기"
-                type="type2"
-                width="248px"
-                height="54px"
-                :disabled="isContentChanged"
-                @click="openFileModal"
-                class="flex-none order-2 flex-grow-0"
-            />
+            <BaseButton text="문항 추가하기" type="type2" width="248px" height="54px"
+                :disabled="isContentChanged || isFromRoute" @click="validateAndOpenModal('generate')"
+                class="flex-none order-0 flex-grow-0" />
+            <BaseButton text="저장하기" type="type2" width="248px" height="54px" :disabled="!isContentChanged"
+                @click="handleSaveButtonClick" class="flex-none order-1 flex-grow-0" />
+            <BaseButton text="추출하기" type="type2" width="248px" height="54px" :disabled="isContentChanged"
+                @click="openFileModal" class="flex-none order-2 flex-grow-0" />
         </div>
     </div>
 
@@ -177,120 +101,58 @@
     <div class="block md:hidden w-full bg-white h-screen">
         <!-- Header -->
         <header
-            class="sticky top-0 z-999 bg-white/80 backdrop-blur-md justify-center shadow-[0_1px_3px_rgba(0,0,0,0.05)] px-4 py-3.5 flex items-center"
-        >
+            class="sticky top-0 z-999 bg-white/80 backdrop-blur-md justify-center shadow-[0_1px_3px_rgba(0,0,0,0.05)] px-4 py-3.5 flex items-center">
             <div class="flex items-center gap-2">
                 <div class="flex justify-center items-center w-full">
-                    <router-link
-                        to="/questions"
-                        class="text-base text-center font-bold bg-[#222] bg-clip-text text-transparent"
-                        >문항생성</router-link
-                    >
+                    <router-link to="/questions"
+                        class="text-base text-center font-bold bg-[#222] bg-clip-text text-transparent">문항생성</router-link>
                 </div>
             </div>
         </header>
 
         <!-- 버튼 그룹 -->
-        <div
-            class="flex items-center gap-2 justify-end border-b border-gray-200 p-2"
-        >
-            <button
-                @click="validateAndOpenModal('generate')"
-                :disabled="isContentChanged || isFromRoute"
-                class="hover:bg-[#dcfce7] hover:shadow-sm px-3 py-1.5 text-xs rounded-lg transition-all duration-200 bg-[#f0fdf4] text-[#16a34a] shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#f0fdf4] disabled:hover:text-[#16a34a]"
-            >
+        <div class="flex items-center gap-2 justify-end border-b border-gray-200 p-2">
+            <button @click="validateAndOpenModal('generate')" :disabled="isContentChanged || isFromRoute"
+                class="hover:bg-[#dcfce7] hover:shadow-sm px-3 py-1.5 text-xs rounded-lg transition-all duration-200 bg-[#f0fdf4] text-[#16a34a] shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#f0fdf4] disabled:hover:text-[#16a34a]">
                 문항 추가하기
             </button>
-            <button
-                @click="handleSaveButtonClick"
-                :disabled="!isContentChanged"
-                class="hover:bg-[#cce7ff] hover:shadow-sm px-3 py-1.5 text-xs rounded-lg transition-all duration-200 bg-[#e6f3ff] text-[#0066cc] shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#e6f3ff] disabled:hover:text-[#0066cc]"
-            >
+            <button @click="handleSaveButtonClick" :disabled="!isContentChanged"
+                class="hover:bg-[#cce7ff] hover:shadow-sm px-3 py-1.5 text-xs rounded-lg transition-all duration-200 bg-[#e6f3ff] text-[#0066cc] shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#e6f3ff] disabled:hover:text-[#0066cc]">
                 저장하기
             </button>
-            <button
-                @click="openFileModal"
-                :disabled="isContentChanged"
-                class="hover:bg-[#e0f2fe] hover:shadow-sm px-3 py-1.5 text-xs rounded-lg transition-all duration-200 bg-[#f0f9ff] text-[#0284c7] shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#f0f9ff] disabled:hover:text-[#0284c7]"
-            >
+            <button @click="openFileModal" :disabled="isContentChanged"
+                class="hover:bg-[#e0f2fe] hover:shadow-sm px-3 py-1.5 text-xs rounded-lg transition-all duration-200 bg-[#f0f9ff] text-[#0284c7] shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#f0f9ff] disabled:hover:text-[#0284c7]">
                 추출하기
             </button>
         </div>
         <div class="flex flex-col gap-4 p-4">
             <!-- 문항 섹션 -->
             <div class="w-full">
-                <EditPassageMobile
-                    ref="editPassageRefMobile"
-                    :initial-title="passageData.title"
-                    :initial-content="passageData.content"
-                    @content-changed="handlePassageChange"
-                />
+                <EditPassageMobile ref="editPassageRefMobile" :initial-title="passageData.title"
+                    :initial-content="passageData.content" @content-changed="handlePassageChange" />
             </div>
         </div>
     </div>
 
     <!-- Modals -->
-    <GenerateQuestionModal
-        :isOpen="showGenerateQuestionModal"
-        createText="다음"
-        mode="generate"
-        @close="showGenerateQuestionModal = false"
-        @openPaymentModal="handleUpdateQuestion"
-    />
-    <PaymentUsageModal
-        :isOpen="showPaymentModal"
-        createText="문항 추가하기"
-        @close="showPaymentModal = false"
-        @generate="handleQuestionGeneration"
-        :selected-question="selectedQuestion"
-    />
-    <PaymentUsageModal
-        :isOpen="showRecreateModal"
-        createText="재생성하기"
-        @close="showRecreateModal = false"
-        @generate="handleRecreateGeneration"
-        :selected-question="selectedQuestion"
-    />
-    <ConfirmModalComponent
-        :isOpen="isConfirmModalOpen"
-        title="문항 생성이 불가합니다."
-        message="500자 이하의 지문으로 정상적인 문항을 생성하기 어렵습니다.<br>충분한 지문을 입력해 주세요."
-        @close="isConfirmModalOpen = false"
-        @confirm="isConfirmModalOpen = false"
-    />
-    <WarningModalComponent
-        :isOpen="isLengthWarning"
-        title="글자 수를 확인해주세요."
-        message="500자 이하의 지문으로는 새로운 문항을 추가하기 어렵습니다.<br>그래도 저장하시겠습니까?"
-        cancelText="취소하기"
-        confirmText="저장하기"
-        @close="cancelLengthWarning"
-        @confirm="confirmLengthWarning"
-    />
-    <WarningModalComponent
-        :isOpen="isWarningModalOpen"
-        title="작업을 중단하시겠습니까?"
-        message="마지막 편집 내용은 저장되지 않습니다."
-        cancelText="취소하기"
-        confirmText="작업 중단하기"
-        @close="cancelNavigation"
-        @confirm="confirmNavigation"
-    />
-    <WarningModalComponent
-        :isOpen="isEditWarningModalOpen"
-        title="문항 수정 시 최초 생성된 해설은 적용되지 않습니다."
-        message="해설 수정을 원하실 경우, 직접 수정도 가능합니다."
-        cancelText="취소하기"
-        confirmText="수정하기"
-        @close="closeEditWarningModal"
-        @confirm="confirmEditWarningModal"
-    />
-    <FileSelectModal
-        :isOpen="isFileModalOpen"
-        :pasCode="pasCode"
-        @close="closeFileModal"
-        @confirm="handleFileSelect"
-    />
+    <GenerateQuestionModal :isOpen="showGenerateQuestionModal" createText="다음" mode="generate"
+        @close="showGenerateQuestionModal = false" @openPaymentModal="handleUpdateQuestion" />
+    <PaymentUsageModal :isOpen="showPaymentModal" createText="문항 추가하기" @close="showPaymentModal = false"
+        @generate="handleQuestionGeneration" :selected-question="selectedQuestion" />
+    <PaymentUsageModal :isOpen="showRecreateModal" createText="재생성하기" @close="showRecreateModal = false"
+        @generate="handleRecreateGeneration" :selected-question="selectedQuestion" />
+    <ConfirmModalComponent :isOpen="isConfirmModalOpen" title="문항 생성이 불가합니다."
+        message="500자 이하의 지문으로 정상적인 문항을 생성하기 어렵습니다.<br>충분한 지문을 입력해 주세요." @close="isConfirmModalOpen = false"
+        @confirm="isConfirmModalOpen = false" />
+    <WarningModalComponent :isOpen="isLengthWarning" title="글자 수를 확인해주세요."
+        message="500자 이하의 지문으로는 새로운 문항을 추가하기 어렵습니다.<br>그래도 저장하시겠습니까?" cancelText="취소하기" confirmText="저장하기"
+        @close="cancelLengthWarning" @confirm="confirmLengthWarning" />
+    <WarningModalComponent :isOpen="isWarningModalOpen" title="작업을 중단하시겠습니까?" message="마지막 편집 내용은 저장되지 않습니다."
+        cancelText="취소하기" confirmText="작업 중단하기" @close="cancelNavigation" @confirm="confirmNavigation" />
+    <WarningModalComponent :isOpen="isEditWarningModalOpen" title="문항 수정 시 최초 생성된 해설은 적용되지 않습니다."
+        message="해설 수정을 원하실 경우, 직접 수정도 가능합니다." cancelText="취소하기" confirmText="수정하기" @close="closeEditWarningModal"
+        @confirm="confirmEditWarningModal" />
+    <FileSelectModal :isOpen="isFileModalOpen" :pasCode="pasCode" @close="closeFileModal" @confirm="handleFileSelect" />
     <LoadingModal :isOpen="isLoading" :message="loadingMessage" />
 </template>
 
