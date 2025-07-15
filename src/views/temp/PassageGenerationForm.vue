@@ -274,11 +274,11 @@ import PassageGenerationFormSplitLayout from './PassageGenerationFormSplitLayout
 import BaseTooltip from '@/components/common/BaseTooltip.vue'
 import { generateSinglePassageAPI, generateReadingPassageAPI, generateMultiplePassageAPI } from '@/api/generate'
 import { savePassageToDatabase } from '@/api/passage'
-import { usePassageStore } from '@/stores/passage'
+import { usePassage } from '@/composables/usePassage'
 
-// Router 및 Store 설정
+// Router 및 Composable 설정
 const router = useRouter()
-const passageStore = usePassageStore()
+const { cacheGeneratedPassage } = usePassage()
 
 // 로딩 및 에러 상태
 const isLoading = ref(false)
@@ -525,14 +525,10 @@ const generatePassage = async () => {
         loadingStep.value = 'saving'
         const savedPassage = await savePassageToDatabase(dbData)
         console.log('✅ DB 저장 성공:', savedPassage)
-
-        // 5. Store에 데이터 저장
-        passageStore.setRequestData(requestData, generateType)
-        passageStore.setResponseData({
-            pas_title: savedPassage.title,
-            pas_content: savedPassage.content,
-            description: savedPassage.descriptions
-        })
+        
+        // 5. Simple Store 에 캐싱 (중복 API 호출 방지)
+        cacheGeneratedPassage(savedPassage.pasCode, apiResponse, savedPassage)
+        console.log('✅ Simple Store 캐싱 완료:', savedPassage.pasCode)
         
         // 6. 결과 페이지로 이동
         console.log('📫 결과 페이지로 이동:', `/passage/view/${savedPassage.pasCode}`)

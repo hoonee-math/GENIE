@@ -53,17 +53,15 @@ import { useRoute } from 'vue-router'
 import PassageAndQuestionLayout from './PassageAndQuestionLayout.vue'
 import PassageSummaryLayout from './PassageSummaryLayout.vue'
 import PassageEditor from './PassageEditor.vue'
-import { usePassageStore } from '@/stores/passage'
-import { getPassageFromDatabase } from '@/api/passage'
+import { usePassage } from '@/composables/usePassage'
 
-// Router 및 Store 설정
+// Router 및 Composable 설정
 const route = useRoute()
-const passageStore = usePassageStore()
+const { fetchPassage, passage, isLoading: passageLoading } = usePassage()
 
 // 로딩 및 에러 상태
 const isLoading = ref(true)
 const errorMessage = ref('')
-const passageData = ref(null)
 
 // TipTapEditor 관련 변수
 const savedContent = ref('')
@@ -78,7 +76,7 @@ const handleContentChange = ({ content, textLength }) => {
   currentLength.value = textLength
 }
 
-// URL에서 pasCode 추출 및 데이터 로드
+// URL에서 pasCode 추출 및 데이터 로드 (캐시 우선)
 const loadPassageData = async () => {
   try {
     isLoading.value = true
@@ -89,21 +87,18 @@ const loadPassageData = async () => {
       throw new Error('지문 코드가 없습니다.')
     }
 
-    console.log('📜 지문 데이터 로드 시작:', pasCode)
+    console.log('📜 지문 데이터 로드 시작 (캐시 우선):', pasCode)
     
-    // 서버에서 지문 데이터 조회
-    const dbResponse = await getPassageFromDatabase(pasCode)
-    console.log('✅ 서버 응답:', dbResponse)
-    
-    passageData.value = dbResponse
+    // usePassage의 fetchPassage 사용 (캐시 우선 + API 호출)
+    await fetchPassage(pasCode)
     
     // TipTap 에디터에 초기 콘텐츠 설정
-    savedContent.value = dbResponse.content || ''
+    savedContent.value = passage.value.content || ''
     
-    // Store에 데이터 저장 (현재 스키마 기반)
-    const transformedData = transformDbResponseToStoreFormat(dbResponse)
-    passageStore.setRequestData(transformedData.requestData, transformedData.methodType)
-    passageStore.setResponseData(transformedData.responseData)
+    console.log('✅ 지문 데이터 로드 완료:', {
+      pasCode: passage.value.pasCode,
+      title: passage.value.title
+    })
     
   } catch (error) {
     console.error('❌ 지문 로드 실패:', error)
@@ -113,27 +108,11 @@ const loadPassageData = async () => {
   }
 }
 
-// DB 응답을 Store 형식으로 변환
-const transformDbResponseToStoreFormat = (dbResponse) => {
-  // DB 응답을 그대로 Store에 저장하면 됨!
-  return {
-    methodType: dbResponse.descriptions.length > 1 ? 'multiple' : 'single',
-    requestData: null, // 또는 적절히 추론
-    responseData: dbResponse  // ← 그냥 이렇게!
-  }
-}
-
-// Computed 속성들
-const generatedPassage = computed(() => {
-  if (isLoading.value) return '로딩 중...'
-  if (errorMessage.value) return '오류가 발생했습니다.'
-  return passageData.value?.content || '지문 내용을 불러올 수 없습니다.'
-})
-
+// Computed 속성들 (usePassage에서 데이터 가져오기)
 const passageTitle = computed(() => {
   if (isLoading.value) return '로딩 중...'
   if (errorMessage.value) return '오류'
-  return passageData.value?.title || 'Untitled'
+  return passage.value.title || 'Untitled'
 })
 
 // 컴포넌트 마운트 시 데이터 로드

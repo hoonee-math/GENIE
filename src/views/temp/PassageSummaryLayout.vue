@@ -57,16 +57,13 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { usePassageStore } from '@/stores/passage'
+import { usePassage } from '@/composables/usePassage'
 
-// Pinia store 사용
-const passageStore = usePassageStore()
+// usePassage composable 사용
+const { corePointTabs } = usePassage()
 
 // 현재 활성 탭
 const activeTabIndex = ref(0)
-
-// Store에서 데이터 가져오기
-const corePointTabs = computed(() => passageStore.corePointTabs)
 
 // 탭 표시 여부 (복합 지문일 때만)
 const showTabs = computed(() => corePointTabs.value.length > 1)
@@ -89,13 +86,3 @@ watch(corePointTabs, (newTabs) => {
   }
 }, { immediate: true })
 </script>
-
-<style scoped>
-.text-brand {
-  color: #0086FF;
-}
-
-.border-brand {
-  border-color: #0086FF;
-}
-</style>
