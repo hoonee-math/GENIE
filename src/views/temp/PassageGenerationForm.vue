@@ -436,10 +436,21 @@ const createDescriptions = (apiResponse, requestData, generateType) => {
 const transformApiResponseToDbFormat = (apiResponse, requestData, generateType) => {
     return {
         title: generateTitle(generateType, requestData),
-        content: apiResponse.generated_passage,
+        content: convertNewlinesToParagraphs(apiResponse.generated_passage),
         isGenerated: 1,
-        descriptions: createDescriptions(apiResponse, requestData, generateType) // ← 새로 추가
+        descriptions: createDescriptions(apiResponse, requestData, generateType)
     }
+}
+
+// fastApi 응답 데이터의 '\n' 형식을 Tiptap 형식에 맞게 수정하여 db 저장할 때 사용
+const convertNewlinesToParagraphs = (text) => {
+  if (!text) return ''
+  return text
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0)
+    .map(line => `<p>${line}</p>`)
+    .join('')
 }
 
 // 지문 생성 요청 데이터 (request data)
