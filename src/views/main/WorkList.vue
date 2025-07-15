@@ -764,7 +764,7 @@ const handleWorkItemClick = async (item) => {
       );
 
       // 지문 생성 페이지로 이동
-      router.push("/passage/create");
+      router.push(`/passage/view/${passageData.pasCode}`);
     } else {
       // 문항인 경우 - GenerateQuestion.vue로 이동
       // 데이터 형식 변환 및 저장
