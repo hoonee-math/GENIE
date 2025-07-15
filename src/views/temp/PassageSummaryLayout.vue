@@ -73,14 +73,14 @@ const showTabs = computed(() => corePointTabs.value.length > 1)
 
 // 현재 선택된 탭의 데이터
 const currentTabData = computed(() => {
-  if (corePointTabs.value.length === 0) return { type_passage: '', keyword: '', core_point: '' }
-  return corePointTabs.value[activeTabIndex.value] || { type_passage: '', keyword: '', core_point: '' }
+  if (corePointTabs.value.length === 0) return { pasType: '', keyword: '', gist: '' }
+  return corePointTabs.value[activeTabIndex.value] || { pasType: '', keyword: '', gist: '' }
 })
 
 // 각 탭별 데이터 (탭이 바뀔 때마다 다른 값 표시)
-const pasType = computed(() => currentTabData.value.type_passage)
+const pasType = computed(() => currentTabData.value.pasType)
 const keyword = computed(() => currentTabData.value.keyword)
-const gist = computed(() => currentTabData.value.core_point)
+const gist = computed(() => currentTabData.value.gist)
 
 // 탭이 변경될 때 activeTabIndex 초기화
 watch(corePointTabs, (newTabs) => {

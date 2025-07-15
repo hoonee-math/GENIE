@@ -38,44 +38,19 @@ export const usePassageStore = defineStore('passage', {
             // 복합 지문 (2개 이상)
             return descriptions.map((desc, index) => ({
             label: `(${String.fromCharCode(65 + index)}) 지문`,  // (가), (나), (다)...
-            type_passage: desc.pasType,
+            pasType: desc.pasType,
             keyword: desc.keyword,
-            core_point: desc.gist
+            gist: desc.gist
             }))
         } else {
             // 단일 지문 (1개)
             return [{
             label: '지문 분석',
-            type_passage: descriptions[0]?.pasType || '',
+            pasType: descriptions[0]?.pasType || '',
             keyword: descriptions[0]?.keyword || '',
-            core_point: descriptions[0]?.gist || ''
+            gist: descriptions[0]?.gist || ''
             }]
         }
-    },
-    
-    // 전체 지문 분야 (화면 헤더용)
-    passageSubject: (state) => {
-      if (!state.responseData?.descriptions) return ''
-      
-      if (state.generateType === 'multiple' && state.responseData.descriptions.length > 1) {
-        return `${state.responseData.descriptions[0].pasType}, ${state.responseData.descriptions[1].pasType}`
-      } else {
-        return state.responseData.descriptions[0]?.pasType || ''
-      }
-    },
-    
-    // 전체 지문 제재 (화면 헤더용)
-    passageKeyword: (state) => {
-      if (!state.requestData) return ''
-      
-      if (state.generateType === 'single') {
-        return state.requestData.keyword
-      } else if (state.generateType === 'multiple') {
-        return `${state.requestData.first_keyword}, ${state.requestData.second_keyword}`
-      } else if (state.generateType === 'reading') {
-        return state.requestData.keyword
-      }
-      return ''
     }
   },
 
