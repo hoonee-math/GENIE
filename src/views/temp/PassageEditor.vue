@@ -86,12 +86,12 @@
           다음 글을 읽고 물음에 답하시오
         </p>
         <div class="w-fit h-6 text-right font-medium text-base leading-[150%] tracking-[-0.02em] text-[#bdbdbd] mt-2 sm:mt-0 sm:ml-auto">
-          <span class="text-brand">{{ textLength }}</span>/5000
+          <span class="text-brand">{{ textLength }}</span>/{{MAX_LENGTH}}
         </div>
       </div>
 
       <!-- TipTap 에디터 -->
-      <div class="box-border flex flex-row justify-center items-center p-8 gap-2 bg-white border border-brand rounded-xl mt-4">
+      <div class="box-border flex flex-row justify-center items-center p-8 gap-2 bg-white border border-[#757575] rounded-xl mt-4">
         <editor-content 
           :editor="editor" 
           class="w-full h-[398px] min-h-[398px] font-normal text-base leading-7 tracking-[-0.02em] text-[#303030] outline-none overflow-y-auto text-left"
@@ -116,7 +116,7 @@ const props = defineProps({
 })
 
 // 상수 정의
-const MAX_LENGTH = 5000
+const MAX_LENGTH = 3000
 
 // Emits
 const emit = defineEmits(['content-changed'])
