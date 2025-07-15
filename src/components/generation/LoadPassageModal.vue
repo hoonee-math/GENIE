@@ -164,6 +164,7 @@ import SearchList from "@/components/generation/SearchList.vue";
 import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { Icon } from "@iconify/vue";
+import { getPrevPassageListInDatabase } from '@/api/passage';
 
 // 라우터와 스토어 초기화
 const router = useRouter();
@@ -212,59 +213,24 @@ const handleActiveItemChange = (itemId) => {
   selectedPassageId.value = itemId;
 };
 
-const loadPreviews = () => {
-  fetch(`/api/pass/select/prevlist`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  })
-    .then((response) => {
-      if (!response.ok) {
-        // 인증 오류 처리 (401)
-        if (response.status === 401) {
-          // (추가) 로그 - 인증 오류 감지
+const loadPreviews = async () => {
 
-          // 인증 상태 초기화
-          authStore.user = null;
-          authStore.isAuthenticated = false;
-          localStorage.removeItem("authUser");
+    const responseData = await getPrevPassageListInDatabase();
+    passages.value = responseData.map((item) => ({
+    PAS_CODE: item.pasCode,
+    PAS_TITLE: item.title,
+    // PAS_KEYWORD: item.keyword,
+    // PAS_GIST: item.gist,
+    // PAS_DATE: item.date,
+    PAS_CONTENT: item.content,
+    // PAS_FAVORITE: item.favorite,
+    }));
 
-          // 로그인 페이지로 리다이렉트
-          router.push({
-            path: "/login",
-            query: { redirect: route.fullPath },
-          });
-
-          // 추가 처리를 중단하기 위한 에러 발생
-          throw new Error("인증이 필요합니다");
-        }
-        return response.text().then((text) => {
-          throw new Error(text);
-        });
-      }
-      return response.json();
-    })
-    .then((data) => {
-      // 응답 데이터 구조에 맞게 매핑
-      passages.value = data.map((item) => ({
-        PAS_CODE: item.passageCode,
-        PAS_TITLE: item.passageTitle,
-        PAS_KEYWORD: item.subjectKeyword,
-        PAS_GIST: item.gist,
-        PAS_DATE: item.date,
-        PAS_CONTENT: item.content,
-        PAS_FAVORITE: item.favorite,
-      }));
-
-      if (passages.value.length > 0) {
-        const firstPassage = passages.value[0];
-        selectedPassageId.value = firstPassage.PAS_CODE;
-        selectedPassage.value = null;
-      }
-    })
-    .catch((error) => {});
+    if (passages.value.length > 0) {
+    const firstPassage = passages.value[0];
+    selectedPassageId.value = firstPassage.PAS_CODE;
+    selectedPassage.value = null;
+    }
 };
 
 // 불러오기 버튼 클릭 시 처리

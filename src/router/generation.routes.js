@@ -4,6 +4,8 @@ import GenerateQuestion from "@/views/generation/question/GenerateQuestion.vue";
 import QuestionMain from "@/views/generation/question/QuestionMain.vue";
 import PassageGenerationForm from "@/views/temp/PassageGenerationForm.vue";
 import GeneratedPassageView from "@/views/temp/GeneratedPassageView.vue";
+import QuestionGenerateForm from "@/views/temp/QuestionGenerateForm.vue";
+import GeneratedQuestionView from "@/views/temp/GeneratedQuestionView.vue";
 
 // passage 라우트를 라우트 객체 배열로 정의
 const generationRoutes = [
@@ -23,11 +25,10 @@ const generationRoutes = [
     name: "questions",
     children: [
       { path: "", name: "question-main", component: QuestionMain },
-      {
-        path: "generate",
-        name: "question-generate",
-        component: GenerateQuestion,
-      },
+      { path: "generate", name: "question-generate", component: GenerateQuestion },
+      // 새로 만든 임시 주소
+      { path: "form", name: "question-form", component: QuestionGenerateForm },
+      { path: "view/:pasCode", name: "question-view", component: GeneratedQuestionView },
     ],
   },
 ];

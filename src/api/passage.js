@@ -44,3 +44,16 @@ export async function updatePassageInDatabase(passageData) {
         throw error;
     }
 }
+
+// 문항 생성 페이지에서 최근 자료실 지문 호출 (/api/pass/select/prevlist)
+export async function getPrevPassageListInDatabase() {
+    try {
+        console.log('📖 [DB GET] 최근 생성한 지문 리스트 조회 요청');
+        const response = await apiGet('/api/pass/select/prevlist');
+        console.log('📖 [DB GET] 최근 생성한 지문 리스트 조회 성공:', response);
+        return response;
+    } catch (error) {
+        console.error('📖 [DB GET] 최근 생성한 지문 리스트 조회 실패:');
+        throw error;
+    }
+}
