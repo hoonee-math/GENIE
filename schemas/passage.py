@@ -2,7 +2,6 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 from enum import Enum
 
-
 # ✅ 지문 분야 Enum 정의
 class PassageType(str, Enum):
     인문 = "인문"
@@ -27,6 +26,7 @@ class SinglePassageRequest(BaseModel):
 
 # ✅ 단일 지문 응답
 class SinglePassageResponse(BaseModel):
+    kind_passage: str = "단일지문"
     generated_passage: str = Field(..., description="생성된 지문")
     generated_core_point: List[str] = Field(..., description="지문의 핵심 논점")
 
@@ -37,6 +37,7 @@ class ReadingPassageRequest(BaseModel):
 
 # ✅ 독서 지문 응답
 class ReadingPassageResponse(BaseModel):
+    kind_passage: str = "독서론"
     generated_passage: str = Field(..., description="생성된 지문")
     generated_core_point: List[str] = Field(..., description="지문의 핵심 논점")
 
@@ -51,5 +52,6 @@ class MultiplePassageRequest(BaseModel):
 
 # ✅ 복수 지문 응답
 class MultiplePassageResponse(BaseModel):
+    kind_passage: str = "복합지문"
     generated_passage: str = Field(..., description="생성된 지문")
     generated_core_point: List[str] = Field(..., description="(가) 지문의 핵심 논점과 (나) 지문 핵심 논점")
