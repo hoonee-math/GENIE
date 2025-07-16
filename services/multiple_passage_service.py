@@ -5,6 +5,7 @@ from google.genai import types
 from fastapi import HTTPException
 from schemas.passage import MultiplePassageRequest, MultiplePassageResponse
 from utils.guidelines import get_passage_guidelines, get_passage_examples, get_passage_structures
+from utils.json_utils import process_json_response
 from utils.logger import logger, log_api_call_cost
 from dotenv import load_dotenv
 
@@ -166,15 +167,22 @@ async def create_multiple_passage(request: MultiplePassageRequest) -> MultiplePa
 [지문]
 {generated_passage}
 
-이 지문에서 학생이 반드시 이해해야 할 핵심 논점 3가지를 요약하라.
+(가), (나) 각각의 지문에서 학생이 반드시 이해해야 할 핵심 논점 3가지를 요약하라.
 *논점이란 해당 글에서 다루는 핵심 주제나 쟁점을 의미한다. 출제자가 독자에게 전달하고자 하는 주요 메시지나 주장으로, 글의 방향성과 목적을 결정짓는 요소이다.
 
-<작성 예시>
+<각 지문 논점 작성 예시>
 "첫째, 조세는 국가 운영과 공공 서비스 재정을 마련하는 중요한 수단으로 효율적인 자원 분배와 공평한 부담을 동시에 추구해야 한다.
+
 둘째, 조세 제도 설계 시 효율성과 공평성을 균형 있게 고려하여 경제 활동을 저해하지 않으면서도 재정 안정성을 보장할 필요가 있다.
+
 셋째, 다양한 이해관계자와 전문가의 의견을 수렴하고 구체적인 통계 자료를 토대로 합리적인 기준을 설정하여 조세 정책의 효율성과 공평성을 실현해야 한다."
 
-출력은 불필요한 문자 없이 줄글 형태로만 출력해라."""
+
+반드시 아래 JSON 형식으로 답변하세요.
+{{
+    "first_passage_generated_core_point": String "(가) 논점",
+    "second_passage_generated_core_point": String "(나) 논점"
+}}"""
 
         core_point_response = await client.aio.models.generate_content(
             model=GEMINI_FLASH_MODEL,
@@ -190,12 +198,17 @@ async def create_multiple_passage(request: MultiplePassageRequest) -> MultiplePa
             "total_token_count": usage_metadata_core_point.total_token_count,
         })
 
-        generated_core_point = core_point_response.text.strip()
-        logger.debug(f"핵심 논점 생성 완료 : {generated_core_point[:30]}...")
+        core_json = process_json_response(core_point_response.text)
+
+        first_generated_core_point = str(core_json.get("first_passage_generated_core_point")).strip()
+        second_generated_core_point = str(core_json.get("second_passage_generated_core_point")).strip()
+
+
+        logger.debug(f"(가) 추출 논점 : {first_generated_core_point[:15]}..., (나) 추출 논점 : {second_generated_core_point[:15]}...")
 
         return MultiplePassageResponse(
             generated_passage=generated_passage,
-            generated_core_point=[generated_core_point]
+            generated_core_point=[first_generated_core_point, second_generated_core_point]
         )
     
     except ValueError as ve:
