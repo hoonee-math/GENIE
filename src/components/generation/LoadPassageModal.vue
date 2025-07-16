@@ -186,9 +186,9 @@ const handleActiveItemChange = (itemId) => {
 
 // 불러오기 버튼 클릭 시 처리
 const handleLoadPassage = async () => {
-    // 선택된 ID만 부모에게 전달
-    emit("selectPasCode", selectedPassageId.value);
-    closeModal();
+        // 선택된 ID만 부모에게 전달
+        emit("selectPasCode", selectedPassageId.value);
+        closeModal();
 };
 
 const handleSearch = (event) => {

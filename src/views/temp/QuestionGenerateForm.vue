@@ -214,19 +214,35 @@ const closeLoadPassageModal = () => {
  * 지문 불러오기 처리
  */
 const handleLoadPassage = async (selectPasCode) => {
+    // console.log('🔥 [DEBUG] handleLoadPassage 호출됨 - selectPasCode:', selectPasCode, 'typeof:', typeof selectPasCode);
+    
+    // 중복 호출 방지: 이미 로딩 중이면 종료
+    if (isLoading.value) {
+        // console.log('⚠️ [DEBUG] QuestionGenerateForm: 이미 로딩 중이므로 함수 종료');
+        return;
+    }
+    
+    // // 유효성 검증 추가
+    // if (!selectPasCode || selectPasCode === null || selectPasCode === undefined) {
+    //     console.warn('⚠️ [DEBUG] QuestionGenerateForm: 잘못된 selectPasCode 값으로 인해 함수 종료:', selectPasCode);
+    //     return;
+    // }
+    
     try {
-        // LoadPassageModal.vue 에서 emit된 데이터를 받아서 처리
+        isLoading.value = true
         await fetchPassage(selectPasCode);
         
         // UI 상태 변경
         activeTab.value = 'storage';
         closeLoadPassageModal();
         
-        console.log('📥 지문 불러오기 완료');
+        // console.log('📥 지문 불러오기 완료');
     } catch (error) {
         console.error('지문 불러오기 실패:', error);
         errorMessage.value = '지문을 불러오는데 실패했습니다.';
         closeLoadPassageModal();
+    } finally {
+        isLoading.value = false
     }
 }
 
@@ -312,7 +328,7 @@ watch(() => passage.value, (newPassage) => {
             // console.log('⚠️ [Watch] 에디터 참조 없음')
         }
     } else {
-        console.log('⚠️ [Watch] 조건 미충족:', {hasPassage: !!newPassage, hasTitle: !!(newPassage?.title), hasContent: !!(newPassage?.content)})
+        // console.log('⚠️ [Watch] 조건 미충족:', {hasPassage: !!newPassage, hasTitle: !!(newPassage?.title), hasContent: !!(newPassage?.content)})
     }
 }, { deep: true, immediate: true })
 </script>

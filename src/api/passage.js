@@ -9,9 +9,9 @@ import { apiGet, apiPost } from "@/utils/http";
 // 지문 개별 저장 (/api/pass/insert/each)
 export async function savePassageToDatabase(passageData) {
     try {
-        console.log('💾 [DB SAVE] 지문 저장 요청:', passageData);
+        // console.log('💾 [DB SAVE] 지문 저장 요청:', passageData);
         const response = await apiPost('/api/pass/insert/each', passageData);
-        console.log('💾 [DB SAVE] 지문 저장 성공:', response);
+        // console.log('💾 [DB SAVE] 지문 저장 성공:', response);
         return response;
     } catch (error) {
         console.error('💾 [DB SAVE] 지문 저장 실패:', error);
@@ -22,9 +22,9 @@ export async function savePassageToDatabase(passageData) {
 // 지문 개별 조회 (/api/pass/select/{pasCode})
 export async function getPassageFromDatabase(pasCode) {
     try {
-        console.log('📖 [DB GET] 지문 조회 요청:', pasCode);
+        // console.log('📖 [DB GET] 지문 조회 요청:', pasCode);
         const response = await apiGet(`/api/pass/select/${pasCode}`);
-        console.log('📖 [DB GET] 지문 조회 성공:', response);
+        // console.log('📖 [DB GET] 지문 조회 성공:', response);
         return response;
     } catch (error) {
         console.error('📖 [DB GET] 지문 조회 실패:', error);
@@ -35,9 +35,9 @@ export async function getPassageFromDatabase(pasCode) {
 // 지문 수정 (/api/pass/update/each)
 export async function updatePassageInDatabase(passageData) {
     try {
-        console.log('✏️ [DB UPDATE] 지문 수정 요청:', passageData);
+        // console.log('✏️ [DB UPDATE] 지문 수정 요청:', passageData);
         const response = await apiPost('/api/pass/update/each', passageData);
-        console.log('✏️ [DB UPDATE] 지문 수정 성공:', response);
+        // console.log('✏️ [DB UPDATE] 지문 수정 성공:', response);
         return response;
     } catch (error) {
         console.error('✏️ [DB UPDATE] 지문 수정 실패:', error);
@@ -48,9 +48,9 @@ export async function updatePassageInDatabase(passageData) {
 // 문항 생성 페이지에서 최근 자료실 지문 호출 (/api/pass/select/prevlist)
 export async function getPrevPassageListInDatabase() {
     try {
-        console.log('📖 [DB GET] 최근 생성한 지문 리스트 조회 요청');
+        // console.log('📖 [DB GET] 최근 생성한 지문 리스트 조회 요청');
         const response = await apiGet('/api/pass/select/prevlist');
-        console.log('📖 [DB GET] 최근 생성한 지문 리스트 조회 성공:', response);
+        // console.log('📖 [DB GET] 최근 생성한 지문 리스트 조회 성공:', response);
         return response;
     } catch (error) {
         console.error('📖 [DB GET] 최근 생성한 지문 리스트 조회 실패:');

@@ -97,7 +97,7 @@ export function usePassage() {
     // Store 데이터를 computed로 감싸서 반환
     passage: computed(() => store.passage),
     corePointTabs: computed(() => store.corePointTabs),
-    isLoading: computed(() => store.ui.isLoading),
+    passageIsLoading: computed(() => store.ui.isLoading),
     errorMessage: computed(() => store.ui.errorMessage),
     storageList: computed(() => store.lists.storage),
     

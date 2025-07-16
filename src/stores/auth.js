@@ -101,7 +101,7 @@ export const useAuthStore = defineStore('auth', () => {
     
     // 페이지 새로고침 시 토큰 복원
     async function initializeAuth() {
-        console.log('=== 인증 초기화 시작 ===');
+        // console.log('=== 인증 초기화 시작 ===');
         
         // 1. 사용자 정보 복원
         const autoLogin = localStorage.getItem('autoLogin') === 'true';
@@ -109,17 +109,17 @@ export const useAuthStore = defineStore('auth', () => {
         
         if (autoLogin) {
             userData = localStorage.getItem('authUser');
-            console.log('자동 로그인 모드: localStorage 복원 시도');
+            // console.log('자동 로그인 모드: localStorage 복원 시도');
         } else {
             userData = sessionStorage.getItem('authUser');
-            console.log('일반 로그인 모드: sessionStorage 복원 시도');
+            // console.log('일반 로그인 모드: sessionStorage 복원 시도');
         }
         
         if (userData) {
             try {
                 user.value = JSON.parse(userData);
                 isAuthenticated.value = true;
-                console.log('사용자 정보 복원 성공:', user.value.name);
+                // console.log('사용자 정보 복원 성공:', user.value.name);
             } catch (err) {
                 console.error('사용자 정보 파싱 오류:', err);
                 forceLogout();
@@ -285,7 +285,7 @@ export const useAuthStore = defineStore('auth', () => {
         user.value = userData;
         isAuthenticated.value = true;
         error.value = null;
-        console.log('사용자 정보 설정됨:', userData.name);
+        // console.log('사용자 정보 설정됨:', userData.name);
     }
 
     // ========== 반환 객체 ==========

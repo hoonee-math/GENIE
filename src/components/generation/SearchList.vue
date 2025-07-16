@@ -44,7 +44,7 @@ const props = defineProps({
   activeItemId: Number, // 부모 컴포넌트에서 전달받은 활성화 ID
 });
 
-const emit = defineEmits(["preview"]);
+const emit = defineEmits(["preview", "activeItemChange"]);
 
 const activeItem = ref(null);
 
