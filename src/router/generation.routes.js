@@ -24,7 +24,7 @@ const generationRoutes = [
     path: "questions",
     name: "questions",
     children: [
-      { path: "", name: "question-main", component: QuestionMain },
+      { path: "", name: "question-main", component: QuestionGenerateForm },
       { path: "generate", name: "question-generate", component: GenerateQuestion },
       // 새로 만든 임시 주소
       { path: "form", name: "question-form", component: QuestionGenerateForm },

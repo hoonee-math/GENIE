@@ -22,7 +22,7 @@
                     <div>
                         <h3 class="font-semibold">오류 발생</h3>
                         <p>{{ errorMessage }}</p>
-                        <button @click="loadPassageData" class="mt-2 text-sm underline hover:no-underline">
+                        <button @click="retryLoadData" class="mt-2 text-sm underline hover:no-underline">
                             다시 시도
                         </button>
                     </div>
@@ -30,57 +30,323 @@
             </div>
         </div>
 
+        <!-- 메인 콘텐츠 -->
+        <PassageAndQuestionLayout :v-else :leftRatio="showQuestionModal ? 1 : 2" :rightRatio="showQuestionModal ? 0 : 1">
 
-        <PassageAndQuestionLayout >
             <template #title>
                 <!-- 기존 InsertPassage.vue 의 작업 이름이 들어갈 위치 -->
-                {{ passageTitle }}
+                {{ questionTitle }}
             </template>
 
             <template #left>
-                <!-- 기존 InsertPassage.vue 의 사용자 입력/자료질 지문 탭 이 들어갈 위치 -->
+                <div>
+                    <!-- 탭 네비게이션 -->
+                    <div class="flex border-b border-gray-200 mb-6">
+                        <button @click="switchTab('user')" :class="['px-4 py-2 text-sm font-medium border-b-2 transition-colors', activeTab === 'user' ? 'border-brand text-brand' : 'border-transparent text-gray-500 hover:text-gray-700' ]">
+                            사용자 입력
+                        </button>
+                        <button @click="switchTab('storage')" :class="['px-4 py-2 text-sm font-medium border-b-2 transition-colors', activeTab === 'storage' ? 'border-brand text-brand' : 'border-transparent text-gray-500 hover:text-gray-700']">
+                            자료실 지문
+                        </button>
+                    </div>
 
-                <!-- 탭 전환시에 기존 UserInsertPassage/StoresInsertPassage 대신에 TipTap 에디터를 이용해서 값을 입력해줄 위치 
-                - 사용자 입력 탭이 활성화 된 경우에는 바로 입력 가능하도록 설정
-                - 자료실 지문 탭이 활성화 시킨 경우 바로 모달창이 뜨도록 설정, 데이터를 호출하지 않고 모달을 닫으면 다시 사용자 입력 탭으로 되돌리기.
-                - GeneratedPassageView.vue 에서 추가 예정인 [문항 이어서 생성하기] 버튼을 클릭하면 캐시에 저장된 해당 데이터를 바로 자료실 지문 탭에 출력 -->
-
-                <!-- TipTap 에디터 -->
-                <div class="box-border flex flex-row justify-center items-center p-8 gap-2 bg-white border border-[#757575] rounded-xl mt-4">
-                    <editor-content 
-                    :editor="editor" 
-                    class="w-full h-[398px] min-h-[398px] font-normal text-base leading-7 tracking-[-0.02em] text-[#303030] outline-none overflow-y-auto text-left"
-                    />
+                    <!-- 사용자 입력 탭,자료실 지문 탭 모두 같은 에디터에 데이터 입력 -->
+                    <!-- (미구현) GeneratedPassageView.vue 에서 추가 예정인 [문항 이어서 생성하기] 버튼을 클릭하면 passage pinia Store 에 저장시켜놓았던 캐시 데이터를 가져와서 해당 데이터를 바로 자료실 지문 탭에 출력 -->
+                    <div>
+                        <!-- TipTap 에디터 -->
+                        <PassageEditor ref="editorRef" :initialContent="questionContent" :parentComponent="'QuestionGenerateForm'" @content-changed="handleContentChange" />
+                    </div>
                 </div>
             </template>
 
             <template #right>
-                <!-- 지문 불러오기를 통해서 가져온 지문에 대한 지문 분석 데이터 출력 (Pinia Store에서 자동으로 데이터 가져옴) -->
-                <PassageSummaryLayout />
+                <!-- (미구현) LoadPassageModal.vue 의 지문 불러오기에서 지문을 선택한 후 불러오기 버튼을 클릭하면 해당 지문을 pinia에 저장시키기. pinia에 저장된 지문과 지문 분석 데이터 출력 (Pinia Store에서 자동으로 데이터 가져옴) -->
+                <PassageSummaryLayout v-if="!showQuestionModal"/>
+                
             </template>
         </PassageAndQuestionLayout>
 
-        <!-- 초기화 버튼과 문항 유형 선택하기 버튼 추가, Button 은 BaseButton 컴포넌트 이용방식으로 사용해보기 
-        - 초기화 버튼 클릭시 위에 입력한 데이터 초기화 
-        - 문항 유형 선택하기 클릭시 기존에 모달로 사용했던 GenerateQuestionModal을 PassageAndQuestionLayout 아래에 출력되도록 설정. 이 때 초기화 버튼과 문항 유형 선택하기 버튼이 사라지고 나타난다. 이 때 PassageAndQuestionLayout의 #right 도 사라지고 #right 지문이 PassageAndQuestionLayout 전체를 차지하게 된다.
-        -->
+        <!-- 하단 버튼들 (문항 유형 선택 모달이 표시되지 않을 때만) -->
+        <div v-if="!showQuestionModal" class="flex flex-col sm:flex-row justify-end gap-4 mt-8">
+            <BaseButton id="reset_button" text="초기화" type="type2" width="248px" height="54px" :disabled="!canReset"
+                @click="resetAll" class="hover:shadow-xl active:scale-[0.98]" />
+            <BaseButton id="select-type" text="문항 유형 선택하기" type="type1" width="248px" height="54px"
+                :disabled="!canGenerate" @click="openQuestionModal" class="hover:shadow-xl active:scale-[0.98]" />
+        </div>
+
+        <!-- 문항 유형 선택 모달이 표시될 때 -->
+        <div v-if="showQuestionModal" class="w-full">
+            <GenerateQuestionModal :isOpen="true" :mode="'inline'" :passageTitle="questionTitle"
+                :passageContent="questionContent" @close="closeQuestionModal" @generate="handleQuestionGenerate" />
+        </div>
+
+        <!-- 모달 컴포넌트들 -->
+        <!-- (미구현) 지문 불러오기에서 지문을 선택한 후 불러오기 버튼을 클릭하면 해당 지문을 pinia에 저장시키기. pinia에 저장된 지문과 지문 분석 데이터 출력 (Pinia Store에서 자동으로 데이터 가져옴) -->
+        <LoadPassageModal :isOpen="showLoadPassageModal" @close="closeLoadPassageModal"
+            @loadPassage="handleLoadPassage" />
+
+        <ConfirmModalComponent :isOpen="isConfirmModalOpen" title="글자 수를 확인해 주세요."
+            message="500자 이하의 지문으로 정상적인 문항을 생성하기 어렵습니다. 충분한 지문을 입력해 주세요." @close="isConfirmModalOpen = false"
+            @confirm="isConfirmModalOpen = false" />
+
+        <!-- 로딩 모달 -->
+        <LoadingModal :isOpen="isGenerating" :message="loadingMessage" />
     </div>
 </template>
 
 <script setup>
-import { computed, ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import PassageAndQuestionLayout from './PassageAndQuestionLayout.vue';
-import PassageEditor from './PassageEditor.vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import PassageAndQuestionLayout from './PassageAndQuestionLayout.vue'
+import PassageSummaryLayout from './PassageSummaryLayout.vue'
+import PassageEditor from './PassageEditor.vue'
+import BaseButton from '@/components/common/BaseButton.vue'
+import GenerateQuestionModal from '@/components/generation/GenerateQuestionModal.vue'
+import LoadPassageModal from '@/components/generation/LoadPassageModal.vue'
+import ConfirmModalComponent from '@/components/common/ConfirmModalComponent.vue'
+import LoadingModal from '@/components/common/LoadingModal.vue'
+import { useQuestion } from '@/composables/useQuestion'
 
-// 로딩 및 에러 상태
-const isLoading = ref(true)
+// Router 및 Composables
+const route = useRoute()
+const router = useRouter()
+const {
+    passage,
+    validateQuestionData,
+    processQuestionGeneration,
+    loadPassageFromStorage,
+    continueFromGeneratedPassage,
+    resetPassageData
+} = useQuestion()
+
+// ===== 상태 관리 =====
+
+// 기본 상태
+const isLoading = ref(false)
 const errorMessage = ref('')
+const isGenerating = ref(false)
+const loadingMessage = ref('문항을 생성 중입니다.\\n생성까지 최대 3분이 소요될 수 있습니다.')
 
-// TipTapEditor 관련 변수
-const savedContent = ref('')
-const currentLength = ref(0)
-const numberLength = ref(3000)
+// 데이터 상태
+const questionTitle = ref('Untitled')
+const questionContent = ref('')
+const textLength = ref(0)
 
-const questionTitle = ref('Untitled');
+// 탭 상태
+const activeTab = ref('user') // ['user': '사용자 입력', 'storage': '자료실 지문' }]
+
+// 모달 상태
+const showQuestionModal = ref(false)
+const showLoadPassageModal = ref(false)
+const isConfirmModalOpen = ref(false)
+
+// 에디터 참조
+const editorRef = ref(null)
+
+// ===== Computed Properties =====
+
+// 초기화 가능 여부
+const canReset = computed(() => {
+    return questionTitle.value.trim().length > 0 ||
+        questionContent.value.trim().length > 0
+})
+
+// 문항 생성 가능 여부
+const canGenerate = computed(() => {
+    const validation = validateQuestionData(questionTitle.value, questionContent.value)
+    return validation.isValid
+})
+
+// ===== 이벤트 핸들러 =====
+
+/**
+ * 에디터 내용 변경 처리
+ */
+const handleContentChange = ({ content, textLength: length }) => {
+    questionContent.value = content
+    textLength.value = length
+}
+
+/**
+ * 탭 전환 처리
+ */
+const switchTab = (tabKey) => {
+    if (tabKey === 'storage') {
+        activeTab.value = tabKey
+        openLoadPassageModal()
+    } else {
+        activeTab.value = tabKey
+    }
+}
+
+/**
+ * 데이터 다시 로드
+ */
+const retryLoadData = () => {
+    errorMessage.value = ''
+    initializeComponent()
+}
+
+/**
+ * 전체 초기화
+ */
+const resetAll = () => {
+    questionTitle.value = 'Untitled'
+    questionContent.value = ''
+    textLength.value = 0
+    activeTab.value = 'user'
+
+    // 에디터 초기화
+    if (editorRef.value) {
+        editorRef.value.setContent('')
+    }
+
+    // store 초기화
+    resetPassageData()
+}
+
+// ===== 모달 관련 함수들 =====
+
+/**
+ * 문항 유형 선택 모달 열기
+ */
+const openQuestionModal = () => {
+    if (!canGenerate.value) {
+        const validation = validateQuestionData(questionTitle.value, questionContent.value)
+        if (!validation.isValid) {
+            errorMessage.value = validation.errors.join(' ')
+            return
+        }
+    }
+
+    showQuestionModal.value = true
+}
+
+/**
+ * 문항 유형 선택 모달 닫기
+ */
+const closeQuestionModal = () => {
+    showQuestionModal.value = false
+}
+
+/**
+ * 지문 불러오기 모달 열기
+ */
+const openLoadPassageModal = () => {
+    showLoadPassageModal.value = true
+}
+
+/**
+ * 지문 불러오기 모달 닫기
+ */
+const closeLoadPassageModal = () => {
+    showLoadPassageModal.value = false
+    // 모달을 닫으면 사용자 입력 탭으로 돌아가기
+    activeTab.value = 'user'
+}
+
+/**
+ * 지문 불러오기 처리 (마이그레이션 전 상태와 혼용된 부분이 있음... )
+ */
+const handleLoadPassage = (passageData) => {
+    try {
+        const loadedData = loadPassageFromStorage(passageData)
+
+        // UI 업데이트
+        questionTitle.value = loadedData.title
+        questionContent.value = loadedData.content
+
+        // 에디터 업데이트
+        if (editorRef.value) {
+            editorRef.value.setContent(loadedData.content)
+        }
+
+        // 자료실 탭으로 전환
+        activeTab.value = 'storage'
+        closeLoadPassageModal()
+    } catch (error) {
+        console.error('지문 불러오기 실패:', error)
+        errorMessage.value = '지문을 불러오는데 실패했습니다.'
+        closeLoadPassageModal()
+    }
+}
+
+/**
+ * 문항 생성 처리
+ */
+const handleQuestionGenerate = async (questionData) => {
+    isGenerating.value = true
+
+    try {
+        await processQuestionGeneration(questionData, questionTitle.value, questionContent.value)
+        // 성공 시 자동으로 결과 페이지로 이동됨
+    } catch (error) {
+        console.error('문항 생성 실패:', error)
+        errorMessage.value = error.message || '문항 생성에 실패했습니다.'
+        closeQuestionModal()
+    } finally {
+        isGenerating.value = false
+    }
+}
+
+// ===== 초기화 함수 =====
+
+/**
+ * 컴포넌트 초기화
+ */
+const initializeComponent = async () => {
+    isLoading.value = true
+
+    try {
+        // URL 파라미터에서 pasCode 확인 (이어서 생성하기)
+        const pasCode = route.params.pasCode || route.query.pasCode
+
+        if (pasCode) {
+            try {
+                // 캐시에서 지문 데이터 로드
+                const loadedData = continueFromGeneratedPassage(Number(pasCode))
+
+                // UI 업데이트
+                questionTitle.value = loadedData.title
+                questionContent.value = loadedData.content
+                activeTab.value = 'storage'
+
+                // 에디터 업데이트 (nextTick으로 DOM 업데이트 후 실행)
+                await nextTick()
+                if (editorRef.value) {
+                    editorRef.value.setContent(loadedData.content)
+                }
+            } catch (error) {
+                console.error('캐시된 지문 로드 실패:', error)
+                // 실패 시 기본 상태로 유지
+            }
+        }
+    } catch (error) {
+        console.error('컴포넌트 초기화 실패:', error)
+        errorMessage.value = '페이지를 불러오는데 실패했습니다.'
+    } finally {
+        isLoading.value = false
+    }
+}
+
+// ===== 라이프사이클 =====
+
+onMounted(() => {
+    initializeComponent()
+})
+
+// passage store 변경 감지
+watch(() => passage.value, (newPassage) => {
+    if (newPassage && newPassage.title && newPassage.content) {
+        questionTitle.value = newPassage.title
+        questionContent.value = newPassage.content
+
+        // 에디터 업데이트
+        if (editorRef.value) {
+            editorRef.value.setContent(newPassage.content)
+        }
+    }
+}, { deep: true })
 </script>
+
+<style scoped></style>
