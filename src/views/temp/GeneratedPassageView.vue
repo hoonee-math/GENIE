@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col gap-8 p-0 md:p-8 box-border w-full">
+    <div class="flex flex-col gap-8 p-0 md:p-8 box-border w-full h-full">
         <!-- 로딩 상태 -->
         <div v-if="isLoading" class="flex justify-center items-center min-h-[400px]">
             <div class="flex flex-col items-center">
@@ -37,13 +37,15 @@
             <template #left>
                 <!-- TipTapEditor (1) savedContent 값을 props 로 자식 컴포넌트의 initialContent 변수로 전달 -->
                 <!-- TipTapEditor (2) 자식 컴포넌트에서 emit 으로 부모 컴포넌트에 전달, 자식이 emit 한 데이터를 받는 함수 handleContentChange -->
-                <PassageEditor :max-length="numberLength" :initialContent="savedContent" @content-changed="handleContentChange"/>
+                <PassageEditor :max-length="numberLength" :initialContent="savedContent" :parentComponent="'GeneratedPassageView'" @content-changed="handleContentChange"/>
             </template>
             <template #right>
                 <!-- 지문 분석 (Pinia Store에서 자동으로 데이터 가져옴) -->
                 <PassageSummaryLayout />
             </template>
         </PassageAndQuestionLayout>
+
+        <div>qjxms</div>
 
         <!-- 재생성하기, 문항 이어서 생성하기, 저장하기, 추출하기 버튼 추가 예정 -->
     </div>

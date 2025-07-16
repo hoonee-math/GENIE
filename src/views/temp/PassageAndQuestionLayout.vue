@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col items-start gap-4 w-full md:mt-0 bg-white md:bg-[#f9fafb] dev-border">
+    <div class="flex flex-col items-start gap-4 w-full h-full md:mt-0 bg-white md:bg-[#f9fafb] dev-border">
       
         <!-- 헤더 -->
         <div v-if="$slots.title">
@@ -11,7 +11,7 @@
 
         <div class="flex w-full h-full min-h-[500px] border border-gray-300 bg-white rounded-2xl">
             <!-- 왼쪽 영역 (편집 도구, 지문 출력) -->
-            <div class="min-w-0 m-7 dev-border" :class="`flex-[${leftRatio}]`">
+            <div class="min-w-0 m-7 dev-border h-full" :class="`flex-[${leftRatio}]`">
                 <div class="flex flex-col gap-10 h-full">
                     <slot name="left" />
                 </div>
