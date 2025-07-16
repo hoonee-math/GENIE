@@ -117,7 +117,7 @@ const props = defineProps({
 });
 
 // 불러오기, 닫기 이벤트 정의
-const emit = defineEmits(["close", "loadPassage"]);
+const emit = defineEmits(["close", "selectPasCode"]);
 
 const searchQuery = ref("");
 const activeTab = ref("recent");
@@ -186,33 +186,9 @@ const handleActiveItemChange = (itemId) => {
 
 // 불러오기 버튼 클릭 시 처리
 const handleLoadPassage = async () => {
-    console.log("[LoadPassage] 불러오기 버튼 클릭, 상태:", {
-        selectedPassage: selectedPassage.value
-            ? selectedPassage.value.PAS_TITLE
-            : "null",
-        selectedPassageId: selectedPassageId.value,
-        activeItemInList:
-            filteredPassages.value.find((p) => p.PAS_CODE === selectedPassageId.value)
-                ?.PAS_TITLE || "null",
-    });
-    await fetchPassage(selectedPassageId.value)
-    if (selectedPassage.value) {
-        // 부모 컴포넌트에 선택한 지문 전달
-        // console.log('[LoadPassage] 미리보기된 지문 불러오기:', selectedPassage.value.PAS_TITLE);
-        emit("loadPassage", selectedPassage.value);
-        closeModal();
-    }
-    // 미리보기는 아니지만 활성화된 아이템 ID가 있는 경우
-    else if (selectedPassageId.value) {
-        const activePassage = filteredPassages.value.find(
-            (p) => p.PAS_CODE === selectedPassageId.value
-        );
-        if (activePassage) {
-            // console.log('[LoadPassage] 활성화된 지문 불러오기:', activePassage.PAS_TITLE);
-            emit("loadPassage", activePassage);
-            closeModal();
-        }
-    }
+    // 선택된 ID만 부모에게 전달
+    emit("selectPasCode", selectedPassageId.value);
+    closeModal();
 };
 
 const handleSearch = (event) => {
