@@ -59,7 +59,7 @@ watch(
       // 활성화된 항목으로 화면 포커싱
       setTimeout(() => {
         const activeElement = document.querySelector(
-          `.list-item[data-id="${newVal}"]`
+            `[data-id="${newVal}"]`
         );
         if (activeElement) {
           activeElement.scrollIntoView({ behavior: "smooth", block: "center" });

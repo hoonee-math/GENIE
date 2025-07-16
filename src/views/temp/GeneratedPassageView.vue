@@ -52,7 +52,7 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import PassageAndQuestionLayout from './PassageAndQuestionLayout.vue'
 import PassageSummaryLayout from './PassageSummaryLayout.vue'
@@ -123,6 +123,13 @@ const passageTitle = computed(() => {
 onMounted(() => {
   loadPassageData()
 })
+
+onBeforeUnmount(() => {
+    // 컴포넌트 종료 시 리스트만 클리어
+    const { clearPassage } = usePassage()
+    clearPassage()
+})
+
 </script>
 
 <style scoped>

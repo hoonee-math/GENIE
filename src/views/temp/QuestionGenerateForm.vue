@@ -242,7 +242,7 @@ const openLoadPassageModal = () => {
 const closeLoadPassageModal = () => {
     showLoadPassageModal.value = false
     // 모달을 닫으면 사용자 입력 탭으로 돌아가기
-    activeTab.value = 'user'
+    // activeTab.value = 'user'
 }
 
 /**
@@ -250,20 +250,16 @@ const closeLoadPassageModal = () => {
  */
 const handleLoadPassage = (passageData) => {
     try {
+        // Store에 데이터 저장 (useQuestion.js의 loadPassageFromStorage 사용)
         const loadedData = loadPassageFromStorage(passageData)
-
-        // UI 업데이트
-        questionTitle.value = loadedData.title
-        questionContent.value = loadedData.content
-
-        // 에디터 업데이트
-        if (editorRef.value) {
-            editorRef.value.setContent(loadedData.content)
-        }
-
+        
+        // Store에 저장하면 watch 감지기가 자동으로 UI 업데이트 처리 에디터 수동 업데이트 제거)
+        
         // 자료실 탭으로 전환
         activeTab.value = 'storage'
         closeLoadPassageModal()
+        
+        console.log('📥 지문 불러오기 완료:', loadedData.title)
     } catch (error) {
         console.error('지문 불러오기 실패:', error)
         errorMessage.value = '지문을 불러오는데 실패했습니다.'
@@ -337,16 +333,25 @@ onMounted(() => {
 
 // passage store 변경 감지
 watch(() => passage.value, (newPassage) => {
+    // console.log('🔍 [Watch] passage 변경 감지:', {hasPassage: !!newPassage, title: newPassage?.title || 'null', content: newPassage?.content ? `${newPassage.content.length}자` : 'null', descriptions: newPassage?.descriptions?.length || 0 })
+    
     if (newPassage && newPassage.title && newPassage.content) {
+        // console.log('✅ [Watch] UI 업데이트 실행')
+        
         questionTitle.value = newPassage.title
         questionContent.value = newPassage.content
 
         // 에디터 업데이트
         if (editorRef.value) {
             editorRef.value.setContent(newPassage.content)
+            // console.log('📝 [Watch] 에디터 내용 업데이트 완료')
+        } else {
+            // console.log('⚠️ [Watch] 에디터 참조 없음')
         }
+    } else {
+        console.log('⚠️ [Watch] 조건 미충족:', {hasPassage: !!newPassage, hasTitle: !!(newPassage?.title), hasContent: !!(newPassage?.content)})
     }
-}, { deep: true })
+}, { deep: true, immediate: true })
 </script>
 
 <style scoped></style>

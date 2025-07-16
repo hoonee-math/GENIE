@@ -110,7 +110,7 @@ const route = useRoute();
 const authStore = useAuthStore();
 
 // usePassage composable 사용
-const { fetchPassageList, storageList } = usePassage();
+const { fetchPassage, fetchPassageList, storageList } = usePassage();
 
 const props = defineProps({
     isOpen: Boolean,
@@ -185,7 +185,7 @@ const handleActiveItemChange = (itemId) => {
 }
 
 // 불러오기 버튼 클릭 시 처리
-const handleLoadPassage = () => {
+const handleLoadPassage = async () => {
     console.log("[LoadPassage] 불러오기 버튼 클릭, 상태:", {
         selectedPassage: selectedPassage.value
             ? selectedPassage.value.PAS_TITLE
@@ -195,7 +195,7 @@ const handleLoadPassage = () => {
             filteredPassages.value.find((p) => p.PAS_CODE === selectedPassageId.value)
                 ?.PAS_TITLE || "null",
     });
-
+    await fetchPassage(selectedPassageId.value)
     if (selectedPassage.value) {
         // 부모 컴포넌트에 선택한 지문 전달
         // console.log('[LoadPassage] 미리보기된 지문 불러오기:', selectedPassage.value.PAS_TITLE);

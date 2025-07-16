@@ -28,15 +28,7 @@ export const usePassageStore = defineStore('passage', {
     
     // === 리스트 스키마 ===
     lists: {
-      storage: [
-        {
-          pasCode: null,
-          title: '',
-          primaryType: '',    // 첫 번째 description의 pasType
-          createdAt: null,
-          hasQuestions: false
-        }
-      ],
+      storage: [],
       search: [],
       recent: []  // pasCode 배열
     },
