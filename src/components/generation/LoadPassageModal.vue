@@ -102,12 +102,15 @@ import SearchList from "@/components/generation/SearchList.vue";
 import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { Icon } from "@iconify/vue";
-import { getPrevPassageListInDatabase } from '@/api/passage';
+import { usePassage } from '@/composables/usePassage';
 
 // 라우터와 스토어 초기화
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
+
+// usePassage composable 사용
+const { fetchPassageList, storageList } = usePassage();
 
 const props = defineProps({
     isOpen: Boolean,
@@ -119,8 +122,8 @@ const emit = defineEmits(["close", "loadPassage"]);
 const searchQuery = ref("");
 const activeTab = ref("recent");
 const passages = ref([]);
-const selectedPassage = ref(null);
-const selectedPassageId = ref(null);
+const selectedPassage = ref(null);      // 미리보기 화면에 표시할 지문 데이터를 페이지 안에서 저장해서 사용
+const selectedPassageId = ref(null);    // 해당 항목을 하이라이트 설정하도록 하는 변수
 
 const isMobile = ref(false)
 
@@ -146,30 +149,40 @@ onMounted(() => {
     }
 });
 
+const loadPreviews = async () => {
+    try {
+        // usePassage.js의 fetchPassageList 사용 (캐시 우선 + API 호출)
+        const listData = await fetchPassageList();
+        
+        // LoadPassageModal에서 사용하는 데이터 형식으로 변환
+        passages.value = listData.map((item) => ({
+            PAS_CODE: item.pasCode,
+            PAS_TITLE: item.title,
+            PAS_CONTENT: item.content, // 리스트에서 미리보기용으로 포함
+            // PAS_KEYWORD: item.keyword,
+            // PAS_GIST: item.gist,
+            // PAS_DATE: item.date,
+            // PAS_FAVORITE: item.favorite,
+        }));
+        
+        // 첫 번째 지문 선택
+        if (passages.value.length > 0) {
+            const firstPassage = passages.value[0];
+            selectedPassageId.value = firstPassage.PAS_CODE;
+            selectedPassage.value = null;
+        }
+        
+        console.log('📜 LoadPassageModal 리스트 로드 완료, 개수:', passages.value.length);
+    } catch (error) {
+        console.error('LoadPassageModal 리스트 로드 실패:', error);
+    }
+};
+
 const handleActiveItemChange = (itemId) => {
     // console.log('[LoadPassageModal] 활성화된 항목 변경:', itemId);
     selectedPassageId.value = itemId;
-};
-
-const loadPreviews = async () => {
-
-    const responseData = await getPrevPassageListInDatabase();
-    passages.value = responseData.map((item) => ({
-        PAS_CODE: item.pasCode,
-        PAS_TITLE: item.title,
-        // PAS_KEYWORD: item.keyword,
-        // PAS_GIST: item.gist,
-        // PAS_DATE: item.date,
-        PAS_CONTENT: item.content,
-        // PAS_FAVORITE: item.favorite,
-    }));
-
-    if (passages.value.length > 0) {
-        const firstPassage = passages.value[0];
-        selectedPassageId.value = firstPassage.PAS_CODE;
-        selectedPassage.value = null;
-    }
-};
+    selectedPassage.value = null;
+}
 
 // 불러오기 버튼 클릭 시 처리
 const handleLoadPassage = () => {

@@ -1,6 +1,6 @@
 import { computed } from 'vue'
 import { usePassageStore } from '@/stores/passage'
-import { getPassageFromDatabase } from '@/api/passage'
+import { getPassageFromDatabase, getPrevPassageListInDatabase } from '@/api/passage'
 
 export function usePassage() {
   const store = usePassageStore()
@@ -61,14 +61,36 @@ export function usePassage() {
     console.log('생성된 지문 캐싱 완료:', pasCode)
   }
   
-  // 보관함 리스트 (미래 구현 예정)
-  const fetchStorageList = async (options = {}) => {
+  // 지문 리스트 조회 (캐시 우선 + API 호출)
+  const fetchPassageList = async (options = {}) => {
+    // 캐시 확인 (강제 새로고침이 아니고 캐시된 데이터가 있으면)
     if (!options.force && store.lists.storage.length > 0) {
+      console.log('⭐ 리스트 캐시에서 로드 (API 호출 없음)')
       return store.lists.storage
     }
     
-    // TODO: 보관함 API 구현 후 추가
-    return store.lists.storage
+    console.log('🌐 리스트 API 호출 시작 (캐시 없음)')
+    
+    try {
+      const apiResponse = await getPrevPassageListInDatabase()
+      
+      // 단순 파싱 (API → Store 리스트 스키마)
+      const parsed = apiResponse.map(item => ({
+        pasCode: item.pasCode,
+        title: item.title,
+        content: item.content, // 리스트에서도 content 포함 (미리보기용)
+        primaryType: '', // 리스트에서는 descriptions 없음
+        createdAt: item.createdAt,
+        hasQuestions: false // 리스트에서는 questions 정보 없음
+      }))
+      
+      store.setStorageList(parsed)
+      console.log('✅ 리스트 API 호출 완료 및 캐시 저장, 개수:', parsed.length)
+      return store.lists.storage
+    } catch (error) {
+      console.error('지문 리스트 조회 실패:', error)
+      throw error
+    }
   }
   
   return {
@@ -82,7 +104,7 @@ export function usePassage() {
     // Actions
     fetchPassage,
     cacheGeneratedPassage,
-    fetchStorageList,
+    fetchPassageList, // 이름 변경: fetchStorageList -> fetchPassageList
     
     // Store actions 직접 노출
     clearPassage: store.clearPassage,
