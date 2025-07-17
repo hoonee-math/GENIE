@@ -25,7 +25,7 @@
                     <!-- GeneratedPassageView.vue 에서 추가 예정인 [문항 이어서 생성하기] 버튼을 클릭하면 passage pinia Store 에 저장시켜놓았던 캐시 데이터를 가져와서 해당 데이터를 바로 자료실 지문 탭에 출력 -->
                     <div>
                         <!-- TipTap 에디터 -->
-                        <PassageEditor ref="editorRef" :initialContent="questionContent" :parentComponent="'QuestionGenerateForm'" @content-changed="handleContentChange" />
+                        <PassageEditor ref="editorRef" :initialContent="passageContent" :parentComponent="'QuestionGenerateForm'" @content-changed="handleContentChange" />
                     </div>
                 </div>
             </template>
@@ -48,16 +48,11 @@
         </div>
 
         <!-- 문항 유형 선택 모달 대신 아래 출력되도록 설정 -->
+        <!-- (미구현) QuestionExampleSelector 의 [버튼 영역]을 옮기면서 문항 생성하기 버튼으로 문항 생성 요청시 필요한 데이터들을 emit 으로 받아오도록 수정 필요 -->
         <QuestionExampleSelector v-if="isQuestionExampleSelectorVisible" :generateType="generateType"/>
 
-        <!-- 문항 유형 선택 모달이 표시될 때 -->
-        <div v-if="showQuestionModal" class="w-full">
-            <GenerateQuestionModal :isOpen="true" :mode="'inline'" :passageTitle="questionTitle"
-                :passageContent="questionContent" @close="closeQuestionModal" @generate="handleQuestionGenerate" />
-        </div>
-
         <!-- 모달 컴포넌트들 -->
-        <!-- (미구현) 지문 불러오기에서 지문을 선택한 후 불러오기 버튼을 클릭하면 해당 지문을 pinia에 저장시키기. pinia에 저장된 지문과 지문 분석 데이터 출력 (Pinia Store에서 자동으로 데이터 가져옴) -->
+        <!-- 지문 불러오기에서 지문을 선택한 후 불러오기 버튼을 클릭하면 해당 지문을 pinia에 저장시키기. pinia에 저장된 지문과 지문 분석 데이터 출력 (Pinia Store에서 자동으로 데이터 가져옴) -->
         <LoadPassageModal :isOpen="showLoadPassageModal" @close="closeLoadPassageModal"
             @selectPasCode="handleLoadPassage" />
 
@@ -67,17 +62,18 @@
 
         <!-- 로딩 모달 -->
         <LoadingModal :isOpen="isGenerating" :message="loadingMessage" />
+
+        <!-- (미구현) QuestionExampleSelector 의 [버튼 영역]을 이 자리에 옮기기 -->
     </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { ref, computed, onMounted, watch, nextTick, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PassageAndQuestionLayout from './PassageAndQuestionLayout.vue'
 import PassageSummaryLayout from './PassageSummaryLayout.vue'
 import PassageEditor from './PassageEditor.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
-import GenerateQuestionModal from '@/components/generation/GenerateQuestionModal.vue'
 import LoadPassageModal from '@/components/generation/LoadPassageModal.vue'
 import ConfirmModalComponent from '@/components/common/ConfirmModalComponent.vue'
 import LoadingModal from '@/components/common/LoadingModal.vue'
@@ -104,12 +100,13 @@ const { fetchPassage } = usePassage();
 const isLoading = ref(false)
 const errorMessage = ref('')
 const isGenerating = ref(false)
+const isLeavingPageWithClear = ref(true) // 페이지를 나갈 때 passage 데이터를 초기화할지 여부, 문항 생성 요청시에는 false로 설정 예정
 
 const loadingMessage = ref('문항을 생성 중입니다.\\n생성까지 최대 3분이 소요될 수 있습니다.')
 
 // 데이터 상태
 const questionTitle = ref('Untitled')
-const questionContent = ref('')
+const passageContent = ref('')
 const textLength = ref(0)
 
 // 탭 상태
@@ -130,12 +127,12 @@ const editorRef = ref(null)
 // 초기화 가능 여부
 const canReset = computed(() => {
     return questionTitle.value.trim().length > 0 ||
-        questionContent.value.trim().length > 0
+        passageContent.value.trim().length > 0
 })
 
 // 문항 생성 가능 여부
 const canGenerate = computed(() => {
-    const validation = validateQuestionData(questionTitle.value, questionContent.value)
+    const validation = validateQuestionData(questionTitle.value, passageContent.value)
     return validation.isValid
 })
 
@@ -145,7 +142,7 @@ const canGenerate = computed(() => {
  * 에디터 내용 변경 처리
  */
 const handleContentChange = ({ content, textLength: length }) => {
-    questionContent.value = content
+    passageContent.value = content
     textLength.value = length
 }
 
@@ -166,7 +163,7 @@ const switchTab = (tabKey) => {
  */
 const resetAll = () => {
     questionTitle.value = 'Untitled'
-    questionContent.value = ''
+    passageContent.value = ''
     textLength.value = 0
     activeTab.value = 'user'
 
@@ -186,7 +183,7 @@ const resetAll = () => {
  */
 const showQuestionExampleSelector = () => {
     if (!canGenerate.value) {
-        const validation = validateQuestionData(questionTitle.value, questionContent.value)
+        const validation = validateQuestionData(questionTitle.value, passageContent.value)
         if (!validation.isValid) {
             errorMessage.value = validation.errors.join(' ')
             return
@@ -255,7 +252,7 @@ const handleQuestionGenerate = async (questionData) => {
     isGenerating.value = true
 
     try {
-        await processQuestionGeneration(questionData, questionTitle.value, questionContent.value)
+        await processQuestionGeneration(questionData, questionTitle.value, passageContent.value)
         // 성공 시 자동으로 결과 페이지로 이동됨
     } catch (error) {
         console.error('문항 생성 실패:', error)
@@ -272,44 +269,52 @@ const handleQuestionGenerate = async (questionData) => {
  * 컴포넌트 초기화
  */
 const initializeComponent = async () => {
-    isLoading.value = true
+    // isLoading.value = true
 
-    try {
-        // URL 파라미터에서 pasCode 확인 (이어서 생성하기)
-        const pasCode = route.params.pasCode || route.query.pasCode
+    // try {
+    //     // URL 파라미터에서 pasCode 확인 (이어서 생성하기)
+    //     const pasCode = route.params.pasCode || route.query.pasCode
 
-        if (pasCode) {
-            try {
-                // 캐시에서 지문 데이터 로드
-                const loadedData = continueFromGeneratedPassage(Number(pasCode))
+    //     if (pasCode) {
+    //         try {
+    //             // 캐시에서 지문 데이터 로드
+    //             const loadedData = continueFromGeneratedPassage(Number(pasCode))
 
-                // UI 업데이트
-                questionTitle.value = loadedData.title
-                questionContent.value = loadedData.content
-                activeTab.value = 'storage'
+    //             // UI 업데이트
+    //             questionTitle.value = loadedData.title
+    //             passageContent.value = loadedData.content
+    //             activeTab.value = 'storage'
 
-                // 에디터 업데이트 (nextTick으로 DOM 업데이트 후 실행)
-                await nextTick()
-                if (editorRef.value) {
-                    editorRef.value.setContent(loadedData.content)
-                }
-            } catch (error) {
-                console.error('캐시된 지문 로드 실패:', error)
-                // 실패 시 기본 상태로 유지
-            }
-        }
-    } catch (error) {
-        console.error('컴포넌트 초기화 실패:', error)
-        errorMessage.value = '페이지를 불러오는데 실패했습니다.'
-    } finally {
-        isLoading.value = false
-    }
+    //             // 에디터 업데이트 (nextTick으로 DOM 업데이트 후 실행)
+    //             await nextTick()
+    //             if (editorRef.value) {
+    //                 editorRef.value.setContent(loadedData.content)
+    //             }
+    //         } catch (error) {
+    //             console.error('캐시된 지문 로드 실패:', error)
+    //             // 실패 시 기본 상태로 유지
+    //         }
+    //     }
+    // } catch (error) {
+    //     console.error('컴포넌트 초기화 실패:', error)
+    //     errorMessage.value = '페이지를 불러오는데 실패했습니다.'
+    // } finally {
+    //     isLoading.value = false
+    // }
 }
 
 // ===== 라이프사이클 =====
 
 onMounted(() => {
     initializeComponent()
+})
+
+// 마운트 해제시
+onUnmounted(() => {
+    // 문항 생성을 하지 않고, 그냥 페이지를 나가려는 경우 pinia에 저장된 passage 데이터를 초기화
+    if (isLeavingPageWithClear.value) {
+        resetPassageData()
+    }
 })
 
 // passage store 변경 감지
@@ -320,7 +325,7 @@ watch(() => passage.value, (newPassage) => {
         // console.log('✅ [Watch] UI 업데이트 실행')
         
         questionTitle.value = newPassage.title
-        questionContent.value = newPassage.content
+        passageContent.value = newPassage.content
 
         // 에디터 업데이트
         if (editorRef.value) {
