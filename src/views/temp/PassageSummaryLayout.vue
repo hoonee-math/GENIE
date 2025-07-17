@@ -22,7 +22,7 @@
                 </button>
             </div>
             
-            <div class="box-border flex flex-col flex-1 items-start px-4 py-4 gap-4 w-full bg-white border border-[#E5E7EB] rounded-xl shadow-sm">
+            <div class="box-border flex flex-col flex-1 items-start px-4 py-4 gap-4 w-full bg-white border border-[#E5E7EB] rounded-xl shadow-sm overflow-y-auto scrollbar-hide">
                 <div class="flex flex-row items-center w-full gap-4">
                     <p class="font-bold text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030]">
                         지문 분야
@@ -86,3 +86,14 @@ watch(corePointTabs, (newTabs) => {
   }
 }, { immediate: true })
 </script>
+
+<style scoped>
+.scrollbar-hide {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE 10+ */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+</style>

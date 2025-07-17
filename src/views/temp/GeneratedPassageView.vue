@@ -1,5 +1,7 @@
 <template>
     <div class="flex flex-col p-0 md:p-8 gap-6 box-border w-full h-full">
+        <!-- PassageAndQuestionLayout에 flex-1 추가: 남은 공간 차지하되 축소 가능 -->
+        <div class="flex-1 min-h-0 overflow-hidden">  <!-- flex-1 min-h-0 overflow-hidden 추가 -->
         <PassageAndQuestionLayout :left-ratio="2" :right-ratio="1">
             <template #title>
                 {{ passageTitle }}
@@ -14,11 +16,12 @@
                 <PassageSummaryLayout />
             </template>
         </PassageAndQuestionLayout>
+        </div>
 
         <!-- 재생성하기, 문항 이어서 생성하기, 저장하기, 추출하기 버튼 추가 예정 -->
          
         <!-- 하단 버튼 -->
-        <div class="flex justify-end space-x-4 ">
+        <div class="flex justify-end space-x-4 flex-shrink-0">
             <button @click="GenerateQuestionWithThisPassage" :disabled="isLoading" class="px-8 py-4 text-lg font-medium rounded-lg transition-all duration-200 bg-brand text-white hover:bg-blue-600">
                 이어서 문항 생성하기
             </button>

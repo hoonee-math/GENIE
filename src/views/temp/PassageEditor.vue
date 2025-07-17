@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class=""> <!-- 여기에 뭔가 overflow-y-auto 속성을 주더라도 editor-content (TipTap 에디터)는 여전히 div를 벗어나버림, editor-content의 높이가 문제인것 같음. -->
         <!-- <div class="box-border bg-white border border-[#E5E7EB] rounded-xl"> -->
         <!-- 편집 도구 섹션 -->
         <div v-if="showTools" class="flex flex-col items-start gap-2 mb-4">
