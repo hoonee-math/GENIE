@@ -18,10 +18,10 @@
             </div>
             
             <!-- 가운데 구분선 -->
-            <div class="w-px my-7 border-[1px] border-[#D9D9D9] flex-shrink-0"></div>
+            <div v-if="$slots.right" class="w-px my-7 border-[1px] border-[#D9D9D9] flex-shrink-0"></div>
 
             <!-- 오른쪽 영역 (지문 분석) -->
-            <div class="min-w-0 m-7 dev-border" :class="`flex-[${rightRatio}]`">
+            <div v-if="$slots.right" class="min-w-0 m-7 dev-border" :class="`flex-[${rightRatio}]`">
                 <div class="flex flex-col gap-10 h-full">
                     <slot name="right" />
                 </div>

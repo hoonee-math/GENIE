@@ -32,18 +32,23 @@
 
             <template #right>
                 <!-- LoadPassageModal.vue 의 지문 불러오기에서 지문을 선택한 후 불러오기 버튼을 클릭하면 해당 지문을 pinia에 저장시키기. pinia에 저장된 지문과 지문 분석 데이터 출력 (Pinia Store에서 자동으로 데이터 가져옴) -->
-                <PassageSummaryLayout v-if="!showQuestionModal"/>
+                <PassageSummaryLayout />
                 
             </template>
         </PassageAndQuestionLayout>
 
         <!-- 하단 버튼들 (문항 유형 선택 모달이 표시되지 않을 때만) -->
-        <div v-if="!showQuestionModal" class="flex flex-col sm:flex-row justify-end gap-4 mt-8">
+        <div v-if="!isQuestionExampleSelectorVisible" class="flex flex-col sm:flex-row justify-end gap-4 mt-8">
+            <!-- 초기화 버튼 -->
             <BaseButton id="reset_button" text="초기화" type="type2" width="248px" height="54px" :disabled="!canReset"
                 @click="resetAll" class="hover:shadow-xl active:scale-[0.98]" />
+            <!-- 문항 유형 선택하기 버튼 -->
             <BaseButton id="select-type" text="문항 유형 선택하기" type="type1" width="248px" height="54px"
-                :disabled="!canGenerate" @click="openQuestionModal" class="hover:shadow-xl active:scale-[0.98]" />
+                :disabled="!canGenerate" @click="showQuestionExampleSelector" class="hover:shadow-xl active:scale-[0.98]" />
         </div>
+
+        <!-- 문항 유형 선택 모달 대신 아래 출력되도록 설정 -->
+        <QuestionExampleSelector v-if="isQuestionExampleSelectorVisible" :generateType="generateType"/>
 
         <!-- 문항 유형 선택 모달이 표시될 때 -->
         <div v-if="showQuestionModal" class="w-full">
@@ -78,6 +83,7 @@ import ConfirmModalComponent from '@/components/common/ConfirmModalComponent.vue
 import LoadingModal from '@/components/common/LoadingModal.vue'
 import { useQuestion } from '@/composables/useQuestion'
 import { usePassage } from '@/composables/usePassage';
+import QuestionExampleSelector from './QuestionExampleSelector.vue'
 
 // Router 및 Composables
 const route = useRoute()
@@ -98,6 +104,7 @@ const { fetchPassage } = usePassage();
 const isLoading = ref(false)
 const errorMessage = ref('')
 const isGenerating = ref(false)
+
 const loadingMessage = ref('문항을 생성 중입니다.\\n생성까지 최대 3분이 소요될 수 있습니다.')
 
 // 데이터 상태
@@ -107,11 +114,13 @@ const textLength = ref(0)
 
 // 탭 상태
 const activeTab = ref('user') // ['user': '사용자 입력', 'storage': '자료실 지문' }]
+const generateType = ref('단일 지문')
 
 // 모달 상태
 const showQuestionModal = ref(false)
 const showLoadPassageModal = ref(false)
 const isConfirmModalOpen = ref(false)
+const isQuestionExampleSelectorVisible = ref(false)
 
 // 에디터 참조
 const editorRef = ref(null)
@@ -173,9 +182,9 @@ const resetAll = () => {
 // ===== 모달 관련 함수들 =====
 
 /**
- * 문항 유형 선택 모달 열기
+ * 문항 유형 선택하기 버튼 숨기기, 초기화 버튼 숨기기, QuestionExampleSelector 아래 나타내기
  */
-const openQuestionModal = () => {
+const showQuestionExampleSelector = () => {
     if (!canGenerate.value) {
         const validation = validateQuestionData(questionTitle.value, questionContent.value)
         if (!validation.isValid) {
@@ -184,14 +193,7 @@ const openQuestionModal = () => {
         }
     }
 
-    showQuestionModal.value = true
-}
-
-/**
- * 문항 유형 선택 모달 닫기
- */
-const closeQuestionModal = () => {
-    showQuestionModal.value = false
+    isQuestionExampleSelectorVisible.value = true
 }
 
 /**
