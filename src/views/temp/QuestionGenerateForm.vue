@@ -114,7 +114,7 @@ const textLength = ref(0)
 
 // 탭 상태
 const activeTab = ref('user') // ['user': '사용자 입력', 'storage': '자료실 지문' }]
-const generateType = ref('단일 지문')
+const generateType = ref('복합지문')
 
 // 모달 상태
 const showQuestionModal = ref(false)

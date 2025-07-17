@@ -104,6 +104,7 @@ import { ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import BaseButton from "@/components/common/BaseButton.vue";
 import PlainTooltip from "@/components/common/PlainTooltip.vue";
+import questionExampleData from '@/assets/data/question_example.json';
 import questionExample from "@/assets/data/questionExample.json";
 import PassageAndQuestionLayout from "./PassageAndQuestionLayout.vue";
 
@@ -118,7 +119,8 @@ const props = defineProps({
     createText: { type: String, default: "문항 생성하기" },
     passageTitle: String, // 부모에서 전달된 제목
     passageContent: String, // 부모에서 전달된 내용
-    });
+    generateType: String, // 부모에서 절달된 내용
+});
 
 const activePattern = ref(null); // 문항 유형 선택값
 const activeType = ref(null); // 서술 방식 선택값
@@ -294,37 +296,44 @@ const difficultyLevels = ref([
     { id: 11, label: "상" },
 ]);
 
-const questions = questionExample;
+// 1. 기본 questions를 구조별로 필터링
+const questions = computed(() => {
+    // const passageStore = usePassageStore()
+    
+    // structure 타입 결정
+    let structureType = props.generateType || '단일지문'
+    if (!props.generateType) {
+        structureType = '복합지문'
+    }
+    
+    // question_example.json에서 구조별 필터링
+    return questionExampleData.filter(question => {
+        if (question.structure && question.structure.length > 0) {
+            return question.structure.includes(structureType)
+        }
+        return true
+    })
+})
 
-// ✅ 선택된 라디오 버튼에 따라 자동 필터링
+// 2. 기존 filteredQuestions를 업데이트 (패턴, 타입별 필터링)
 const filteredQuestions = computed(() => {
-    if (
-        !activePattern.value ||
-        (!activeType.value && !activeDifficulty.value)
-    ) {
-        return []; // 필터가 선택되지 않았다면 빈 배열 반환
+    if (!activePattern.value || (!activeType.value && !activeDifficulty.value)) {
+        return [];
     }
 
-    return questionExample.filter((q) => {
+    return questions.value.filter((q) => { // questionExample → questions.value 변경
         return (
-            (activePattern.value === "전체" ||
-                q.pattern === activePattern.value) &&
+            (activePattern.value === "전체" || q.pattern === activePattern.value) &&
             (activeType.value === "전체" || q.type === activeType.value) &&
-            (activeDifficulty.value === null ||
-                activeDifficulty.value === "전체" ||
-                q.difficulty === activeDifficulty.value)
+            (activeDifficulty.value === null || activeDifficulty.value === "전체" || q.difficulty === activeDifficulty.value)
         );
     });
 });
 
-// ✅ 필터링된 리스트 변경 시 첫 번째 문항을 자동으로 선택
+// 3. 기존 watch는 그대로 유지
 watch(filteredQuestions, (newList) => {
     if (newList.length > 0) {
-        // 기존 선택 문항이 필터링 결과에 포함되지 않으면 첫 번째 문항 선택
-        if (
-            !selectedQuestion.value ||
-            !newList.includes(selectedQuestion.value)
-        ) {
+        if (!selectedQuestion.value || !newList.includes(selectedQuestion.value)) {
             selectedQuestion.value = newList[0];
         }
     } else {
