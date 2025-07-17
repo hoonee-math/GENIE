@@ -1,7 +1,7 @@
 <template>
     <PassageAndQuestionLayout>
-        <template #left>
-    <div class="w-full h-full flex flex-col items-start gap-4 box-border max-h-[968px]"> <!--max-w-[1232px] -->
+    <template #left>
+    <div class="w-full h-full flex flex-col items-start gap-4 box-border "> <!--max-w-[1232px] -->
         <h1
             class="w-full font-pretendard font-bold text-lg md:text-xl leading-[150%] tracking-[-0.02em] text-[#303030]">
             문항 생성하기
@@ -45,7 +45,7 @@
         <div class="flex flex-col lg:flex-row gap-4 md:gap-5 flex-1 w-full overflow-hidden">
             <!-- 예시 목록 -->
             <div
-                class="w-full flex-1 h-full rounded-[20px] border border-[#bdbdbd] p-4 md:p-5 flex items-center justify-center overflow-hidden">
+                class="w-full flex-1 h-[462px] rounded-[20px] border border-[#bdbdbd] p-4 md:p-5 flex items-center justify-center overflow-hidden">
                 <div v-if="filteredQuestions.length > 0" class="flex flex-col gap-4 w-full h-full overflow-y-auto">
                     <div v-for="(item, index) in filteredQuestions" :key="index"
                         class="w-full h-24 rounded-[20px] border border-[#bdbdbd] p-4 flex flex-col items-start gap-2.5 cursor-pointer transition-all duration-200 hover:border-[#0086ff] hover:bg-[#e6f3ff]"
@@ -70,7 +70,7 @@
 
             <!-- 미리보기 -->
             <div
-                class="w-full flex-1 h-full rounded-[20px] border border-[#bdbdbd] p-4 md:p-6 flex flex-col items-start overflow-hidden">
+                class="w-full flex-1  h-[462px] rounded-[20px] border border-[#bdbdbd] p-4 md:p-6 flex flex-col items-start overflow-hidden">
                 <h2 class="font-bold text-base md:text-lg leading-[150%] tracking-[-0.02em] mb-6 md:mb-8">
                     문항 미리보기
                 </h2>
@@ -85,19 +85,19 @@
                 </div>
             </div>
         </div>
-
-        <!-- 버튼 영역 -->
-        <div class="flex flex-col sm:flex-row gap-2.5 self-end w-full sm:w-auto">
-            <div class="flex gap-2.5 w-full sm:w-auto relative">
-                <PlainTooltip id="tooltip" message="생성 시 이용권 1회 차감" width="205px" class="absolute -top-14 right-0" />
-                <BaseButton text="닫기" type="type3" height="54px" class="w-full sm:w-auto px-8 text-sm"
-                    @click="closeModal" />
-                <BaseButton :text="createText" type="type1" height="54px" class="w-full sm:w-auto px-8 text-sm"
-                    :disabled="!selectedQuestion" @click.once="handleGenerateQuestion" />
-            </div>
-        </div>
     </div></template>
     </PassageAndQuestionLayout>
+    
+    <!-- 버튼 영역 -->
+    <div class="flex flex-col sm:flex-row gap-2.5 self-end w-full sm:w-auto">
+        <div class="flex gap-2.5 w-full sm:w-auto relative">
+            <PlainTooltip id="tooltip" message="생성 시 이용권 1회 차감" width="205px" class="absolute -top-14 right-0" />
+            <BaseButton text="닫기" type="type3" height="54px" class="w-full sm:w-auto px-8 text-sm"
+                @click="closeModal" />
+            <BaseButton :text="createText" type="type1" height="54px" class="w-full sm:w-auto px-8 text-sm"
+                :disabled="!selectedQuestion" @click.once="handleGenerateQuestion" />
+        </div>
+    </div>
 </template>
 <script setup>
 import { ref, computed, watch } from "vue";
@@ -118,7 +118,7 @@ const props = defineProps({
     createText: { type: String, default: "문항 생성하기" },
     passageTitle: String, // 부모에서 전달된 제목
     passageContent: String, // 부모에서 전달된 내용
-});
+    });
 
 const activePattern = ref(null); // 문항 유형 선택값
 const activeType = ref(null); // 서술 방식 선택값
