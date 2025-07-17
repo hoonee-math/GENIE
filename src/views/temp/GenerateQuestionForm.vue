@@ -64,6 +64,36 @@
         <LoadingModal :isOpen="isGenerating" :message="loadingMessage" />
 
         <!-- (미구현) QuestionExampleSelector 의 [버튼 영역]을 이 자리에 옮기기 -->
+        <div class="flex justify-end space-x-4 mt-12">
+            <button @click="generateQuestion" :disabled="isLoading"
+                :class="[
+                    'px-8 py-4 text-lg font-medium rounded-lg transition-all duration-200',
+                    isLoading 
+                        ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+                        : 'bg-brand text-white hover:bg-blue-600'
+                ]">
+                <!-- 로딩 스피너 -->
+                <div v-if="isLoading" class="flex items-center">
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span v-if="loadingStep === 'generating'">문항 생성 중...</span>
+                    <span v-else-if="loadingStep === 'saving'">문항 저장 중...</span>
+                    <span v-else>처리 중...</span>
+                </div>
+                <span v-else>문항 생성하기</span>
+            </button>
+            <button @click="resetForm" :disabled="isLoading"
+                :class="[
+                    'px-8 py-4 text-lg font-medium rounded-lg transition-colors duration-200',
+                    isLoading
+                        ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                        : 'text-gray-700 bg-gray-200 hover:bg-gray-300'
+                ]">
+                초기화? 직접 입력하기?
+            </button>
+        </div>
     </div>
 </template>
 
@@ -248,7 +278,7 @@ const handleLoadPassage = async (selectPasCode) => {
 /**
  * 문항 생성 처리
  */
-const handleQuestionGenerate = async (questionData) => {
+const generateQuestion = async (questionData) => {
     isGenerating.value = true
 
     try {
@@ -263,50 +293,10 @@ const handleQuestionGenerate = async (questionData) => {
     }
 }
 
-// ===== 초기화 함수 =====
-
-/**
- * 컴포넌트 초기화
- */
-const initializeComponent = async () => {
-    // isLoading.value = true
-
-    // try {
-    //     // URL 파라미터에서 pasCode 확인 (이어서 생성하기)
-    //     const pasCode = route.params.pasCode || route.query.pasCode
-
-    //     if (pasCode) {
-    //         try {
-    //             // 캐시에서 지문 데이터 로드
-    //             const loadedData = continueFromGeneratedPassage(Number(pasCode))
-
-    //             // UI 업데이트
-    //             questionTitle.value = loadedData.title
-    //             passageContent.value = loadedData.content
-    //             activeTab.value = 'storage'
-
-    //             // 에디터 업데이트 (nextTick으로 DOM 업데이트 후 실행)
-    //             await nextTick()
-    //             if (editorRef.value) {
-    //                 editorRef.value.setContent(loadedData.content)
-    //             }
-    //         } catch (error) {
-    //             console.error('캐시된 지문 로드 실패:', error)
-    //             // 실패 시 기본 상태로 유지
-    //         }
-    //     }
-    // } catch (error) {
-    //     console.error('컴포넌트 초기화 실패:', error)
-    //     errorMessage.value = '페이지를 불러오는데 실패했습니다.'
-    // } finally {
-    //     isLoading.value = false
-    // }
-}
-
 // ===== 라이프사이클 =====
 
 onMounted(() => {
-    initializeComponent()
+    
 })
 
 // 마운트 해제시
