@@ -36,96 +36,8 @@ async def create_reading_passage_question(request: QuestionRequest) -> ReadingPa
         logger.info(f"문항 생성 요청 수신 -> 유형:{request.type_question}")
         logger.debug(f"입력 지문 길이:{len(request.custom_passage)}자")
 
-        # --------------------- 1. 지문 분류 및 키워드 추출 : 먼저 사용자가 직접 입력 및 수정한 지문일 수 있기 때문에 지문의 유형과 제재를 추출합니다. -----------------------
-        logger.info("지문 유형 및 핵심 키워드 추출 중")
 
-        type_keyword_prompt = f"""아래 수능 국어 독서 영역 비문학(독서론) 지문에서 20자 이내로 요약한 핵심 키워드를 3개 뽑아주세요. 각 키워드는 쉼표(,)로 구분해 주세요.
-
----
-
-## 지문
-
-{request.custom_passage}
-
----
-
-## 핵심 키워드 예시
-
-유서, 조선 전기, 실학자
-
----
-
-반드시 아래 JSON 형식으로 답변하세요.
-{{
-    "keyword": String "string1, string2, string3"
-}}"""
-
-        type_keyword_response = await client.aio.models.generate_content(
-            model=GEMINI_FLASH_MODEL,
-            config=types.GenerateContentConfig(
-                system_instruction=type_keyword_prompt,
-                temperature=0.3, ## 일관된 답변을 위해 온도를 낮췄습니다.
-                response_mime_type="application/json", ## 아예 답변을 json으로 받기
-                response_schema=ReadingPassageInfo, ## 나올 json의 key, value 값을 지정한 클래스입니다.
-            ),
-            contents=""
-        )
-
-        # 사용된 토큰 값을 바탕으로 지불하는 비용을 계산합니다.
-        usage_metadata_type_keyword = type_keyword_response.usage_metadata
-        log_api_call_cost(GEMINI_FLASH_MODEL, {
-            "prompt_token_count": usage_metadata_type_keyword.prompt_token_count,
-            "total_token_count": usage_metadata_type_keyword.total_token_count,
-        })
-
-        ## 구조화된 답변을 유도하는 설정
-        type_keyword_result = json.loads(type_keyword_response.text)
-        # type_keyword_result = process_json_response(type_keyword_response.text)
-        keyword_str = type_keyword_result.get("keyword", "제재 추출 실패")
-
-        logger.debug(f"추출 지문 유형:'독서론', 키워드:{keyword_str}")
-
-        keyword_list = [k.strip() for k in keyword_str.split(',')]
-
-        # -------------------------------------- 2. 핵심 논점 추출 : 지문의 핵심 논점을 추출합니다. -----------------------------------------
-        logger.info("지문 핵심 논점 추출 중...")
-
-        core_point_prompt = f"""다음은 수능 국어 영역 독서 분야 비문학 지문이다.
-
-[지문]
-{request.custom_passage}
-
-이 지문에서 학생이 반드시 이해해야 할 핵심 논점 3가지를 요약하라.
-*논점이란 해당 글에서 다루는 핵심 주제나 쟁점을 의미한다. 출제자가 독자에게 전달하고자 하는 주요 메시지나 주장으로, 글의 방향성과 목적을 결정짓는 요소이다.
-
-<작성 예시>
-"첫째, 조세는 국가 운영과 공공 서비스 재정을 마련하는 중요한 수단으로 효율적인 자원 분배와 공평한 부담을 동시에 추구해야 한다.
-
-둘째, 조세 제도 설계 시 효율성과 공평성을 균형 있게 고려하여 경제 활동을 저해하지 않으면서도 재정 안정성을 보장할 필요가 있다.
-
-셋째, 다양한 이해관계자와 전문가의 의견을 수렴하고 구체적인 통계 자료를 토대로 합리적인 기준을 설정하여 조세 정책의 효율성과 공평성을 실현해야 한다."
-
-
-출력은 불필요한 문자 없이 줄글 형태로만 출력하라."""
-
-        core_point_response = await client.aio.models.generate_content(
-            model=GEMINI_PRO_MODEL,
-            config=types.GenerateContentConfig(
-                temperature=0.3
-            ),
-            contents=core_point_prompt
-        )
-
-        usage_metadata_core_point = core_point_response.usage_metadata
-        log_api_call_cost(GEMINI_PRO_MODEL, {
-            "prompt_token_count": usage_metadata_core_point.prompt_token_count,
-            "total_token_count": usage_metadata_core_point.total_token_count,
-        })
-
-        generated_core_point = core_point_response.text.strip()
-        logger.debug(f"추출 논점 : {generated_core_point[:30]}...")
-
-        # -------------------------------------------------- 3. 문항 생성 : 문항을 생성합니다. ----------------------------------------------------
+        # -------------------------------------------------- 문항 생성 : 문항을 생성합니다. ----------------------------------------------------
         logger.info("문항 생성 중...")
         ## 사실적, 추론적, 비판적, 어휘 각각의 유형에 따른 가이드라인을 가져옵니다.
         question_guidelines = get_question_guidelines(request.type_question)
@@ -259,110 +171,18 @@ quoted_word
         logger.info("문항 생성 완료")
 
 
-        quoted_paragraph = response_json.get("quoted_paragraph", "")
-        quoted_sentence = response_json.get("quoted_sentence", [])
-        quoted_word = response_json.get("quoted_word", [])
-
-
-        
-        if request.question_subpassage_example and request.question_subpassage_example.strip():
-            if (quoted_paragraph=="") and (quoted_sentence == []) and (quoted_word == []):
-                return ReadingPassageQuestionResponse(
-                    type_passage="독서론",
-                    keyword=keyword_list,
-                    generated_core_point=[generated_core_point],
-                    generated_question=response_json.get("generated_question", "문제문 생성 실패"),
-                    generated_subpassage=response_json.get("generated_subpassage", "보기 지문 생성 실패"),
-                    generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
-                    generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
-                    generated_description=response_json.get("generated_description", "해설 생성 실패")
-                )
-            elif (quoted_paragraph!="") and (quoted_sentence == []) and (quoted_word == []):
-                return ReadingPassageQuestionResponse(
-                    type_passage="독서론",
-                    keyword=keyword_list,
-                    generated_core_point=[generated_core_point],
+        return ReadingPassageQuestionResponse(
+                    kind_passage="독서론",
                     generated_question=response_json.get("generated_question", "문제문 생성 실패"),
                     generated_subpassage=response_json.get("generated_subpassage", "보기 지문 생성 실패"),
                     generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
                     generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
                     generated_description=response_json.get("generated_description", "해설 생성 실패"),
-                    quoted_paragraph=quoted_paragraph
+                    quoted_paragraph = response_json.get("quoted_paragraph", None),
+                    quoted_sentence = response_json.get("quoted_sentence", None),
+                    quoted_word = response_json.get("quoted_word", None)
                 )
-            elif (quoted_paragraph!="") and (quoted_sentence != []) and (quoted_word != []):
-                return ReadingPassageQuestionResponse(
-                    type_passage="독서론",
-                    keyword=keyword_list,
-                    generated_core_point=[generated_core_point],
-                    generated_question=response_json.get("generated_question", "문제문 생성 실패"),
-                    generated_subpassage=response_json.get("generated_subpassage", "보기 지문 생성 실패"),
-                    generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
-                    generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
-                    generated_description=response_json.get("generated_description", "해설 생성 실패"),
-                    quoted_paragraph=quoted_paragraph,
-                    quoted_sentence=quoted_sentence,
-                    quoted_word=quoted_word
-                )
-            elif (quoted_paragraph=="") and (quoted_sentence != []) and (quoted_word != []):
-                return ReadingPassageQuestionResponse(
-                    type_passage="독서론",
-                    keyword=keyword_list,
-                    generated_core_point=[generated_core_point],
-                    generated_question=response_json.get("generated_question", "문제문 생성 실패"),
-                    generated_subpassage=response_json.get("generated_subpassage", "보기 지문 생성 실패"),
-                    generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
-                    generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
-                    generated_description=response_json.get("generated_description", "해설 생성 실패"),
-                    quoted_sentence=quoted_sentence,
-                    quoted_word=quoted_word
-                )
-        else:
-            if (quoted_paragraph=="") and (quoted_sentence == []) and (quoted_word == []):
-                return ReadingPassageQuestionResponse(
-                    type_passage="독서론",
-                    keyword=keyword_list,
-                    generated_core_point=[generated_core_point],
-                    generated_question=response_json.get("generated_question", "문제문 생성 실패"),
-                    generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
-                    generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
-                    generated_description=response_json.get("generated_description", "해설 생성 실패")
-                )
-            elif (quoted_paragraph!="") and (quoted_sentence == []) and (quoted_word == []):
-                return ReadingPassageQuestionResponse(
-                    type_passage="독서론",
-                    keyword=keyword_list,
-                    generated_core_point=[generated_core_point],
-                    generated_question=response_json.get("generated_question", "문제문 생성 실패"),
-                    generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
-                    generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
-                    generated_description=response_json.get("generated_description", "해설 생성 실패"),
-                    quoted_paragraph=quoted_paragraph
-                )
-            elif (quoted_paragraph!="") and (quoted_sentence != []) and (quoted_word != []):
-                return ReadingPassageQuestionResponse(
-                    type_passage="독서론",
-                    keyword=keyword_list,
-                    generated_core_point=[generated_core_point],
-                    generated_question=response_json.get("generated_question", "문제문 생성 실패"),
-                    generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
-                    generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
-                    generated_description=response_json.get("generated_description", "해설 생성 실패"),
-                    quoted_paragraph=quoted_paragraph,
-                    quoted_sentence=quoted_sentence,
-                    quoted_word=quoted_word
-                )
-            elif (quoted_paragraph=="") and (quoted_sentence != []) and (quoted_word != []):
-                return ReadingPassageQuestionResponse(
-                    type_passage="독서론",
-                    keyword=keyword_list,
-                    generated_core_point=[generated_core_point],
-                    generated_question=response_json.get("generated_question", "문제문 생성 실패"),
-                    generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
-                    generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
-                    generated_description=response_json.get("generated_description", "해설 생성 실패"),
-                    quoted_sentence=quoted_sentence,
-                    quoted_word=quoted_word
-                )
+    
 
     except ValueError as ve:
          logger.error(f"입력값 오류 : {str(ve)}")
@@ -379,3 +199,105 @@ quoted_word
         error_detail = traceback.format_exc()
         logger.error(f"문항 생성 중 오류 발생 : {str(e)}\n{error_detail}")
         raise HTTPException(status_code=500, detail=f"지문 생성 중 서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요: {str(e)}")
+
+
+
+        
+    #     if request.question_subpassage_example and request.question_subpassage_example.strip():
+    #         if (quoted_paragraph=="") and (quoted_sentence == []) and (quoted_word == []):
+    #             return ReadingPassageQuestionResponse(
+    #                 kind_passage="독서론",
+    #                 generated_question=response_json.get("generated_question", "문제문 생성 실패"),
+    #                 generated_subpassage=response_json.get("generated_subpassage", "보기 지문 생성 실패"),
+    #                 generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
+    #                 generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
+    #                 generated_description=response_json.get("generated_description", "해설 생성 실패")
+    #             )
+    #         elif (quoted_paragraph!="") and (quoted_sentence == []) and (quoted_word == []):
+    #             return ReadingPassageQuestionResponse(
+    #                 kind_passage="독서론",
+    #                 generated_question=response_json.get("generated_question", "문제문 생성 실패"),
+    #                 generated_subpassage=response_json.get("generated_subpassage", "보기 지문 생성 실패"),
+    #                 generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
+    #                 generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
+    #                 generated_description=response_json.get("generated_description", "해설 생성 실패"),
+    #                 quoted_paragraph=quoted_paragraph
+    #             )
+    #         elif (quoted_paragraph!="") and (quoted_sentence != []) and (quoted_word != []):
+    #             return ReadingPassageQuestionResponse(
+    #                 kind_passage="독서론",
+    #                 generated_question=response_json.get("generated_question", "문제문 생성 실패"),
+    #                 generated_subpassage=response_json.get("generated_subpassage", "보기 지문 생성 실패"),
+    #                 generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
+    #                 generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
+    #                 generated_description=response_json.get("generated_description", "해설 생성 실패"),
+    #                 quoted_paragraph=quoted_paragraph,
+    #                 quoted_sentence=quoted_sentence,
+    #                 quoted_word=quoted_word
+    #             )
+    #         elif (quoted_paragraph=="") and (quoted_sentence != []) and (quoted_word != []):
+    #             return ReadingPassageQuestionResponse(
+    #                 kind_passage="독서론",
+    #                 generated_question=response_json.get("generated_question", "문제문 생성 실패"),
+    #                 generated_subpassage=response_json.get("generated_subpassage", "보기 지문 생성 실패"),
+    #                 generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
+    #                 generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
+    #                 generated_description=response_json.get("generated_description", "해설 생성 실패"),
+    #                 quoted_sentence=quoted_sentence,
+    #                 quoted_word=quoted_word
+    #             )
+    #     else:
+    #         if (quoted_paragraph=="") and (quoted_sentence == []) and (quoted_word == []):
+    #             return ReadingPassageQuestionResponse(
+    #                 kind_passage="독서론",
+    #                 generated_question=response_json.get("generated_question", "문제문 생성 실패"),
+    #                 generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
+    #                 generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
+    #                 generated_description=response_json.get("generated_description", "해설 생성 실패")
+    #             )
+    #         elif (quoted_paragraph!="") and (quoted_sentence == []) and (quoted_word == []):
+    #             return ReadingPassageQuestionResponse(
+    #                 kind_passage="독서론",
+    #                 generated_question=response_json.get("generated_question", "문제문 생성 실패"),
+    #                 generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
+    #                 generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
+    #                 generated_description=response_json.get("generated_description", "해설 생성 실패"),
+    #                 quoted_paragraph=quoted_paragraph
+    #             )
+    #         elif (quoted_paragraph!="") and (quoted_sentence != []) and (quoted_word != []):
+    #             return ReadingPassageQuestionResponse(
+    #                 kind_passage="독서론",
+    #                 generated_question=response_json.get("generated_question", "문제문 생성 실패"),
+    #                 generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
+    #                 generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
+    #                 generated_description=response_json.get("generated_description", "해설 생성 실패"),
+    #                 quoted_paragraph=quoted_paragraph,
+    #                 quoted_sentence=quoted_sentence,
+    #                 quoted_word=quoted_word
+    #             )
+    #         elif (quoted_paragraph=="") and (quoted_sentence != []) and (quoted_word != []):
+    #             return ReadingPassageQuestionResponse(
+    #                 kind_passage="독서론",
+    #                 generated_question=response_json.get("generated_question", "문제문 생성 실패"),
+    #                 generated_option=response_json.get("generated_option", ["선지 생성 실패"] * 5),
+    #                 generated_answer=response_json.get("generated_answer", "정답 생성 실패"),
+    #                 generated_description=response_json.get("generated_description", "해설 생성 실패"),
+    #                 quoted_sentence=quoted_sentence,
+    #                 quoted_word=quoted_word
+    #             )
+
+    # except ValueError as ve:
+    #      logger.error(f"입력값 오류 : {str(ve)}")
+    #      raise HTTPException(status_code=400, detail=f"입력값 오류: {str(ve)}")
+    
+    # except genai.types.generation_types.BlockedPromptException as bpe:
+    #      logger.error(f"프롬프트 차단 : {bpe}")
+    #      raise HTTPException(status_code=400, detail="지문 생성 요청이 안전 정책에 의해 차단되었습니다.")
+    
+    # except HTTPException as http_exc:
+    #      raise http_exc
+    
+    # except Exception as e:
+    #     error_detail = traceback.format_exc()
+    #     logger.error(f"문항 생성 중 오류 발생 : {str(e)}\n{error_detail}")
+    #     raise HTTPException(status_code=500, detail=f"지문 생성 중 서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요: {str(e)}")

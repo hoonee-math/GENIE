@@ -26,7 +26,7 @@ class SinglePassageRequest(BaseModel):
 
 # ✅ 단일 지문 응답
 class SinglePassageResponse(BaseModel):
-    kind_passage: str = "단일지문"
+    kind_passage: str = "단일 지문"
     generated_passage: str = Field(..., description="생성된 지문")
     generated_core_point: List[str] = Field(..., description="지문의 핵심 논점")
 
@@ -52,6 +52,6 @@ class MultiplePassageRequest(BaseModel):
 
 # ✅ 복합 지문 응답
 class MultiplePassageResponse(BaseModel):
-    kind_passage: str = "복합지문"
+    kind_passage: str = "복합 지문"
     generated_passage: str = Field(..., description="생성된 지문")
     generated_core_point: List[str] = Field(..., description="(가) 지문의 핵심 논점과 (나) 지문 핵심 논점")
