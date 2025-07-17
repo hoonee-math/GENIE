@@ -54,10 +54,18 @@
                                 JSON.stringify(selectedQuestion) ===
                                 JSON.stringify(item),
                         }" @click="selectedQuestion = item">
-                        <span
-                            class="px-2 py-1 rounded-lg border border-[#0086ff] text-[#0086ff] bg-[#cce5ff] font-semibold text-xs md:text-sm leading-[150%] tracking-[-0.02em]">
-                            {{ item.pattern }}
-                        </span>
+                        <div>
+                            <span
+                                class="px-2 py-1 rounded-lg border border-[#0086ff] text-[#0086ff] bg-[#cce5ff] font-semibold text-xs md:text-sm leading-[150%] tracking-[-0.02em] mr-4">
+                                {{ item.pattern }}
+                            </span>
+                            
+                            <span
+                                class="px-2 py-1 rounded-lg border border-[#BDBDBD] text-[#757575] bg-[#D9D9D9] font-semibold text-xs md:text-sm leading-[150%] tracking-[-0.02em]">
+                                {{ item.tag }}
+                            </span>
+
+                        </div>
                         <div class="font-medium text-xs md:text-sm leading-[150%] tracking-[-0.02em] text-[#303030]">
                             {{ item.title }}
                         </div>
@@ -288,6 +296,7 @@ const questionTypes = ref([
     { id: 6, label: "전체" },
     { id: 7, label: "정답형" },
     { id: 8, label: "부정형" },
+    { id: 12, label: "긍정형" },
 ]);
 
 const difficultyLevels = ref([
