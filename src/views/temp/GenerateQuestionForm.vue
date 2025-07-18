@@ -56,15 +56,8 @@
         <LoadPassageModal :isOpen="showLoadPassageModal" @close="closeLoadPassageModal"
             @selectPasCode="handleLoadPassage" />
 
-        <ConfirmModalComponent :isOpen="isConfirmModalOpen" title="글자 수를 확인해 주세요."
-            message="500자 이하의 지문으로 정상적인 문항을 생성하기 어렵습니다. 충분한 지문을 입력해 주세요." @close="isConfirmModalOpen = false"
-            @confirm="isConfirmModalOpen = false" />
-
-        <!-- 로딩 모달 -->
-        <LoadingModal :isOpen="isGenerating" :message="loadingMessage" />
-
         <!-- (미구현) QuestionExampleSelector 의 [버튼 영역]을 이 자리에 옮기기 -->
-        <div class="flex justify-end space-x-4 mt-12">
+        <div v-if="isQuestionExampleSelectorVisible" class="flex justify-end space-x-4">
             <button @click="generateQuestion" :disabled="isLoading"
                 :class="[
                     'px-8 py-4 text-lg font-medium rounded-lg transition-all duration-200',
@@ -84,7 +77,7 @@
                 </div>
                 <span v-else>문항 생성하기</span>
             </button>
-            <button @click="resetForm" :disabled="isLoading"
+            <button @click="resetAll" :disabled="isLoading"
                 :class="[
                     'px-8 py-4 text-lg font-medium rounded-lg transition-colors duration-200',
                     isLoading
@@ -94,6 +87,14 @@
                 초기화? 직접 입력하기?
             </button>
         </div>
+
+        <!-- 문항 생성 확인 모달 -->
+        <ConfirmModalComponent :isOpen="isConfirmModalOpen" title="글자 수를 확인해 주세요."
+            message="500자 이하의 지문으로 정상적인 문항을 생성하기 어렵습니다. 충분한 지문을 입력해 주세요." @close="isConfirmModalOpen = false"
+            @confirm="isConfirmModalOpen = false" />
+
+        <!-- 로딩 모달 -->
+        <LoadingModal :isOpen="isGenerating" :message="loadingMessage" />
     </div>
 </template>
 
@@ -196,6 +197,7 @@ const resetAll = () => {
     passageContent.value = ''
     textLength.value = 0
     activeTab.value = 'user'
+    isQuestionExampleSelectorVisible.value = false
 
     // 에디터 초기화
     if (editorRef.value) {

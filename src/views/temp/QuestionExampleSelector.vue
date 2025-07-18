@@ -79,12 +79,21 @@
             <!-- 미리보기 -->
             <div
                 class="w-full flex-1  h-[462px] rounded-[20px] border border-[#bdbdbd] p-4 md:p-6 flex flex-col items-start overflow-hidden">
-                <h2 class="font-bold text-base md:text-lg leading-[150%] tracking-[-0.02em] mb-6 md:mb-8">
-                    문항 미리보기
-                </h2>
+                <div class="flex justify-between w-full mb-6 md:mb-8">
+                    <div class="font-bold text-base md:text-lg leading-[150%] tracking-[-0.02em] ">
+                        문항 미리보기
+                    </div>
+                    <div v-if="selectedQuestion" class="px-2 py-1 rounded-lg border border-[#BDBDBD] text-[#000000] bg-[#D9D9D9] font-semibold text-xs md:text-sm leading-[150%] tracking-[-0.02em]">
+                        {{ selectedQuestion.reference }}
+                    </div>
+                </div>
                 <div v-if="selectedQuestion" class="w-full h-full overflow-y-auto">
                     <div class="font-normal text-base md:text-lg leading-[150%] tracking-[-0.02em] mb-3 text-left">
                         {{ selectedQuestion.title }}
+                    </div>
+                    <div v-if="selectedQuestion.subpassage" class="border border-2 w-full p-2 mb-2 text-xs md:text-sm leading-10 tracking-[-0.02em] text-left ">
+                        보기
+                        {{ selectedQuestion.subpassage }}
                     </div>
                     <div
                         class="font-normal text-xs md:text-sm leading-10 tracking-[-0.02em] whitespace-pre-wrap text-left">
@@ -97,7 +106,7 @@
     </PassageAndQuestionLayout>
     
     <!-- 버튼 영역 -->
-    <div class="flex flex-col sm:flex-row gap-2.5 self-end w-full sm:w-auto">
+    <div v-if="false" class="flex flex-col sm:flex-row gap-2.5 self-end w-full sm:w-auto">
         <div class="flex gap-2.5 w-full sm:w-auto relative">
             <PlainTooltip id="tooltip" message="생성 시 이용권 1회 차감" width="205px" class="absolute -top-14 right-0" />
             <BaseButton text="닫기" type="type3" height="54px" class="w-full sm:w-auto px-8 text-sm"
