@@ -184,8 +184,10 @@ const switchTab = (tabKey) => {
     if (tabKey === 'storage') {
         activeTab.value = tabKey
         openLoadPassageModal()
-    } else {
+    } else { // 사용자 입력 탭으로 전환
+        // 사용자 입력 탭으로 전환 시 passage 데이터를 초기화
         activeTab.value = tabKey
+        resetAll();
     }
 }
 
@@ -298,7 +300,14 @@ const generateQuestion = async (questionData) => {
 // ===== 라이프사이클 =====
 
 onMounted(() => {
-    
+    console.log('passage', passage.value.pasCode)
+    if(passage.value.pasCode){
+        activeTab.value = 'storage'
+        console.log('📥 [DEBUG] PassageAndQuestionLayout: passage.pasCode')
+    } else {
+        activeTab.value = 'user'
+        console.log('📥 [DEBUG] PassageAndQuestionLayout: passage.pasCode 없음, 사용자 입력 탭으로 설정')
+    }
 })
 
 // 마운트 해제시

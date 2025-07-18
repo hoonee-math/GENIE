@@ -308,12 +308,6 @@ const questionTypes = ref([
     { id: 12, label: "긍정형" },
 ]);
 
-const difficultyLevels = ref([
-    { id: 9, label: "하" },
-    { id: 10, label: "중" },
-    { id: 11, label: "상" },
-]);
-
 // 1. 기본 questions를 구조별로 필터링
 const questions = computed(() => {
     // const passageStore = usePassageStore()
