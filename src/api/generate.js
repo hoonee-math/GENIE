@@ -1,10 +1,10 @@
 import { apiPost } from "@/utils/http";
 
 // 더미 데이터 모드 설정 (true: 더미 데이터 사용, false: 실제 API 호출)
-const USE_DUMMY_DATA = true;
+const USE_DUMMY_DATA = false;
 
 // 더미 응답 데이터
-const DUMMY_RESPONSES = {
+const DUMMY_PASSAGE_RESPONSES = {
   single: {
     generated_passage: "예술 작품을 감상하고 그것의 가치를 판단하는 행위는 미학의 오랜 탐구 주제였다. 이러한 탐구의 중심에는 예술 작품이라는 대상과 그것을 지각하는 주체 사이의 관계를 어떻게 설정할 것인가의 문제가 놓여 있다. 작품의 아름다움은 감상자의 주관적 마음에 달려 있는가, 아니면 작품 자체에 객관적으로 존재하는가? 이 물음에 대해 흄은 주관적 감정을, 후설은 의식에 드러나는 현상을, 그리고 하먼은 객체 자체의 독립적 실재를 중심으로 각기 다른 이론적 구도를 제시하며 예술에 대한 이해의 지평을 넓혔다.\n\n흄에 따르면 미(美)는 대상 자체에 내재하는 속성이 아니라 그것을 바라보는 정신 속에서 발생하는 특정한 쾌의 정념이다. 그는 경험론의 입장에서 미적 판단의 근거를 보편적 이성이 아닌 개인의 주관적 감정에서 찾았다. 하지만 그는 모든 감정이 동등하다고 보지 않았으며, 취미에 있어 일정한 기준, 즉 ‘취미의 기준’이 존재한다고 주장했다. 이 기준은 특정 개인의 독단적 선호가 아니라, 섬세한 감각과 건전한 이성을 갖추고 편견 없이 대상을 반복적으로 고찰하는 훈련을 거친 ‘참된 비평가’들의 공동체적 합의를 통해 형성된다. 결국 흄에게 예술 작품의 가치는 개별 감상자의 순간적 쾌감에 머무는 것이 아니라, 이상적 감상자들의 공통된 정념을 통해 그 보편적 타당성을 확보하게 된다.\n\n이러한 흄의 논의와 달리, 후설은 현상학적 관점에서 예술 작품의 본질을 탐구하고자 했다. 그는 예술 작품에 대한 판단이 감상자의 주관적 심리 상태에 좌우되는 것을 넘어, 작품 자체가 의식에 드러나는 방식에 주목했다. 이를 위해 그는 자연적 태도를 괄호 안에 묶고 판단을 중지하는 ‘현상학적 환원’을 통해, 작품에 대한 기존의 지식이나 개인적 감정을 배제하고 순수한 의식에 나타나는 현상 자체에 집중할 것을 요구했다. 이 과정에서 예술 작품은 감상자의 의식과 무관한 물리적 사물이 아니라, 의식에 의해 구성되는 ‘지향적 대상’으로서 의미를 갖는다. 감상자는 작품의 개별적이고 우연적인 측면들을 넘어 그 본질적 구조를 직관함으로써 작품의 고유한 미적 가치에 도달할 수 있게 된다.\n\n한편, 현대의 객체지향 존재론을 개척한 하먼은 흄과 후설의 인간 중심적 접근에서 벗어나 객체의 독립적 위상을 강조한다. 하먼에게 예술 작품은 인간의 의식이나 감상과 무관하게 존재하는 ‘실재적 객체’이다. 이 실재적 객체는 무한한 속성을 지닌 채 자신만의 고유한 시공간 속에 있으며, 인간의 지각이나 사유를 통해 결코 완전히 파악될 수 없다. 우리가 경험하는 것은 실재적 객체의 일부 속성만이 드러난 ‘감각적 객체’에 불과하다. 하먼은 예술의 본질이 바로 이 두 객체 사이의 긴장에서 발생한다고 본다. 예술 작품은 감각적 속성들을 통해 자신의 배후에 있는 심오한 실재적 객체의 존재를 암시하며, 감상자는 이 간극이 만들어 내는 ‘매혹’을 통해 미적 경험을 하게 된다는 것이다.",
     generated_core_point: [ "첫째, 예술 작품의 가치 판단에 있어 작품의 아름다움이 감상자의 주관에 달린 것인지, 작품 자체에 객관적으로 존재하는 것인지에 대한 주체와 객체 간의 관계 설정 문제가 미학의 핵심 탐구 주제이다. 둘째, 흄, 후설, 하먼은 예술 작품과 감상 주체 간의 관계 설정에 대해 각각 주관적 감정의 보편적 합의, 의식에 드러나는 현상, 객체 자체의 독립적 실재를 중심으로 상이한 이론적 구도를 제시한다. 셋째, 이러한 각기 다른 이론적 관점들은 예술 작품의 본질과 미적 가치, 그리고 감상 경험의 발생 방식에 대한 이해의 지평을 확장하며, 예술에 대한 다양한 해석 가능성을 제시한다."]
@@ -33,7 +33,7 @@ export async function generateSinglePassageAPI(requestData) {
             // 더미 데이터 모드: 실제 API 대신 더미 응답 반환
             console.log('📱 [DUMMY MODE] 단일 지문 생성 요청:', requestData);
             await new Promise(resolve => setTimeout(resolve, 1000)); // 네트워크 지연 시뮬레이션
-            const response = DUMMY_RESPONSES.single;
+            const response = DUMMY_PASSAGE_RESPONSES.single;
             console.log('📱 [DUMMY MODE] 단일 지문 생성 응답:', response);
             return response;
         }
@@ -56,7 +56,7 @@ export async function generateMultiplePassageAPI(requestData) {
             // 더미 데이터 모드: 실제 API 대신 더미 응답 반환
             console.log('📋 [DUMMY MODE] 복합 지문 생성 요청:', requestData);
             await new Promise(resolve => setTimeout(resolve, 1200)); // 네트워크 지연 시뮬레이션
-            const response = DUMMY_RESPONSES.multiple;
+            const response = DUMMY_PASSAGE_RESPONSES.multiple;
             console.log('📋 [DUMMY MODE] 복합 지문 생성 응답:', response);
             return response;
         }
@@ -77,7 +77,7 @@ export async function generateReadingPassageAPI(requestData) {
             // 더미 데이터 모드: 실제 API 대신 더미 응답 반환
             console.log('📚 [DUMMY MODE] 독서론 지문 생성 요청:', requestData);
             await new Promise(resolve => setTimeout(resolve, 900)); // 네트워크 지연 시뮬레이션
-            const response = DUMMY_RESPONSES.reading;
+            const response = DUMMY_PASSAGE_RESPONSES.reading;
             console.log('📚 [DUMMY MODE] 독서론 지문 생성 응답:', response);
             return response;
         }
@@ -91,12 +91,135 @@ export async function generateReadingPassageAPI(requestData) {
     }
 }
 
+// type_passage[] : 인문, 사회, 과학, 기술, 예술, 독서론
+// kind_passage : 단일 지문, 복합 지문, 독서론 -> db 에 저장하는 값은 아님. vue에서도 이 값을 사용하지 않음. vue 에서는 type_passage 값을 이용해서 generateType 값을 설정함. 즉, kind_passage = generateType
+// 문항 생성 더미 응답 데이터
+const DUMMY_QUESTION_RESPONSES = {
+    // 사용자 입력 탭에서 문항 생성 요청할 경우 입력한 지문에 대한 지문 분석 내용을 함께 받아옴. 이때 kind_passage 값을 사용자가 선택한 generateType 값으로 설정하여 requestData에 포함해서 요청해야함.
+    userReading: {
+        // 사용자 입력 탭에서 문항 생성 요청 시 해당 지문에 대한 분석 내용을 응답하는 필드
+        detail: {
+            kind_passage: "독서론",
+            keyword: "독서, 공감적 읽기",
+            generated_core_point: ["생성된 핵심 논점"]
+        },
+        question: {
+            kind_passage: "독서론",
+            generated_question: "생성된 문제문",
+            generated_option: ["생성된 선지 목록"],
+            generated_answer: "정답",
+            generated_description: ["정답해설 + 오답피하기"],
+            generated_subpassage: "문항 보기 지문 (선택 사항)",
+            quoted_paragraph: "인용 문단 (선택 사항)",
+            quoted_sentence: ["인용 문장이 포함된 문장 목록 (선택 사항)"],
+            quoted_word: ["인용 문구 목록 (선택 사항)"],
+        }
+    },
+    userSingle: {
+        // 사용자 입력 탭에서 문항 생성 요청 시 해당 지문에 대한 분석 내용을 응답하는 필드
+        detail: {
+            kind_passage: "단일 지문",
+            type_passage: "지문의 분야",
+            keyword: "경제 사회, 민주주의",
+            generated_core_point: ["생성된 핵심 논점"]
+        },
+        question: {
+            kind_passage: "생성된 지문의 kind_passage가 들어가게됨",
+            generated_question: "생성된 문제문",
+            generated_option: ["생성된 선지 목록"],
+            generated_answer: "정답",
+            generated_description: ["정답해설 + 오답피하기"],
+            generated_subpassage: "문항 보기 지문 (선택 사항)",
+            quoted_paragraph: "인용 문단 (선택 사항)",
+            quoted_sentence: ["인용 문장이 포함된 문장 목록 (선택 사항)"],
+            quoted_word: ["인용 문구 목록 (선택 사항)"],
+        }
+    },
+    userMultiple: {
+        // 사용자 입력 탭에서 문항 생성 요청 시 해당 지문에 대한 분석 내용을 응답하는 필드
+        detail: {
+            kind_passage: "복합 지문",
+            first_passage_type: "기술",
+            first_passage_keyword: "(가) 지문 키워드",
+            second_passage_type: "(나) 지문 분야",
+            second_passage_keyword: "(나) 지문 키워드",
+            generated_core_point: ["(가) 지문 핵심 논점과","(나) 지문 핵심 논점"]
+        },
+        question: {
+            kind_passage: "생성된 지문의 kind_passage가 들어가게됨",
+            generated_question: "생성된 문제문",
+            generated_option: ["생성된 선지 목록"],
+            generated_answer: "정답",
+            generated_description: ["정답해설 + 오답피하기"],
+            generated_subpassage: "문항 보기 지문 (선택 사항)",
+            quoted_paragraph: "인용 문단 (선택 사항)",
+            quoted_sentence: ["인용 문장이 포함된 문장 목록 (선택 사항)"],
+            quoted_word: ["인용 문구 목록 (선택 사항)"],
+        }
+    },
+
+    single: {
+        kind_passage: "단일 지문",
+        generated_question: "생성된 문제문",
+        generated_option: ["생성된 선지 목록"],
+        generated_answer: "정답",
+        generated_description: ["정답해설 + 오답피하기"],
+        generated_subpassage: "문항 보기 지문 (선택 사항)",
+        quoted_paragraph: "인용 문단 (선택 사항)",
+        quoted_sentence: ["인용 문장이 포함된 문장 목록 (선택 사항)"],
+        quoted_word: ["인용 문구 목록 (선택 사항)"],
+    },
+    multiple: {
+        kind_passage: "단일 지문",
+        generated_question: "생성된 문제문",
+        generated_option: ["생성된 선지 목록"],
+        generated_answer: "정답",
+        generated_description: ["정답해설 + 오답피하기"],
+        generated_subpassage: "문항 보기 지문 (선택 사항)",
+        quoted_paragraph: "인용 문단 (선택 사항)",
+        quoted_sentence: ["인용 문장이 포함된 문장 목록 (선택 사항)"],
+        quoted_word: ["인용 문구 목록 (선택 사항)"],
+    },
+    reading: {
+        kind_passage: "단일 지문",
+        generated_question: "생성된 문제문",
+        generated_option: ["생성된 선지 목록"],
+        generated_answer: "정답",
+        generated_description: ["정답해설 + 오답피하기"],
+        generated_subpassage: "문항 보기 지문 (선택 사항)",
+        quoted_paragraph: "인용 문단 (선택 사항)",
+        quoted_sentence: ["인용 문장이 포함된 문장 목록 (선택 사항)"],
+        quoted_word: ["인용 문구 목록 (선택 사항)"],
+    }
+};
+
 /**
  * 문항 생성 관련 API 모듈
  * 이 모듈은 지문 기반 문항 생성 관련 API 호출을 처리합니다.
  * 각 함수는 API 엔드포인트에 POST 요청을 보내고, 결과를 반환합니다.
  * 에러 발생 시 콘솔에 로그를 남기고 에러를 다시 던집니다.
  **/
+
+// generate-passage-data
+export async function generatePassageDataAPI(requestData) {
+    try {
+        if (USE_DUMMY_DATA) {
+            // 더미 데이터 모드: 실제 API 대신 더미 응답 반환
+            console.log('📄 [DUMMY MODE] 지문 분석 요청:', requestData);
+            await new Promise(resolve => setTimeout(resolve, 800)); // 네트워크 지연 시뮬레이션
+            const response = DUMMY_QUESTION_RESPONSES.user.detail;
+            console.log('📄 [DUMMY MODE] 지문 분석 응답:', response);
+            return response;
+        }
+        
+        // 실제 API 호출
+        const response = await apiPost('/fastapi/generate-passage-data', requestData);
+        return response;
+    } catch (error) {
+        console.error('지문 분석 API 호출 실패:', error);
+        throw error; // 에러를 다시 던져서 호출한 곳에서 처리할 수 있도록 함
+    }
+}
 
 // generate-reading-passage-question
 export async function generateReadingPassageQuestionAPI(requestData) {
