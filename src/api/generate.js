@@ -236,10 +236,19 @@ export async function generatePassageDataAPI(requestData) {
 // generate-reading-passage-question
 export async function generateReadingPassageQuestionAPI(requestData) {
     try {
+        if (USE_DUMMY_DATA) {
+            // 더미 데이터 모드: 실제 API 대신 더미 응답 반환
+            console.log('📄 [DUMMY MODE] 독서론 지문에 대한 문항 생성 요청:', requestData);
+            await new Promise(resolve => setTimeout(resolve, 800)); // 네트워크 지연 시뮬레이션
+            const response = DUMMY_QUESTION_RESPONSES.reading;
+            return response;
+        }
+        
+        // 실제 API 호출
         const response = await apiPost('/fastapi/generate-reading-passage-question', requestData);
         return response;
     } catch (error) {
-        console.error('독해 지문 질문 생성 API 호출 실패:', error);
+        console.error('독서론 지문 질문 생성 API 호출 실패:', error);
         throw error; // 에러를 다시 던져서 호출한 곳에서 처리할 수 있도록 함
     }
 }
@@ -247,6 +256,15 @@ export async function generateReadingPassageQuestionAPI(requestData) {
 // generate-single-passage-question
 export async function generateSinglePassageQuestionAPI(requestData) {
     try {
+        if (USE_DUMMY_DATA) {
+            // 더미 데이터 모드: 실제 API 대신 더미 응답 반환
+            console.log('📄 [DUMMY MODE] 단일 지문에 대한 문항 생성 요청:', requestData);
+            await new Promise(resolve => setTimeout(resolve, 800)); // 네트워크 지연 시뮬레이션
+            const response = DUMMY_QUESTION_RESPONSES.single;
+            return response;
+        }
+        
+        // 실제 API 호출
         const response = await apiPost('/fastapi/generate-single-passage-question', requestData);
         return response;
     } catch (error) {
@@ -258,10 +276,19 @@ export async function generateSinglePassageQuestionAPI(requestData) {
 // generate-multiple-passage-question
 export async function generateMultiplePassageQuestionAPI(requestData) {
     try {
+        if (USE_DUMMY_DATA) {
+            // 더미 데이터 모드: 실제 API 대신 더미 응답 반환
+            console.log('📄 [DUMMY MODE] 복합 지문에 대한 문항 생성 요청:', requestData);
+            await new Promise(resolve => setTimeout(resolve, 800)); // 네트워크 지연 시뮬레이션
+            const response = DUMMY_QUESTION_RESPONSES.multiple;
+            return response;
+        }
+        
+        // 실제 API 호출
         const response = await apiPost('/fastapi/generate-multiple-passage-question', requestData);
         return response;
     } catch (error) {
-        console.error('다중 지문 질문 생성 API 호출 실패:', error);
+        console.error('복합 지문 질문 생성 API 호출 실패:', error);
         throw error; // 에러를 다시 던져서 호출한 곳에서 처리할 수 있도록 함
     }
 }
