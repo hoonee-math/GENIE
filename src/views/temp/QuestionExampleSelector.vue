@@ -14,13 +14,13 @@
                     문항 유형
                 </span>
                 <div class="flex flex-wrap gap-2 md:gap-4 overflow-x-auto w-full md:w-auto">
-                    <BaseButton v-for="type in questionPattern" :key="type.id" :text="type.label" type="type3"
-                        :width="type.width" class="transition-all duration-200" :class="{
+                    <BaseButton v-for="pattern in questionPatterns" :key="pattern.id" :text="pattern.label" type="type3"
+                        :width="pattern.width" class="transition-all duration-200" :class="{
                             'bg-[#e6f3ff] border-none text-[#0066cc]':
-                                activePattern === type.label,
+                                activePattern === pattern.label,
                             'bg-white border-[#bdbdbd] text-[#757575] hover:border-[#0086ff] hover:text-[#0086ff]':
-                                activePattern !== type.label,
-                        }" @click="activePattern = type.label" />
+                                activePattern !== pattern.label,
+                        }" @click="activePattern = pattern.label" />
                 </div>
             </div>
 
@@ -293,7 +293,7 @@ const handleGenerateQuestion = async () => {
     }
 };
 
-const questionPattern = ref([
+const questionPatterns = ref([
     { id: 1, label: "전체" },
     { id: 2, label: "사실적 읽기" },
     { id: 3, label: "추론적 읽기" },

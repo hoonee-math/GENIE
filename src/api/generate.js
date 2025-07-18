@@ -170,7 +170,7 @@ const DUMMY_QUESTION_RESPONSES = {
         quoted_word: ["인용 문구 목록 (선택 사항)"],
     },
     multiple: {
-        kind_passage: "단일 지문",
+        kind_passage: "복합 지문",
         generated_question: "생성된 문제문",
         generated_option: ["생성된 선지 목록"],
         generated_answer: "정답",
@@ -181,7 +181,7 @@ const DUMMY_QUESTION_RESPONSES = {
         quoted_word: ["인용 문구 목록 (선택 사항)"],
     },
     reading: {
-        kind_passage: "단일 지문",
+        kind_passage: "독서론",
         generated_question: "생성된 문제문",
         generated_option: ["생성된 선지 목록"],
         generated_answer: "정답",
