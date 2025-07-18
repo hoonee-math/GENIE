@@ -257,8 +257,10 @@ const openLoadPassageModal = () => {
  */
 const closeLoadPassageModal = () => {
     showLoadPassageModal.value = false
-    // 모달을 닫으면 사용자 입력 탭으로 돌아가기
-    // activeTab.value = 'user'
+    // 지문을 호출하지 않고 모달을 닫으면 사용자 입력탭으로 되돌리기
+    if (passage.value.pasCode === null || passage.value.pasCode === undefined) {
+        activeTab.value = 'user'
+    }
 }
 
 /**
