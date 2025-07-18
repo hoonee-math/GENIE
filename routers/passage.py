@@ -24,8 +24,8 @@ async def generate_passage_endpoint(request: SinglePassageRequest, current_user:
     except HTTPException as http_exc:
         raise http_exc
     except Exception as e:
-        logger.error(f"지문 생성 API 처리 중 오류 발생: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="지문 생성 중 서버 내부 오류가 발생했습니다.")
+        logger.error(f"단일 지문 생성 API 처리 중 오류 발생: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="단일 지문 생성 중 서버 내부 오류가 발생했습니다.")
     
 
 @router.post("/generate-reading-passage", response_model=ReadingPassageResponse)
@@ -36,8 +36,8 @@ async def generate_passage_endpoint(request: ReadingPassageRequest, current_user
     except HTTPException as http_exc:
         raise http_exc
     except Exception as e:
-        logger.error(f"지문 생성 API 처리 중 오류 발생: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="지문 생성 중 서버 내부 오류가 발생했습니다.")
+        logger.error(f"독서론 지문 생성 API 처리 중 오류 발생: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="독서론 지문 생성 중 서버 내부 오류가 발생했습니다.")
     
 
 @router.post("/generate-multiple-passage", response_model=MultiplePassageResponse)
@@ -48,5 +48,5 @@ async def generate_passage_endpoint(request: MultiplePassageRequest, current_use
     except HTTPException as http_exc:
         raise http_exc
     except Exception as e:
-        logger.error(f"지문 생성 API 처리 중 오류 발생: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="지문 생성 중 서버 내부 오류가 발생했습니다.")
+        logger.error(f"복합 지문 생성 API 처리 중 오류 발생: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="복합 지문 생성 중 서버 내부 오류가 발생했습니다.")

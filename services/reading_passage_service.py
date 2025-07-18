@@ -32,7 +32,8 @@ except Exception as e:
 
 async def create_reading_passage(request: ReadingPassageRequest) -> ReadingPassageResponse:
     try:
-        logger.info(f"지문 생성 요청 수신 -> 분야:독서론, 키워드:{request.keyword}, 요청사항:{request.requirement}")
+        logger.info("---------- 독서론 지문 생성 ----------")
+        logger.info(f"지문 생성 요청 수신, 키워드:{request.keyword}, 요청사항:{request.requirement}")
 
         passage_guidelines = get_passage_guidelines("독서론")
         logger.debug(f"지문 가이드라인 불러오기:{passage_guidelines[:25]}...")
@@ -172,7 +173,10 @@ async def create_reading_passage(request: ReadingPassageRequest) -> ReadingPassa
         })
 
         generated_core_point = core_point_response.text.strip()
-        logger.debug(f"핵심 논점 생성 완료 : {generated_core_point[:30]}...")
+        logger.debug(f"추출 논점 : {generated_core_point[:30]}...")
+
+        logger.info("독서론 지문 생성 완료")
+        logger.info("---------------------------------------")
 
         return ReadingPassageResponse(
             generated_passage=generated_passage,

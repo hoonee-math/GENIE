@@ -31,12 +31,12 @@ except Exception as e:
 
 async def create_multiple_passage_question(request: QuestionRequest) -> MultiplePassageQuestionResponse:
     try:
+        logger.info("---------- 복합 지문 문항 생성 ----------")
         logger.info(f"문항 생성 요청 수신 -> 유형:{request.type_question}")
-        logger.debug(f"입력 지문 길이:{len(request.custom_passage)}자")
+        logger.debug(f"입력 복합 지문 길이:{len(request.custom_passage)}자")
 
 
         # -------------------------------------------------- 문항 생성 : 문항을 생성합니다. ----------------------------------------------------
-        logger.info("문항 생성 중...")
         ## 사실적, 추론적, 비판적, 어휘 각각의 유형에 따른 가이드라인을 가져옵니다.
         question_guidelines = get_question_guidelines(request.type_question)
         logger.debug(f"문항 생성 가이드라인 불러오기 : {question_guidelines[:30]}...")
@@ -166,7 +166,8 @@ quoted_word
         ## 구조화된 답변을 유도하는 설정
         # response_json = json.loads(question_gen_response.text)
         response_json = process_json_response(question_gen_response.text)
-        logger.info("문항 생성 완료")
+        logger.info("복합 지문 문항 생성 완료")
+        logger.info("---------------------------------------")
 
 
         return MultiplePassageQuestionResponse(
@@ -188,7 +189,7 @@ quoted_word
     
     except genai.types.generation_types.BlockedPromptException as bpe:
          logger.error(f"프롬프트 차단 : {bpe}")
-         raise HTTPException(status_code=400, detail="지문 생성 요청이 안전 정책에 의해 차단되었습니다.")
+         raise HTTPException(status_code=400, detail="문항 생성 요청이 안전 정책에 의해 차단되었습니다.")
     
     except HTTPException as http_exc:
          raise http_exc
@@ -196,7 +197,7 @@ quoted_word
     except Exception as e:
         error_detail = traceback.format_exc()
         logger.error(f"문항 생성 중 오류 발생 : {str(e)}\n{error_detail}")
-        raise HTTPException(status_code=500, detail=f"지문 생성 중 서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"문항 생성 중 서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요: {str(e)}")
 
 
 

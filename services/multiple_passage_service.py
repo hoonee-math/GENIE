@@ -33,13 +33,14 @@ except Exception as e:
 
 async def create_multiple_passage(request: MultiplePassageRequest) -> MultiplePassageResponse:
     try:
-        logger.info(f"지문 생성 요청 수신 -> 복합지문, (가) 분야:{request.first_type_passage}, (가) 키워드:{request.first_keyword}, (나) 분야:{request.second_type_passage}, (나) 키워드:{request.second_keyword}")
+        logger.info("---------- 복합 지문 생성 ----------")
+        logger.info(f"지문 생성 요청 수신, (가) 분야:{request.first_type_passage}, (가) 키워드:{request.first_keyword}, (나) 분야:{request.second_type_passage}, (나) 키워드:{request.second_keyword}")
 
         first_passage_guidelines = get_passage_guidelines(request.first_type_passage)
-        logger.debug(f"(가) 지문 가이드라인 불러오기:{first_passage_guidelines[:25]}...")
+        logger.debug(f"(가) 분야 설명 불러오기:{first_passage_guidelines[:25]}...")
 
         second_passage_guidelines = get_passage_guidelines(request.second_type_passage)
-        logger.debug(f"(나) 지문 가이드라인 불러오기:{first_passage_guidelines[:25]}...")
+        logger.debug(f"(나) 분야 설명 불러오기:{second_passage_guidelines[:25]}...")
 
         passage_example = get_passage_examples("복합지문")
         logger.debug(f"지문 예시 불러오기:{passage_example[:25]}...")
@@ -205,6 +206,9 @@ async def create_multiple_passage(request: MultiplePassageRequest) -> MultiplePa
 
 
         logger.debug(f"(가) 추출 논점 : {first_generated_core_point[:15]}..., (나) 추출 논점 : {second_generated_core_point[:15]}...")
+
+        logger.info("복합 지문 생성 완료")
+        logger.info("---------------------------------------")
 
         return MultiplePassageResponse(
             generated_passage=generated_passage,

@@ -55,8 +55,8 @@ async def generate_reading_passage_question_endpoint(request: QuestionRequest, c
         raise http_exc
     
     except Exception as e:
-        logger.error(f"문항 생성 API 처리 중 오류 발생: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="문항 생성 중 서버 내부 오류가 발생했습니다.")
+        logger.error(f"독서론 - 문항 생성 API 처리 중 오류 발생: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="독서론 - 문항 생성 중 서버 내부 오류가 발생했습니다.")
 
 
 @router.post("/generate-single-passage-question", response_model=SinglePassageQuestionResponse)
@@ -69,8 +69,8 @@ async def generate_single_passage_question_endpoint(request: QuestionRequest, cu
         raise http_exc
     
     except Exception as e:
-        logger.error(f"문항 생성 API 처리 중 오류 발생: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="문항 생성 중 서버 내부 오류가 발생했습니다.")
+        logger.error(f"단일 지문 - 문항 생성 API 처리 중 오류 발생: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="단일 지문 - 문항 생성 중 서버 내부 오류가 발생했습니다.")
 
 
 @router.post("/generate-multiple-passage-question", response_model=MultiplePassageQuestionResponse)
@@ -83,5 +83,5 @@ async def generate_multiple_passage_question_endpoint(request: QuestionRequest, 
         raise http_exc
     
     except Exception as e:
-        logger.error(f"문항 생성 API 처리 중 오류 발생: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="문항 생성 중 서버 내부 오류가 발생했습니다.")
+        logger.error(f"복합 지문 - 문항 생성 API 처리 중 오류 발생: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="복합 지문 - 문항 생성 중 서버 내부 오류가 발생했습니다.")

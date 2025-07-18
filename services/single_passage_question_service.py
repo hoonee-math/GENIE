@@ -33,12 +33,12 @@ except Exception as e:
 # 단일 지문, 독서론에 따른 문항을 만드는 함수를 만듭니다.
 async def create_single_passage_question(request: QuestionRequest) -> SinglePassageQuestionResponse:
     try:
+        logger.info("---------- 단일 지문 문항 생성 ----------")
         logger.info(f"문항 생성 요청 수신 -> 유형:{request.type_question}")
-        logger.debug(f"입력 지문 길이:{len(request.custom_passage)}자")
+        logger.debug(f"입력 단일 지문 길이:{len(request.custom_passage)}자")
 
 
         # -------------------------------------------------- 문항 생성 : 문항을 생성합니다. ----------------------------------------------------
-        logger.info("문항 생성 중...")
         ## 사실적, 추론적, 비판적, 어휘 각각의 유형에 따른 가이드라인을 가져옵니다.
         question_guidelines = get_question_guidelines(request.type_question)
         logger.debug(f"문항 생성 가이드라인 불러오기 : {question_guidelines[:30]}...")
@@ -168,7 +168,8 @@ quoted_word
         ## 구조화된 답변을 유도하는 설정
         # response_json = json.loads(question_gen_response.text)
         response_json = process_json_response(question_gen_response.text)
-        logger.info("문항 생성 완료")
+        logger.info("단일 지문 문항 생성 완료")
+        logger.info("---------------------------------------")
 
 
         return SinglePassageQuestionResponse(

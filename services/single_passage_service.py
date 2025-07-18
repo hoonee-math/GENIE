@@ -32,7 +32,8 @@ except Exception as e:
 
 async def create_single_passage(request: SinglePassageRequest) -> SinglePassageResponse:
     try:
-        logger.info(f"지문 생성 요청 수신 -> 분야:{request.type_passage}, 키워드:{request.keyword}, 지문구조:{request.type_structure}, 요청사항:{request.requirement}")
+        logger.info("---------- 단일 지문 생성 ----------")
+        logger.info(f"지문 생성 요청 수신, 분야:{request.type_passage}, 키워드:{request.keyword}, 지문구조:{request.type_structure}, 요청사항:{request.requirement}")
 
         passage_guidelines = get_passage_guidelines(request.type_passage)
         logger.debug(f"지문 가이드라인 불러오기:{passage_guidelines[:25]}...")
@@ -190,7 +191,10 @@ async def create_single_passage(request: SinglePassageRequest) -> SinglePassageR
         })
 
         generated_core_point = core_point_response.text.strip()
-        logger.debug(f"핵심 논점 생성 완료 : {generated_core_point[:30]}...")
+        logger.debug(f"추출 논점 : {generated_core_point[:30]}...")
+
+        logger.info("단일 지문 생성 완료")
+        logger.info("---------------------------------------")
 
         return SinglePassageResponse(
             generated_passage=generated_passage,

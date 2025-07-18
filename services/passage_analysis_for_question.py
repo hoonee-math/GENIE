@@ -33,8 +33,9 @@ except Exception as e:
 # 단일 지문/복합 지문/독서론 여부를 구분하고 그에 맞춰서 지문을 분석하는 함수를 만들었습니다.
 async def create_passage_data(request: PassageDataRequest):
     try:
-        logger.info(f"지문 분석 요청 수신")
-        logger.debug(f"입력 지문 길이:{len(request.custom_passage)}자")
+        logger.info("---------- 지문 분석 및 문항 생성 ----------")
+        logger.info(f"{request.kind_passage} 분석 요청 수신")
+        logger.debug(f"입력 지문 길이 : {len(request.custom_passage)}자")
 
 #         kind_prompt = f"""아래 수능 국어 독서 영역 비문학 지문은 다음 3가지 유형(독서론/단일 지문/복합 지문) 중 하나입니다.
 
@@ -73,9 +74,6 @@ async def create_passage_data(request: PassageDataRequest):
 #         logger.debug(f"지문 유형 : {kind_passage}")
 
         kind_passage = request.kind_passage
-
-        logger.info(f"지문 유형 : {kind_passage}")
-
 
         if kind_passage == "단일 지문":
             logger.info("단일 지문의 분야/핵심 키워드/논점 추출 중")
@@ -149,6 +147,9 @@ async def create_passage_data(request: PassageDataRequest):
 
             logger.debug(f"단일 지문 분야 : {single_passage_type}, 제재 : {single_passage_keyword}, 논점 : {single_passage_core[:15]}...")
 
+            logger.info("단일 지문 분석 및 문항 생성 완료")
+            logger.info("----------------------------")
+
             return SinglePassageDataResponse(
                 kind_passage=kind_passage,
                 type_passage=single_passage_type,
@@ -156,7 +157,6 @@ async def create_passage_data(request: PassageDataRequest):
                 generated_core_point=[single_passage_core])
         
         elif kind_passage == "복합 지문":
-            print('검토 한 번 하자')
             logger.info("복합 지문의 분야/핵심 키워드/논점 추출 중")
 
             multiple_passage_data_system_prompt = f"""아래 수능 국어 독서 영역 비문학 지문의 (가), (나) 지문을 각각
@@ -233,6 +233,9 @@ async def create_passage_data(request: PassageDataRequest):
 
             logger.debug(f"복합 지문 (가) 분야 : {first_passage_type}, (나) 분야 : {second_passage_type}, (가) 제재 : {first_passage_keyword}, (나) 제재 : {second_passage_keyword}, (가) 논점 : {first_passage_generated_core_point[:15]}..., (나) 제재 : {second_passage_generated_core_point[:15]}...")
 
+            logger.info("복합 지문 분석 및 문항 생성 완료")
+            logger.info("----------------------------")
+
             return MultiplePassageDataResponse(
                 kind_passage=kind_passage,
                 first_passage_type=first_passage_type,
@@ -299,6 +302,9 @@ async def create_passage_data(request: PassageDataRequest):
             reading_passage_core = str(reading_passage_data_json.get("generated_core_point")).strip()
 
             logger.debug(f"독서론 제재 : {reading_passage_keyword}, 논점 : {reading_passage_core[:15]}...")
+
+            logger.info("독서론 지문 분석 및 문항 생성 완료")
+            logger.info("---------------------------------------")
 
             return ReadingPassageDataResponse(
                 kind_passage=kind_passage,

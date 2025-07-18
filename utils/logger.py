@@ -171,8 +171,8 @@ def log_api_call_cost(model_name: str, usage_metadata: dict) -> None:
     cost_tracker.add_cost(cost)
 
     logger.info(f"모델 : {model_name}")
-    logger.info(f"입력 토큰 : {prompt_tokens}개")
-    logger.info(f"출력 토큰 : {total_tokens - prompt_tokens}개")
+    logger.info(f"입/출력 토큰 : {prompt_tokens}/{total_tokens - prompt_tokens}")
+    # logger.info(f"출력 토큰 : {total_tokens - prompt_tokens}개")
     logger.info(f"전체 토큰 수 : {total_tokens}개")
     logger.info(f"비용: ${cost:.6f}")
     logger.info(f"[누적 비용] : ${cost_tracker.total_cost:.6f}")
