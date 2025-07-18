@@ -7,13 +7,13 @@ export const usePassageStore = defineStore('passage', {
       pasCode: null,
       title: '',
       content: '',
-      descriptions: [
-        {
-          pasType: '',  // 인문, 사회, 과학, 기술, 예술, 독서론
-          keyword: '',  // 지문 제재
-          gist: '',     // 핵심 논점
-          order: null   // 순서
-        }
+      descriptions: [ // 복합 지문을 경우 지문 분석 데이터를 배열로 두 개 이상 담아야 하기 때문에 배열로 설정, 데이터가 없을 경우 빈 배열을 반환하기 위해 내용은 주석 처리
+        // {
+        //   pasType: '',  // 인문, 사회, 과학, 기술, 예술, 독서론
+        //   keyword: '',  // 지문 제재
+        //   gist: '',     // 핵심 논점
+        //   order: null   // 순서
+        // }
       ],
       questions: [],    // (추가 예정)
       createdAt: null,
@@ -51,7 +51,6 @@ export const usePassageStore = defineStore('passage', {
         pasType: desc.pasType,
         keyword: desc.keyword,
         gist: desc.gist
-        // label은 Vue 파일에서 직접 생성
       }))
     }
   },

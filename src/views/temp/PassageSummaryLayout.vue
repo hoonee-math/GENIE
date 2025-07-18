@@ -23,13 +23,20 @@
             </div>
             
             <div class="box-border flex flex-col flex-1 items-start px-4 py-4 gap-4 w-full bg-white border border-[#E5E7EB] rounded-xl shadow-sm overflow-y-auto scrollbar-hide">
-                <div class="flex flex-row items-center w-full gap-4">
+                <div v-if="structure" class="flex flex-row items-center w-full gap-4">
                     <p class="font-bold text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030]">
                         지문 종류
                     </p>
                     <p class="font-normal text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030] break-words flex-1">
                         <slot name="type_passage">{{ structure }}</slot>
                     </p>
+                </div>
+                <div v-if="!structure" class="flex flex-col items-start w-full gap-4">
+                    <p class="font-bold text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030]">
+                        지문 종류
+                    </p>
+                    <!-- 단일 지문, 복합 지문, 독서론 을 선택할 수 있는 라디오 버튼, 해당 선택 값을 부모 객체에 전달 -->
+                    <slot name="select_generateType" />
                 </div>
                 <div class="flex flex-row items-center w-full gap-4">
                     <p class="font-bold text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030]">
@@ -88,6 +95,7 @@ const keyword = computed(() => currentTabData.value.keyword)
 const gist = computed(() => currentTabData.value.gist)
 // corePointTabs 과 pasType 을 이용해 structure(단일 지문, 복합 지문, 독서론) 계산 structure = generateType 같은 의미로 쓰임
 const structure = computed(() => {
+    console.log('📥 [DEBUG] PassageSummaryLayout: corePointTabs.value', corePointTabs.value)
     if (corePointTabs.value.length === 1 && corePointTabs.value[0].pasType === '독서론') return '독서론'
     if (corePointTabs.value.length === 1) return '단일 지문'
     if (corePointTabs.value.length > 1) return '복합 지문'

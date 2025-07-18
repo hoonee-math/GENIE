@@ -32,7 +32,25 @@
 
             <template #right>
                 <!-- LoadPassageModal.vue 의 지문 불러오기에서 지문을 선택한 후 불러오기 버튼을 클릭하면 해당 지문을 pinia에 저장시키기. pinia에 저장된 지문과 지문 분석 데이터 출력 (Pinia Store에서 자동으로 데이터 가져옴) -->
-                <PassageSummaryLayout />
+                <PassageSummaryLayout>
+                    <template #select_generateType>
+                        <!-- 단일 지문, 복합 지문, 독서론 (generateType)을 선택할 수 있는 라디오 버튼, 해당 선택 값을 부모 객체에 전달 -->
+                        <div class="flex-col md:flex-row justify-between items-center gap-4">
+                            <label class="inline-flex items-center">
+                                <input type="radio" value="단일 지문" v-model="generateType" class="form-radio text-brand" />
+                                <span class="ml-2 whitespace-nowrap">단일 지문</span>
+                            </label>
+                            <label class="inline-flex items-center ml-4">
+                                <input type="radio" value="복합 지문" v-model="generateType" class="form-radio text-brand" />
+                                <span class="ml-2 whitespace-nowrap">복합 지문</span>
+                            </label>
+                            <label class="inline-flex items-center ml-4">
+                                <input type="radio" value="독서론" v-model="generateType" class="form-radio text-brand" />
+                                <span class="ml-2 whitespace-nowrap">독서론</span>
+                            </label>
+                        </div>
+                    </template>
+                </PassageSummaryLayout> 
                 
             </template>
         </PassageAndQuestionLayout>
