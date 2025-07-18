@@ -205,11 +205,23 @@ export async function generatePassageDataAPI(requestData) {
     try {
         if (USE_DUMMY_DATA) {
             // 더미 데이터 모드: 실제 API 대신 더미 응답 반환
-            console.log('📄 [DUMMY MODE] 지문 분석 요청:', requestData);
+            console.log('📄 [DUMMY MODE] 지문 분석 및 문항 생성 요청:', requestData);
             await new Promise(resolve => setTimeout(resolve, 800)); // 네트워크 지연 시뮬레이션
-            const response = DUMMY_QUESTION_RESPONSES.user.detail;
-            console.log('📄 [DUMMY MODE] 지문 분석 응답:', response);
-            return response;
+            if(requestData.kind_passage === '독서론') {
+                // 독서론 지문 분석 요청 시 더미 응답 반환
+                const response = DUMMY_QUESTION_RESPONSES.userReading;
+                return response;
+            } else if(requestData.kind_passage === '단일 지문') {
+                // 단일 지문 분석 요청 시 더미 응답 반환
+                const response = DUMMY_QUESTION_RESPONSES.userSingle;
+                return response;
+            } else if(requestData.kind_passage === '복합 지문') {
+                // 복합 지문 분석 요청 시 더미 응답 반환
+                const response = DUMMY_QUESTION_RESPONSES.userMultiple;
+                return response;
+            }
+            // 그 외의 경우는 지문 종류를 선택하지 않았다고 throw error
+            throw new Error('지문 종류를 선택하지 않았습니다. kind_passage(generateType) 값을 확인해주세요.');
         }
         
         // 실제 API 호출
