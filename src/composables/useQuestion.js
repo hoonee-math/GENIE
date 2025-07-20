@@ -199,28 +199,30 @@ export function useQuestion() {
    * @returns {string} - 밑줄 태그가 적용된 지문
    */
    const applyUnderlineToQuotedWords = (content, quotedSentences, quotedWords) => {
+        const koreanMarkers = ['㉠', '㉡', '㉢', '㉣'];
+
         if (!quotedSentences || !quotedWords || quotedSentences.length !== quotedWords.length) {
-        console.warn('quoted_sentence와 quoted_word 배열 길이가 다르거나 없습니다.');
-        return content;
+            console.warn('quoted_sentence와 quoted_word 배열 길이가 다르거나 없습니다.');
+            return content;
         }
     
         let modifiedContent = content;
     
         // 각 quoted_sentence를 순회하면서 해당하는 quoted_word에 밑줄 적용
         for (let i = 0; i < quotedSentences.length; i++) {
-        const sentence = quotedSentences[i];
-        const word = quotedWords[i];
+            const sentence = quotedSentences[i];
+            const word = quotedWords[i];
+            
+            if (!sentence || !word) {
+                console.warn(`Index ${i}에서 sentence 또는 word가 비어있습니다.`);
+                continue;
+            }
         
-        if (!sentence || !word) {
-            console.warn(`Index ${i}에서 sentence 또는 word가 비어있습니다.`);
-            continue;
-        }
-    
-        // 원본 문장을 찾아서 해당 단어에 밑줄 태그 적용한 문장으로 교체
-        const underlinedSentence = sentence.replace(word, `<u>${word}</u>`);
-        modifiedContent = modifiedContent.replace(sentence, underlinedSentence);
-        
-        console.log(`밑줄 적용: "${word}" -> "<u>${word}</u>"`);
+            // 원본 문장을 찾아서 해당 단어에 밑줄 태그 적용한 문장으로 교체
+            const underlinedSentence = sentence.replace(word, `<u>${word}</u>`);
+            modifiedContent = modifiedContent.replace(sentence, underlinedSentence);
+            
+            console.log(`밑줄 적용: "${word}" -> "${koreanMarkers[i]}<u>${word}</u>"`);
         }
     
         return modifiedContent;
