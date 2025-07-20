@@ -199,7 +199,12 @@ export function useQuestion() {
    * @returns {string} - 밑줄 태그가 적용된 지문
    */
    const applyUnderlineToQuotedWords = (content, quotedSentences, quotedWords) => {
-        const koreanMarkers = ['㉠', '㉡', '㉢', '㉣'];
+        // '㉠'은 유니코드 U+32A0 (16진수), 10진수로는 12960
+        const getKoreanCircleMarker = (index) => {
+            const baseCode = 0x32A0; // '㉠'
+            const codePoint = baseCode + index;
+            return String.fromCharCode(codePoint);
+        };
 
         if (!quotedSentences || !quotedWords || quotedSentences.length !== quotedWords.length) {
             console.warn('quoted_sentence와 quoted_word 배열 길이가 다르거나 없습니다.');
@@ -222,7 +227,7 @@ export function useQuestion() {
             const underlinedSentence = sentence.replace(word, `<u>${word}</u>`);
             modifiedContent = modifiedContent.replace(sentence, underlinedSentence);
             
-            console.log(`밑줄 적용: "${word}" -> "${koreanMarkers[i]}<u>${word}</u>"`);
+            console.log(`밑줄 적용: "${word}" -> "${getKoreanCircleMarker(i)}<u>${word}</u>"`);
         }
     
         return modifiedContent;
