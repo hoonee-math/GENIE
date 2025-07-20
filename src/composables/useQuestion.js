@@ -189,6 +189,127 @@ export function useQuestion() {
     return response.json();
   };
 
+   // ===== 데이터 변환 =====
+  const vueToPython = (custom_passage, selectedQuestionExample, generateType, activeTab) => {
+    if (!selectedQuestionExample) {
+        throw new Error('선택된 문항 예제가 없습니다.');
+    }
+
+    console.log("Python 요청 데이터 생성:", { selectedQuestionExample, generateType, activeTab });
+    
+    // 실제 Python API에 전달할 데이터 구조
+    const baseRequest = {
+        custom_passage,
+        type_question: selectedQuestionExample.pattern,
+        question_format: selectedQuestionExample.title,
+        question_statement_example: selectedQuestionExample.statement,
+        question_choice_example: selectedQuestionExample.question,
+        question_subpassage_example: selectedQuestionExample.subpassage || null
+    };
+    
+    // activeTab이 'user'인 경우에는 generateType을 type_passage로 전달
+    if (activeTab === 'user') {
+        return { kind_passage: generateType, ...baseRequest };
+    } else {
+        return baseRequest;
+    }
+  };
+  const pythonToJava = (responseFromPython, custom_passage, title = "Untitled") => {
+    console.log("Python 응답 변환 시작:", responseFromPython);
+    
+    // 1. 응답 타입 확인 (사용자 입력 vs 자료실)
+    const isUserInput = responseFromPython.detail && responseFromPython.question;
+    const questionData = isUserInput ? responseFromPython.question : responseFromPython;
+    const detailData = isUserInput ? responseFromPython.detail : null;
+    
+    // description 포맷팅 함수
+    const formatDescription = (generatedDescription) => {
+        if (!generatedDescription) {return "";}
+        
+        // 배열이 아닌 경우 그대로 반환
+        if (!Array.isArray(generatedDescription)) {return generatedDescription;}
+        
+        // 배열 길이에 따른 처리
+        if (generatedDescription.length === 2) {
+            return `<p>정답해설</p><p>${generatedDescription[0]}</p><p>오답피하기</p><p>${generatedDescription[1]}</p>`;
+        } else if (generatedDescription.length === 1) {
+            return generatedDescription[0];
+        } else {
+            // 예외 상황: 3개 이상이거나 빈 배열인 경우
+            console.warn('예상과 다른 description 배열 길이:', generatedDescription.length);
+            return generatedDescription.join('\n\n');
+        }
+    };
+
+    // 2. descriptions 배열 생성
+    const descriptions = [];
+    
+    if (detailData) {
+        // 사용자 입력: detail에서 descriptions 생성
+        if (detailData.kind_passage === "복합 지문") {
+            // 복합 지문인 경우
+            descriptions.push({
+                pasType: detailData.first_passage_type,
+                keyword: detailData.first_passage_keyword,
+                gist: detailData.generated_core_point[0] || "",
+                order: 1
+            });
+            descriptions.push({
+                pasType: detailData.second_passage_type, 
+                keyword: detailData.second_passage_keyword,
+                gist: detailData.generated_core_point[1] || "",
+                order: 2
+            });
+        } else {
+            // 단일 지문 or 독서론인 경우
+            descriptions.push({
+                pasType: detailData.type_passage || detailData.kind_passage,
+                keyword: detailData.keyword,
+                gist: detailData.generated_core_point[0] || "",
+                order: 1
+            });
+        }
+    } else {
+        // 자료실 지문: Store에서 기존 descriptions 가져오기
+        const passageStore = usePassageStore();
+        if (passageStore.passage.descriptions?.length > 0) {
+            descriptions.push(...passageStore.passage.descriptions);
+        } else {
+            // fallback: 최소한의 description 생성
+            descriptions.push({
+                pasType: questionData.kind_passage,
+                keyword: "자동 생성",
+                gist: "문항 생성됨",
+                order: 1
+            });
+        }
+    }
+    
+    // 3. questions 배열 생성
+    const questions = [{
+        queQuery: questionData.generated_question,
+        queOption: questionData.generated_option,
+        queAnswer: questionData.generated_answer,
+        description: formatDescription(questionData.generated_description)  // description 포맷팅 '정답 해설'과 '오답 피하기' 가 배열로 저장되는 문제 처리 -> java에서는 String으로 저장되고 정답 및 해설도 Tiptap을 이용해 출력해주는 것으로 통일하기 위해 html 로 변환
+    }];
+    
+    // 4. 최종 Java 요청 데이터 생성
+    const javaRequestData = {
+        title: title,
+        content: custom_passage,
+        isGenerated: 0,
+        descriptions: descriptions,
+        questions: questions,
+        mode: "question_generation" // 구분용
+    };
+    
+    console.log("Java 요청 데이터 변환 완료:", javaRequestData);
+    return javaRequestData;
+  };
+  
+
+
+
   // ===== 반환값 =====
   return {
     // 상태 (computed)
