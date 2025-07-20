@@ -122,6 +122,8 @@ export function useQuestion() {
     }
 
     try {
+      // activeTab이 'user'인 경우에는 requestToPython에 generateType을 type_passage로 전달합니다.
+      // activeTab이 'storage'인 경우에는 generateType을 apiFunction에서 직접 처리합니다.
       const requestToPython = vueToPython(custom_passage, selectedQuestionExample, generateType, activeTab);
 
       const apiFunction = selectPythonApiFunction(activeTab, generateType);
@@ -141,12 +143,12 @@ export function useQuestion() {
   // generateQuestionWithNewPassage 함수에서 사용하는 파이썬 API 선택 함수
   const selectPythonApiFunction = (activeTab, generateType) => {
     if (activeTab === "user") {
-      return generatePassageDataAPI;
+      return generatePassageDataAPI; // 해당 api 의 requestData는 
     } // 분석 + 문항 생성 통합
     const apiMap = {
       "단일 지문": generateSinglePassageQuestionAPI,
       "복합 지문": generateMultiplePassageQuestionAPI,
-      독서론: generateReadingPassageQuestionAPI,
+      "독서론": generateReadingPassageQuestionAPI,
     };
     const apiFunction = apiMap[generateType];
     if (!apiFunction) {

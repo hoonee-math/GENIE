@@ -106,7 +106,7 @@ const DUMMY_QUESTION_RESPONSES = {
         question: {
             kind_passage: "독서론",
             generated_question: "생성된 문제문",
-            generated_option: ["생성된 선지 목록"],
+            generated_option: ["선지1 5개의 예시 선지를 보여줍니다.", "선지2, 쉼표를 포함한 예", "선지3 <u>태그</u>를 포함한 예", "선지4 줄바꿈 기호 \\n \n을 포함한 예", "선지5, <u>전부</u> \n 포함한 예"],
             generated_answer: "정답",
             generated_description: ["정답해설 + 오답피하기"],
             generated_subpassage: "문항 보기 지문 (선택 사항)",
@@ -126,7 +126,7 @@ const DUMMY_QUESTION_RESPONSES = {
         question: {
             kind_passage: "생성된 지문의 kind_passage가 들어가게됨",
             generated_question: "생성된 문제문",
-            generated_option: ["생성된 선지 목록"],
+            generated_option: ["선지1 5개의 예시 선지를 보여줍니다.", "선지2, 쉼표를 포함한 예", "선지3 <u>태그</u>를 포함한 예", "선지4 줄바꿈 기호 \\n \n을 포함한 예", "선지5, <u>전부</u> \n 포함한 예"],
             generated_answer: "정답",
             generated_description: ["정답해설 + 오답피하기"],
             generated_subpassage: "문항 보기 지문 (선택 사항)",
@@ -148,7 +148,7 @@ const DUMMY_QUESTION_RESPONSES = {
         question: {
             kind_passage: "생성된 지문의 kind_passage가 들어가게됨",
             generated_question: "생성된 문제문",
-            generated_option: ["생성된 선지 목록"],
+            generated_option: ["선지1 5개의 예시 선지를 보여줍니다.", "선지2, 쉼표를 포함한 예", "선지3 <u>태그</u>를 포함한 예", "선지4 줄바꿈 기호 \\n \n을 포함한 예", "선지5, <u>전부</u> \n 포함한 예"],
             generated_answer: "정답",
             generated_description: ["정답해설 + 오답피하기"],
             generated_subpassage: "문항 보기 지문 (선택 사항)",
@@ -161,7 +161,7 @@ const DUMMY_QUESTION_RESPONSES = {
     single: {
         kind_passage: "단일 지문",
         generated_question: "생성된 문제문",
-        generated_option: ["생성된 선지 목록"],
+        generated_option: ["선지1 5개의 예시 선지를 보여줍니다.", "선지2, 쉼표를 포함한 예", "선지3 <u>태그</u>를 포함한 예", "선지4 줄바꿈 기호 \\n \n을 포함한 예", "선지5, <u>전부</u> \n 포함한 예"],
         generated_answer: "정답",
         generated_description: ["정답해설 + 오답피하기"],
         generated_subpassage: "문항 보기 지문 (선택 사항)",
@@ -172,7 +172,7 @@ const DUMMY_QUESTION_RESPONSES = {
     multiple: {
         kind_passage: "복합 지문",
         generated_question: "생성된 문제문",
-        generated_option: ["생성된 선지 목록"],
+        generated_option: ["선지1 5개의 예시 선지를 보여줍니다.", "선지2, 쉼표를 포함한 예", "선지3 <u>태그</u>를 포함한 예", "선지4 줄바꿈 기호 \\n \n을 포함한 예", "선지5, <u>전부</u> \n 포함한 예"],
         generated_answer: "정답",
         generated_description: ["정답해설 + 오답피하기"],
         generated_subpassage: "문항 보기 지문 (선택 사항)",
@@ -183,7 +183,7 @@ const DUMMY_QUESTION_RESPONSES = {
     reading: {
         kind_passage: "독서론",
         generated_question: "생성된 문제문",
-        generated_option: ["생성된 선지 목록"],
+        generated_option: ["선지1 5개의 예시 선지를 보여줍니다.", "선지2, 쉼표를 포함한 예", "선지3 <u>태그</u>를 포함한 예", "선지4 줄바꿈 기호 \\n \n을 포함한 예", "선지5, <u>전부</u> \n 포함한 예"],
         generated_answer: "정답",
         generated_description: ["정답해설 + 오답피하기"],
         generated_subpassage: "문항 보기 지문 (선택 사항)",
