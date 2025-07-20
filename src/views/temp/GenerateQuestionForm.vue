@@ -58,11 +58,13 @@
         <!-- 하단 버튼들 (문항 유형 선택 모달이 표시되지 않을 때만) -->
         <div v-if="!isQuestionExampleSelectorVisible" class="flex flex-col sm:flex-row justify-end gap-4 mt-8">
             <!-- 초기화 버튼 -->
-            <BaseButton id="reset_button" text="초기화" type="type2" width="248px" height="54px" :disabled="!canReset"
-                @click="resetAll" class="hover:shadow-xl active:scale-[0.98]" />
+            <button @click="resetAll" :disabled="!canReset" :class="['px-8 py-4 text-lg font-medium rounded-lg transition-colors duration-200', isLoading ? 'text-gray-400 bg-gray-100 cursor-not-allowed' : 'text-gray-700 bg-gray-200 hover:bg-gray-300' ]">
+                초기화
+            </button>
             <!-- 문항 유형 선택하기 버튼 -->
-            <BaseButton id="select-type" text="문항 유형 선택하기" type="type1" width="248px" height="54px"
-                :disabled="!canGenerate" @click="showQuestionExampleSelector" class="hover:shadow-xl active:scale-[0.98]" />
+            <button @click="showQuestionExampleSelector" :class="['px-8 py-4 text-lg font-medium rounded-lg transition-all duration-200 bg-brand text-white hover:bg-blue-600']">
+                문항 유형 선택하기
+            </button>
         </div>
 
         <!-- 문항 유형 선택 모달 대신 아래 출력되도록 설정 -->
@@ -76,6 +78,15 @@
 
         <!-- (미구현) QuestionExampleSelector 의 [버튼 영역]을 이 자리에 옮기기 -->
         <div v-if="isQuestionExampleSelectorVisible" class="flex justify-end space-x-4">
+            <button @click="resetAll" :disabled="isLoading"
+                :class="[
+                    'px-8 py-4 text-lg font-medium rounded-lg transition-colors duration-200',
+                    isLoading
+                        ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                        : 'text-gray-700 bg-gray-200 hover:bg-gray-300'
+                ]">
+                직접 입력하기
+            </button>
             <button @click="generateQuestion" :disabled="isLoading"
                 :class="[
                     'px-8 py-4 text-lg font-medium rounded-lg transition-all duration-200',
@@ -95,15 +106,6 @@
                 </div>
                 <span v-else>문항 생성하기</span>
             </button>
-            <button @click="resetAll" :disabled="isLoading"
-                :class="[
-                    'px-8 py-4 text-lg font-medium rounded-lg transition-colors duration-200',
-                    isLoading
-                        ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
-                        : 'text-gray-700 bg-gray-200 hover:bg-gray-300'
-                ]">
-                초기화? 직접 입력하기?
-            </button>
         </div>
 
         <!-- 문항 생성 확인 모달 -->
@@ -122,7 +124,6 @@ import { useRoute, useRouter } from 'vue-router'
 import PassageAndQuestionLayout from './PassageAndQuestionLayout.vue'
 import PassageSummaryLayout from './PassageSummaryLayout.vue'
 import PassageEditor from './PassageEditor.vue'
-import BaseButton from '@/components/common/BaseButton.vue'
 import LoadPassageModal from '@/components/generation/LoadPassageModal.vue'
 import ConfirmModalComponent from '@/components/common/ConfirmModalComponent.vue'
 import LoadingModal from '@/components/common/LoadingModal.vue'
@@ -136,12 +137,9 @@ const router = useRouter()
 const {
     passage,
     validateQuestionData,
-    processQuestionGeneration,
-    loadPassageFromStorage,
-    continueFromGeneratedPassage,
-    resetPassageData
+    processQuestionGeneration
 } = useQuestion()
-const { fetchPassage } = usePassage();
+const { fetchPassage, clearPassage } = usePassage();
 
 // ===== 상태 관리 =====
 
@@ -182,6 +180,12 @@ const canReset = computed(() => {
 // 문항 생성 가능 여부
 const canGenerate = computed(() => {
     const validation = validateQuestionData(questionTitle.value, passageContent.value)
+    if (validation.isValid) {
+        errorMessage.value = ''
+    } else {
+        errorMessage.value = validation.errors.join(' ')
+        alert(errorMessage.value) // 에러 메시지 출력
+    }
     return validation.isValid
 })
 
@@ -225,7 +229,7 @@ const resetAll = () => {
     }
 
     // store 초기화
-    resetPassageData()
+    clearPassage()
 }
 
 // ===== 모달 관련 함수들 =====
@@ -264,32 +268,23 @@ const closeLoadPassageModal = () => {
 }
 
 /**
- * 지문 불러오기 처리
+ * 지문 불러오기 처리, LoadPassageModal.vue 에서 선택된 지문(emit으로 selectPasCode 받아옴)을 가져와서 지문 정보를 호출(fetchPassage)하여 pinia에 저장
  */
 const handleLoadPassage = async (selectPasCode) => {
-    // console.log('🔥 [DEBUG] handleLoadPassage 호출됨 - selectPasCode:', selectPasCode, 'typeof:', typeof selectPasCode);
     
     // 중복 호출 방지: 이미 로딩 중이면 종료
     if (isLoading.value) {
-        // console.log('⚠️ [DEBUG] QuestionGenerateForm: 이미 로딩 중이므로 함수 종료');
         return;
     }
     
-    // // 유효성 검증 추가
-    // if (!selectPasCode || selectPasCode === null || selectPasCode === undefined) {
-    //     console.warn('⚠️ [DEBUG] QuestionGenerateForm: 잘못된 selectPasCode 값으로 인해 함수 종료:', selectPasCode);
-    //     return;
-    // }
-    
     try {
         isLoading.value = true
-        await fetchPassage(selectPasCode);
+        await fetchPassage(selectPasCode); // fetchPassage 함수에서 pinia에 passage 데이터를 저장함
         
         // UI 상태 변경
         activeTab.value = 'storage';
         closeLoadPassageModal();
         
-        // console.log('📥 지문 불러오기 완료');
     } catch (error) {
         console.error('지문 불러오기 실패:', error);
         errorMessage.value = '지문을 불러오는데 실패했습니다.';
@@ -334,7 +329,7 @@ onMounted(() => {
 onUnmounted(() => {
     // 문항 생성을 하지 않고, 그냥 페이지를 나가려는 경우 pinia에 저장된 passage 데이터를 초기화
     if (isLeavingPageWithClear.value) {
-        resetPassageData()
+        clearPassage()
     }
 })
 
