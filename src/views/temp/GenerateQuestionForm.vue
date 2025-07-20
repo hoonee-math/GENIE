@@ -139,7 +139,7 @@ const {
     validateQuestionData,
     processQuestionGeneration
 } = useQuestion()
-const { fetchPassage, clearPassage } = usePassage();
+const { fetchPassage, clearPassage, corePointTabs } = usePassage();
 
 // ===== 상태 관리 =====
 
@@ -158,7 +158,7 @@ const textLength = ref(0)
 
 // 탭 상태
 const activeTab = ref('user') // ['user': '사용자 입력', 'storage': '자료실 지문' }]
-const generateType = ref('')
+const generateType = ref('단일 지문')
 
 // 모달 상태
 const showQuestionModal = ref(false)
@@ -238,13 +238,13 @@ const resetAll = () => {
  * 문항 유형 선택하기 버튼 숨기기, 초기화 버튼 숨기기, QuestionExampleSelector 아래 나타내기
  */
 const showQuestionExampleSelector = () => {
-    if (!canGenerate.value) {
-        const validation = validateQuestionData(questionTitle.value, passageContent.value)
-        if (!validation.isValid) {
-            errorMessage.value = validation.errors.join(' ')
-            return
-        }
-    }
+    // if (!canGenerate.value) {
+    //     const validation = validateQuestionData(questionTitle.value, passageContent.value)
+    //     if (!validation.isValid) {
+    //         errorMessage.value = validation.errors.join(' ')
+    //         return
+    //     }
+    // }
 
     isQuestionExampleSelectorVisible.value = true
 }
@@ -342,7 +342,11 @@ watch(() => passage.value, (newPassage) => {
         
         questionTitle.value = newPassage.title
         passageContent.value = newPassage.content
-
+        
+        if (corePointTabs.value.length === 1 && corePointTabs.value[0].pasType === '독서론') {generateType.value = '독서론'}
+        else if (corePointTabs.value.length === 1) generateType.value = '단일 지문'
+        else if (corePointTabs.value.length > 1) generateType.value = '복합 지문'
+        
         // 에디터 업데이트
         if (editorRef.value) {
             editorRef.value.setContent(newPassage.content)
