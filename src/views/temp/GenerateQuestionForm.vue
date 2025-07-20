@@ -304,15 +304,17 @@ const generateQuestion = async (questionData) => {
     try {
         // 문항 생성 요청시 생성된 문항은 새로 추가되는 passage 데이터를 이용함. (지문에 인용 문구가 추가될 수도 있고, 원본 passage 데이터를 유지하기 위해서 이렇게 사용함.)
         // 인용 문구를 지문에 반영하여 저장하지 않고, table을 분리하여 각 문항에 맞는 quoted 데이터를 저장할 수도 있겠지만, 그런 경우 문항을 넘길때마다 지문이 업데이트되면서 편의성이 올라가겠지만, 문제지를 만들 경우 어떻게 묶음 처리할지 곤란해짐.
-        await generateQuestionWithNewPassage(
+        const savedQuestion = await generateQuestionWithNewPassage(
             questionTitle.value,
             passageContent.value,
             selectedQuestionExample.value,
             generateType.value,
             activeTab.value
         )
+        // savedQuestion 데이터를 pinia store에 저장 (이것도 composable에 구현할지 고려해보기, 아직 구현 안함.)
+
         // 성공 시 자동으로 결과 페이지로 이동됨
-        router.push({ name: 'QuestionResult' })
+        router.push(`/questions/view/${savedQuestion.pasCode}`)
     } catch (error) {
         console.error('문항 생성 실패:', error)
         errorMessage.value = error.message || '문항 생성에 실패했습니다.'
