@@ -190,6 +190,42 @@ export function useQuestion() {
   };
 
    // ===== 데이터 변환 =====
+   
+   /**
+   * quoted_sentence와 quoted_word를 매핑하여 지문에 밑줄 태그 적용
+   * @param {string} content - 원본 지문 내용
+   * @param {Array<string>} quotedSentences - 인용 문장 목록
+   * @param {Array<string>} quotedWords - 인용 단어 목록
+   * @returns {string} - 밑줄 태그가 적용된 지문
+   */
+   const applyUnderlineToQuotedWords = (content, quotedSentences, quotedWords) => {
+        if (!quotedSentences || !quotedWords || quotedSentences.length !== quotedWords.length) {
+        console.warn('quoted_sentence와 quoted_word 배열 길이가 다르거나 없습니다.');
+        return content;
+        }
+    
+        let modifiedContent = content;
+    
+        // 각 quoted_sentence를 순회하면서 해당하는 quoted_word에 밑줄 적용
+        for (let i = 0; i < quotedSentences.length; i++) {
+        const sentence = quotedSentences[i];
+        const word = quotedWords[i];
+        
+        if (!sentence || !word) {
+            console.warn(`Index ${i}에서 sentence 또는 word가 비어있습니다.`);
+            continue;
+        }
+    
+        // 원본 문장을 찾아서 해당 단어에 밑줄 태그 적용한 문장으로 교체
+        const underlinedSentence = sentence.replace(word, `<u>${word}</u>`);
+        modifiedContent = modifiedContent.replace(sentence, underlinedSentence);
+        
+        console.log(`밑줄 적용: "${word}" -> "<u>${word}</u>"`);
+        }
+    
+        return modifiedContent;
+   };
+   
   const vueToPython = (custom_passage, selectedQuestionExample, generateType, activeTab) => {
     if (!selectedQuestionExample) {
         throw new Error('선택된 문항 예제가 없습니다.');
@@ -296,10 +332,21 @@ export function useQuestion() {
         description: formatDescription(questionData.generated_description)  // description 포맷팅 '정답 해설'과 '오답 피하기' 가 배열로 저장되는 문제 처리 -> java에서는 String으로 저장되고 정답 및 해설도 Tiptap을 이용해 출력해주는 것으로 통일하기 위해 html 로 변환
     }];
     
-    // 4. 최종 Java 요청 데이터 생성
+    // 4. quoted_sentence와 quoted_word를 사용하여 지문에 밑줄 적용
+    let processedContent = custom_passage;
+    if (questionData.quoted_sentence && questionData.quoted_word) {
+        processedContent = applyUnderlineToQuotedWords(
+            custom_passage,
+            questionData.quoted_sentence,
+            questionData.quoted_word
+        );
+        console.log('밑줄 태그 적용 완료:', processedContent !== custom_passage);
+    }
+    
+    // 5. 최종 Java 요청 데이터 생성
     const javaRequestData = {
         title: title,
-        content: custom_passage,
+        content: processedContent,
         isGenerated: 0,
         descriptions: descriptions,
         questions: questions,
