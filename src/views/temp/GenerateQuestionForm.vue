@@ -134,11 +134,7 @@ import QuestionExampleSelector from './QuestionExampleSelector.vue'
 // Router 및 Composables
 const route = useRoute()
 const router = useRouter()
-const {
-    passage,
-    validateQuestionData,
-    processQuestionGeneration
-} = useQuestion()
+const { passage, generateQuestionWithNewPassage } = useQuestion()
 const { fetchPassage, clearPassage, corePointTabs } = usePassage();
 
 // ===== 상태 관리 =====
@@ -182,17 +178,17 @@ const canReset = computed(() => {
         passageContent.value.trim().length > 0
 })
 
-// 문항 생성 가능 여부
-const canGenerate = computed(() => {
-    const validation = validateQuestionData(questionTitle.value, passageContent.value)
-    if (validation.isValid) {
-        errorMessage.value = ''
-    } else {
-        errorMessage.value = validation.errors.join(' ')
-        alert(errorMessage.value) // 에러 메시지 출력
-    }
-    return validation.isValid
-})
+// 문항 생성 가능 여부 (문항 생성 요청 composable에서 처리)
+// const canGenerate = computed(() => {
+//     const validation = validateQuestionData(questionTitle.value, passageContent.value)
+//     if (validation.isValid) {
+//         errorMessage.value = ''
+//     } else {
+//         errorMessage.value = validation.errors.join(' ')
+//         alert(errorMessage.value) // 에러 메시지 출력
+//     }
+//     return validation.isValid
+// })
 
 // ===== 이벤트 핸들러 =====
 
@@ -306,12 +302,17 @@ const generateQuestion = async (questionData) => {
     isGenerating.value = true
 
     try {
-        await processQuestionGeneration(questionData, questionTitle.value, passageContent.value)
+        await generateQuestionWithNewPassage(
+            questionTitle.value,
+            passageContent.value,
+            selectedQuestionExample.value,
+            generateType.value,
+            activeTab.value
+        )
         // 성공 시 자동으로 결과 페이지로 이동됨
     } catch (error) {
         console.error('문항 생성 실패:', error)
         errorMessage.value = error.message || '문항 생성에 실패했습니다.'
-        closeQuestionModal()
     } finally {
         isGenerating.value = false
     }

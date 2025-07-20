@@ -30,6 +30,9 @@ export function useQuestion() {
   const validateQuestionData = (title, content) => {
     const errors = [];
 
+    // 문항 생성 실패: TypeError: title.trim is not a function
+    // 문항 생성 실패: TypeError: Cannot read properties of undefined (reading 'trim')
+    // 문항 생성 실패: TypeError: Cannot read properties of undefined (reading 'length')
     if (!title || title.trim().length === 0) {
       errors.push("제목을 입력해주세요.");
     }
@@ -115,11 +118,12 @@ export function useQuestion() {
    * GenerateQuestionForm.vue 에서 '사용자 지문(user)' 탭이나 '자료실 지문(storage)' 탭에서 문항을 갖고있지 않는 지문을 이용해서 처음 문항을 생성할 때 사용하는 API
    * @param {string} custom_passage - 사용자 지문 or 자료실 지문 (python 에서 custom_passage 로 사용중)
    */
-  const generateQuestionWithNewPassage = async (custom_passage, selectedQuestionExample, generateType, activeTab, title) => { // params 를 pinia store를 사용할지 추가 고려 필요
-    const validation = validateQuestionData(title, custom_passage);
-    if (!validation.isValid) {
-      throw new Error(validation.errors.join(" "));
-    }
+  const generateQuestionWithNewPassage = async (title, custom_passage, selectedQuestionExample, generateType, activeTab) => { // params 를 pinia store를 사용할지 추가 고려 필요
+    // const validation = validateQuestionData(title, custom_passage);
+    // if (!validation.isValid) {
+    //   throw new Error(validation.errors.join(" "));
+    // }
+    console.log("문항 생성 요청 데이터:", { title, custom_passage, selectedQuestionExample, generateType, activeTab });
 
     try {
       // activeTab이 'user'인 경우에는 requestToPython에 generateType을 type_passage로 전달합니다.
@@ -193,6 +197,10 @@ export function useQuestion() {
     // 검증 함수
     validatePassageLength,
     validateQuestionData,
+
+    // 문항 생성 함수
+    generateQuestionWithNewPassage,
+    addQuestionToExistingPassage,
 
     // API 함수 (개별)
     generateQuestion,
