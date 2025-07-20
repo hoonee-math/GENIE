@@ -139,7 +139,7 @@ const questionTypes = ref([
 
 // 1. 기본 questions를 구조별로 필터링
 const questions = computed(() => {
-    // structure 타입 결정
+    // structure 타입 결정, props.generateType에서 공백 제거, question_example.json의 구조에 맞게 처리하여 필터링
     let structureType = props.generateType.replace(/\s/g, '');
     
     // question_example.json에서 구조별 필터링
