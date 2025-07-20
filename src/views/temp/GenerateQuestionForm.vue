@@ -69,7 +69,7 @@
 
         <!-- 문항 유형 선택 모달 대신 아래 출력되도록 설정 -->
         <!-- (미구현) QuestionExampleSelector 의 [버튼 영역]을 옮기면서 문항 생성하기 버튼으로 문항 생성 요청시 필요한 데이터들을 emit 으로 받아오도록 수정 필요 -->
-        <QuestionExampleSelector v-if="isQuestionExampleSelectorVisible" :generateType="generateType"/>
+        <QuestionExampleSelector v-if="isQuestionExampleSelectorVisible" :generateType="generateType" @selectedQuestionExample="handleQuestionSelected"/>
 
         <!-- 모달 컴포넌트들 -->
         <!-- 지문 불러오기에서 지문을 선택한 후 불러오기 버튼을 클릭하면 해당 지문을 pinia에 저장시키기. pinia에 저장된 지문과 지문 분석 데이터 출력 (Pinia Store에서 자동으로 데이터 가져옴) -->
@@ -155,6 +155,11 @@ const loadingMessage = ref('문항을 생성 중입니다.\\n생성까지 최대
 const questionTitle = ref('Untitled')
 const passageContent = ref('')
 const textLength = ref(0)
+const selectedQuestionExample = ref(null)
+const handleQuestionSelected = (questionExample) => {
+    selectedQuestionExample.value = questionExample
+    // console.log('받은 문항 데이터:', questionExample);
+}
 
 // 탭 상태
 const activeTab = ref('user') // ['user': '사용자 입력', 'storage': '자료실 지문' }]

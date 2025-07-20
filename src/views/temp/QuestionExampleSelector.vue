@@ -115,6 +115,8 @@ const props = defineProps({
     generateType: String, // 부모에서 절달된 내용
 });
 
+const emit = defineEmits(["selectedQuestionExample"]); // 부모 컴포넌트로 선택된 문항 전달
+
 const activePattern = ref(null); // 문항 유형 선택값
 const activeType = ref(null); // 서술 방식 선택값
 const activeDifficulty = ref(null); // 난이도 선택값
@@ -174,4 +176,9 @@ watch(filteredQuestions, (newList) => {
         selectedQuestion.value = null;
     }
 });
+
+// emit 이벤트를 통해 선택된 문항을 부모 컴포넌트로 전달
+watch(selectedQuestion, (newQuestion) => {
+    emit('selectedQuestionExample', newQuestion);
+}, { immediate: true });
 </script>
