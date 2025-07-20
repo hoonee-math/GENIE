@@ -231,7 +231,10 @@ export function useQuestion() {
         
         // 배열 길이에 따른 처리
         if (generatedDescription.length === 2) {
-            return `<p>정답해설</p><p>${generatedDescription[0]}</p><p>오답피하기</p><p>${generatedDescription[1]}</p>`;
+            // 각 항목 내의 \n을 </p><p>로 변환하고 <p>로 래핑
+            const formattedFirst = `<p>${generatedDescription[0].replace(/\n/g, '</p><p>')}</p>`;
+            const formattedSecond = `<p>${generatedDescription[1].replace(/\n/g, '</p><p>')}</p>`;
+            return formattedFirst + formattedSecond;
         } else if (generatedDescription.length === 1) {
             return generatedDescription[0];
         } else {
