@@ -123,6 +123,7 @@ const showTooltip = ref(false)
 const showTools = ref(true)
 const currentSymbolType = ref('㉠')
 const symbolList = ref([])
+const isEditable = ref(true) // 편집 가능 여부 상태
 
 // 메인 심볼 목록
 const mainSymbols = [
@@ -140,6 +141,13 @@ const symbolSeries = {
     '①': ['①', '②', '③', '④', '⑤']
 }
 
+// 편집 가능 여부 설정 함수 추가
+const setEditableByParent = () => {
+    // GeneratedQuestionView에서만 편집 가능
+    isEditable.value = props.parentComponent === 'GeneratedQuestionView'
+    console.log('편집 가능 여부 설정:', props.parentComponent, '→', isEditable.value)
+}
+
 // TipTap 에디터 설정
 const editor = useEditor({
     extensions: [
@@ -147,12 +155,18 @@ const editor = useEditor({
         Underline,
     ],
     content: props.initialContent,
+    editable: isEditable.value,  // 편집 가능 여부 설정
     editorProps: {
         attributes: {
             class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none',
             style: 'min-height: 398px; max-height: 398px; overflow-y: auto;'
         },
         handleKeyDown: (view, event) => {
+            // 편집 불가능한 상태에서는 모든 입력 차단
+            if (!isEditable.value) {
+                event.preventDefault()
+                return true
+            }
             // 최대 길이 체크
             if (textLength.value >= MAX_LENGTH &&
                 !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
@@ -163,6 +177,9 @@ const editor = useEditor({
         }
     },
     onUpdate: ({ editor }) => {
+        // 편집 불가능한 상태에서는 변경 이벤트 발생 안함
+        if (!isEditable.value) return
+
         const html = editor.getHTML()
         const text = editor.getText()
 
@@ -246,7 +263,7 @@ const handleClickOutside = (event) => {
 }
 
 // 부모 컴포넌트 종류에 따라서 편집 도구 섹션 출력 제어
-const hideToolsComponents = ['QuestionGenerateForm', 'GeneratedPassageView']
+const hideToolsComponents = ['GenerateQuestionForm', 'GeneratedPassageView']
 const showToolsByParent = () => {
     //console.log('parentComponent prop:', props.parentComponent)
     if (hideToolsComponents.includes(props.parentComponent)) {
@@ -261,11 +278,19 @@ watch(() => props.initialContent, (newContent) => {
         setContent(newContent)
     }
 })
+watch(() => props.parentComponent, () => {
+    setEditableByParent()
+    // 에디터 편집 가능 여부 동적 변경
+    if (editor.value) {
+        editor.value.setEditable(isEditable.value)
+    }
+})
 
 // 마운트/언마운트 처리
 onMounted(() => {
     document.addEventListener('click', handleClickOutside)
     showToolsByParent()
+    setEditableByParent()  // 편집 가능 여부 설정
 })
 
 onBeforeUnmount(() => {

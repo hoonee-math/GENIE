@@ -9,7 +9,7 @@
             <template #left>
                 <!-- TipTapEditor (1) savedContent 값을 props 로 자식 컴포넌트의 initialContent 변수로 전달 -->
                 <!-- TipTapEditor (2) 자식 컴포넌트에서 emit 으로 부모 컴포넌트에 전달, 자식이 emit 한 데이터를 받는 함수 handleContentChange -->
-                <PassageEditor :max-length="numberLength" :initialContent="savedContent" :parentComponent="'GeneratedPassageView'" @content-changed="handleContentChange"/>
+                <PassageEditor :max-length="numberLength" :initialContent="savedContent" :parentComponent="currentParentComponent" @content-changed="handleContentChange"/>
             </template>
             <template #right>
                 <!-- 지문 분석 (Pinia Store에서 자동으로 데이터 가져옴) -->
@@ -21,10 +21,15 @@
         <!-- 재생성하기, 문항 이어서 생성하기, 저장하기, 추출하기 버튼 추가 예정 -->
          
         <!-- 하단 버튼 -->
-        <div class="flex justify-end space-x-4 flex-shrink-0">
+        <div v-if="!isCalledFromGeneratedQuestionView" class="flex justify-end space-x-4 flex-shrink-0">
             <button @click="GenerateQuestionWithThisPassage" :disabled="isLoading" class="px-8 py-4 text-lg font-medium rounded-lg transition-all duration-200 bg-brand text-white hover:bg-blue-600">
                 이어서 문항 생성하기
             </button>
+        </div>
+
+        <!-- GeneratedQuestionView에서 사용할 슬롯 -->
+        <div v-if="isCalledFromGeneratedQuestionView" class="flex-shrink-0">
+            <slot name="bottom-buttons"></slot>
         </div>
     </div>
 </template>
@@ -37,6 +42,13 @@ import PassageSummaryLayout from './PassageSummaryLayout.vue'
 import PassageEditor from './PassageEditor.vue'
 import { usePassage } from '@/composables/usePassage'
 import GenerateQuestion from '../generation/question/GenerateQuestion.vue'
+
+const props = defineProps({
+    isCalledFromGeneratedQuestionView: {
+        type: Boolean,
+        default: false
+    }
+})
 
 // Router 및 Composable 설정
 const route = useRoute()
@@ -105,6 +117,11 @@ const passageTitle = computed(() => {
   if (isLoading.value) return '로딩 중...'
   if (errorMessage.value) return '오류'
   return passage.value.title || 'Untitled'
+})
+
+// PassageEditor 의 parentComponent 변수에 전달할 값(currentParentComponent) 설정 
+const currentParentComponent = computed(() => {
+    return props.isCalledFromGeneratedQuestionView ? 'GeneratedQuestionView' : 'GeneratedPassageView'
 })
 
 // 컴포넌트 마운트 시 데이터 로드

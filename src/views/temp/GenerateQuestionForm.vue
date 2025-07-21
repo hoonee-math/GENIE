@@ -25,7 +25,7 @@
                     <!-- GeneratedPassageView.vue 에서 추가 예정인 [문항 이어서 생성하기] 버튼을 클릭하면 passage pinia Store 에 저장시켜놓았던 캐시 데이터를 가져와서 해당 데이터를 바로 자료실 지문 탭에 출력 -->
                     <div>
                         <!-- TipTap 에디터 -->
-                        <PassageEditor ref="editorRef" :initialContent="passageContent" :parentComponent="'QuestionGenerateForm'" @content-changed="handleContentChange" />
+                        <PassageEditor ref="editorRef" :initialContent="passageContent" :parentComponent="'GenerateQuestionForm'" @content-changed="handleContentChange" />
                     </div>
                 </div>
             </template>
