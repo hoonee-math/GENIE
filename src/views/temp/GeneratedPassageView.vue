@@ -4,7 +4,15 @@
         <div class="">  <!-- flex-1 min-h-0 overflow-hidden 제거 -->
             <PassageAndQuestionLayout :left-ratio="2" :right-ratio="1">
                 <template #title>
-                    {{ passageTitle }}
+                    <div class="flex items-center gap-4">
+                        <input v-model="editedTitle" :disabled="!editableTitle" @input="handleTitleChange"
+                            :style="{  width: editedTitle ? `${Math.max(editedTitle.length * 1, 10)}ch` : '10ch'  }"
+                            :class="[ 'text-3xl font-semibold bg-transparent outline-none', editableTitle ? 'border border-black' : '' ]"
+                        />
+                        <button @click="toggleTitleEdit" class="flex items-center justify-center w-8 h-8 rounded">
+                            <Icon icon="mingcute:pencil-fill" width="24" height="24" :class="editableTitle ? 'text-[#0086FF]' : 'text-[#303030]'" />
+                        </button>
+                    </div>
                 </template>
                 <template #left>
                     <!-- TipTapEditor (1) savedContent 값을 props 로 자식 컴포넌트의 initialContent 변수로 전달 -->
@@ -47,6 +55,8 @@ const props = defineProps({
         default: false
     }
 })
+// defineEmits 추가
+const emit = defineEmits(['title-changed', 'content-changed'])
 
 // Router 및 Composable 설정
 const route = useRoute()
@@ -57,6 +67,30 @@ const { fetchPassage, passage, isLoading: passageLoading } = usePassage()
 const isLoading = ref(true)
 const errorMessage = ref('')
 const goToQuestionGenerateForm = ref(false)
+
+// script에 추가할 상태들
+const editableTitle = ref(false)
+const editedTitle = ref('')
+
+// 타이틀 편집 토글
+const toggleTitleEdit = () => {
+    if (!editableTitle.value) {
+        // 편집 시작
+        editableTitle.value = true
+        editedTitle.value = passage.value.title || ''
+    } else {
+        // 편집 완료
+        editableTitle.value = false
+        // 부모 컴포넌트에 변경사항 전달
+        emit('title-changed', editedTitle.value)
+    }
+}
+
+// 타이틀 변경 핸들러
+const handleTitleChange = () => {
+    // 실시간으로 변경사항을 부모에게 알림 (저장하기 버튼 활성화용)
+    emit('title-changed', editedTitle.value)
+}
 
 // TipTapEditor 관련 변수
 const savedContent = ref('')
@@ -69,6 +103,9 @@ const handleContentChange = ({ content, textLength }) => {
   console.log('Length:', textLength)
   savedContent.value = content
   currentLength.value = textLength
+
+  // 부모 컴포넌트(문항 생성 페이지: GeneratedQuestionView)에 content 변경사항도 전달
+  emit('content-changed', { content, textLength })
 }
 
 // URL에서 pasCode 추출 및 데이터 로드 (캐시 우선)
@@ -93,11 +130,14 @@ const loadPassageData = async () => {
     
     // TipTap 에디터에 초기 콘텐츠 설정
     savedContent.value = passage.value.content || ''
+    // 데이터 로드 후 title 초기화
+    editedTitle.value = passage.value.title || ''
     
     console.log('✅ 지문 데이터 로드 완료:', {
       pasCode: passage.value.pasCode,
       title: passage.value.title
     })
+    
     
   } catch (error) {
     console.error('❌ 지문 로드 실패:', error)

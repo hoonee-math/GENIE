@@ -5,7 +5,7 @@
         <div v-if="$slots.title">
             <div class="flex items-center max-w-screen-2xl mx-auto">
                 <div class="text-3xl font-semibold text-gray-900"><slot name="title" /></div>
-                <EditButton />
+                <!-- <EditButton /> -->
             </div>
         </div>
 

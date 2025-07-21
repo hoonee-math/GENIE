@@ -93,7 +93,7 @@
                         추출하기
                     </button>
                 </div>
-                <button @click="" :class="['px-16 py-4 text-2xl font-medium rounded-lg transition-all duration-200 bg-brand text-white hover:bg-blue-600']">
+                <button @click="addQuestion" :class="['px-16 py-4 text-2xl font-medium rounded-lg transition-all duration-200 bg-brand text-white hover:bg-blue-600']">
                     문항 추가하기
                 </button>
             </div>
@@ -113,7 +113,7 @@ import TipTapEditor from './TipTapEditor.vue'
 
 // Router 및 Composables
 const router = useRouter()
-const { passage } = useQuestion()
+const { passage, addQuestionToExistingPassage } = useQuestion()
 
 const isLoading = ref(false)
 const isSaved = ref(true)
@@ -200,5 +200,11 @@ const handelQueDescriptionChange = ({ content, textLength }) => {
   console.log('Length:', textLength)
   savedDescription.value = content
   queDescriptionLength.value = textLength
+}
+
+// 문항 추가 함수
+const addQuestion = async () => {
+    await addQuestionToExistingPassage();
+    
 }
 </script>
