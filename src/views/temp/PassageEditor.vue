@@ -142,7 +142,7 @@ const symbolSeries = {
 }
 
 // 편집 가능 여부 설정 함수 추가
-const setEditableByParent = () => {
+const setEditable = () => {
     // GeneratedQuestionView에서만 편집 가능
     isEditable.value = props.parentComponent === 'GeneratedQuestionView'
     console.log('편집 가능 여부 설정:', props.parentComponent, '→', isEditable.value)
@@ -278,11 +278,12 @@ watch(() => props.initialContent, (newContent) => {
         setContent(newContent)
     }
 })
+// 에디터 편집 가능 여부를 동적으로 변경하는 로직을 포함하기 위해서 watch 방식 사용.. TipTap 에디터 (외부 라이브러리)는 직접 수정로직이 필요함.
 watch(() => props.parentComponent, () => {
-    setEditableByParent()
+    setEditable()   // Vue 상태 업데이트
     // 에디터 편집 가능 여부 동적 변경
     if (editor.value) {
-        editor.value.setEditable(isEditable.value)
+        editor.value.setEditable(isEditable.value) // 외부 라이브러리 동기화
     }
 })
 
@@ -290,7 +291,7 @@ watch(() => props.parentComponent, () => {
 onMounted(() => {
     document.addEventListener('click', handleClickOutside)
     showToolsByParent()
-    setEditableByParent()  // 편집 가능 여부 설정
+    setEditable()  // 편집 가능 여부 설정
 })
 
 onBeforeUnmount(() => {
