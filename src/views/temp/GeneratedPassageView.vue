@@ -1,21 +1,21 @@
 <template>
     <div class="flex flex-col p-0 md:p-8 gap-6 box-border w-full h-full">
-        <!-- PassageAndQuestionLayout에 flex-1 추가: 남은 공간 차지하되 축소 가능 -->
-        <div class="flex-1 min-h-0 overflow-hidden">  <!-- flex-1 min-h-0 overflow-hidden 추가 -->
-        <PassageAndQuestionLayout :left-ratio="2" :right-ratio="1">
-            <template #title>
-                {{ passageTitle }}
-            </template>
-            <template #left>
-                <!-- TipTapEditor (1) savedContent 값을 props 로 자식 컴포넌트의 initialContent 변수로 전달 -->
-                <!-- TipTapEditor (2) 자식 컴포넌트에서 emit 으로 부모 컴포넌트에 전달, 자식이 emit 한 데이터를 받는 함수 handleContentChange -->
-                <PassageEditor :max-length="numberLength" :initialContent="savedContent" :parentComponent="currentParentComponent" @content-changed="handleContentChange"/>
-            </template>
-            <template #right>
-                <!-- 지문 분석 (Pinia Store에서 자동으로 데이터 가져옴) -->
-                <PassageSummaryLayout />
-            </template>
-        </PassageAndQuestionLayout>
+        <!-- PassageAndQuestionLayout에 flex-1 삭제: 남은 공간 차지하되 축소 가능한 설정 제거 -->
+        <div class="">  <!-- flex-1 min-h-0 overflow-hidden 제거 -->
+            <PassageAndQuestionLayout :left-ratio="2" :right-ratio="1">
+                <template #title>
+                    {{ passageTitle }}
+                </template>
+                <template #left>
+                    <!-- TipTapEditor (1) savedContent 값을 props 로 자식 컴포넌트의 initialContent 변수로 전달 -->
+                    <!-- TipTapEditor (2) 자식 컴포넌트에서 emit 으로 부모 컴포넌트에 전달, 자식이 emit 한 데이터를 받는 함수 handleContentChange -->
+                    <PassageEditor :max-length="numberLength" :initialContent="savedContent" :parentComponent="currentParentComponent" @content-changed="handleContentChange"/>
+                </template>
+                <template #right>
+                    <!-- 지문 분석 (Pinia Store에서 자동으로 데이터 가져옴) -->
+                    <PassageSummaryLayout />
+                </template>
+            </PassageAndQuestionLayout>
         </div>
 
         <!-- 재생성하기, 문항 이어서 생성하기, 저장하기, 추출하기 버튼 추가 예정 -->
@@ -28,9 +28,7 @@
         </div>
 
         <!-- GeneratedQuestionView에서 사용할 슬롯 -->
-        <div v-if="isCalledFromGeneratedQuestionView" class="flex-shrink-0">
-            <slot name="bottom-buttons"></slot>
-        </div>
+        <slot name="questions"></slot>
     </div>
 </template>
 
