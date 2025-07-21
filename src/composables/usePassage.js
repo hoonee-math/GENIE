@@ -1,11 +1,12 @@
 import { computed } from 'vue'
 import { usePassageStore } from '@/stores/passage'
-import { getPassageFromDatabase, getPrevPassageListInDatabase } from '@/api/passage'
+import { getPassageFromDatabase, getPrevPassageListInDatabase, getPassageWithQuestionsFromDatabase } from '@/api/passage'
 
 export function usePassage() {
   const store = usePassageStore()
   
   // 지문 조회 (캐시 우선 + API 호출 + 파싱)
+  // 호출 방식: await fetchPassage(123, { force: true, includeQuestions: true })
   const fetchPassage = async (pasCode, options = {}) => {
     const numPasCode = Number(pasCode)
     
@@ -20,7 +21,10 @@ export function usePassage() {
     // API 호출 + 파싱
     store.setLoading(true)
     try {
-      const apiResponse = await getPassageFromDatabase(numPasCode)
+      // 분기처리: questions 포함 여부에 따라 API 함수 선택
+      const apiResponse = options.includeQuestions
+        ? await getPassageWithQuestionsFromDatabase(numPasCode)
+        : await getPassageFromDatabase(numPasCode)
       
       // 단순 파싱 (API → Store 스키마)
       const parsed = {
@@ -32,6 +36,7 @@ export function usePassage() {
         createdAt: apiResponse.createdAt,
         updatedAt: apiResponse.updatedAt
       }
+      console.log(parsed.questions)
       
       store.setPassage(parsed)
       console.log('✅ API 호출 완료 및 캐시 저장:', numPasCode)
