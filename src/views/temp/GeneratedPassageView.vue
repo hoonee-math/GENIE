@@ -85,7 +85,11 @@ const loadPassageData = async () => {
     console.log('📜 지문 데이터 로드 시작 (캐시 우선):', pasCode)
     
     // usePassage의 fetchPassage 사용 (캐시 우선 + API 호출)
-    await fetchPassage(pasCode)
+    if(props.isCalledFromGeneratedQuestionView) {
+        await fetchPassage(pasCode, { includeQuestions: true })
+    } else {
+        await fetchPassage(pasCode)
+    }
     
     // TipTap 에디터에 초기 콘텐츠 설정
     savedContent.value = passage.value.content || ''
