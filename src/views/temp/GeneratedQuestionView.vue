@@ -38,7 +38,7 @@
                         <!-- question.queOption 은 div 대신 TipTap editor를 이용해 출력해주기. 기본값 editable=false, question.queQuery 옆의 수정 버튼을 눌러 question.queOption의 editable 갑도 true로 변경-->
                         <div>
                             <!-- 현재 question.queOption는 배열 형식인데 String 으로 수정 예정, 임시로 배열을 String으로 바꿔서 TipTap 에디터에 넣어주기. -->
-                            <TipTapEditor :initialContent="question.queOption" :isEditable="editableQueryAndOption" @content-changed="handleQueOptionChange" :addClass="'text-xl mb-2 leading-10'"/>
+                            <TipTapEditor :initialContent="question.queOption" :isEditable="editableQueryAndOption" @content-changed="handleQueOptionChange" :addClass="'text-xl leading-10'"/>
                         </div>
                     </template>
                     <template #right>
@@ -76,7 +76,7 @@
                                 </p>
                                 <!-- 해설 데이터인 question.description 는 div 대신 TipTap 에디터를 이용해서 출력 -->
                                 <div class="w-full font-normal text-sm md:text-xl leading-[200%] tracking-[-0.02em] text-[#303030] flex-1 overflow-auto">
-                                    <TipTapEditor :initialContent="question.description" :isEditable="editableAnswerAndDesc" @content-changed="handelQueDescriptionChange" />
+                                    <TipTapEditor :initialContent="question.description" :isEditable="editableAnswerAndDesc" @content-changed="handelQueDescriptionChange" :addClass="'text-xl'" />
                                 </div>
                             </div>
                             
