@@ -287,6 +287,30 @@ export function useQuestion() {
         }
     };
 
+    const formatOption = (generatedOption) => {
+        console.log("generatedOption", generatedOption);
+        if (!generatedOption) return "";
+        
+        // 배열이 아닌 경우 그대로 반환
+        if (!Array.isArray(generatedOption)) return generatedOption;
+        
+        // 배열 길이에 따른 처리
+        if (generatedOption.length > 0) {
+            let formattedOption = '';
+            const numberOption = ['①','②','③','④','⑤'];
+            
+            // ✅ 올바른 for 루프 사용
+            for (let index = 0; index < generatedOption.length; index++) {
+                formattedOption += '<p>' + numberOption[index] + ' ' + generatedOption[index] + '</p>';
+            }
+            
+            console.log("formattedOption", formattedOption);
+            return formattedOption;
+        } else {
+            return "";
+        }
+    }
+
     // 2. descriptions 배열 생성
     const descriptions = [];
     
@@ -334,7 +358,7 @@ export function useQuestion() {
     // 3. questions 배열 생성
     const questions = [{
         queQuery: questionData.generated_question,
-        queOption: questionData.generated_option,
+        queOption: formatOption(questionData.generated_option),
         queAnswer: questionData.generated_answer,
         description: formatDescription(questionData.generated_description)  // description 포맷팅 '정답 해설'과 '오답 피하기' 가 배열로 저장되는 문제 처리 -> java에서는 String으로 저장되고 정답 및 해설도 Tiptap을 이용해 출력해주는 것으로 통일하기 위해 html 로 변환
     }];
