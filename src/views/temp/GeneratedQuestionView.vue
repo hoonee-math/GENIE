@@ -49,7 +49,7 @@
                                 </p>
                                 <!-- question.queAnswer 값은 editQueAnswer 값에 따라서 저장된 값을 출력하거나, 라디오 버튼으로 수정가능하게 변경 -->
                                 <p v-if="!editableAnswerAndDesc" class="font-normal text-xl md:text-3xl leading-[150%] tracking-[-0.02em] text-[#303030] break-words flex-1">
-                                    {{ queAnswer }}
+                                    {{ question.queAnswer }}
                                 </p>
 
                                 <!-- 라디오 버튼 그룹 -->
@@ -75,7 +75,7 @@
                                 </p>
                                 <!-- 해설 데이터인 question.description 는 div 대신 TipTap 에디터를 이용해서 출력 -->
                                 <div class="w-full font-normal text-sm md:text-xl leading-[200%] tracking-[-0.02em] text-[#303030] flex-1 overflow-auto">
-                                    {{ question }}
+                                    {{ question.description }}
                                 </div>
                             </div>
                             
@@ -123,6 +123,9 @@ const queAnswer = ref('①')
 
 const questions = computed(() => {
     return passage.value.questions || []
+})
+const question = computed(() => {
+    return questions.value[currentPage.value - 1] || {}
 })
 
 const editQueQueryAndOption = () => {
