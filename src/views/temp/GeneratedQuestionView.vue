@@ -25,8 +25,9 @@
                     <template #left>
                         <!-- question.queQuery 생성된 문제문 -->
                         <div class="flex">
-                            <div class="font-semibold text-sm md:text-2xl mr-5">
-                                Q. {{ question.queQuery }}
+                            <div class="flex font-semibold text-sm md:text-2xl mr-5">
+                                <span>Q.</span>
+                                <TipTapEditor :initialContent="question.queQuery" :isEditable="editableQueryAndOption" @content-changed="handleQueQueryChange" :addClass="'text-2xl'"/>
                             </div>
                             <!-- 수정 버튼을 누르면 #left 영역의 question.queQuery 값과 아래 question.queOption 값을 각각 수정할 수 있게 변경. 각각 TipTap Editor로 따로 구현하거나 더 나은방법 고려해보기. -->
                             <button @click="editQueQueryAndOption" class="flex flex-row justify-center items-center text-sm md:text-xl pl-2 py-3 w-[86px] h-[35px] left-[1485px] top-[50px] bg-[#CCCCCC] rounded-lg">
@@ -37,7 +38,7 @@
                         <!-- question.queOption 은 div 대신 TipTap editor를 이용해 출력해주기. 기본값 editable=false, question.queQuery 옆의 수정 버튼을 눌러 question.queOption의 editable 갑도 true로 변경-->
                         <div>
                             <!-- 현재 question.queOption는 배열 형식인데 String 으로 수정 예정, 임시로 배열을 String으로 바꿔서 TipTap 에디터에 넣어주기. -->
-                            {{ question.queOption }} 
+                            <TipTapEditor :initialContent="question.queOption" :isEditable="editableQueryAndOption" @content-changed="handleQueOptionChange" :addClass="'text-xl mb-2 leading-10'"/>
                         </div>
                     </template>
                     <template #right>
@@ -75,7 +76,7 @@
                                 </p>
                                 <!-- 해설 데이터인 question.description 는 div 대신 TipTap 에디터를 이용해서 출력 -->
                                 <div class="w-full font-normal text-sm md:text-xl leading-[200%] tracking-[-0.02em] text-[#303030] flex-1 overflow-auto">
-                                    {{ question.description }}
+                                    <TipTapEditor :initialContent="question.description" :isEditable="editableAnswerAndDesc" @content-changed="handelQueDescriptionChange" />
                                 </div>
                             </div>
                             
@@ -108,6 +109,7 @@ import { useRouter } from 'vue-router'
 import GeneratedPassageView from './GeneratedPassageView.vue'
 import PassageAndQuestionLayout from './PassageAndQuestionLayout.vue'
 import { useQuestion } from '@/composables/useQuestion'
+import TipTapEditor from './TipTapEditor.vue'
 
 // Router 및 Composables
 const router = useRouter()
@@ -171,5 +173,32 @@ const selectQueAnswerOption = (option) => {
     queAnswer.value = option
 }
 
+// #Left 영역 TipTapEditor 관련 변수
+const savedQueQuery = ref('')
+const savedQueOption = ref('')
+const savedDescription = ref('')
+const queQueryLength = ref(0)
+const queOptionLength = ref(0)
+const queDescriptionLength = ref(0)
+const numberLength = ref(3000)
 
+// TipTapEditor 콘텐츠 변경 핸들러
+const handleQueQueryChange = ({ content, textLength }) => {
+  console.log('Content:', content)
+  console.log('Length:', textLength)
+  savedQueQuery.value = content
+  queQueryLength.value = textLength
+}
+const handleQueOptionChange = ({ content, textLength }) => {
+  console.log('Content:', content)
+  console.log('Length:', textLength)
+  savedQueOption.value = content
+  queOptionLength.value = textLength
+}
+const handelQueDescriptionChange = ({ content, textLength }) => {
+  console.log('Content:', content)
+  console.log('Length:', textLength)
+  savedDescription.value = content
+  queDescriptionLength.value = textLength
+}
 </script>
