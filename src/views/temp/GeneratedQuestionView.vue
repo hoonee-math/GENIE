@@ -51,8 +51,24 @@
                             
                         </div>
                     </template>
+                    
                 </PassageAndQuestionLayout>
             </div>
+            <div class="flex flex-col justify-between sm:flex-row justify-end gap-4 mt-8">
+                <div class="flex gap-5">
+                    <button @click="" :disabled="false" :class="['px-12 py-4 text-2xl font-medium rounded-lg transition-colors duration-200', isSaved ? 'text-gray-700 bg-gray-200 hover:bg-gray-300 cursor-not-allowed':'bg-brand text-white hover:bg-blue-600']">
+                        저장하기
+                    </button>
+                    <button @click="" :disabled="false" :class="['px-12 py-4 text-2xl font-medium rounded-lg transition-colors duration-200', isSaved ? 'bg-brand text-white hover:bg-blue-600':'text-gray-400 bg-gray-100 cursor-not-allowed']">
+                        추출하기
+                    </button>
+                </div>
+                <button @click="" :class="['px-16 py-4 text-2xl font-medium rounded-lg transition-all duration-200 bg-brand text-white hover:bg-blue-600']">
+                    문항 추가하기
+                </button>
+            </div>
+
+
         </template>
     </GeneratedPassageView>
 </template>
@@ -72,6 +88,7 @@ const { fetchPassage } = usePassage()
 const { passage, generateQuestionWithNewPassage } = useQuestion()
 
 const isLoading = ref(false)
+const isSaved = ref(true)
 
 const passageQuestion = computed(() => {
     return passage.value.questions || '없음'
