@@ -5,8 +5,23 @@
      3. PassageEditor 에서 TipTap 에디터 영역을 수정가능하게 만들어줌 -->
     <GeneratedPassageView :isCalledFromGeneratedQuestionView="true">
         <template #questions>
-            <div v-for="question in questions">
                 <PassageAndQuestionLayout>
+                    <template #pagination v-if="questions.length>1">
+                        <div class="flex items-center gap-2 mt-4">
+                            <button @click="prevPageBlock" :disabled="currentPageBlockStart === 1">이전</button>
+
+                            <button v-for="page in currentPageBlockEnd - currentPageBlockStart + 1"
+                                    :key="page"
+                                    @click="goToPage(currentPageBlockStart + page - 1)"
+                                    :class="['w-12 px-3 py-1 border rounded', currentPage === currentPageBlockStart + page - 1 ? 'bg-blue-500 text-white' : 'bg-white text-black']">
+                            {{ currentPageBlockStart + page - 1 }}
+                            </button>
+
+                            <button @click="nextPageBlock" :disabled="currentPageBlockEnd === totalPages">다음</button>
+                        </div>
+
+
+                    </template>
                     <template #left>
                         <!-- question.queQuery 생성된 문제문 -->
                         <div class="flex">
@@ -68,7 +83,6 @@
                     </template>
                     
                 </PassageAndQuestionLayout>
-            </div>
             <div class="flex flex-col justify-between sm:flex-row gap-4 mt-8">
                 <div class="flex gap-5">
                     <button @click="" :disabled="false" :class="['px-12 py-4 text-2xl font-medium rounded-lg transition-colors duration-200', isSaved ? 'text-gray-700 bg-gray-200 hover:bg-gray-300 cursor-not-allowed':'bg-brand text-white hover:bg-blue-600']">
@@ -94,13 +108,10 @@ import { useRouter } from 'vue-router'
 import GeneratedPassageView from './GeneratedPassageView.vue'
 import PassageAndQuestionLayout from './PassageAndQuestionLayout.vue'
 import { useQuestion } from '@/composables/useQuestion'
-import { usePassage } from '@/composables/usePassage';
-import EditButton from '@/components/common/EditButton.vue'
 
 // Router 및 Composables
 const router = useRouter()
-const { fetchPassage } = usePassage()
-const { passage, generateQuestionWithNewPassage } = useQuestion()
+const { passage } = useQuestion()
 
 const isLoading = ref(false)
 const isSaved = ref(true)
@@ -109,10 +120,6 @@ const editableAnswerAndDesc = ref(false)
 
 // queAnswer 값은 각 question 값에 딸라 초기값이 달라짐. 나중에 구현할 하단 문항을 페이지네이션 처리하게되면 각 question 에 따라서 그 값이 달라지므로 수정 필요
 const queAnswer = ref('①')
-
-const passageQuestion = computed(() => {
-    return passage.value.questions || '없음'
-})
 
 const questions = computed(() => {
     return passage.value.questions || []
@@ -124,6 +131,36 @@ const editQueQueryAndOption = () => {
 
 const editQueAnswerAndDesc = () => {
     editableAnswerAndDesc.value = !editableAnswerAndDesc.value;
+}
+
+// 페이징 처리 관련 함수
+const currentPage = ref(1)
+const itemsPerPage = 1
+
+const totalPages = computed(() => Math.ceil(21 / itemsPerPage))
+
+// 🔢 페이지 블록 범위 계산
+const pageBlockSize = 5
+const currentPageBlockStart = computed(() => Math.floor((currentPage.value - 1) / pageBlockSize) * pageBlockSize + 1)
+const currentPageBlockEnd = computed(() => Math.min(currentPageBlockStart.value + pageBlockSize - 1, totalPages.value))
+
+const paginatedQuestion = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage
+    return questions.value.slice(start, start + itemsPerPage)
+})
+
+const goToPage = (page) => {
+    currentPage.value = page
+}
+
+const nextPageBlock = () => {
+    const next = currentPageBlockEnd.value + 1
+    if (next <= totalPages.value) currentPage.value = next
+}
+
+const prevPageBlock = () => {
+    const prev = currentPageBlockStart.value - pageBlockSize
+    if (prev >= 1) currentPage.value = prev
 }
 
 // 라디오 버튼 선택 함수 추가

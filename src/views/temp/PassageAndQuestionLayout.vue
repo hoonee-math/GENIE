@@ -9,21 +9,26 @@
             </div>
         </div>
 
-        <div class="flex w-full h-full min-h-[500px] border border-gray-300 bg-white rounded-2xl">
-            <!-- 왼쪽 영역 (편집 도구, 지문 출력) -->
-            <div class="min-w-0 m-7 dev-border h-full" :class="`flex-[${leftRatio}]`">
-                <div class="flex flex-col gap-10 h-full">
-                    <slot name="left" />
-                </div>
+        <div class="flex flex-col w-full h-full min-h-[500px] border border-gray-300 bg-white rounded-2xl">
+            <div v-if="$slots.pagination" class="flex w-full h-full min-w-0 m-7 mb-0">
+                <slot name="pagination" />
             </div>
-            
-            <!-- 가운데 구분선 -->
-            <div v-if="$slots.right" class="w-px my-7 border-[1px] border-[#D9D9D9] flex-shrink-0"></div>
+            <div class="flex w-full h-full ">
+                <!-- 왼쪽 영역 (편집 도구, 지문 출력) -->
+                <div class="min-w-0 m-7 dev-border h-full" :class="`flex-[${leftRatio}]`">
+                    <div class="flex flex-col gap-10 h-full">
+                        <slot name="left" />
+                    </div>
+                </div>
+                
+                <!-- 가운데 구분선 -->
+                <div v-if="$slots.right" class="w-px my-7 border-[1px] border-[#D9D9D9] flex-shrink-0"></div>
 
-            <!-- 오른쪽 영역 (지문 분석) -->
-            <div v-if="$slots.right" class="min-w-0 m-7 dev-border" :class="`flex-[${rightRatio}]`">
-                <div class="flex flex-col gap-10 h-full">
-                    <slot name="right" />
+                <!-- 오른쪽 영역 (지문 분석) -->
+                <div v-if="$slots.right" class="min-w-0 m-7 dev-border" :class="`flex-[${rightRatio}]`">
+                    <div class="flex flex-col gap-10 h-full">
+                        <slot name="right" />
+                    </div>
                 </div>
             </div>
         </div>
