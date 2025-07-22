@@ -88,7 +88,7 @@
                     </template>
                     
                 </PassageAndQuestionLayout>
-            <div v-if="!isQuestionExampleSelectorVisible" class="flex flex-col justify-between sm:flex-row gap-4 my-4">
+            <div v-if="!isQuestionExampleSelectorVisible" class="flex flex-col justify-between sm:flex-row gap-4">
                 <div class="flex gap-5">
                     <button @click="" :disabled="false" :class="['px-12 py-4 text-2xl font-medium rounded-lg transition-colors duration-200', isSaved ? 'text-gray-700 bg-gray-200 hover:bg-gray-300 cursor-not-allowed':'bg-brand text-white hover:bg-blue-600']">
                         저장하기
