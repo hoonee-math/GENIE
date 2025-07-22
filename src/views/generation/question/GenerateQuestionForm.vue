@@ -113,16 +113,16 @@
 <script setup>
 import { ref, computed, onMounted, watch, nextTick, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import PassageAndQuestionLayout from './PassageAndQuestionLayout.vue'
-import PassageSummaryLayout from './PassageSummaryLayout.vue'
-import PassageEditor from './PassageEditor.vue'
+import PassageAndQuestionLayout from '@/views/generation/PassageAndQuestionLayout.vue'
+import PassageSummaryLayout from '@/views/generation/PassageSummaryLayout.vue'
+import PassageEditor from '@/views/generation/PassageEditor.vue'
 import LoadPassageModal from '@/components/generation/LoadPassageModal.vue'
 import ConfirmModalComponent from '@/components/common/ConfirmModalComponent.vue'
 import LoadingModal from '@/components/common/LoadingModal.vue'
 import { useQuestion } from '@/composables/useQuestion'
 import { usePassage } from '@/composables/usePassage';
-import QuestionExampleSelector from './QuestionExampleSelector.vue'
-import EditableTitle from '@/views/temp/EditableTitle.vue'
+import QuestionExampleSelector from '@/views/generation/QuestionExampleSelector.vue'
+import EditableTitle from '@/views/generation/EditableTitle.vue'
 import PaymentUsageModal from "@/components/generation/PaymentUsageModal.vue";
 
 // Router 및 Composables

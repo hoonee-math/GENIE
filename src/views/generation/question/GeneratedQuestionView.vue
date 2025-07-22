@@ -144,12 +144,12 @@
 <script setup>
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
-import GeneratedPassageView from './GeneratedPassageView.vue'
-import PassageAndQuestionLayout from './PassageAndQuestionLayout.vue'
+import GeneratedPassageView from '@/views/generation/passage/GeneratedPassageView.vue'
+import PassageAndQuestionLayout from '@/views/generation/PassageAndQuestionLayout.vue'
 import { useQuestion } from '@/composables/useQuestion'
 import { usePassage } from '@/composables/usePassage';
-import TipTapEditor from './TipTapEditor.vue'
-import QuestionExampleSelector from './QuestionExampleSelector.vue'
+import TipTapEditor from '@/views/generation/TipTapEditor.vue'
+import QuestionExampleSelector from '@/views/generation/QuestionExampleSelector.vue'
 import PaymentUsageModal from "@/components/generation/PaymentUsageModal.vue";
 import LoadingModal from '@/components/common/LoadingModal.vue'
 

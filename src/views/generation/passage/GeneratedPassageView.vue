@@ -35,12 +35,11 @@
 <script setup>
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import PassageAndQuestionLayout from './PassageAndQuestionLayout.vue'
-import PassageSummaryLayout from './PassageSummaryLayout.vue'
-import PassageEditor from './PassageEditor.vue'
+import PassageAndQuestionLayout from '@/views/generation/PassageAndQuestionLayout.vue'
+import PassageSummaryLayout from '@/views/generation/PassageSummaryLayout.vue'
+import PassageEditor from '@/views/generation/PassageEditor.vue'
 import { usePassage } from '@/composables/usePassage'
-import GenerateQuestion from '../generation/question/GenerateQuestion.vue'
-import EditableTitle from '@/views/temp/EditableTitle.vue'
+import EditableTitle from '@/views/generation/EditableTitle.vue'
 
 const props = defineProps({
     isCalledFromGeneratedQuestionView: {

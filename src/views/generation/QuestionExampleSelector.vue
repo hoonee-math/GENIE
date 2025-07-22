@@ -109,7 +109,7 @@
 import { ref, computed, watch } from "vue";
 import BaseButton from "@/components/common/BaseButton.vue";
 import questionExampleData from '@/assets/data/question_example.json';
-import PassageAndQuestionLayout from "./PassageAndQuestionLayout.vue";
+import PassageAndQuestionLayout from "@/views/generation/PassageAndQuestionLayout.vue";
 
 const props = defineProps({
     generateType: {type: String}, // 부모에서 절달된 내용

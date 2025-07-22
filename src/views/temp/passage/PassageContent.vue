@@ -149,9 +149,9 @@
 </template>
 
 <script setup>
-import PassageContentMain from "@/views/generation/passage/PassageContentMain.vue";
-import PassageContentMainMobile from "@/views/generation/passage/PassageContentMainMobile.vue";
-import PassageSummary from "@/views/generation/passage/PassageSummary.vue";
+import PassageContentMain from "@/views/temp/passage/PassageContentMain.vue";
+import PassageContentMainMobile from "@/views/temp/passage/PassageContentMainMobile.vue";
+import PassageSummary from "@/views/temp/passage/PassageSummary.vue";
 import BaseButton from "@/components/common/BaseButton.vue";
 import FileSelectModal from "@/components/common/FileSelectModal.vue";
 import ConfirmModalComponent from "@/components/common/ConfirmModalComponent.vue";

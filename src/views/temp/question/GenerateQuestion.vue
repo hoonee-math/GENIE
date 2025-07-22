@@ -169,10 +169,10 @@ import {
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 // 직접 컴포넌트 임포트
-import EditPassage from "@/views/generation/question/EditPassage.vue";
-import EditQuestion from "@/views/generation/question/EditQuestion.vue";
-import PassageSummary from "@/views/generation/passage/PassageSummary.vue";
-import QuestionDescription from "@/views/generation/question/QuestionDescription.vue";
+import EditPassage from "@/views/temp/question/EditPassage.vue";
+import EditQuestion from "@/views/temp/question/EditQuestion.vue";
+import PassageSummary from "@/views/temp/passage/PassageSummary.vue";
+import QuestionDescription from "@/views/temp/question/QuestionDescription.vue";
 import BaseButton from "@/components/common/BaseButton.vue";
 import GenerateQuestionModal from "@/components/generation/GenerateQuestionModal.vue";
 import ConfirmModalComponent from "@/components/common/ConfirmModalComponent.vue";
@@ -180,7 +180,7 @@ import WarningModalComponent from "@/components/common/WarningModalComponent.vue
 import PaymentUsageModal from "@/components/generation/PaymentUsageModal.vue";
 import FileSelectModal from "@/components/common/FileSelectModal.vue";
 import LoadingModal from "@/components/common/LoadingModal.vue";
-import EditPassageMobile from "@/views/generation/question/EditPassageMobile.vue";
+import EditPassageMobile from "@/views/temp/question/EditPassageMobile.vue";
 
 const isEditingGlobal = ref(false);
 const pattern = ref(null);

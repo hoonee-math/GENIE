@@ -128,8 +128,8 @@
 </template>
 <script setup>
 import { ref, watch, onMounted, defineProps, defineEmits } from "vue";
-import SymbolTooltip from "@/views/generation/question/SymbolTooltip.vue";
-import EditTitle from "@/views/generation/question/EditTitle.vue";
+import SymbolTooltip from "@/views/temp/question/SymbolTooltip.vue";
+import EditTitle from "@/views/temp/question/EditTitle.vue";
 
 const props = defineProps({
   initialTitle: {

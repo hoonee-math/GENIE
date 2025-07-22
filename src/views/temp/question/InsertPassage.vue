@@ -82,9 +82,8 @@
 </template>
 
 <script setup>
-import StoresInsertPassage from "@/views/generation/question/StoresInsertPassage.vue";
-import UserInsertPassage from "@/views/generation/question/UserInsertPassage.vue";
-import WarningModalComponent from '@/components/common/WarningModalComponent.vue';
+import StoresInsertPassage from "@/views/temp/question/StoresInsertPassage.vue";
+import UserInsertPassage from "@/views/temp/question/UserInsertPassage.vue";
 
 import { ref, inject, computed, watch, defineExpose, onMounted } from "vue";
 

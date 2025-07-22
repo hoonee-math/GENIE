@@ -35,8 +35,6 @@
     </div>
 </template>
 <script setup>
-import EditButton from '@/components/common/EditButton.vue';
-
 // Props 정의
 const props = defineProps({
     leftRatio: {

@@ -271,13 +271,12 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import PassageGenerationFormSplitLayout from './PassageGenerationFormSplitLayout.vue'
+import PassageGenerationFormSplitLayout from '@/views/generation/PassageGenerationFormSplitLayout.vue'
 import BaseTooltip from '@/components/common/BaseTooltip.vue'
-import EditButton from '@/components/common/EditButton.vue'
 import { generateSinglePassageAPI, generateReadingPassageAPI, generateMultiplePassageAPI } from '@/api/generate'
 import { savePassageToDatabase } from '@/api/passage'
 import { usePassage } from '@/composables/usePassage'
-import EditableTitle from '@/views/temp/EditableTitle.vue'
+import EditableTitle from '@/views/generation/EditableTitle.vue'
 import PaymentUsageModal from "@/components/generation/PaymentUsageModal.vue";
 import LoadingModal from '@/components/common/LoadingModal.vue'
 

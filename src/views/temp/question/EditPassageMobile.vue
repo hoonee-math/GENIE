@@ -472,7 +472,7 @@
 import { ref, onMounted, watch, computed, nextTick } from "vue";
 import { Icon } from "@iconify/vue";
 import EditQuestion from "./EditQuestion.vue";
-import SymbolTooltip from "@/views/generation/question/SymbolTooltip.vue";
+import SymbolTooltip from "@/views/temp/question/SymbolTooltip.vue";
 
 const props = defineProps({
     initialTitle: {
