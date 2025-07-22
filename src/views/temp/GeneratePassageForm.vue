@@ -375,8 +375,8 @@ const resetForm = () => {
 
 // 제목 생성 함수
 const generateTitle = (generateType, requestData) => {
-    if (newPassageTitle === "Untitled") {
-        return newPassageTitle;
+    if (newPassageTitle.value !== "Untitled") {
+        return newPassageTitle.value;
     }
 
     const now = new Date()
@@ -385,11 +385,11 @@ const generateTitle = (generateType, requestData) => {
     if (generateType === 'single') {
         return `[단일 지문] ${requestData.keyword.slice(0, 10)} (${dateStr})`
     } else if (generateType === 'multiple') {
-        return `[복수 지문] ${requestData.first_type_passage} & ${requestData.second_type_passage} (${dateStr})`
+        return `[복합 지문] ${requestData.first_type_passage} & ${requestData.second_type_passage} (${dateStr})`
     } else if (generateType === 'reading') {
         return `[독서론 지문] ${requestData.keyword.slice(0, 10)} (${dateStr})`
     }
-    return newPassageTitle;
+    return newPassageTitle.value;
 }
 
 // DescriptionDto 구조에 맞춰 생성
