@@ -1,10 +1,14 @@
 <template>
     <div class="flex flex-col items-start p-0 h-full">
         <div class="flex flex-col items-start p-0 gap-4 w-full h-full">
-            <p class="font-bold text-2xl md:text-xl leading-[150%] tracking-[-0.02em] text-[#303030]">
-                지문 분석
-            </p>
-            
+            <div>
+                <span class="font-bold text-2xl md:text-xl leading-[150%] tracking-[-0.02em] text-[#303030]">
+                    지문 분석
+                </span>
+                
+                <!-- Tooltip 적용 -->
+                <BaseTooltip :content="tooltipContent" position="top" class="ml-2" />
+            </div>
             <!-- 탭 네비게이션 (복합 지문일 때만 표시) -->
             <div v-if="showTabs" class="flex border-b border-gray-200 w-full">
                 <button
@@ -73,12 +77,14 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { usePassage } from '@/composables/usePassage'
+import BaseTooltip from '@/components/common/BaseTooltip.vue'
 
 // usePassage composable 사용
 const { corePointTabs } = usePassage()
 
 // 현재 활성 탭
 const activeTabIndex = ref(0)
+const tooltipContent = ref("'지문 생성'또는 '자료실 지문' 중 지니큐 서비스로 생성한 지문을 불러오시면 해당 지문에 대한 분석 내용을 확인하실 수 있습니다.")
 
 // 탭 표시 여부 (복합 지문일 때만)
 const showTabs = computed(() => corePointTabs.value.length > 1)
