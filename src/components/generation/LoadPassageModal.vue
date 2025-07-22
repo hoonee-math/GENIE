@@ -70,6 +70,10 @@
                 </div>
 
                 <!-- 검색 결과가 없을 때 -->
+                <div v-else-if="filteredPassages.length === 0 && activeTab === 'favorites'"
+                    class="font-normal text-xl leading-[150%] tracking-[-0.02em] text-center">
+                    즐겨찾기가 존재하지 않습니다.
+                </div>
                 <div v-else-if="filteredPassages.length === 0"
                     class="font-normal text-xl leading-[150%] tracking-[-0.02em] text-center">
                     '{{ searchQuery }}'에 대한 검색 결과가 존재하지 않습니다.
