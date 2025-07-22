@@ -734,6 +734,8 @@ const fetchWorkItems = async () => {
 const handleWorkItemClick = async (item) => {
   const pasCode = item.PAS_CODE;
 
+
+
   // PAS_IS_GENERATED 값에 따라 API 및 페이지 분기처리
   const isGeneratedText = item.PAS_IS_GENERATED;
   const isPassage = isGeneratedText === "지문";
@@ -784,8 +786,8 @@ const handleWorkItemClick = async (item) => {
 
       // 문항 생성 페이지로 이동
       router.push({
-        path: "/questions/generate",
-        query: { from: route.path }, // 현재 경로 전달
+        path: `/questions/view/${pasCode}`,
+        // query: { from: route.path }, // 현재 경로 전달
       });
     }
 
