@@ -224,7 +224,7 @@
                 
                 <!-- 하단 버튼 -->
                 <div class="flex justify-end space-x-4 mt-12">
-                    <button @click="generatePassage" :disabled="isLoading"
+                    <button @click="openPaymentUsageModal" :disabled="isLoading"
                         :class="[
                             'px-8 py-4 text-lg font-medium rounded-lg transition-all duration-200',
                             isLoading 
@@ -256,6 +256,16 @@
             </div>
         </div>
     </div>
+
+    <!-- 로딩 모달 -->
+    <LoadingModal :isOpen="isLoading" :message="loadingMessage" />
+
+    <PaymentUsageModal
+        ref="paymentUsageModalRef"
+        :isOpen="isPaymentUsageModalOpen"
+        @close="closePaymentUsageModal"
+        @generate="generatePassage"
+    />
 </template>
 
 <script setup>
@@ -268,6 +278,8 @@ import { generateSinglePassageAPI, generateReadingPassageAPI, generateMultiplePa
 import { savePassageToDatabase } from '@/api/passage'
 import { usePassage } from '@/composables/usePassage'
 import EditableTitle from '@/views/temp/EditableTitle.vue'
+import PaymentUsageModal from "@/components/generation/PaymentUsageModal.vue";
+import LoadingModal from '@/components/common/LoadingModal.vue'
 
 // Router 및 Composable 설정
 const router = useRouter()
@@ -279,6 +291,9 @@ const loadingStep = ref('') // 'generating' | 'saving' | ''
 const errorMessage = ref('')
 // 문서 제목
 const newPassageTitle = ref('Untitled')
+const isPaymentUsageModalOpen = ref(false); // 결제 사용 모달 
+const paymentUsageModalRef = ref(null);
+const loadingMessage = ref('');
 
 // 탭 데이터
 const tabs = [
@@ -544,6 +559,11 @@ const generatePassage = async () => {
     }
 }
 
+// payment 모달 관련 함수
+
+// 결제 사용 모달 관련 함수
+const openPaymentUsageModal = () => { isPaymentUsageModalOpen.value = true; };
+const closePaymentUsageModal = () => { isPaymentUsageModalOpen.value = false; };
 </script>
 
 <style scoped>
