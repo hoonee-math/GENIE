@@ -148,7 +148,7 @@
         ref="paymentUsageModalRef"
         :isOpen="isPaymentUsageModalOpen"
         @close="closePaymentUsageModal"
-        @generate="handleGenerate"
+        @generate="addQuestion"
     />
 </template>
 
@@ -175,6 +175,7 @@ const editableAnswerAndDesc = ref(false)
 const isQuestionExampleSelectorVisible = ref(false)
 const isPaymentUsageModalOpen = ref(false); // 결제 사용 모달 
 const paymentUsageModalRef = ref(null);
+const loadingMessage = ref('');
 
 // queAnswer 값은 각 question 값에 딸라 초기값이 달라짐. 나중에 구현할 하단 문항을 페이지네이션 처리하게되면 각 question 에 따라서 그 값이 달라지므로 수정 필요
 const queAnswer = ref('①')
@@ -318,8 +319,24 @@ const calculateGenerateType = () => {
 
 // 문항 추가 함수
 const addQuestion = async () => {
-    // (custom_passage, selectedQuestionExample, generateType, pasCode) 
-    await addQuestionToExistingPassage(savedPassageContent.value, '','',passage.value.pasCode)
+    if (isLoading.value) return;
+
+    closePaymentUsageModal();
+    // 재생성 처리 로직
+    // isProcessing.value = true;
+    isLoading.value = true;
+    loadingMessage.value = "문항을 추가하고 있습니다. 새로운 문항이 추가될 때까지 최대 3분이 소요될 수 있습니다.";
+    try {
+        // (custom_passage, selectedQuestionExample, generateType, pasCode) 
+        await addQuestionToExistingPassage(savedPassageContent.value, selectedQuestionExample.value, generateType, passage.value.pasCode)
+    } catch {
+        console.log("GeneratedQuestionVeiw.addQuestion",error);
+    } finally {
+        isLoading.value = false;
+        loadingMessage.value = ''
+        // isProcessing.value = false;
+    }
+
 }
 
 // 저장하기 함수
@@ -343,107 +360,8 @@ const savePassageAndQuestion = async () => {
 // payment 모달 관련 함수
 
 // 결제 사용 모달 관련 함수
-const openPaymentUsageModal = () => {
-    
-    isPaymentUsageModalOpen.value = true;
-    if (checkContentLength(new Event("click"))) {
-        // 저장된 지문 데이터를 로컬 스토리지에 임시 저장
-        const passageData = {
-            // title: title.value,
-            // content: content.value,
-            // summary: summary.value,
-            // pasCode: pasCode.value,
-            // type: type.value,
-            // keyword: keyword.value,
-        };
-        // localStorage.setItem(
-        //     "generateQuestionPassageData",
-        //     JSON.stringify(passageData)
-        // );
-
-        // 모달 열기 전에 이용권 정보 갱신
-        if (
-            paymentUsageModalRef.value &&
-            paymentUsageModalRef.value.updateCreditCount
-        ) {
-            authStore.updateTicketCount().then((count) => {
-                paymentUsageModalRef.value.updateCreditCount(count);
-
-                // 갱신 후 모달 열기
-                isPaymentUsageModalOpen.value = true;
-            });
-        } else {
-            // ref나 초기화 메서드가 없어도 모달은 열어줌
-            isPaymentUsageModalOpen.value = true;
-        }
-    }
-};
-
-const closePaymentUsageModal = () => {
-    isPaymentUsageModalOpen.value = false;
-};
-
-const handleGenerate = () => {
-    if (isProcessing.value) {
-        return;
-    }
-
-    closePaymentUsageModal();
-    // 재생성 처리 로직
-    isProcessing.value = true;
-    isLoading.value = true;
-    loadingMessage.value =
-        "지문을 재생성 중입니다.\n재생성까지 최대 3분이 소요될 수 있습니다.";
-
-    // 로컬 스토리지에서 문자열로 데이터 가져오기
-    const savedGenerateDataStr = localStorage.getItem("genieq-passage-data");
-
-    if (!savedGenerateDataStr) {
-        isLoading.value = false;
-        return;
-    }
-
-    // 문자열을 객체로 파싱
-    let savedGenerateData;
-    try {
-        savedGenerateData = JSON.parse(savedGenerateDataStr);
-    } catch (error) {
-        alert("지문 데이터 처리 중 오류가 발생했습니다.");
-        isLoading.value = false;
-        return;
-    }
-
-    const requestData = {
-        type_passage: savedGenerateData.type,
-        keyword: [savedGenerateData.keyword],
-    };
-
-    fetch("/fastapi/generate-passage", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestData),
-    })
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error(`API 호출 실패: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then((data) => {
-            savePassageToBackend(data);
-            isContentChanged.value = false;
-            hasManualSave.value = true;
-        })
-        .catch((error) => {
-            isLoading.value = false;
-            isProcessing.value = false;
-        })
-        .finally(() => {
-            isLoading.value = false;
-            isProcessing.value = false;
-        });
-};
-const savePassageToBackend = (data) => {}
+const openPaymentUsageModal = () => { isPaymentUsageModalOpen.value = true; };
+const closePaymentUsageModal = () => { isPaymentUsageModalOpen.value = false; };
 
 onMounted(() => {
     // generateType();
