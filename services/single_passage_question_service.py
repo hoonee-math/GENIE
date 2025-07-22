@@ -86,7 +86,7 @@ async def create_single_passage_question(request: QuestionRequest) -> SinglePass
 
 {question_guidelines}"""
 
-        user_prompt = f"""제시된 지문을 기반으로 {request.question_format} 형식의 5개의 선지"""
+        user_prompt = f"""제시된 지문을 기반으로 {request.question_format} 형식의 5개의 선지(꼭 예시 선지와 같은 형식으로 맞춰주세요)"""
         
         if request.question_subpassage_example and request.question_subpassage_example.strip():
             user_prompt += "와 보기 지문으"
