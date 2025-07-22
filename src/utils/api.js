@@ -1,6 +1,6 @@
 // src/utils/api.js - 보안 우선 API 요청 시스템
-import { useAuthStore } from '@/stores/auth';
-import { useRouter } from 'vue-router';
+import { useAuthStore } from "@/stores/auth";
+import { useRouter } from "vue-router";
 
 /**
  * 보안 우선 API 요청 함수
@@ -49,9 +49,9 @@ import { useRouter } from 'vue-router';
  * 디버그 모드에서만 API 로그 출력
  */
 export function debugLog(message, data = null) {
-    if (import.meta.env.DEV) {
-        console.log(`[API Debug] ${message}`, data);
-    }
+  if (import.meta.env.DEV) {
+    console.log(`[API Debug] ${message}`, data);
+  }
 }
 
 // ========== 타입 검증 유틸리티 (@/utils/validation.js 로 이동) ==========

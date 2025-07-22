@@ -1,10 +1,11 @@
 <template>
     <div class="min-h-screen flex justify-center items-center mx-auto p-4 sm:p-8 w-full ">
-<!-- hidden md:block flex flex-col gap-3 mx-auto p-4 sm:p-8 w-full -->
+        <!-- hidden md:block flex flex-col gap-3 mx-auto p-4 sm:p-8 w-full -->
         <div class="w-[1312px]">
             <!-- 헤더 -->
             <div class="mb-4">
-                <EditableTitle v-model="newPassageTitle" title-class="text-2xl font-bold" placeholder="새 지문 제목을 입력하세요" />
+                <EditableTitle v-model="newPassageTitle" title-class="text-2xl font-bold"
+                    placeholder="새 지문 제목을 입력하세요" />
             </div>
 
             <!-- 메인 콘텐츠 -->
@@ -93,8 +94,8 @@
                                     <h3 class="text-2xl font-semibold text-gray-900 mb-6">
                                         추가 요청 사항 (선택)
                                     </h3>
-                                    <textarea v-model="singleForm.requirement"
-                                        placeholder="지문 작성에 유의할 점이 있다면 작성해 주세요." rows="8"
+                                    <textarea v-model="singleForm.requirement" placeholder="지문 작성에 유의할 점이 있다면 작성해 주세요."
+                                        rows="8"
                                         class="w-full p-6 text-xl border-2 border-gray-300 rounded-lg resize-none focus:border-brand focus:outline-none transition-colors duration-200" />
                                 </div>
                             </template>
@@ -215,27 +216,32 @@
                     <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg max-w-md w-full">
                         <div class="flex">
                             <svg class="w-5 h-5 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                    clip-rule="evenodd"></path>
                             </svg>
                             <span>{{ errorMessage }}</span>
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- 하단 버튼 -->
                 <div class="flex justify-end space-x-4 mt-12">
-                    <button @click="openPaymentUsageModal" :disabled="isLoading"
-                        :class="[
-                            'px-8 py-4 text-lg font-medium rounded-lg transition-all duration-200',
-                            isLoading 
-                                ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
-                                : 'bg-brand text-white hover:bg-blue-600'
-                        ]">
+                    <button @click="openPaymentUsageModal" :disabled="isLoading" :class="[
+                        'px-8 py-4 text-lg font-medium rounded-lg transition-all duration-200',
+                        isLoading
+                            ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                            : 'bg-brand text-white hover:bg-blue-600'
+                    ]">
                         <!-- 로딩 스피너 -->
                         <div v-if="isLoading" class="flex items-center">
-                            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-600"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                    stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                </path>
                             </svg>
                             <span v-if="loadingStep === 'generating'">지문 생성 중...</span>
                             <span v-else-if="loadingStep === 'saving'">지문 저장 중...</span>
@@ -243,13 +249,12 @@
                         </div>
                         <span v-else>지문 생성하기</span>
                     </button>
-                    <button @click="resetForm" :disabled="isLoading"
-                        :class="[
-                            'px-8 py-4 text-lg font-medium rounded-lg transition-colors duration-200',
-                            isLoading
-                                ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
-                                : 'text-gray-700 bg-gray-200 hover:bg-gray-300'
-                        ]">
+                    <button @click="resetForm" :disabled="isLoading" :class="[
+                        'px-8 py-4 text-lg font-medium rounded-lg transition-colors duration-200',
+                        isLoading
+                            ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                            : 'text-gray-700 bg-gray-200 hover:bg-gray-300'
+                    ]">
                         초기화
                     </button>
                 </div>
@@ -260,12 +265,8 @@
     <!-- 로딩 모달 -->
     <LoadingModal :isOpen="isLoading" :message="loadingMessage" />
 
-    <PaymentUsageModal
-        ref="paymentUsageModalRef"
-        :isOpen="isPaymentUsageModalOpen"
-        @close="closePaymentUsageModal"
-        @generate="generatePassage"
-    />
+    <PaymentUsageModal ref="paymentUsageModalRef" :isOpen="isPaymentUsageModalOpen" @close="closePaymentUsageModal"
+        @generate="generatePassage" />
 </template>
 
 <script setup>
@@ -296,9 +297,9 @@ const loadingMessage = ref('');
 
 // 탭 데이터
 const tabs = [
-    { key: 'single', label: '단일 지문', tooltip: true, tooltipContent: '하나의 주제와 분야로 출제되는 지문 유형입니다.'},
+    { key: 'single', label: '단일 지문', tooltip: true, tooltipContent: '하나의 주제와 분야로 출제되는 지문 유형입니다.' },
     { key: 'multiple', label: '복합 지문', tooltip: true, tooltipContent: '서로 다른 주제나 분야의 지문 두 개가 조합되어 하나의 세트로 출제되는 지문 유형입니다.' },
-    { key: 'reading', label: '독서 지문', tooltip: true, tooltipContent: '독서의 방법론이나 독서 과정, 독서에 대한 이론 등을 다루는 지문 유형입니다.'}
+    { key: 'reading', label: '독서 지문', tooltip: true, tooltipContent: '독서의 방법론이나 독서 과정, 독서에 대한 이론 등을 다루는 지문 유형입니다.' }
 ]
 
 // 현재 활성 탭
@@ -395,7 +396,7 @@ const generateTitle = (generateType, requestData) => {
 
     const now = new Date()
     const dateStr = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`
-    
+
     if (generateType === 'single') {
         return `[단일 지문] ${requestData.keyword.slice(0, 10)} (${dateStr})`
     } else if (generateType === 'multiple') {
@@ -451,13 +452,13 @@ const transformApiResponseToDbFormat = (apiResponse, requestData, generateType) 
 
 // fastApi 응답 데이터의 '\n' 형식을 Tiptap 형식에 맞게 수정하여 db 저장할 때 사용
 const convertNewlinesToParagraphs = (text) => {
-  if (!text) return ''
-  return text
-    .split('\n')
-    .map(line => line.trim())
-    .filter(line => line.length > 0)
-    .map(line => `<p>${line}</p>`)
-    .join('')
+    if (!text) return ''
+    return text
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0)
+        .map(line => `<p>${line}</p>`)
+        .join('')
 }
 
 // 지문 생성 요청 데이터 (request data)
@@ -465,7 +466,7 @@ const generatePassage = async () => {
     // 에러 및 로딩 상태 초기화
     errorMessage.value = ''
     isLoading.value = true
-    
+
     try {
         let requestData = {}
         let generateType = ''
@@ -486,7 +487,7 @@ const generatePassage = async () => {
                 requestData.requirement = singleForm.requirement
             }
             apiFunction = generateSinglePassageAPI
-            
+
         } else if (activeTab.value === 'multiple') {
             generateType = 'multiple'
             requestData = {
@@ -503,7 +504,7 @@ const generatePassage = async () => {
                 requestData.second_requirement = multipleForm.second_requirement
             }
             apiFunction = generateMultiplePassageAPI
-            
+
         } else if (activeTab.value === 'reading') {
             generateType = 'reading'
             requestData = {
@@ -532,18 +533,18 @@ const generatePassage = async () => {
         loadingStep.value = 'saving'
         const savedPassage = await savePassageToDatabase(dbData)
         console.log('✅ DB 저장 성공:', savedPassage)
-        
+
         // 5. Simple Store 에 캐싱 (중복 API 호출 방지)
         cacheGeneratedPassage(savedPassage.pasCode, apiResponse, savedPassage)
         console.log('✅ Simple Store 캐싱 완료:', savedPassage.pasCode)
-        
+
         // 6. 결과 페이지로 이동
         console.log('📫 결과 페이지로 이동:', `/passage/view/${savedPassage.pasCode}`)
         await router.push(`/passage/view/${savedPassage.pasCode}`)
-        
+
     } catch (error) {
         console.error('❌ 지문 생성 실패:', error)
-        
+
         // 에러 메시지 설정
         if (loadingStep.value === 'generating') {
             errorMessage.value = '지문 생성에 실패했습니다. 다시 시도해 주세요.'

@@ -13,10 +13,12 @@
                 <div>
                     <!-- 탭 네비게이션 -->
                     <div class="flex border-b border-gray-200 mb-6">
-                        <button @click="switchTab('user')" :class="['px-4 py-2 text-sm font-medium border-b-2 transition-colors', activeTab === 'user' ? 'border-brand text-brand' : 'border-transparent text-gray-500 hover:text-gray-700' ]">
+                        <button @click="switchTab('user')"
+                            :class="['px-4 py-2 text-sm font-medium border-b-2 transition-colors', activeTab === 'user' ? 'border-brand text-brand' : 'border-transparent text-gray-500 hover:text-gray-700']">
                             사용자 입력
                         </button>
-                        <button @click="switchTab('storage')" :class="['px-4 py-2 text-sm font-medium border-b-2 transition-colors', activeTab === 'storage' ? 'border-brand text-brand' : 'border-transparent text-gray-500 hover:text-gray-700']">
+                        <button @click="switchTab('storage')"
+                            :class="['px-4 py-2 text-sm font-medium border-b-2 transition-colors', activeTab === 'storage' ? 'border-brand text-brand' : 'border-transparent text-gray-500 hover:text-gray-700']">
                             자료실 지문
                         </button>
                     </div>
@@ -25,7 +27,8 @@
                     <!-- GeneratedPassageView.vue 에서 추가 예정인 [문항 이어서 생성하기] 버튼을 클릭하면 passage pinia Store 에 저장시켜놓았던 캐시 데이터를 가져와서 해당 데이터를 바로 자료실 지문 탭에 출력 -->
                     <div>
                         <!-- TipTap 에디터 -->
-                        <PassageEditor ref="editorRef" :initialContent="passageContent" :parentComponent="'GenerateQuestionForm'" @content-changed="handleContentChange" />
+                        <PassageEditor ref="editorRef" :initialContent="passageContent"
+                            :parentComponent="'GenerateQuestionForm'" @content-changed="handleContentChange" />
                     </div>
                 </div>
             </template>
@@ -37,11 +40,13 @@
                         <!-- 단일 지문, 복합 지문, 독서론 (generateType=kind_passage)을 선택할 수 있는 라디오 버튼, 해당 선택 값을 부모 객체에 전달 -->
                         <div class="flex-col md:flex-row justify-between items-center gap-4">
                             <label class="inline-flex items-center">
-                                <input type="radio" value="단일 지문" v-model="generateType" class="form-radio text-brand" />
+                                <input type="radio" value="단일 지문" v-model="generateType"
+                                    class="form-radio text-brand" />
                                 <span class="ml-2 whitespace-nowrap">단일 지문</span>
                             </label>
                             <label class="inline-flex items-center ml-4">
-                                <input type="radio" value="복합 지문" v-model="generateType" class="form-radio text-brand" />
+                                <input type="radio" value="복합 지문" v-model="generateType"
+                                    class="form-radio text-brand" />
                                 <span class="ml-2 whitespace-nowrap">복합 지문</span>
                             </label>
                             <label class="inline-flex items-center ml-4">
@@ -50,26 +55,29 @@
                             </label>
                         </div>
                     </template>
-                </PassageSummaryLayout> 
-                
+                </PassageSummaryLayout>
+
             </template>
         </PassageAndQuestionLayout>
 
         <!-- 하단 버튼들 (문항 유형 선택 모달이 표시되지 않을 때만) -->
         <div v-if="!isQuestionExampleSelectorVisible" class="flex flex-col sm:flex-row justify-end gap-4 mt-8">
             <!-- 초기화 버튼 -->
-            <button @click="resetAll" :disabled="!canReset" :class="['px-8 py-4 text-lg font-medium rounded-lg transition-colors duration-200', isLoading ? 'text-gray-400 bg-gray-100 cursor-not-allowed' : 'text-gray-700 bg-gray-200 hover:bg-gray-300' ]">
+            <button @click="resetAll" :disabled="!canReset"
+                :class="['px-8 py-4 text-lg font-medium rounded-lg transition-colors duration-200', isLoading ? 'text-gray-400 bg-gray-100 cursor-not-allowed' : 'text-gray-700 bg-gray-200 hover:bg-gray-300']">
                 초기화
             </button>
             <!-- 문항 유형 선택하기 버튼 -->
-            <button @click="showQuestionExampleSelector" :class="['px-8 py-4 text-lg font-medium rounded-lg transition-all duration-200 bg-brand text-white hover:bg-blue-600']">
+            <button @click="showQuestionExampleSelector"
+                :class="['px-8 py-4 text-lg font-medium rounded-lg transition-all duration-200 bg-brand text-white hover:bg-blue-600']">
                 문항 유형 선택하기
             </button>
         </div>
 
         <!-- 문항 유형 선택 모달 대신 아래 출력되도록 설정 -->
         <!-- (미구현) QuestionExampleSelector 의 [버튼 영역]을 옮기면서 문항 생성하기 버튼으로 문항 생성 요청시 필요한 데이터들을 emit 으로 받아오도록 수정 필요 -->
-        <QuestionExampleSelector v-if="isQuestionExampleSelectorVisible" :generateType="generateType" @selectedQuestionExample="handleQuestionSelected"/>
+        <QuestionExampleSelector v-if="isQuestionExampleSelectorVisible" :generateType="generateType"
+            @selectedQuestionExample="handleQuestionSelected" />
 
         <!-- 모달 컴포넌트들 -->
         <!-- 지문 불러오기에서 지문을 선택한 후 불러오기 버튼을 클릭하면 해당 지문을 pinia에 저장시키기. pinia에 저장된 지문과 지문 분석 데이터 출력 (Pinia Store에서 자동으로 데이터 가져옴) -->
@@ -78,17 +86,16 @@
 
         <!-- (미구현) QuestionExampleSelector 의 [버튼 영역]을 이 자리에 옮기기 -->
         <div v-if="isQuestionExampleSelectorVisible" class="flex justify-end space-x-4">
-            <button @click="resetAll" :disabled="isLoading"
-                :class="[
-                    'px-8 py-4 text-lg font-medium rounded-lg transition-colors duration-200',
-                    isLoading
-                        ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
-                        : 'text-gray-700 bg-gray-200 hover:bg-gray-300'
-                ]">
+            <button @click="resetAll" :disabled="isLoading" :class="[
+                'px-8 py-4 text-lg font-medium rounded-lg transition-colors duration-200',
+                isLoading
+                    ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                    : 'text-gray-700 bg-gray-200 hover:bg-gray-300'
+            ]">
                 직접 입력하기
             </button>
             <button @click="openPaymentUsageModal" :disabled="isLoading"
-                :class="[ 'px-8 py-4 text-lg font-medium rounded-lg transition-all duration-200', isLoading  ? 'bg-gray-400 text-gray-600 cursor-not-allowed' : 'bg-brand text-white hover:bg-blue-600']">
+                :class="['px-8 py-4 text-lg font-medium rounded-lg transition-all duration-200', isLoading ? 'bg-gray-400 text-gray-600 cursor-not-allowed' : 'bg-brand text-white hover:bg-blue-600']">
                 <span>문항 생성하기</span>
             </button>
         </div>
@@ -101,12 +108,8 @@
         <!-- 로딩 모달 -->
         <LoadingModal :isOpen="isGenerating" :message="loadingMessage" />
 
-        <PaymentUsageModal
-            ref="paymentUsageModalRef"
-            :isOpen="isPaymentUsageModalOpen"
-            @close="closePaymentUsageModal"
-            @generate="generateQuestion"
-        />
+        <PaymentUsageModal ref="paymentUsageModalRef" :isOpen="isPaymentUsageModalOpen" @close="closePaymentUsageModal"
+            @generate="generateQuestion" />
     </div>
 </template>
 
@@ -269,20 +272,20 @@ const closeLoadPassageModal = () => {
  * 지문 불러오기 처리, LoadPassageModal.vue 에서 선택된 지문(emit으로 selectPasCode 받아옴)을 가져와서 지문 정보를 호출(fetchPassage)하여 pinia에 저장
  */
 const handleLoadPassage = async (selectPasCode) => {
-    
+
     // 중복 호출 방지: 이미 로딩 중이면 종료
     if (isLoading.value) {
         return;
     }
-    
+
     try {
         isLoading.value = true
         await fetchPassage(selectPasCode); // fetchPassage 함수에서 pinia에 passage 데이터를 저장함
-        
+
         // UI 상태 변경
         activeTab.value = 'storage';
         closeLoadPassageModal();
-        
+
     } catch (error) {
         console.error('지문 불러오기 실패:', error);
         errorMessage.value = '지문을 불러오는데 실패했습니다.';
@@ -329,7 +332,7 @@ const closePaymentUsageModal = () => { isPaymentUsageModalOpen.value = false; };
 
 onMounted(() => {
     console.log('passage', passage.value.pasCode)
-    if(passage.value.pasCode){
+    if (passage.value.pasCode) {
         activeTab.value = 'storage'
         console.log('📥 [DEBUG] PassageAndQuestionLayout: passage.pasCode')
     } else {
@@ -349,17 +352,17 @@ onUnmounted(() => {
 // passage store 변경 감지
 watch(() => passage.value, (newPassage) => {
     // console.log('🔍 [Watch] passage 변경 감지:', {hasPassage: !!newPassage, title: newPassage?.title || 'null', content: newPassage?.content ? `${newPassage.content.length}자` : 'null', descriptions: newPassage?.descriptions?.length || 0 })
-    
+
     if (newPassage && newPassage.title && newPassage.content) {
         // console.log('✅ [Watch] UI 업데이트 실행')
-        
+
         // questionTitle.value = newPassage.title // EditableTitle 에서 자동 감지?
         passageContent.value = newPassage.content
-        
-        if (corePointTabs.value.length === 1 && corePointTabs.value[0].pasType === '독서론') {generateType.value = '독서론'}
+
+        if (corePointTabs.value.length === 1 && corePointTabs.value[0].pasType === '독서론') { generateType.value = '독서론' }
         else if (corePointTabs.value.length === 1) generateType.value = '단일 지문'
         else if (corePointTabs.value.length > 1) generateType.value = '복합 지문'
-        
+
         // 에디터 업데이트
         if (editorRef.value) {
             editorRef.value.setContent(newPassage.content)

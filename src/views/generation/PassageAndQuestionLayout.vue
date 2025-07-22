@@ -1,10 +1,12 @@
 <template>
     <div class="flex flex-col items-start gap-4 w-full h-full md:mt-0 bg-white md:bg-[#f9fafb] dev-border">
-      
+
         <!-- 헤더 -->
         <div v-if="$slots.title">
             <div class="flex items-center max-w-screen-2xl mx-auto">
-                <div class="text-3xl font-semibold text-gray-900"><slot name="title" /></div>
+                <div class="text-3xl font-semibold text-gray-900">
+                    <slot name="title" />
+                </div>
                 <!-- <EditButton /> -->
             </div>
         </div>
@@ -20,7 +22,7 @@
                         <slot name="left" />
                     </div>
                 </div>
-                
+
                 <!-- 가운데 구분선 -->
                 <div v-if="$slots.right" class="w-px my-7 border-[1px] border-[#D9D9D9] flex-shrink-0"></div>
 
@@ -52,10 +54,12 @@ const props = defineProps({
     /* border: solid; */
     border-color: pink;
 }
-.dev-border .dev-border:nth-child(1){
+
+.dev-border .dev-border:nth-child(1) {
     border-color: red;
 }
-.dev-border .dev-border:nth-child(2){
+
+.dev-border .dev-border:nth-child(2) {
     border-color: blue;
 }
 </style>

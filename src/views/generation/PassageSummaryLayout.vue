@@ -5,33 +5,30 @@
                 <span class="font-bold text-2xl md:text-xl leading-[150%] tracking-[-0.02em] text-[#303030]">
                     지문 분석
                 </span>
-                
+
                 <!-- Tooltip 적용 -->
                 <BaseTooltip :content="tooltipContent" position="top" class="ml-2" />
             </div>
             <!-- 탭 네비게이션 (복합 지문일 때만 표시) -->
             <div v-if="showTabs" class="flex border-b border-gray-200 w-full">
-                <button
-                    v-for="(tab, index) in corePointTabs"
-                    :key="index"
-                    @click="activeTabIndex = index"
-                    :class="[
-                        'px-4 py-2 text-sm font-medium border-b-2 transition-colors',
-                        activeTabIndex === index
-                            ? 'border-brand text-brand'
-                            : 'border-transparent text-gray-500 hover:text-gray-700'
-                    ]"
-                >
+                <button v-for="(tab, index) in corePointTabs" :key="index" @click="activeTabIndex = index" :class="[
+                    'px-4 py-2 text-sm font-medium border-b-2 transition-colors',
+                    activeTabIndex === index
+                        ? 'border-brand text-brand'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                ]">
                     {{ tab.label }}
                 </button>
             </div>
-            
-            <div class="box-border flex flex-col flex-1 items-start px-4 py-4 gap-4 w-full bg-white border border-[#E5E7EB] rounded-xl shadow-sm overflow-y-auto scrollbar-hide">
+
+            <div
+                class="box-border flex flex-col flex-1 items-start px-4 py-4 gap-4 w-full bg-white border border-[#E5E7EB] rounded-xl shadow-sm overflow-y-auto scrollbar-hide">
                 <div v-if="structure" class="flex flex-row items-center w-full gap-4">
                     <p class="font-bold text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030]">
                         지문 종류
                     </p>
-                    <p class="font-normal text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030] break-words flex-1">
+                    <p
+                        class="font-normal text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030] break-words flex-1">
                         <slot name="type_passage">{{ structure }}</slot>
                     </p>
                 </div>
@@ -46,7 +43,8 @@
                     <p class="font-bold text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030]">
                         지문 분야
                     </p>
-                    <p class="font-normal text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030] break-words flex-1">
+                    <p
+                        class="font-normal text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030] break-words flex-1">
                         <slot name="type_passage">{{ pasType }}</slot>
                     </p>
                 </div>
@@ -55,17 +53,20 @@
                         지문 제재
                     </p>
                     <div class="flex-1 min-w-0">
-                        <p class="font-normal text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030] break-words whitespace-pre-wrap overflow-hidden">
+                        <p
+                            class="font-normal text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030] break-words whitespace-pre-wrap overflow-hidden">
                             <slot name="keyword">{{ keyword }}</slot>
                         </p>
                     </div>
                 </div>
 
                 <div class="flex flex-col items-start gap-4 w-full flex-1">
-                    <p class="font-bold text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030] min-w-[80px] shrink-0">
+                    <p
+                        class="font-bold text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030] min-w-[80px] shrink-0">
                         핵심 논점
                     </p>
-                    <div class="w-full font-normal text-sm md:text-base leading-[200%] tracking-[-0.02em] text-[#303030] flex-1 overflow-auto">
+                    <div
+                        class="w-full font-normal text-sm md:text-base leading-[200%] tracking-[-0.02em] text-[#303030] flex-1 overflow-auto">
                         <slot name="generated_core_point">{{ gist }}</slot>
                     </div>
                 </div>
@@ -91,8 +92,8 @@ const showTabs = computed(() => corePointTabs.value.length > 1)
 
 // 현재 선택된 탭의 데이터
 const currentTabData = computed(() => {
-  if (corePointTabs.value.length === 0) return { pasType: '', keyword: '', gist: '' }
-  return corePointTabs.value[activeTabIndex.value] || { pasType: '', keyword: '', gist: '' }
+    if (corePointTabs.value.length === 0) return { pasType: '', keyword: '', gist: '' }
+    return corePointTabs.value[activeTabIndex.value] || { pasType: '', keyword: '', gist: '' }
 })
 
 // 각 탭별 데이터 (탭이 바뀔 때마다 다른 값 표시)
@@ -110,19 +111,22 @@ const structure = computed(() => {
 
 // 탭이 변경될 때 activeTabIndex 초기화
 watch(corePointTabs, (newTabs) => {
-  if (newTabs.length > 0 && activeTabIndex.value >= newTabs.length) {
-    activeTabIndex.value = 0
-  }
+    if (newTabs.length > 0 && activeTabIndex.value >= newTabs.length) {
+        activeTabIndex.value = 0
+    }
 }, { immediate: true })
 </script>
 
 <style scoped>
 .scrollbar-hide {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none;  /* IE 10+ */
-}
-.scrollbar-hide::-webkit-scrollbar {
-  display: none; /* Chrome, Safari */
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE 10+ */
 }
 
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari */
+}
 </style>

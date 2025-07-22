@@ -3,121 +3,137 @@
      1. GeneratedPassageView에서 pinia store를 업데이트하는 fetch 요청에 문항을 포함할지 결정함
      2. PassageEditor 에서 사용하는 parentComponent 값을 GeneratedQuestionView로 인식하게함
      3. PassageEditor 에서 TipTap 에디터 영역을 수정가능하게 만들어줌 -->
-    <GeneratedPassageView :isCalledFromGeneratedQuestionView="true" @title-changed="handlePassageTitleChange" @content-changed="handlePassageContentChange">
+    <GeneratedPassageView :isCalledFromGeneratedQuestionView="true" @title-changed="handlePassageTitleChange"
+        @content-changed="handlePassageContentChange">
         <template #questions>
-                <PassageAndQuestionLayout>
-                    <template #pagination v-if="questions.length>1">
-                        <div class="flex items-center gap-2 mt-4">
-                            <button @click="prevPageBlock" :disabled="currentPageBlockStart === 1" :class="['mr-1',currentPageBlockStart === 1 ? 'text-gray-400':'']">← 이전</button>
+            <PassageAndQuestionLayout>
+                <template #pagination v-if="questions.length > 1">
+                    <div class="flex items-center gap-2 mt-4">
+                        <button @click="prevPageBlock" :disabled="currentPageBlockStart === 1"
+                            :class="['mr-1', currentPageBlockStart === 1 ? 'text-gray-400' : '']">← 이전</button>
 
-                            <!-- figma에는 32px인데 너무 작은거 같아서 40px로 설정 w-10 -->
-                            <button v-for="page in currentPageBlockEnd - currentPageBlockStart + 1"
-                                    :key="page"
-                                    @click="goToPage(currentPageBlockStart + page - 1)"
-                                    :class="['w-10 h-10 px-1 py-1 ', currentPage === currentPageBlockStart + page - 1 ? 'border rounded-xl bg-blue-500 text-white' : 'text-black']">
+                        <!-- figma에는 32px인데 너무 작은거 같아서 40px로 설정 w-10 -->
+                        <button v-for="page in currentPageBlockEnd - currentPageBlockStart + 1" :key="page"
+                            @click="goToPage(currentPageBlockStart + page - 1)"
+                            :class="['w-10 h-10 px-1 py-1 ', currentPage === currentPageBlockStart + page - 1 ? 'border rounded-xl bg-blue-500 text-white' : 'text-black']">
                             {{ currentPageBlockStart + page - 1 }}
-                            </button>
+                        </button>
 
-                            <button @click="nextPageBlock" :disabled="currentPageBlockEnd === totalPages" :class="['ml-1',currentPageBlockEnd === totalPages ? 'text-gray-400':'']">다음 →</button>
+                        <button @click="nextPageBlock" :disabled="currentPageBlockEnd === totalPages"
+                            :class="['ml-1', currentPageBlockEnd === totalPages ? 'text-gray-400' : '']">다음 →</button>
+                    </div>
+
+
+                </template>
+                <template #left>
+                    <!-- question.queQuery 생성된 문제문 -->
+                    <div class="flex">
+                        <div class="flex flex-1 font-semibold text-sm md:text-2xl mr-5">
+                            <span>Q.</span>
+                            <TipTapEditor :initialContent="question.queQuery" :isEditable="editableQueryAndOption"
+                                @content-changed="handleQueQueryChange" :addClass="'text-2xl'" />
                         </div>
+                        <!-- 수정 버튼을 누르면 #left 영역의 question.queQuery 값과 아래 question.queOption 값을 각각 수정할 수 있게 변경. 각각 TipTap Editor로 따로 구현하거나 더 나은방법 고려해보기. -->
+                        <button @click="editQueQueryAndOption"
+                            class="flex flex-row justify-center items-center text-sm md:text-xl pl-2 py-3 w-[86px] h-[35px] left-[1485px] top-[50px] bg-[#CCCCCC] rounded-lg">
+                            {{ editableQueryAndOption ? '완료' : '수정' }}
+                            <Icon icon="mingcute:pencil-fill" width="20" height="20" class="mx-1"
+                                :class="false ? 'text-[#0086FF]' : 'text-[#303030]'" />
+                        </button>
+                    </div>
+                    <div v-if="existQueSubpassage" class="border border-black p-4">
+                        <TipTapEditor :initialContent="question.queSubpassage" :isEditable="editableQueryAndOption"
+                            @content-changed="handleQueSubpassageChange" :addClass="'text-xl leading-10'" />
+                    </div>
+                    <!-- question.queOption 은 div 대신 TipTap editor를 이용해 출력해주기. 기본값 editable=false, question.queQuery 옆의 수정 버튼을 눌러 question.queOption의 editable 갑도 true로 변경-->
+                    <div>
+                        <!-- question.queOption 영역 -->
+                        <TipTapEditor :initialContent="question.queOption" :isEditable="editableQueryAndOption"
+                            @content-changed="handleQueOptionChange" :addClass="'text-xl leading-10'" />
+                    </div>
+                </template>
+                <template #right>
 
+                    <div
+                        class="box-border flex flex-col flex-1 items-start px-4 py-4 gap-4 w-full max-h-full bg-white border border-[#E5E7EB] rounded-xl shadow-sm overflow-y-auto scrollbar-hide">
+                        <div class="flex flex-row items-center w-full gap-4">
+                            <p class="font-bold text-sm md:text-2xl leading-[150%] tracking-[-0.02em] text-[#303030]">
+                                정답
+                            </p>
+                            <!-- question.queAnswer 값은 editQueAnswer 값에 따라서 저장된 값을 출력하거나, 라디오 버튼으로 수정가능하게 변경 -->
+                            <p v-if="!editableAnswerAndDesc"
+                                class="font-normal text-xl md:text-3xl leading-[150%] tracking-[-0.02em] text-[#303030] break-words flex-1">
+                                {{ question.queAnswer }}
+                            </p>
 
-                    </template>
-                    <template #left>
-                        <!-- question.queQuery 생성된 문제문 -->
-                        <div class="flex">
-                            <div class="flex flex-1 font-semibold text-sm md:text-2xl mr-5">
-                                <span>Q.</span>
-                                <TipTapEditor :initialContent="question.queQuery" :isEditable="editableQueryAndOption" @content-changed="handleQueQueryChange" :addClass="'text-2xl'"/>
-                            </div>
-                            <!-- 수정 버튼을 누르면 #left 영역의 question.queQuery 값과 아래 question.queOption 값을 각각 수정할 수 있게 변경. 각각 TipTap Editor로 따로 구현하거나 더 나은방법 고려해보기. -->                            
-                            <button @click="editQueQueryAndOption" class="flex flex-row justify-center items-center text-sm md:text-xl pl-2 py-3 w-[86px] h-[35px] left-[1485px] top-[50px] bg-[#CCCCCC] rounded-lg">
-                                {{ editableQueryAndOption ? '완료' : '수정' }}
-                                <Icon icon="mingcute:pencil-fill" width="20" height="20" class="mx-1" :class=" false ? 'text-[#0086FF]' : 'text-[#303030]'" />
-                            </button>
-                        </div>
-                        <div v-if="existQueSubpassage" class="border border-black p-4">
-                            <TipTapEditor :initialContent="question.queSubpassage" :isEditable="editableQueryAndOption" @content-changed="handleQueSubpassageChange" :addClass="'text-xl leading-10'"/>
-                        </div>
-                        <!-- question.queOption 은 div 대신 TipTap editor를 이용해 출력해주기. 기본값 editable=false, question.queQuery 옆의 수정 버튼을 눌러 question.queOption의 editable 갑도 true로 변경-->
-                        <div>
-                            <!-- question.queOption 영역 -->
-                            <TipTapEditor :initialContent="question.queOption" :isEditable="editableQueryAndOption" @content-changed="handleQueOptionChange" :addClass="'text-xl leading-10'"/>
-                        </div>
-                    </template>
-                    <template #right>
-                        
-                        <div class="box-border flex flex-col flex-1 items-start px-4 py-4 gap-4 w-full max-h-full bg-white border border-[#E5E7EB] rounded-xl shadow-sm overflow-y-auto scrollbar-hide">
-                            <div class="flex flex-row items-center w-full gap-4">
-                                <p class="font-bold text-sm md:text-2xl leading-[150%] tracking-[-0.02em] text-[#303030]">
-                                    정답
-                                </p>
-                                <!-- question.queAnswer 값은 editQueAnswer 값에 따라서 저장된 값을 출력하거나, 라디오 버튼으로 수정가능하게 변경 -->
-                                <p v-if="!editableAnswerAndDesc" class="font-normal text-xl md:text-3xl leading-[150%] tracking-[-0.02em] text-[#303030] break-words flex-1">
-                                    {{ question.queAnswer }}
-                                </p>
-
-                                <!-- 라디오 버튼 그룹 -->
-                                <div v-if="editableAnswerAndDesc" class="flex flex-1 gap-1">
-                                    <button v-for="option in ['①','②','③','④','⑤']" :key="option" @click="selectQueAnswerOption(option)"
-                                        :class="[ 'text-xl md:text-3xl font-light transition-colors mx-2 hover:scale-[1.1]',
-                                        queAnswer === option ? 'font-bold text-brand' : '']"
-                                        >
-                                        {{ option }}
-                                    </button>
-                                </div>
-
-
-                                <!-- 수정 버튼을 누르면 #right 영역의 question.queAnswer 값과 아래 question.description 값을 각각 수정할 수 있게 변경. -->
-                                <button @click="editQueAnswerAndDesc" class="flex flex-row justify-center items-center text-sm md:text-xl pl-2 py-3 w-[86px] h-[35px] bg-[#CCCCCC] rounded-lg">
-                                    {{ editableAnswerAndDesc ? '완료' : '수정' }}
-                                    <Icon icon="mingcute:pencil-fill" width="20" height="20" class="mx-1" :class=" false ? 'text-[#0086FF]' : 'text-[#303030]'" />
+                            <!-- 라디오 버튼 그룹 -->
+                            <div v-if="editableAnswerAndDesc" class="flex flex-1 gap-1">
+                                <button v-for="option in ['①', '②', '③', '④', '⑤']" :key="option"
+                                    @click="selectQueAnswerOption(option)" :class="['text-xl md:text-3xl font-light transition-colors mx-2 hover:scale-[1.1]',
+                                        queAnswer === option ? 'font-bold text-brand' : '']">
+                                    {{ option }}
                                 </button>
                             </div>
-                            <div class="flex flex-col items-start gap-4 w-full">
-                                <p class="font-bold text-sm md:text-2xl leading-[150%] tracking-[-0.02em] text-[#303030] min-w-[80px] shrink-0">
-                                    해설
-                                </p>
-                                <!-- 해설 데이터인 question.description 는 div 대신 TipTap 에디터를 이용해서 출력 -->
-                                <div class="w-full font-normal text-sm md:text-xl leading-[200%] tracking-[-0.02em] text-[#303030] flex-1 overflow-auto">
-                                    <TipTapEditor :initialContent="question.description" :isEditable="editableAnswerAndDesc" @content-changed="handelQueDescriptionChange" :addClass="'text-xl'" />
-                                </div>
-                            </div>
-                            
+
+
+                            <!-- 수정 버튼을 누르면 #right 영역의 question.queAnswer 값과 아래 question.description 값을 각각 수정할 수 있게 변경. -->
+                            <button @click="editQueAnswerAndDesc"
+                                class="flex flex-row justify-center items-center text-sm md:text-xl pl-2 py-3 w-[86px] h-[35px] bg-[#CCCCCC] rounded-lg">
+                                {{ editableAnswerAndDesc ? '완료' : '수정' }}
+                                <Icon icon="mingcute:pencil-fill" width="20" height="20" class="mx-1"
+                                    :class="false ? 'text-[#0086FF]' : 'text-[#303030]'" />
+                            </button>
                         </div>
-                    </template>
-                    
-                </PassageAndQuestionLayout>
+                        <div class="flex flex-col items-start gap-4 w-full">
+                            <p
+                                class="font-bold text-sm md:text-2xl leading-[150%] tracking-[-0.02em] text-[#303030] min-w-[80px] shrink-0">
+                                해설
+                            </p>
+                            <!-- 해설 데이터인 question.description 는 div 대신 TipTap 에디터를 이용해서 출력 -->
+                            <div
+                                class="w-full font-normal text-sm md:text-xl leading-[200%] tracking-[-0.02em] text-[#303030] flex-1 overflow-auto">
+                                <TipTapEditor :initialContent="question.description" :isEditable="editableAnswerAndDesc"
+                                    @content-changed="handelQueDescriptionChange" :addClass="'text-xl'" />
+                            </div>
+                        </div>
+
+                    </div>
+                </template>
+
+            </PassageAndQuestionLayout>
             <div v-if="!isQuestionExampleSelectorVisible" class="flex flex-col justify-between sm:flex-row gap-4">
                 <div class="flex gap-5">
-                    <button @click="" :disabled="false" :class="['px-12 py-4 text-2xl font-medium rounded-lg transition-colors duration-200', isSaved ? 'text-gray-700 bg-gray-200 hover:bg-gray-300 cursor-not-allowed':'bg-brand text-white hover:bg-blue-600']">
+                    <button @click="" :disabled="false"
+                        :class="['px-12 py-4 text-2xl font-medium rounded-lg transition-colors duration-200', isSaved ? 'text-gray-700 bg-gray-200 hover:bg-gray-300 cursor-not-allowed' : 'bg-brand text-white hover:bg-blue-600']">
                         저장하기
                     </button>
-                    <button @click="" :disabled="false" :class="['px-12 py-4 text-2xl font-medium rounded-lg transition-colors duration-200', isSaved ? 'bg-brand text-white hover:bg-blue-600':'text-gray-400 bg-gray-100 cursor-not-allowed']">
+                    <button @click="" :disabled="false"
+                        :class="['px-12 py-4 text-2xl font-medium rounded-lg transition-colors duration-200', isSaved ? 'bg-brand text-white hover:bg-blue-600' : 'text-gray-400 bg-gray-100 cursor-not-allowed']">
                         추출하기
                     </button>
                 </div>
                 <!-- 여기는 문항 추가하기지만 우선 문항 유형 선택하기가 먼저 출력된 후 다시 문한 추가하기 버튼을 눌러줘야함. -->
-                <button @click="showQuestionExampleSelector" :class="['px-8 py-4 text-lg font-medium rounded-lg transition-all duration-200 bg-brand text-white hover:bg-blue-600']">
+                <button @click="showQuestionExampleSelector"
+                    :class="['px-8 py-4 text-lg font-medium rounded-lg transition-all duration-200 bg-brand text-white hover:bg-blue-600']">
                     문항 추가하기
                 </button>
             </div>
-            
-            <QuestionExampleSelector v-if="isQuestionExampleSelectorVisible" :generateType="generateType" @selectedQuestionExample="handleQuestionSelected"/>
+
+            <QuestionExampleSelector v-if="isQuestionExampleSelectorVisible" :generateType="generateType"
+                @selectedQuestionExample="handleQuestionSelected" />
 
             <!-- (미구현) QuestionExampleSelector 의 [버튼 영역]을 이 자리에 옮기기 -->
             <div v-if="isQuestionExampleSelectorVisible" class="flex justify-end space-x-4">
-                <button @click="resetAll" :disabled="isLoading"
-                    :class="[
-                        'px-8 py-4 text-lg font-medium rounded-lg transition-colors duration-200',
-                        isLoading
-                            ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
-                            : 'text-gray-700 bg-gray-200 hover:bg-gray-300'
-                    ]">
+                <button @click="resetAll" :disabled="isLoading" :class="[
+                    'px-8 py-4 text-lg font-medium rounded-lg transition-colors duration-200',
+                    isLoading
+                        ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
+                        : 'text-gray-700 bg-gray-200 hover:bg-gray-300'
+                ]">
                     직접 입력하기
                 </button>
                 <button @click="openPaymentUsageModal" :disabled="isLoading"
-                    :class="[ 'px-8 py-4 text-lg font-medium rounded-lg transition-all duration-200', isLoading  ? 'bg-gray-400 text-gray-600 cursor-not-allowed' : 'bg-brand text-white hover:bg-blue-600']">
+                    :class="['px-8 py-4 text-lg font-medium rounded-lg transition-all duration-200', isLoading ? 'bg-gray-400 text-gray-600 cursor-not-allowed' : 'bg-brand text-white hover:bg-blue-600']">
                     <span>문항 생성하기</span>
                 </button>
             </div>
@@ -133,12 +149,8 @@
     <!-- 로딩 모달 -->
     <LoadingModal :isOpen="isLoading" :message="loadingMessage" />
 
-    <PaymentUsageModal
-        ref="paymentUsageModalRef"
-        :isOpen="isPaymentUsageModalOpen"
-        @close="closePaymentUsageModal"
-        @generate="addQuestion"
-    />
+    <PaymentUsageModal ref="paymentUsageModalRef" :isOpen="isPaymentUsageModalOpen" @close="closePaymentUsageModal"
+        @generate="addQuestion" />
 </template>
 
 <script setup>
@@ -181,10 +193,10 @@ const question = computed(() => {
 
 // 현재 선택된 question에 queSubpassage가 존재하고 길이가 0이 아닌지 확인
 const existQueSubpassage = computed(() => {
-    console.log("보기가 있을까: ",question.value.queSubpassage )
-    return question.value.queSubpassage && 
-           typeof question.value.queSubpassage === 'string' && 
-           question.value.queSubpassage.trim().length > 0
+    console.log("보기가 있을까: ", question.value.queSubpassage)
+    return question.value.queSubpassage &&
+        typeof question.value.queSubpassage === 'string' &&
+        question.value.queSubpassage.trim().length > 0
 })
 
 const editQueQueryAndOption = () => {
@@ -258,31 +270,31 @@ const numberLength = ref(3000)
 
 // TipTapEditor 콘텐츠 변경 핸들러
 const handleQueQueryChange = ({ content, textLength }) => {
-  console.log('Content:', content)
-  console.log('Length:', textLength)
-  savedQueQuery.value = content
-  queQueryLength.value = textLength
+    console.log('Content:', content)
+    console.log('Length:', textLength)
+    savedQueQuery.value = content
+    queQueryLength.value = textLength
     isSaved.value = false // 저장하기 버튼 활성화
 }
 const handleQueOptionChange = ({ content, textLength }) => {
-  console.log('Content:', content)
-  console.log('Length:', textLength)
-  savedQueOption.value = content
-  queOptionLength.value = textLength
+    console.log('Content:', content)
+    console.log('Length:', textLength)
+    savedQueOption.value = content
+    queOptionLength.value = textLength
     isSaved.value = false // 저장하기 버튼 활성화
 }
 const handelQueDescriptionChange = ({ content, textLength }) => {
-  console.log('Content:', content)
-  console.log('Length:', textLength)
-  savedDescription.value = content
-  queDescriptionLength.value = textLength
+    console.log('Content:', content)
+    console.log('Length:', textLength)
+    savedDescription.value = content
+    queDescriptionLength.value = textLength
     isSaved.value = false // 저장하기 버튼 활성화
 }
 const handleQueSubpassageChange = ({ content, textLength }) => {
-  console.log('Content:', content)
-  console.log('Length:', textLength)
-  savedQueSubpassage.value = content
-  queSubpassageLength.value = textLength
+    console.log('Content:', content)
+    console.log('Length:', textLength)
+    savedQueSubpassage.value = content
+    queSubpassageLength.value = textLength
     isSaved.value = false // 저장하기 버튼 활성화
 }
 
@@ -307,7 +319,7 @@ const calculateGenerateType = () => {
     if (!passage.value?.descriptions?.length) {
         return '단일 지문'
     }
-    
+
     const descriptions = passage.value.descriptions
     if (descriptions.length === 1 && descriptions[0]?.pasType === '독서론') {
         return '독서론'
@@ -332,9 +344,9 @@ const addQuestion = async () => {
         // (custom_passage, selectedQuestionExample, generateType, pasCode) 
         await addQuestionToExistingPassage(savedPassageContent.value, selectedQuestionExample.value, generateType.value, passage.value.pasCode)
         isQuestionExampleSelectorVisible.value = false;
-        
+
     } catch {
-        console.log("GeneratedQuestionVeiw.addQuestion",error);
+        console.log("GeneratedQuestionVeiw.addQuestion", error);
     } finally {
         isLoading.value = false;
         loadingMessage.value = ''
@@ -350,10 +362,10 @@ const savePassageAndQuestion = async () => {
         title: savedPassageTitle.value || passage.value.title,
         content: savedPassageContent.value || passage.value.content
     }
-    
+
     const questionData = {
         queQuery: savedQueQuery.value,
-        queOption: savedQueOption.value, 
+        queOption: savedQueOption.value,
         queAnswer: queAnswer.value,
         description: savedDescription.value
     }
@@ -374,7 +386,7 @@ onMounted(() => {
         savedPassageContent.value = passage.value.content
         savedPassageTitle.value = passage.value.title || ''
     }
-    console.log("GeneratedQuestionView 로드시 초기화 진행된 데이터 출력 savedPassageContent ",savedPassageContent.value)
-    console.log("GeneratedQuestionView 로드시 초기화 진행된 데이터 출력 savedPassageTitle ",savedPassageTitle.value)
+    console.log("GeneratedQuestionView 로드시 초기화 진행된 데이터 출력 savedPassageContent ", savedPassageContent.value)
+    console.log("GeneratedQuestionView 로드시 초기화 진행된 데이터 출력 savedPassageTitle ", savedPassageTitle.value)
 })
 </script>

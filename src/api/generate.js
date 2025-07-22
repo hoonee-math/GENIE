@@ -6,191 +6,262 @@ const USE_DUMMY_DATA = false;
 // 더미 응답 데이터
 const DUMMY_PASSAGE_RESPONSES = {
   single: {
-    generated_passage: "예술 작품을 감상하고 그것의 가치를 판단하는 행위는 미학의 오랜 탐구 주제였다. 이러한 탐구의 중심에는 예술 작품이라는 대상과 그것을 지각하는 주체 사이의 관계를 어떻게 설정할 것인가의 문제가 놓여 있다. 작품의 아름다움은 감상자의 주관적 마음에 달려 있는가, 아니면 작품 자체에 객관적으로 존재하는가? 이 물음에 대해 흄은 주관적 감정을, 후설은 의식에 드러나는 현상을, 그리고 하먼은 객체 자체의 독립적 실재를 중심으로 각기 다른 이론적 구도를 제시하며 예술에 대한 이해의 지평을 넓혔다.\n\n흄에 따르면 미(美)는 대상 자체에 내재하는 속성이 아니라 그것을 바라보는 정신 속에서 발생하는 특정한 쾌의 정념이다. 그는 경험론의 입장에서 미적 판단의 근거를 보편적 이성이 아닌 개인의 주관적 감정에서 찾았다. 하지만 그는 모든 감정이 동등하다고 보지 않았으며, 취미에 있어 일정한 기준, 즉 ‘취미의 기준’이 존재한다고 주장했다. 이 기준은 특정 개인의 독단적 선호가 아니라, 섬세한 감각과 건전한 이성을 갖추고 편견 없이 대상을 반복적으로 고찰하는 훈련을 거친 ‘참된 비평가’들의 공동체적 합의를 통해 형성된다. 결국 흄에게 예술 작품의 가치는 개별 감상자의 순간적 쾌감에 머무는 것이 아니라, 이상적 감상자들의 공통된 정념을 통해 그 보편적 타당성을 확보하게 된다.\n\n이러한 흄의 논의와 달리, 후설은 현상학적 관점에서 예술 작품의 본질을 탐구하고자 했다. 그는 예술 작품에 대한 판단이 감상자의 주관적 심리 상태에 좌우되는 것을 넘어, 작품 자체가 의식에 드러나는 방식에 주목했다. 이를 위해 그는 자연적 태도를 괄호 안에 묶고 판단을 중지하는 ‘현상학적 환원’을 통해, 작품에 대한 기존의 지식이나 개인적 감정을 배제하고 순수한 의식에 나타나는 현상 자체에 집중할 것을 요구했다. 이 과정에서 예술 작품은 감상자의 의식과 무관한 물리적 사물이 아니라, 의식에 의해 구성되는 ‘지향적 대상’으로서 의미를 갖는다. 감상자는 작품의 개별적이고 우연적인 측면들을 넘어 그 본질적 구조를 직관함으로써 작품의 고유한 미적 가치에 도달할 수 있게 된다.\n\n한편, 현대의 객체지향 존재론을 개척한 하먼은 흄과 후설의 인간 중심적 접근에서 벗어나 객체의 독립적 위상을 강조한다. 하먼에게 예술 작품은 인간의 의식이나 감상과 무관하게 존재하는 ‘실재적 객체’이다. 이 실재적 객체는 무한한 속성을 지닌 채 자신만의 고유한 시공간 속에 있으며, 인간의 지각이나 사유를 통해 결코 완전히 파악될 수 없다. 우리가 경험하는 것은 실재적 객체의 일부 속성만이 드러난 ‘감각적 객체’에 불과하다. 하먼은 예술의 본질이 바로 이 두 객체 사이의 긴장에서 발생한다고 본다. 예술 작품은 감각적 속성들을 통해 자신의 배후에 있는 심오한 실재적 객체의 존재를 암시하며, 감상자는 이 간극이 만들어 내는 ‘매혹’을 통해 미적 경험을 하게 된다는 것이다.",
-    generated_core_point: [ "첫째, 예술 작품의 가치 판단에 있어 작품의 아름다움이 감상자의 주관에 달린 것인지, 작품 자체에 객관적으로 존재하는 것인지에 대한 주체와 객체 간의 관계 설정 문제가 미학의 핵심 탐구 주제이다. 둘째, 흄, 후설, 하먼은 예술 작품과 감상 주체 간의 관계 설정에 대해 각각 주관적 감정의 보편적 합의, 의식에 드러나는 현상, 객체 자체의 독립적 실재를 중심으로 상이한 이론적 구도를 제시한다. 셋째, 이러한 각기 다른 이론적 관점들은 예술 작품의 본질과 미적 가치, 그리고 감상 경험의 발생 방식에 대한 이해의 지평을 확장하며, 예술에 대한 다양한 해석 가능성을 제시한다."]
+    generated_passage:
+      "예술 작품을 감상하고 그것의 가치를 판단하는 행위는 미학의 오랜 탐구 주제였다. 이러한 탐구의 중심에는 예술 작품이라는 대상과 그것을 지각하는 주체 사이의 관계를 어떻게 설정할 것인가의 문제가 놓여 있다. 작품의 아름다움은 감상자의 주관적 마음에 달려 있는가, 아니면 작품 자체에 객관적으로 존재하는가? 이 물음에 대해 흄은 주관적 감정을, 후설은 의식에 드러나는 현상을, 그리고 하먼은 객체 자체의 독립적 실재를 중심으로 각기 다른 이론적 구도를 제시하며 예술에 대한 이해의 지평을 넓혔다.\n\n흄에 따르면 미(美)는 대상 자체에 내재하는 속성이 아니라 그것을 바라보는 정신 속에서 발생하는 특정한 쾌의 정념이다. 그는 경험론의 입장에서 미적 판단의 근거를 보편적 이성이 아닌 개인의 주관적 감정에서 찾았다. 하지만 그는 모든 감정이 동등하다고 보지 않았으며, 취미에 있어 일정한 기준, 즉 ‘취미의 기준’이 존재한다고 주장했다. 이 기준은 특정 개인의 독단적 선호가 아니라, 섬세한 감각과 건전한 이성을 갖추고 편견 없이 대상을 반복적으로 고찰하는 훈련을 거친 ‘참된 비평가’들의 공동체적 합의를 통해 형성된다. 결국 흄에게 예술 작품의 가치는 개별 감상자의 순간적 쾌감에 머무는 것이 아니라, 이상적 감상자들의 공통된 정념을 통해 그 보편적 타당성을 확보하게 된다.\n\n이러한 흄의 논의와 달리, 후설은 현상학적 관점에서 예술 작품의 본질을 탐구하고자 했다. 그는 예술 작품에 대한 판단이 감상자의 주관적 심리 상태에 좌우되는 것을 넘어, 작품 자체가 의식에 드러나는 방식에 주목했다. 이를 위해 그는 자연적 태도를 괄호 안에 묶고 판단을 중지하는 ‘현상학적 환원’을 통해, 작품에 대한 기존의 지식이나 개인적 감정을 배제하고 순수한 의식에 나타나는 현상 자체에 집중할 것을 요구했다. 이 과정에서 예술 작품은 감상자의 의식과 무관한 물리적 사물이 아니라, 의식에 의해 구성되는 ‘지향적 대상’으로서 의미를 갖는다. 감상자는 작품의 개별적이고 우연적인 측면들을 넘어 그 본질적 구조를 직관함으로써 작품의 고유한 미적 가치에 도달할 수 있게 된다.\n\n한편, 현대의 객체지향 존재론을 개척한 하먼은 흄과 후설의 인간 중심적 접근에서 벗어나 객체의 독립적 위상을 강조한다. 하먼에게 예술 작품은 인간의 의식이나 감상과 무관하게 존재하는 ‘실재적 객체’이다. 이 실재적 객체는 무한한 속성을 지닌 채 자신만의 고유한 시공간 속에 있으며, 인간의 지각이나 사유를 통해 결코 완전히 파악될 수 없다. 우리가 경험하는 것은 실재적 객체의 일부 속성만이 드러난 ‘감각적 객체’에 불과하다. 하먼은 예술의 본질이 바로 이 두 객체 사이의 긴장에서 발생한다고 본다. 예술 작품은 감각적 속성들을 통해 자신의 배후에 있는 심오한 실재적 객체의 존재를 암시하며, 감상자는 이 간극이 만들어 내는 ‘매혹’을 통해 미적 경험을 하게 된다는 것이다.",
+    generated_core_point: [
+      "첫째, 예술 작품의 가치 판단에 있어 작품의 아름다움이 감상자의 주관에 달린 것인지, 작품 자체에 객관적으로 존재하는 것인지에 대한 주체와 객체 간의 관계 설정 문제가 미학의 핵심 탐구 주제이다. 둘째, 흄, 후설, 하먼은 예술 작품과 감상 주체 간의 관계 설정에 대해 각각 주관적 감정의 보편적 합의, 의식에 드러나는 현상, 객체 자체의 독립적 실재를 중심으로 상이한 이론적 구도를 제시한다. 셋째, 이러한 각기 다른 이론적 관점들은 예술 작품의 본질과 미적 가치, 그리고 감상 경험의 발생 방식에 대한 이해의 지평을 확장하며, 예술에 대한 다양한 해석 가능성을 제시한다.",
+    ],
   },
   multiple: {
-    generated_passage: "(가)\n사회 구성원 간의 자원과 기회가 불균등하게 분배되는 현상인 사회 계층은 인류의 오랜 탐구 대상이었다. 이에 대한 철학적 응답으로 등장한 평등주의는 모든 인간이 도덕적으로 동등한 지위를 갖는다는 전제에서 출발하여, 정의로운 사회는 특정 가치를 구성원에게 평등하게 분배해야 한다고 주장한다. 그러나 무엇을, 어떻게 평등하게 분배할 것인가의 문제는 여전히 첨예한 논쟁의 지점에 놓여 있다. 가령 결과의 평등을 추구하는 급진적 입장은 모든 이에게 동일한 몫을 분배해야 한다고 보지만, 이는 개인의 노력이나 재능의 차이를 무시하여 동기 부여를 저해하고 사회 전체의 활력을 떨어뜨릴 수 있다는 비판에 직면한다.\n\n이러한 한계를 극복하고자 존 롤스는 절차적 정의에 기반한 새로운 평등주의적 관점을 제시했다. 그는 사회 구성원들이 자신의 사회적 지위나 타고난 재능을 알지 못하는 ‘무지의 베일’이라는 가상적 상황에서 합의한 원칙이 곧 정의의 원칙이 된다고 보았다. 이 원초적 입장에서 합리적 개인들은 자신이 사회의 최하층에 속할 가능성을 염두에 두기 때문에, 사회적 약자에게 최대의 이익이 돌아가도록 하는 ‘차등의 원칙’에 합의할 것이라고 논증했다. 즉, 롤스의 정의론은 최소 수혜자의 처지를 개선하는 한도 내에서 사회적·경제적 불평등을 용인하며, 이는 단순한 결과의 평등이 아닌 공정한 기회 균등의 보장과 약자 배려를 결합한 형태의 평등을 지향하는 것이다.\n\n그러나 롤스의 이론 역시 비판으로부터 자유롭지 못하다. 특히 개인의 자유와 소유권을 강조하는 입장에서는, 차등의 원칙을 실현하기 위해 재능 있는 사람의 성과 일부를 그렇지 못한 사람에게 재분배하는 과정이 개인의 정당한 권리를 침해한다고 주장한다. 이들은 개인이 정당한 방식으로 취득한 소유물에 대한 절대적 권리를 가지며, 국가가 재분배를 명목으로 이에 개입하는 것은 부당하다고 본다. 또한 능력주의의 관점에서는 차등의 원칙이 개인의 노력과 성취의 가치를 충분히 존중하지 않으며, 사회 발전에 기여한 사람에게 합당한 보상을 제공하지 못함으로써 결과적으로 공동체의 발전을 저해할 수 있다고 지적한다.\n\n이처럼 평등에 대한 논의는 단순히 분배의 방식을 넘어 개인의 자유, 노력의 가치, 공동체의 역할 등 복합적인 쟁점과 얽혀 있다. 특정 기준에 따른 평등의 실현이 또 다른 측면에서는 불평등이나 부자유를 야기할 수 있다는 딜레마는, 정의로운 사회의 밑그림을 그리는 과정이 다양한 가치 사이의 끊임없는 숙고와 조율을 요구하는 과제임을 시사한다. 사회적 약자를 배려하는 공정성의 원칙과 개인의 자율성 및 성취 동기를 존중하는 원칙 사이의 긴장을 어떻게 해소할 것인가는 현대 사회가 마주한 핵심적인 철학적 물음으로 남아 있다.\n\n(나)\n자본주의 체제의 핵심 작동 원리인 시장은 개별 경제 주체들의 자유로운 교환 행위를 통해 자원이 배분되는 기제이다. 애덤 스미스는 각 개인이 자신의 이익을 추구하는 과정에서 ‘보이지 않는 손’에 이끌려 의도치 않게 사회 전체의 이익을 증진시킨다고 설명했다. 시장 가격은 수요와 공급의 상호 작용을 통해 결정되며, 이는 생산자에게 무엇을 얼마나 생산할지에 대한 신호를, 소비자에게는 무엇을 얼마나 소비할지에 대한 정보를 제공함으로써 자원의 효율적 배분을 가능하게 한다. 이러한 관점에서 시장은 중앙의 계획이나 통제 없이도 복잡한 경제 문제를 자율적으로 조정하는 정교한 시스템으로 평가된다.\n\n시장이 원활하게 기능하기 위해서는 사유 재산권의 확립과 계약의 자유라는 제도적 기반이 필수적이다. 사유 재산권은 개인이 자신의 자산을 배타적으로 사용, 수익, 처분할 수 있는 권리를 보장함으로써 경제 활동의 안정성과 예측 가능성을 높인다. 또한 계약의 자유는 개인들이 자발적인 합의에 따라 법적 구속력을 갖는 약속을 맺을 수 있게 하여, 분업과 전문화에 기초한 복잡한 거래 관계의 형성을 촉진한다. 이 두 제도는 개인의 경제적 자유를 보장하는 동시에, 혁신과 투자의 유인을 제공하여 자본주의 경제의 역동성과 생산성 향상에 기여하는 핵심 요소로 간주된다.\n\n그러나 시장의 논리가 사회 전반으로 확산되는 현상에 대한 비판적 성찰도 존재한다. 칼 폴라니는 노동, 토지, 화폐가 본질적으로 판매를 위해 생산된 상품이 아님에도 불구하고 시장에서 거래되는 상품처럼 취급되는 현상을 지적하며 이를 ‘허구적 상품’이라 명명했다. 그에 따르면 인간의 삶 자체인 노동, 자연의 일부인 토지, 사회적 신뢰의 산물인 화폐를 순수한 시장 원리에 맡기는 것은 사회의 자기 파괴적 과정을 초래할 수 있다. 노동이 단지 가격에 따라 사고팔리는 상품이 될 때 인간의 존엄성이 훼손되고, 토지가 투기의 대상이 될 때 환경이 파괴되며, 화폐 공급이 시장의 변덕에 좌우될 때 경제 시스템 전체가 불안정해진다는 것이다.\n\n폴라니의 분석은 시장 경제가 사회로부터 분리되어 독자적인 논리로 작동하려 할 때 발생하는 위험을 경고한다. 그는 시장의 자기 조정 기능에 대한 맹신이 사회 공동체의 기반을 침식할 수 있음을 역설하며, 경제는 본래 사회적 관계 속에 뿌리내리고 있어야 한다고 보았다. 이러한 시각은 시장의 효율성이라는 가치와 인간다운 삶, 사회적 연대, 생태적 지속 가능성이라는 가치 사이의 균형을 모색해야 할 필요성을 제기한다. 시장의 영역을 어디까지 허용하고, 어떠한 사회적 통제를 가할 것인지에 대한 논의는 자본주의 사회의 모습을 규정하는 중요한 과제로 이어진다.",
-    generated_core_point: [ "정의로운 사회를 위한 평등의 실현은 결과, 기회, 개인의 자유, 사회적 약자 배려 등 다양한 가치 간의 복합적인 쟁점과 딜레마를 내포하며 끊임없는 숙고와 조율을 요구한다. 또한 시장은 자원 배분의 효율적인 기제이나, 노동, 토지, 화폐와 같은 허구적 상품에 대한 시장 논리의 무분별한 적용은 인간의 존엄성 훼손과 사회 공동체의 기반 침식 등 자기 파괴적 결과를 초래할 수 있다. 궁극적으로 현대 사회는 개인의 자유와 경제적 효율성을 존중하면서도 사회적 약자 배려, 인간 존엄성, 공동체의 지속 가능성 등 다양한 가치 사이의 균형점을 찾는 중요한 철학적 과제에 직면해 있다.","두번째 핵심 논점은 없어서 그냥 내가 작성해봄"]
+    generated_passage:
+      "(가)\n사회 구성원 간의 자원과 기회가 불균등하게 분배되는 현상인 사회 계층은 인류의 오랜 탐구 대상이었다. 이에 대한 철학적 응답으로 등장한 평등주의는 모든 인간이 도덕적으로 동등한 지위를 갖는다는 전제에서 출발하여, 정의로운 사회는 특정 가치를 구성원에게 평등하게 분배해야 한다고 주장한다. 그러나 무엇을, 어떻게 평등하게 분배할 것인가의 문제는 여전히 첨예한 논쟁의 지점에 놓여 있다. 가령 결과의 평등을 추구하는 급진적 입장은 모든 이에게 동일한 몫을 분배해야 한다고 보지만, 이는 개인의 노력이나 재능의 차이를 무시하여 동기 부여를 저해하고 사회 전체의 활력을 떨어뜨릴 수 있다는 비판에 직면한다.\n\n이러한 한계를 극복하고자 존 롤스는 절차적 정의에 기반한 새로운 평등주의적 관점을 제시했다. 그는 사회 구성원들이 자신의 사회적 지위나 타고난 재능을 알지 못하는 ‘무지의 베일’이라는 가상적 상황에서 합의한 원칙이 곧 정의의 원칙이 된다고 보았다. 이 원초적 입장에서 합리적 개인들은 자신이 사회의 최하층에 속할 가능성을 염두에 두기 때문에, 사회적 약자에게 최대의 이익이 돌아가도록 하는 ‘차등의 원칙’에 합의할 것이라고 논증했다. 즉, 롤스의 정의론은 최소 수혜자의 처지를 개선하는 한도 내에서 사회적·경제적 불평등을 용인하며, 이는 단순한 결과의 평등이 아닌 공정한 기회 균등의 보장과 약자 배려를 결합한 형태의 평등을 지향하는 것이다.\n\n그러나 롤스의 이론 역시 비판으로부터 자유롭지 못하다. 특히 개인의 자유와 소유권을 강조하는 입장에서는, 차등의 원칙을 실현하기 위해 재능 있는 사람의 성과 일부를 그렇지 못한 사람에게 재분배하는 과정이 개인의 정당한 권리를 침해한다고 주장한다. 이들은 개인이 정당한 방식으로 취득한 소유물에 대한 절대적 권리를 가지며, 국가가 재분배를 명목으로 이에 개입하는 것은 부당하다고 본다. 또한 능력주의의 관점에서는 차등의 원칙이 개인의 노력과 성취의 가치를 충분히 존중하지 않으며, 사회 발전에 기여한 사람에게 합당한 보상을 제공하지 못함으로써 결과적으로 공동체의 발전을 저해할 수 있다고 지적한다.\n\n이처럼 평등에 대한 논의는 단순히 분배의 방식을 넘어 개인의 자유, 노력의 가치, 공동체의 역할 등 복합적인 쟁점과 얽혀 있다. 특정 기준에 따른 평등의 실현이 또 다른 측면에서는 불평등이나 부자유를 야기할 수 있다는 딜레마는, 정의로운 사회의 밑그림을 그리는 과정이 다양한 가치 사이의 끊임없는 숙고와 조율을 요구하는 과제임을 시사한다. 사회적 약자를 배려하는 공정성의 원칙과 개인의 자율성 및 성취 동기를 존중하는 원칙 사이의 긴장을 어떻게 해소할 것인가는 현대 사회가 마주한 핵심적인 철학적 물음으로 남아 있다.\n\n(나)\n자본주의 체제의 핵심 작동 원리인 시장은 개별 경제 주체들의 자유로운 교환 행위를 통해 자원이 배분되는 기제이다. 애덤 스미스는 각 개인이 자신의 이익을 추구하는 과정에서 ‘보이지 않는 손’에 이끌려 의도치 않게 사회 전체의 이익을 증진시킨다고 설명했다. 시장 가격은 수요와 공급의 상호 작용을 통해 결정되며, 이는 생산자에게 무엇을 얼마나 생산할지에 대한 신호를, 소비자에게는 무엇을 얼마나 소비할지에 대한 정보를 제공함으로써 자원의 효율적 배분을 가능하게 한다. 이러한 관점에서 시장은 중앙의 계획이나 통제 없이도 복잡한 경제 문제를 자율적으로 조정하는 정교한 시스템으로 평가된다.\n\n시장이 원활하게 기능하기 위해서는 사유 재산권의 확립과 계약의 자유라는 제도적 기반이 필수적이다. 사유 재산권은 개인이 자신의 자산을 배타적으로 사용, 수익, 처분할 수 있는 권리를 보장함으로써 경제 활동의 안정성과 예측 가능성을 높인다. 또한 계약의 자유는 개인들이 자발적인 합의에 따라 법적 구속력을 갖는 약속을 맺을 수 있게 하여, 분업과 전문화에 기초한 복잡한 거래 관계의 형성을 촉진한다. 이 두 제도는 개인의 경제적 자유를 보장하는 동시에, 혁신과 투자의 유인을 제공하여 자본주의 경제의 역동성과 생산성 향상에 기여하는 핵심 요소로 간주된다.\n\n그러나 시장의 논리가 사회 전반으로 확산되는 현상에 대한 비판적 성찰도 존재한다. 칼 폴라니는 노동, 토지, 화폐가 본질적으로 판매를 위해 생산된 상품이 아님에도 불구하고 시장에서 거래되는 상품처럼 취급되는 현상을 지적하며 이를 ‘허구적 상품’이라 명명했다. 그에 따르면 인간의 삶 자체인 노동, 자연의 일부인 토지, 사회적 신뢰의 산물인 화폐를 순수한 시장 원리에 맡기는 것은 사회의 자기 파괴적 과정을 초래할 수 있다. 노동이 단지 가격에 따라 사고팔리는 상품이 될 때 인간의 존엄성이 훼손되고, 토지가 투기의 대상이 될 때 환경이 파괴되며, 화폐 공급이 시장의 변덕에 좌우될 때 경제 시스템 전체가 불안정해진다는 것이다.\n\n폴라니의 분석은 시장 경제가 사회로부터 분리되어 독자적인 논리로 작동하려 할 때 발생하는 위험을 경고한다. 그는 시장의 자기 조정 기능에 대한 맹신이 사회 공동체의 기반을 침식할 수 있음을 역설하며, 경제는 본래 사회적 관계 속에 뿌리내리고 있어야 한다고 보았다. 이러한 시각은 시장의 효율성이라는 가치와 인간다운 삶, 사회적 연대, 생태적 지속 가능성이라는 가치 사이의 균형을 모색해야 할 필요성을 제기한다. 시장의 영역을 어디까지 허용하고, 어떠한 사회적 통제를 가할 것인지에 대한 논의는 자본주의 사회의 모습을 규정하는 중요한 과제로 이어진다.",
+    generated_core_point: [
+      "정의로운 사회를 위한 평등의 실현은 결과, 기회, 개인의 자유, 사회적 약자 배려 등 다양한 가치 간의 복합적인 쟁점과 딜레마를 내포하며 끊임없는 숙고와 조율을 요구한다. 또한 시장은 자원 배분의 효율적인 기제이나, 노동, 토지, 화폐와 같은 허구적 상품에 대한 시장 논리의 무분별한 적용은 인간의 존엄성 훼손과 사회 공동체의 기반 침식 등 자기 파괴적 결과를 초래할 수 있다. 궁극적으로 현대 사회는 개인의 자유와 경제적 효율성을 존중하면서도 사회적 약자 배려, 인간 존엄성, 공동체의 지속 가능성 등 다양한 가치 사이의 균형점을 찾는 중요한 철학적 과제에 직면해 있다.",
+      "두번째 핵심 논점은 없어서 그냥 내가 작성해봄",
+    ],
   },
   reading: {
-    generated_passage: "독서는 단순히 텍스트에 담긴 정보를 습득하는 행위를 넘어, 작품 속 인물이나 필자의 정서와 가치관을 깊이 있게 이해하는 공감적 읽기로 나아갈 때 그 의미가 심화된다. 공감적 읽기란 텍스트에 명시적으로 드러난 감정을 수동적으로 느끼는 것을 넘어, 독자가 자신의 경험과 감정을 동원하여 작중 상황과 인물의 내면세계를 능동적으로 재구성하는 과정이다. 이를 통해 독자는 타인의 삶을 자신의 삶처럼 느끼고 이해하는 인지적, 정의적 활동을 수행하며, 텍스트와 깊은 유대감을 형성하게 된다. 이러한 과정은 독자에게 지적 만족감은 물론 정서적 충만감을 선사하며 독서 행위의 본질적 즐거움을 느끼게 한다.\n\n이러한 공감적 읽기는 독자의 내면 상태와 독서 환경에 따라 그 깊이가 달라지는데, 특히 가을이라는 계절적 배경은 공감적 몰입을 촉진하는 독특한 맥락을 제공한다. 가을 특유의 스산한 공기와 낙엽 지는 풍경은 인간으로 하여금 내면을 성찰하게 하고 감수성을 고양시키는 경향이 있다. 이러한 심리적 상태는 텍스트가 제시하는 정서적 세계에 대한 독자의 심리적 문턱을 낮추어, 인물의 고뇌나 필자의 사유에 보다 쉽게 동화되도록 이끈다. 즉, 계절이 자아내는 분위기가 독자의 정서적 기조를 형성하고, 이것이 텍스트의 감정선과 조응하면서 공감의 폭과 깊이를 더하는 것이다.\n\n그러나 공감적 읽기가 감정적 동조에만 머무를 경우, 독자는 텍스트와 적절한 거리를 유지하지 못하고 내용에 함몰될 위험이 있다. 성숙한 공감적 읽기는 작품이 유발하는 정서에 깊이 빠져들면서도, 그 감정이 어떠한 서사 구조와 표현 방식을 통해 형성되는지를 분석적으로 파악하는 비판적 태도를 견지하는 것이다. 독자는 텍스트의 참여자인 동시에 분석가로서의 역할을 수행하며, 정서적 체험과 이성적 이해 사이의 균형을 이룰 때 진정한 의미의 공감에 도달할 수 있다. 이를 통해 독자는 타인에 대한 이해를 넘어 자신과 세계를 성찰하는 계기를 마련하게 된다.",
-    generated_core_point: ["첫째, 공감적 읽기는 단순히 텍스트 정보를 습득하는 것을 넘어 독자가 자신의 경험과 감정을 동원하여 텍스트 속 인물이나 필자의 내면세계를 능동적으로 재구성하고 깊이 이해하는 과정이다.\n\n둘째, 독자의 내면 상태와 독서 환경, 특히 가을과 같은 계절적 배경은 독자의 감수성을 고양시키고 심리적 문턱을 낮춰 공감적 읽기의 깊이를 심화시키는 중요한 요소로 작용한다.\n\n셋째, 진정한 의미의 공감적 읽기는 텍스트에 대한 정서적 몰입과 함께 비판적 분석을 통해 이성적 이해의 균형을 이루어야 하며, 이를 통해 독자는 타인과 자신, 그리고 세계를 성찰하는 계기를 마련할 수 있다."]
-  }
+    generated_passage:
+      "독서는 단순히 텍스트에 담긴 정보를 습득하는 행위를 넘어, 작품 속 인물이나 필자의 정서와 가치관을 깊이 있게 이해하는 공감적 읽기로 나아갈 때 그 의미가 심화된다. 공감적 읽기란 텍스트에 명시적으로 드러난 감정을 수동적으로 느끼는 것을 넘어, 독자가 자신의 경험과 감정을 동원하여 작중 상황과 인물의 내면세계를 능동적으로 재구성하는 과정이다. 이를 통해 독자는 타인의 삶을 자신의 삶처럼 느끼고 이해하는 인지적, 정의적 활동을 수행하며, 텍스트와 깊은 유대감을 형성하게 된다. 이러한 과정은 독자에게 지적 만족감은 물론 정서적 충만감을 선사하며 독서 행위의 본질적 즐거움을 느끼게 한다.\n\n이러한 공감적 읽기는 독자의 내면 상태와 독서 환경에 따라 그 깊이가 달라지는데, 특히 가을이라는 계절적 배경은 공감적 몰입을 촉진하는 독특한 맥락을 제공한다. 가을 특유의 스산한 공기와 낙엽 지는 풍경은 인간으로 하여금 내면을 성찰하게 하고 감수성을 고양시키는 경향이 있다. 이러한 심리적 상태는 텍스트가 제시하는 정서적 세계에 대한 독자의 심리적 문턱을 낮추어, 인물의 고뇌나 필자의 사유에 보다 쉽게 동화되도록 이끈다. 즉, 계절이 자아내는 분위기가 독자의 정서적 기조를 형성하고, 이것이 텍스트의 감정선과 조응하면서 공감의 폭과 깊이를 더하는 것이다.\n\n그러나 공감적 읽기가 감정적 동조에만 머무를 경우, 독자는 텍스트와 적절한 거리를 유지하지 못하고 내용에 함몰될 위험이 있다. 성숙한 공감적 읽기는 작품이 유발하는 정서에 깊이 빠져들면서도, 그 감정이 어떠한 서사 구조와 표현 방식을 통해 형성되는지를 분석적으로 파악하는 비판적 태도를 견지하는 것이다. 독자는 텍스트의 참여자인 동시에 분석가로서의 역할을 수행하며, 정서적 체험과 이성적 이해 사이의 균형을 이룰 때 진정한 의미의 공감에 도달할 수 있다. 이를 통해 독자는 타인에 대한 이해를 넘어 자신과 세계를 성찰하는 계기를 마련하게 된다.",
+    generated_core_point: [
+      "첫째, 공감적 읽기는 단순히 텍스트 정보를 습득하는 것을 넘어 독자가 자신의 경험과 감정을 동원하여 텍스트 속 인물이나 필자의 내면세계를 능동적으로 재구성하고 깊이 이해하는 과정이다.\n\n둘째, 독자의 내면 상태와 독서 환경, 특히 가을과 같은 계절적 배경은 독자의 감수성을 고양시키고 심리적 문턱을 낮춰 공감적 읽기의 깊이를 심화시키는 중요한 요소로 작용한다.\n\n셋째, 진정한 의미의 공감적 읽기는 텍스트에 대한 정서적 몰입과 함께 비판적 분석을 통해 이성적 이해의 균형을 이루어야 하며, 이를 통해 독자는 타인과 자신, 그리고 세계를 성찰하는 계기를 마련할 수 있다.",
+    ],
+  },
 };
 
 /**
-    * Passage Generation API 모듈
-    * 이 모듈은 지문 생성 관련 API 호출을 처리합니다.
-    * 각 함수는 API 엔드포인트에 POST 요청을 보내고, 결과를 반환합니다.
-    * 에러 발생 시 콘솔에 로그를 남기고 에러를 다시 던집니다.
-**/
+ * Passage Generation API 모듈
+ * 이 모듈은 지문 생성 관련 API 호출을 처리합니다.
+ * 각 함수는 API 엔드포인트에 POST 요청을 보내고, 결과를 반환합니다.
+ * 에러 발생 시 콘솔에 로그를 남기고 에러를 다시 던집니다.
+ **/
 
 // generate-single-passage
 export async function generateSinglePassageAPI(requestData) {
-    try {
-        if (USE_DUMMY_DATA) {
-            // 더미 데이터 모드: 실제 API 대신 더미 응답 반환
-            console.log('📱 [DUMMY MODE] 단일 지문 생성 요청:', requestData);
-            await new Promise(resolve => setTimeout(resolve, 1000)); // 네트워크 지연 시뮬레이션
-            const response = DUMMY_PASSAGE_RESPONSES.single;
-            console.log('📱 [DUMMY MODE] 단일 지문 생성 응답:', response);
-            return response;
-        }
-        
-        // 실제 API 호출
-        const response = await apiPost('/fastapi/generate-single-passage', requestData);
-        // console.log('generated_passage:', response.generated_passage);
-        // console.log('generated_core_point:', response.generated_core_point);
-        return response;
-    } catch (error) {
-        console.error('단일 지문 생성 API 호출 실패:', error);
-        throw error; // 에러를 다시 던져서 호출한 곳에서 처리할 수 있도록 함
+  try {
+    if (USE_DUMMY_DATA) {
+      // 더미 데이터 모드: 실제 API 대신 더미 응답 반환
+      console.log("📱 [DUMMY MODE] 단일 지문 생성 요청:", requestData);
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // 네트워크 지연 시뮬레이션
+      const response = DUMMY_PASSAGE_RESPONSES.single;
+      console.log("📱 [DUMMY MODE] 단일 지문 생성 응답:", response);
+      return response;
     }
+
+    // 실제 API 호출
+    const response = await apiPost(
+      "/fastapi/generate-single-passage",
+      requestData
+    );
+    // console.log('generated_passage:', response.generated_passage);
+    // console.log('generated_core_point:', response.generated_core_point);
+    return response;
+  } catch (error) {
+    console.error("단일 지문 생성 API 호출 실패:", error);
+    throw error; // 에러를 다시 던져서 호출한 곳에서 처리할 수 있도록 함
+  }
 }
 
 // generate-multiple-passage
 export async function generateMultiplePassageAPI(requestData) {
-    try {
-        if (USE_DUMMY_DATA) {
-            // 더미 데이터 모드: 실제 API 대신 더미 응답 반환
-            console.log('📋 [DUMMY MODE] 복합 지문 생성 요청:', requestData);
-            await new Promise(resolve => setTimeout(resolve, 1200)); // 네트워크 지연 시뮬레이션
-            const response = DUMMY_PASSAGE_RESPONSES.multiple;
-            console.log('📋 [DUMMY MODE] 복합 지문 생성 응답:', response);
-            return response;
-        }
-        
-        // 실제 API 호출
-        const response = await apiPost('/fastapi/generate-multiple-passage', requestData);
-        return response;
-    } catch (error) {
-        console.error('다중 지문 생성 API 호출 실패:', error);
-        throw error; // 에러를 다시 던져서 호출한 곳에서 처리할 수 있도록 함
+  try {
+    if (USE_DUMMY_DATA) {
+      // 더미 데이터 모드: 실제 API 대신 더미 응답 반환
+      console.log("📋 [DUMMY MODE] 복합 지문 생성 요청:", requestData);
+      await new Promise((resolve) => setTimeout(resolve, 1200)); // 네트워크 지연 시뮬레이션
+      const response = DUMMY_PASSAGE_RESPONSES.multiple;
+      console.log("📋 [DUMMY MODE] 복합 지문 생성 응답:", response);
+      return response;
     }
+
+    // 실제 API 호출
+    const response = await apiPost(
+      "/fastapi/generate-multiple-passage",
+      requestData
+    );
+    return response;
+  } catch (error) {
+    console.error("다중 지문 생성 API 호출 실패:", error);
+    throw error; // 에러를 다시 던져서 호출한 곳에서 처리할 수 있도록 함
+  }
 }
 
 // generate-reading-passage
 export async function generateReadingPassageAPI(requestData) {
-    try {
-        if (USE_DUMMY_DATA) {
-            // 더미 데이터 모드: 실제 API 대신 더미 응답 반환
-            console.log('📚 [DUMMY MODE] 독서론 지문 생성 요청:', requestData);
-            await new Promise(resolve => setTimeout(resolve, 900)); // 네트워크 지연 시뮬레이션
-            const response = DUMMY_PASSAGE_RESPONSES.reading;
-            console.log('📚 [DUMMY MODE] 독서론 지문 생성 응답:', response);
-            return response;
-        }
-        
-        // 실제 API 호출
-        const response = await apiPost('/fastapi/generate-reading-passage', requestData);
-        return response;
-    } catch (error) {
-        console.error('독해 지문 생성 API 호출 실패:', error);
-        throw error; // 에러를 다시 던져서 호출한 곳에서 처리할 수 있도록 함
+  try {
+    if (USE_DUMMY_DATA) {
+      // 더미 데이터 모드: 실제 API 대신 더미 응답 반환
+      console.log("📚 [DUMMY MODE] 독서론 지문 생성 요청:", requestData);
+      await new Promise((resolve) => setTimeout(resolve, 900)); // 네트워크 지연 시뮬레이션
+      const response = DUMMY_PASSAGE_RESPONSES.reading;
+      console.log("📚 [DUMMY MODE] 독서론 지문 생성 응답:", response);
+      return response;
     }
+
+    // 실제 API 호출
+    const response = await apiPost(
+      "/fastapi/generate-reading-passage",
+      requestData
+    );
+    return response;
+  } catch (error) {
+    console.error("독해 지문 생성 API 호출 실패:", error);
+    throw error; // 에러를 다시 던져서 호출한 곳에서 처리할 수 있도록 함
+  }
 }
 
 // type_passage[] : 인문, 사회, 과학, 기술, 예술, 독서론
 // kind_passage : 단일 지문, 복합 지문, 독서론 -> db 에 저장하는 값은 아님. vue에서도 이 값을 사용하지 않음. vue 에서는 type_passage 값을 이용해서 generateType 값을 설정함. 즉, kind_passage = generateType
 // 문항 생성 더미 응답 데이터
 const DUMMY_QUESTION_RESPONSES = {
-    // 사용자 입력 탭에서 문항 생성 요청할 경우 입력한 지문에 대한 지문 분석 내용을 함께 받아옴. 이때 kind_passage 값을 사용자가 선택한 generateType 값으로 설정하여 requestData에 포함해서 요청해야함.
-    userReading: {
-        // 사용자 입력 탭에서 문항 생성 요청 시 해당 지문에 대한 분석 내용을 응답하는 필드
-        detail: {
-            kind_passage: "독서론",
-            keyword: "독서, 공감적 읽기",
-            generated_core_point: ["생성된 핵심 논점"]
-        },
-        question: {
-            kind_passage: "독서론",
-            generated_question: "생성된 문제문",
-            generated_option: ["선지1 5개의 예시 선지를 보여줍니다.", "선지2, 쉼표를 포함한 예", "선지3 <u>태그</u>를 포함한 예", "선지4 줄바꿈 기호 \\n \n을 포함한 예", "선지5, <u>전부</u> \n 포함한 예"],
-            generated_answer: "userReading 정답",
-            generated_description: ["이것은 독서론 지문을 선택한 후 저장된 문항입니다. generated_description[0]은 정답해설", "오답피하기는 generated_description[1]에 저장됩니다."],
-            generated_subpassage: "문항 보기 지문 (선택 사항)",
-            quoted_paragraph: "인용 문단 (선택 사항)",
-            quoted_sentence: ["인용 문장이 포함된 문장 목록 (선택 사항)"],
-            quoted_word: ["인용 문구 목록 (선택 사항)"],
-        }
+  // 사용자 입력 탭에서 문항 생성 요청할 경우 입력한 지문에 대한 지문 분석 내용을 함께 받아옴. 이때 kind_passage 값을 사용자가 선택한 generateType 값으로 설정하여 requestData에 포함해서 요청해야함.
+  userReading: {
+    // 사용자 입력 탭에서 문항 생성 요청 시 해당 지문에 대한 분석 내용을 응답하는 필드
+    detail: {
+      kind_passage: "독서론",
+      keyword: "독서, 공감적 읽기",
+      generated_core_point: ["생성된 핵심 논점"],
     },
-    userSingle: {
-        // 사용자 입력 탭에서 문항 생성 요청 시 해당 지문에 대한 분석 내용을 응답하는 필드
-        detail: {
-            kind_passage: "단일 지문",
-            type_passage: "지문의 분야",
-            keyword: "경제 사회, 민주주의",
-            generated_core_point: ["생성된 핵심 논점"]
-        },
-        question: {
-            kind_passage: "생성된 지문의 kind_passage가 들어가게됨",
-            generated_question: "생성된 문제문",
-            generated_option: ["선지1 5개의 예시 선지를 보여줍니다.", "선지2, 쉼표를 포함한 예", "선지3 <u>태그</u>를 포함한 예", "선지4 줄바꿈 기호 \\n \n을 포함한 예", "선지5, <u>전부</u> \n 포함한 예"],
-            generated_answer: "userSingle 정답",
-            generated_description: ["단일 지문 정답해설은 정답해설만 출력되도록 테스트, 오답피하기도 테스트 하고 싶으면 복합지문을 이용하세요"],
-            generated_subpassage: "문항 보기 지문 (선택 사항)",
-            quoted_paragraph: "인용 문단 (선택 사항)",
-            quoted_sentence: ["인용 문장이 포함된 문장 목록 (선택 사항)"],
-            quoted_word: ["인용 문구 목록 (선택 사항)"],
-        }
+    question: {
+      kind_passage: "독서론",
+      generated_question: "생성된 문제문",
+      generated_option: [
+        "선지1 5개의 예시 선지를 보여줍니다.",
+        "선지2, 쉼표를 포함한 예",
+        "선지3 <u>태그</u>를 포함한 예",
+        "선지4 줄바꿈 기호 \\n \n을 포함한 예",
+        "선지5, <u>전부</u> \n 포함한 예",
+      ],
+      generated_answer: "userReading 정답",
+      generated_description: [
+        "이것은 독서론 지문을 선택한 후 저장된 문항입니다. generated_description[0]은 정답해설",
+        "오답피하기는 generated_description[1]에 저장됩니다.",
+      ],
+      generated_subpassage: "문항 보기 지문 (선택 사항)",
+      quoted_paragraph: "인용 문단 (선택 사항)",
+      quoted_sentence: ["인용 문장이 포함된 문장 목록 (선택 사항)"],
+      quoted_word: ["인용 문구 목록 (선택 사항)"],
     },
-    userMultiple: {
-        // 사용자 입력 탭에서 문항 생성 요청 시 해당 지문에 대한 분석 내용을 응답하는 필드
-        detail: {
-            kind_passage: "복합 지문",
-            first_passage_type: "기술",
-            first_passage_keyword: "(가) 지문 키워드",
-            second_passage_type: "(나) 지문 분야",
-            second_passage_keyword: "(나) 지문 키워드",
-            generated_core_point: ["(가) 지문 핵심 논점과","(나) 지문 핵심 논점"]
-        },
-        question: {
-            kind_passage: "생성된 지문의 kind_passage가 들어가게됨",
-            generated_question: "생성된 문제문",
-            generated_option: ["선지1 5개의 예시 선지를 보여줍니다.", "선지2, 쉼표를 포함한 예", "선지3 <u>태그</u>를 포함한 예", "선지4 줄바꿈 기호 \\n \n을 포함한 예", "선지5, <u>전부</u> \n 포함한 예"],
-            generated_answer: "userMultiple 정답",
-            generated_description:  ["복합 지문 정답해설은 정답해설은 오답피하기도 함께 출력해주도록 테스트합니다","리스트의 두번째 값은 오답피하기에 저장됩니다."],
-            generated_subpassage: "문항 보기 지문 (선택 사항)",
-            quoted_paragraph: "인용 문단 (선택 사항)",
-            quoted_sentence: ["인용 문장이 포함된 문장 목록 (선택 사항)"],
-            quoted_word: ["인용 문구 목록 (선택 사항)"],
-        }
+  },
+  userSingle: {
+    // 사용자 입력 탭에서 문항 생성 요청 시 해당 지문에 대한 분석 내용을 응답하는 필드
+    detail: {
+      kind_passage: "단일 지문",
+      type_passage: "지문의 분야",
+      keyword: "경제 사회, 민주주의",
+      generated_core_point: ["생성된 핵심 논점"],
     },
+    question: {
+      kind_passage: "생성된 지문의 kind_passage가 들어가게됨",
+      generated_question: "생성된 문제문",
+      generated_option: [
+        "선지1 5개의 예시 선지를 보여줍니다.",
+        "선지2, 쉼표를 포함한 예",
+        "선지3 <u>태그</u>를 포함한 예",
+        "선지4 줄바꿈 기호 \\n \n을 포함한 예",
+        "선지5, <u>전부</u> \n 포함한 예",
+      ],
+      generated_answer: "userSingle 정답",
+      generated_description: [
+        "단일 지문 정답해설은 정답해설만 출력되도록 테스트, 오답피하기도 테스트 하고 싶으면 복합지문을 이용하세요",
+      ],
+      generated_subpassage: "문항 보기 지문 (선택 사항)",
+      quoted_paragraph: "인용 문단 (선택 사항)",
+      quoted_sentence: ["인용 문장이 포함된 문장 목록 (선택 사항)"],
+      quoted_word: ["인용 문구 목록 (선택 사항)"],
+    },
+  },
+  userMultiple: {
+    // 사용자 입력 탭에서 문항 생성 요청 시 해당 지문에 대한 분석 내용을 응답하는 필드
+    detail: {
+      kind_passage: "복합 지문",
+      first_passage_type: "기술",
+      first_passage_keyword: "(가) 지문 키워드",
+      second_passage_type: "(나) 지문 분야",
+      second_passage_keyword: "(나) 지문 키워드",
+      generated_core_point: ["(가) 지문 핵심 논점과", "(나) 지문 핵심 논점"],
+    },
+    question: {
+      kind_passage: "생성된 지문의 kind_passage가 들어가게됨",
+      generated_question: "생성된 문제문",
+      generated_option: [
+        "선지1 5개의 예시 선지를 보여줍니다.",
+        "선지2, 쉼표를 포함한 예",
+        "선지3 <u>태그</u>를 포함한 예",
+        "선지4 줄바꿈 기호 \\n \n을 포함한 예",
+        "선지5, <u>전부</u> \n 포함한 예",
+      ],
+      generated_answer: "userMultiple 정답",
+      generated_description: [
+        "복합 지문 정답해설은 정답해설은 오답피하기도 함께 출력해주도록 테스트합니다",
+        "리스트의 두번째 값은 오답피하기에 저장됩니다.",
+      ],
+      generated_subpassage: "문항 보기 지문 (선택 사항)",
+      quoted_paragraph: "인용 문단 (선택 사항)",
+      quoted_sentence: ["인용 문장이 포함된 문장 목록 (선택 사항)"],
+      quoted_word: ["인용 문구 목록 (선택 사항)"],
+    },
+  },
 
-    single: {
-        kind_passage: "단일 지문",
-        generated_question: "생성된 문제문",
-        generated_option: ["선지1 5개의 예시 선지를 보여줍니다.", "선지2, 쉼표를 포함한 예", "선지3 <u>태그</u>를 포함한 예", "선지4 줄바꿈 기호 \\n \n을 포함한 예", "선지5, <u>전부</u> \n 포함한 예"],
-        generated_answer: "storage single 정답",
-        generated_description: ["단일 지문 정답해설은 정답해설만 출력되도록 테스트, 오답피하기도 테스트 하고 싶으면 복합지문을 이용하세요"],
-        generated_subpassage: "문항 보기 지문 (선택 사항)",
-        quoted_paragraph: "인용 문단 (선택 사항)",
-        quoted_sentence: ["인용 문장이 포함된 문장 목록 (선택 사항)"],
-        quoted_word: ["인용 문구 목록 (선택 사항)"],
-    },
-    multiple: {
-        kind_passage: "복합 지문",
-        generated_question: "생성된 문제문",
-        generated_option: ["선지1 5개의 예시 선지를 보여줍니다.", "선지2, 쉼표를 포함한 예", "선지3 <u>태그</u>를 포함한 예", "선지4 줄바꿈 기호 \\n \n을 포함한 예", "선지5, <u>전부</u> \n 포함한 예"],
-        generated_answer: "storage multiple정답",
-        generated_description: ["복합 지문 정답해설은 정답해설은 오답피하기도 함께 출력해주도록 테스트합니다","리스트의 두번째 값은 오답피하기에 저장됩니다."],
-        generated_subpassage: "문항 보기 지문 (선택 사항)",
-        quoted_paragraph: "인용 문단 (선택 사항)",
-        quoted_sentence: ["인용 문장이 포함된 문장 목록 (선택 사항)"],
-        quoted_word: ["인용 문구 목록 (선택 사항)"],
-    },
-    reading: {
-        kind_passage: "독서론",
-        generated_question: "생성된 문제문",
-        generated_option: ["선지1 5개의 예시 선지를 보여줍니다.", "선지2, 쉼표를 포함한 예", "선지3 <u>태그</u>를 포함한 예", "선지4 줄바꿈 기호 \\n \n을 포함한 예", "선지5, <u>전부</u> \n 포함한 예"],
-        generated_answer: "storage reading 정답",
-        generated_description: ["이것은 독서론 지문을 선택한 후 저장된 문항입니다. generated_description[0]은 정답해설", "오답피하기는 generated_description[1]에 저장됩니다."],
-        generated_subpassage: "문항 보기 지문 (선택 사항)",
-        quoted_paragraph: "인용 문단 (선택 사항)",
-        quoted_sentence: ["인용 문장이 포함된 문장 목록 (선택 사항)"],
-        quoted_word: ["인용 문구 목록 (선택 사항)"],
-    }
+  single: {
+    kind_passage: "단일 지문",
+    generated_question: "생성된 문제문",
+    generated_option: [
+      "선지1 5개의 예시 선지를 보여줍니다.",
+      "선지2, 쉼표를 포함한 예",
+      "선지3 <u>태그</u>를 포함한 예",
+      "선지4 줄바꿈 기호 \\n \n을 포함한 예",
+      "선지5, <u>전부</u> \n 포함한 예",
+    ],
+    generated_answer: "storage single 정답",
+    generated_description: [
+      "단일 지문 정답해설은 정답해설만 출력되도록 테스트, 오답피하기도 테스트 하고 싶으면 복합지문을 이용하세요",
+    ],
+    generated_subpassage: "문항 보기 지문 (선택 사항)",
+    quoted_paragraph: "인용 문단 (선택 사항)",
+    quoted_sentence: ["인용 문장이 포함된 문장 목록 (선택 사항)"],
+    quoted_word: ["인용 문구 목록 (선택 사항)"],
+  },
+  multiple: {
+    kind_passage: "복합 지문",
+    generated_question: "생성된 문제문",
+    generated_option: [
+      "선지1 5개의 예시 선지를 보여줍니다.",
+      "선지2, 쉼표를 포함한 예",
+      "선지3 <u>태그</u>를 포함한 예",
+      "선지4 줄바꿈 기호 \\n \n을 포함한 예",
+      "선지5, <u>전부</u> \n 포함한 예",
+    ],
+    generated_answer: "storage multiple정답",
+    generated_description: [
+      "복합 지문 정답해설은 정답해설은 오답피하기도 함께 출력해주도록 테스트합니다",
+      "리스트의 두번째 값은 오답피하기에 저장됩니다.",
+    ],
+    generated_subpassage: "문항 보기 지문 (선택 사항)",
+    quoted_paragraph: "인용 문단 (선택 사항)",
+    quoted_sentence: ["인용 문장이 포함된 문장 목록 (선택 사항)"],
+    quoted_word: ["인용 문구 목록 (선택 사항)"],
+  },
+  reading: {
+    kind_passage: "독서론",
+    generated_question: "생성된 문제문",
+    generated_option: [
+      "선지1 5개의 예시 선지를 보여줍니다.",
+      "선지2, 쉼표를 포함한 예",
+      "선지3 <u>태그</u>를 포함한 예",
+      "선지4 줄바꿈 기호 \\n \n을 포함한 예",
+      "선지5, <u>전부</u> \n 포함한 예",
+    ],
+    generated_answer: "storage reading 정답",
+    generated_description: [
+      "이것은 독서론 지문을 선택한 후 저장된 문항입니다. generated_description[0]은 정답해설",
+      "오답피하기는 generated_description[1]에 저장됩니다.",
+    ],
+    generated_subpassage: "문항 보기 지문 (선택 사항)",
+    quoted_paragraph: "인용 문단 (선택 사항)",
+    quoted_sentence: ["인용 문장이 포함된 문장 목록 (선택 사항)"],
+    quoted_word: ["인용 문구 목록 (선택 사항)"],
+  },
 };
 
 /**
@@ -202,93 +273,116 @@ const DUMMY_QUESTION_RESPONSES = {
 
 // generate-passage-data
 export async function generatePassageDataAPI(requestData) {
-    try {
-        if (USE_DUMMY_DATA) {
-            // 더미 데이터 모드: 실제 API 대신 더미 응답 반환
-            console.log('📄 [DUMMY MODE] 지문 분석 및 문항 생성 요청:', requestData);
-            await new Promise(resolve => setTimeout(resolve, 800)); // 네트워크 지연 시뮬레이션
-            if(requestData.kind_passage === '독서론') {
-                // 독서론 지문 분석 요청 시 더미 응답 반환
-                const response = DUMMY_QUESTION_RESPONSES.userReading;
-                return response;
-            } else if(requestData.kind_passage === '단일 지문') {
-                // 단일 지문 분석 요청 시 더미 응답 반환
-                const response = DUMMY_QUESTION_RESPONSES.userSingle;
-                return response;
-            } else if(requestData.kind_passage === '복합 지문') {
-                // 복합 지문 분석 요청 시 더미 응답 반환
-                const response = DUMMY_QUESTION_RESPONSES.userMultiple;
-                return response;
-            }
-            // 그 외의 경우는 지문 종류를 선택하지 않았다고 throw error
-            throw new Error('지문 종류를 선택하지 않았습니다. kind_passage(generateType) 값을 확인해주세요.');
-        }
-        
-        // 실제 API 호출
-        const response = await apiPost('/fastapi/generate-passage-data', requestData);
+  try {
+    if (USE_DUMMY_DATA) {
+      // 더미 데이터 모드: 실제 API 대신 더미 응답 반환
+      console.log("📄 [DUMMY MODE] 지문 분석 및 문항 생성 요청:", requestData);
+      await new Promise((resolve) => setTimeout(resolve, 800)); // 네트워크 지연 시뮬레이션
+      if (requestData.kind_passage === "독서론") {
+        // 독서론 지문 분석 요청 시 더미 응답 반환
+        const response = DUMMY_QUESTION_RESPONSES.userReading;
         return response;
-    } catch (error) {
-        console.error('지문 분석 API 호출 실패:', error);
-        throw error; // 에러를 다시 던져서 호출한 곳에서 처리할 수 있도록 함
+      } else if (requestData.kind_passage === "단일 지문") {
+        // 단일 지문 분석 요청 시 더미 응답 반환
+        const response = DUMMY_QUESTION_RESPONSES.userSingle;
+        return response;
+      } else if (requestData.kind_passage === "복합 지문") {
+        // 복합 지문 분석 요청 시 더미 응답 반환
+        const response = DUMMY_QUESTION_RESPONSES.userMultiple;
+        return response;
+      }
+      // 그 외의 경우는 지문 종류를 선택하지 않았다고 throw error
+      throw new Error(
+        "지문 종류를 선택하지 않았습니다. kind_passage(generateType) 값을 확인해주세요."
+      );
     }
+
+    // 실제 API 호출
+    const response = await apiPost(
+      "/fastapi/generate-passage-data",
+      requestData
+    );
+    return response;
+  } catch (error) {
+    console.error("지문 분석 API 호출 실패:", error);
+    throw error; // 에러를 다시 던져서 호출한 곳에서 처리할 수 있도록 함
+  }
 }
 
 // generate-reading-passage-question
 export async function generateReadingPassageQuestionAPI(requestData) {
-    try {
-        if (USE_DUMMY_DATA) {
-            // 더미 데이터 모드: 실제 API 대신 더미 응답 반환
-            console.log('📄 [DUMMY MODE] 독서론 지문에 대한 문항 생성 요청:', requestData);
-            await new Promise(resolve => setTimeout(resolve, 800)); // 네트워크 지연 시뮬레이션
-            const response = DUMMY_QUESTION_RESPONSES.reading;
-            return response;
-        }
-        
-        // 실제 API 호출
-        const response = await apiPost('/fastapi/generate-reading-passage-question', requestData);
-        return response;
-    } catch (error) {
-        console.error('독서론 지문 질문 생성 API 호출 실패:', error);
-        throw error; // 에러를 다시 던져서 호출한 곳에서 처리할 수 있도록 함
+  try {
+    if (USE_DUMMY_DATA) {
+      // 더미 데이터 모드: 실제 API 대신 더미 응답 반환
+      console.log(
+        "📄 [DUMMY MODE] 독서론 지문에 대한 문항 생성 요청:",
+        requestData
+      );
+      await new Promise((resolve) => setTimeout(resolve, 800)); // 네트워크 지연 시뮬레이션
+      const response = DUMMY_QUESTION_RESPONSES.reading;
+      return response;
     }
+
+    // 실제 API 호출
+    const response = await apiPost(
+      "/fastapi/generate-reading-passage-question",
+      requestData
+    );
+    return response;
+  } catch (error) {
+    console.error("독서론 지문 질문 생성 API 호출 실패:", error);
+    throw error; // 에러를 다시 던져서 호출한 곳에서 처리할 수 있도록 함
+  }
 }
 
 // generate-single-passage-question
 export async function generateSinglePassageQuestionAPI(requestData) {
-    try {
-        if (USE_DUMMY_DATA) {
-            // 더미 데이터 모드: 실제 API 대신 더미 응답 반환
-            console.log('📄 [DUMMY MODE] 단일 지문에 대한 문항 생성 요청:', requestData);
-            await new Promise(resolve => setTimeout(resolve, 800)); // 네트워크 지연 시뮬레이션
-            const response = DUMMY_QUESTION_RESPONSES.single;
-            return response;
-        }
-        
-        // 실제 API 호출
-        const response = await apiPost('/fastapi/generate-single-passage-question', requestData);
-        return response;
-    } catch (error) {
-        console.error('단일 지문 질문 생성 API 호출 실패:', error);
-        throw error; // 에러를 다시 던져서 호출한 곳에서 처리할 수 있도록 함
+  try {
+    if (USE_DUMMY_DATA) {
+      // 더미 데이터 모드: 실제 API 대신 더미 응답 반환
+      console.log(
+        "📄 [DUMMY MODE] 단일 지문에 대한 문항 생성 요청:",
+        requestData
+      );
+      await new Promise((resolve) => setTimeout(resolve, 800)); // 네트워크 지연 시뮬레이션
+      const response = DUMMY_QUESTION_RESPONSES.single;
+      return response;
     }
+
+    // 실제 API 호출
+    const response = await apiPost(
+      "/fastapi/generate-single-passage-question",
+      requestData
+    );
+    return response;
+  } catch (error) {
+    console.error("단일 지문 질문 생성 API 호출 실패:", error);
+    throw error; // 에러를 다시 던져서 호출한 곳에서 처리할 수 있도록 함
+  }
 }
 
 // generate-multiple-passage-question
 export async function generateMultiplePassageQuestionAPI(requestData) {
-    try {
-        if (USE_DUMMY_DATA) {
-            // 더미 데이터 모드: 실제 API 대신 더미 응답 반환
-            console.log('📄 [DUMMY MODE] 복합 지문에 대한 문항 생성 요청:', requestData);
-            await new Promise(resolve => setTimeout(resolve, 800)); // 네트워크 지연 시뮬레이션
-            const response = DUMMY_QUESTION_RESPONSES.multiple;
-            return response;
-        }
-        
-        // 실제 API 호출
-        const response = await apiPost('/fastapi/generate-multiple-passage-question', requestData);
-        return response;
-    } catch (error) {
-        console.error('복합 지문 질문 생성 API 호출 실패:', error);
-        throw error; // 에러를 다시 던져서 호출한 곳에서 처리할 수 있도록 함
+  try {
+    if (USE_DUMMY_DATA) {
+      // 더미 데이터 모드: 실제 API 대신 더미 응답 반환
+      console.log(
+        "📄 [DUMMY MODE] 복합 지문에 대한 문항 생성 요청:",
+        requestData
+      );
+      await new Promise((resolve) => setTimeout(resolve, 800)); // 네트워크 지연 시뮬레이션
+      const response = DUMMY_QUESTION_RESPONSES.multiple;
+      return response;
     }
+
+    // 실제 API 호출
+    const response = await apiPost(
+      "/fastapi/generate-multiple-passage-question",
+      requestData
+    );
+    return response;
+  } catch (error) {
+    console.error("복합 지문 질문 생성 API 호출 실패:", error);
+    throw error; // 에러를 다시 던져서 호출한 곳에서 처리할 수 있도록 함
+  }
 }
