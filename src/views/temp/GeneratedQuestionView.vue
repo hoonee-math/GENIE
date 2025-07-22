@@ -8,16 +8,17 @@
                 <PassageAndQuestionLayout>
                     <template #pagination v-if="questions.length>1">
                         <div class="flex items-center gap-2 mt-4">
-                            <button @click="prevPageBlock" :disabled="currentPageBlockStart === 1">이전</button>
+                            <button @click="prevPageBlock" :disabled="currentPageBlockStart === 1" :class="['mr-1',currentPageBlockStart === 1 ? 'text-gray-400':'']">← 이전</button>
 
+                            <!-- figma에는 32px인데 너무 작은거 같아서 40px로 설정 w-10 -->
                             <button v-for="page in currentPageBlockEnd - currentPageBlockStart + 1"
                                     :key="page"
                                     @click="goToPage(currentPageBlockStart + page - 1)"
-                                    :class="['w-12 px-3 py-1 border rounded', currentPage === currentPageBlockStart + page - 1 ? 'bg-blue-500 text-white' : 'bg-white text-black']">
+                                    :class="['w-10 h-10 px-1 py-1 ', currentPage === currentPageBlockStart + page - 1 ? 'border rounded-xl bg-blue-500 text-white' : 'text-black']">
                             {{ currentPageBlockStart + page - 1 }}
                             </button>
 
-                            <button @click="nextPageBlock" :disabled="currentPageBlockEnd === totalPages">다음</button>
+                            <button @click="nextPageBlock" :disabled="currentPageBlockEnd === totalPages" :class="['ml-1',currentPageBlockEnd === totalPages ? 'text-gray-400':'']">다음 →</button>
                         </div>
 
 
@@ -35,7 +36,7 @@
                                 <Icon icon="mingcute:pencil-fill" width="20" height="20" class="mx-1" :class=" false ? 'text-[#0086FF]' : 'text-[#303030]'" />
                             </button>
                         </div>
-                        <div v-if="existQueSubpassage">
+                        <div v-if="existQueSubpassage" class="border border-black p-4">
                             <TipTapEditor :initialContent="question.queSubpassage" :isEditable="editableQueryAndOption" @content-changed="handleQueSubpassageChange" :addClass="'text-xl leading-10'"/>
                         </div>
                         <!-- question.queOption 은 div 대신 TipTap editor를 이용해 출력해주기. 기본값 editable=false, question.queQuery 옆의 수정 버튼을 눌러 question.queOption의 editable 갑도 true로 변경-->
@@ -87,7 +88,7 @@
                     </template>
                     
                 </PassageAndQuestionLayout>
-            <div v-if="!isQuestionExampleSelectorVisible" class="flex flex-col justify-between sm:flex-row gap-4 mt-8">
+            <div v-if="!isQuestionExampleSelectorVisible" class="flex flex-col justify-between sm:flex-row gap-4 my-4">
                 <div class="flex gap-5">
                     <button @click="" :disabled="false" :class="['px-12 py-4 text-2xl font-medium rounded-lg transition-colors duration-200', isSaved ? 'text-gray-700 bg-gray-200 hover:bg-gray-300 cursor-not-allowed':'bg-brand text-white hover:bg-blue-600']">
                         저장하기
@@ -180,16 +181,25 @@ const isQuestionExampleSelectorVisible = ref(false)
 const isPaymentUsageModalOpen = ref(false); // 결제 사용 모달 
 const paymentUsageModalRef = ref(null);
 const loadingMessage = ref('');
-const existQueSubpassage = ref(false); // question 에 queSubpassage 데이터가 있는지 확인
+// existQueSubpassage는 computed로 변경되어 아래에서 정의됨
 
 // queAnswer 값은 각 question 값에 딸라 초기값이 달라짐. 나중에 구현할 하단 문항을 페이지네이션 처리하게되면 각 question 에 따라서 그 값이 달라지므로 수정 필요
 const queAnswer = ref('①')
 
 const questions = computed(() => {
+    console.log("문항들 데이터 확인", passage.value);
     return passage.value.questions || []
 })
 const question = computed(() => {
     return questions.value[currentPage.value - 1] || {}
+})
+
+// 현재 선택된 question에 queSubpassage가 존재하고 길이가 0이 아닌지 확인
+const existQueSubpassage = computed(() => {
+    console.log("보기가 있을까: ",question.value.queSubpassage )
+    return question.value.queSubpassage && 
+           typeof question.value.queSubpassage === 'string' && 
+           question.value.queSubpassage.trim().length > 0
 })
 
 const editQueQueryAndOption = () => {
@@ -258,7 +268,7 @@ const savedQueSubpassage = ref('')
 const queQueryLength = ref(0)
 const queOptionLength = ref(0)
 const queDescriptionLength = ref(0)
-const queSubpassageLenght = ref=(0)
+const queSubpassageLength = ref(0)
 const numberLength = ref(3000)
 
 // TipTapEditor 콘텐츠 변경 핸들러
@@ -287,7 +297,7 @@ const handleQueSubpassageChange = ({ content, textLength }) => {
   console.log('Content:', content)
   console.log('Length:', textLength)
   savedQueSubpassage.value = content
-  queSubpassageLenght.value = textLength
+  queSubpassageLength.value = textLength
     isSaved.value = false // 저장하기 버튼 활성화
 }
 
