@@ -4,15 +4,7 @@
         <div class="">  <!-- flex-1 min-h-0 overflow-hidden 제거 -->
             <PassageAndQuestionLayout :left-ratio="2" :right-ratio="1">
                 <template #title>
-                    <div class="flex items-center gap-4">
-                        <input v-model="editedTitle" :disabled="!editableTitle" @input="handleTitleChange"
-                            :style="{  width: editedTitle ? `${Math.max(editedTitle.length * 1, 10)}ch` : '10ch'  }"
-                            :class="[ 'text-3xl font-semibold bg-transparent outline-none', editableTitle ? 'border border-black' : '' ]"
-                        />
-                        <button @click="toggleTitleEdit" class="flex items-center justify-center w-8 h-8 rounded">
-                            <Icon icon="mingcute:pencil-fill" width="24" height="24" :class="editableTitle ? 'text-[#0086FF]' : 'text-[#303030]'" />
-                        </button>
-                    </div>
+                    <EditableTitle title-class="text-3xl font-semibold" />
                 </template>
                 <template #left>
                     <!-- TipTapEditor (1) savedContent 값을 props 로 자식 컴포넌트의 initialContent 변수로 전달 -->
@@ -48,6 +40,7 @@ import PassageSummaryLayout from './PassageSummaryLayout.vue'
 import PassageEditor from './PassageEditor.vue'
 import { usePassage } from '@/composables/usePassage'
 import GenerateQuestion from '../generation/question/GenerateQuestion.vue'
+import EditableTitle from '@/views/temp/EditableTitle.vue'
 
 const props = defineProps({
     isCalledFromGeneratedQuestionView: {

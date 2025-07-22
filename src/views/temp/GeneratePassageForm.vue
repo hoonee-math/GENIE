@@ -3,11 +3,8 @@
 <!-- hidden md:block flex flex-col gap-3 mx-auto p-4 sm:p-8 w-full -->
         <div class="w-[1312px]">
             <!-- 헤더 -->
-            <div>
-                <div class="flex items-center max-w-screen-2xl mx-auto">
-                    <h1 class="text-3xl font-bold text-gray-900">{{ documentTitle }}</h1>
-                    <EditButton />
-                </div>
+            <div class="mb-4">
+                <EditableTitle v-model="newPassageTitle" title-class="text-2xl font-bold" placeholder="새 지문 제목을 입력하세요" />
             </div>
 
             <!-- 메인 콘텐츠 -->
@@ -270,6 +267,7 @@ import EditButton from '@/components/common/EditButton.vue'
 import { generateSinglePassageAPI, generateReadingPassageAPI, generateMultiplePassageAPI } from '@/api/generate'
 import { savePassageToDatabase } from '@/api/passage'
 import { usePassage } from '@/composables/usePassage'
+import EditableTitle from '@/views/temp/EditableTitle.vue'
 
 // Router 및 Composable 설정
 const router = useRouter()
@@ -280,7 +278,7 @@ const isLoading = ref(false)
 const loadingStep = ref('') // 'generating' | 'saving' | ''
 const errorMessage = ref('')
 // 문서 제목
-const documentTitle = ref('Untitled')
+const newPassageTitle = ref('Untitled')
 
 // 탭 데이터
 const tabs = [
@@ -377,8 +375,8 @@ const resetForm = () => {
 
 // 제목 생성 함수
 const generateTitle = (generateType, requestData) => {
-    if (documentTitle === "Untitled") {
-        return documentTitle;
+    if (newPassageTitle === "Untitled") {
+        return newPassageTitle;
     }
 
     const now = new Date()
@@ -391,7 +389,7 @@ const generateTitle = (generateType, requestData) => {
     } else if (generateType === 'reading') {
         return `[독서론 지문] ${requestData.keyword.slice(0, 10)} (${dateStr})`
     }
-    return documentTitle;
+    return newPassageTitle;
 }
 
 // DescriptionDto 구조에 맞춰 생성

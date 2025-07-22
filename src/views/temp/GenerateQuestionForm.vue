@@ -6,7 +6,7 @@
 
             <template #title>
                 <!-- 기존 InsertPassage.vue 의 작업 이름이 들어갈 위치 -->
-                {{ questionTitle }}
+                <EditableTitle v-model="questionTitle" title-class="text-2xl font-bold" placeholder="새 지문 제목을 입력하세요" />
             </template>
 
             <template #left>
@@ -130,6 +130,7 @@ import LoadingModal from '@/components/common/LoadingModal.vue'
 import { useQuestion } from '@/composables/useQuestion'
 import { usePassage } from '@/composables/usePassage';
 import QuestionExampleSelector from './QuestionExampleSelector.vue'
+import EditableTitle from '@/views/temp/EditableTitle.vue'
 
 // Router 및 Composables
 const route = useRoute()
@@ -148,6 +149,7 @@ const isLeavingPageWithClear = ref(true) // 페이지를 나갈 때 passage 데�
 const loadingMessage = ref('문항을 생성 중입니다.\\n생성까지 최대 3분이 소요될 수 있습니다.')
 
 // 데이터 상태
+const newPassageTitle = ref('')
 const questionTitle = ref('Untitled')
 const passageContent = ref('')
 const textLength = ref(0)
@@ -351,7 +353,7 @@ watch(() => passage.value, (newPassage) => {
     if (newPassage && newPassage.title && newPassage.content) {
         // console.log('✅ [Watch] UI 업데이트 실행')
         
-        questionTitle.value = newPassage.title
+        // questionTitle.value = newPassage.title // EditableTitle 에서 자동 감지?
         passageContent.value = newPassage.content
         
         if (corePointTabs.value.length === 1 && corePointTabs.value[0].pasType === '독서론') {generateType.value = '독서론'}

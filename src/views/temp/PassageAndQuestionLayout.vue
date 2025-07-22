@@ -26,7 +26,7 @@
 
                 <!-- 오른쪽 영역 (지문 분석) -->
                 <div v-if="$slots.right" class="min-w-0 m-7 dev-border" :class="`flex-[${rightRatio}]`">
-                    <div class="flex flex-col gap-10 h-full">
+                    <div class="flex flex-col h-full">
                         <slot name="right" />
                     </div>
                 </div>

@@ -1,9 +1,9 @@
 <template>
     <!-- TipTap 에디터 -->
     <div
-        :class="['box-border pt-[1px]', isEditable?' border border-[#757575] ':'']">
+        :class="['box-border pt-[1px] ', isEditable?' border border-[#757575] ':'']">
         <editor-content :editor="editor"
-            :class="['w-full h-full text-[#303030] text-left',addClass]" />
+            :class="['text-[#303030] text-left ',addClass]" />
     </div>
 </template>
 <script setup>

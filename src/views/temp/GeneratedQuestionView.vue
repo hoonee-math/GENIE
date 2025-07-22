@@ -30,9 +30,9 @@
                                 <span>Q.</span>
                                 <TipTapEditor :initialContent="question.queQuery" :isEditable="editableQueryAndOption" @content-changed="handleQueQueryChange" :addClass="'text-2xl'"/>
                             </div>
-                            <!-- 수정 버튼을 누르면 #left 영역의 question.queQuery 값과 아래 question.queOption 값을 각각 수정할 수 있게 변경. 각각 TipTap Editor로 따로 구현하거나 더 나은방법 고려해보기. -->
+                            <!-- 수정 버튼을 누르면 #left 영역의 question.queQuery 값과 아래 question.queOption 값을 각각 수정할 수 있게 변경. 각각 TipTap Editor로 따로 구현하거나 더 나은방법 고려해보기. -->                            
                             <button @click="editQueQueryAndOption" class="flex flex-row justify-center items-center text-sm md:text-xl pl-2 py-3 w-[86px] h-[35px] left-[1485px] top-[50px] bg-[#CCCCCC] rounded-lg">
-                                수정
+                                {{ editableQueryAndOption ? '완료' : '수정' }}
                                 <Icon icon="mingcute:pencil-fill" width="20" height="20" class="mx-1" :class=" false ? 'text-[#0086FF]' : 'text-[#303030]'" />
                             </button>
                         </div>
@@ -47,7 +47,7 @@
                     </template>
                     <template #right>
                         
-                        <div class="box-border flex flex-col flex-1 items-start px-4 py-4 gap-4 w-full bg-white border border-[#E5E7EB] rounded-xl shadow-sm overflow-y-auto scrollbar-hide">
+                        <div class="box-border flex flex-col flex-1 items-start px-4 py-4 gap-4 w-full max-h-full bg-white border border-[#E5E7EB] rounded-xl shadow-sm overflow-y-auto scrollbar-hide">
                             <div class="flex flex-row items-center w-full gap-4">
                                 <p class="font-bold text-sm md:text-2xl leading-[150%] tracking-[-0.02em] text-[#303030]">
                                     정답
@@ -69,12 +69,12 @@
 
 
                                 <!-- 수정 버튼을 누르면 #right 영역의 question.queAnswer 값과 아래 question.description 값을 각각 수정할 수 있게 변경. -->
-                                <button @click="editQueAnswerAndDesc" class="flex flex-row justify-center items-center text-sm md:text-xl pl-2 py-3 w-[86px] h-[35px] left-[1485px] top-[50px] bg-[#CCCCCC] rounded-lg">
+                                <button @click="editQueAnswerAndDesc" class="flex flex-row justify-center items-center text-sm md:text-xl pl-2 py-3 w-[86px] h-[35px] bg-[#CCCCCC] rounded-lg">
                                     {{ editableAnswerAndDesc ? '완료' : '수정' }}
                                     <Icon icon="mingcute:pencil-fill" width="20" height="20" class="mx-1" :class=" false ? 'text-[#0086FF]' : 'text-[#303030]'" />
                                 </button>
                             </div>
-                            <div class="flex flex-col items-start gap-4 w-full flex-1">
+                            <div class="flex flex-col items-start gap-4 w-full">
                                 <p class="font-bold text-sm md:text-2xl leading-[150%] tracking-[-0.02em] text-[#303030] min-w-[80px] shrink-0">
                                     해설
                                 </p>
