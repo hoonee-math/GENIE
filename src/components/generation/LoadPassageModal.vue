@@ -159,6 +159,7 @@ const loadPreviews = async () => {
             PAS_CODE: item.pasCode,
             PAS_TITLE: item.title,
             PAS_CONTENT: item.content, // 리스트에서 미리보기용으로 포함
+            generateType: item.generateType,
             // PAS_KEYWORD: item.keyword,
             // PAS_GIST: item.gist,
             // PAS_DATE: item.date,

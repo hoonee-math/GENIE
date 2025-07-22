@@ -9,6 +9,10 @@
                         ? 'border-[#303030] text-[#303030]'
                         : 'border-[#bdbdbd] text-[#bdbdbd] hover:border-gray-400 hover:text-gray-400',
                 ]">
+                <span
+                    :class="[typeStyles[item.generateType] || typeStyles.default, 'px-3 py-1 rounded text-sm mr-2']">
+                    {{ item.generateType }}
+                </span>
                 {{ item.PAS_TITLE }}
             </div>
             <BaseButton
@@ -34,6 +38,13 @@ const props = defineProps({
 const emit = defineEmits(["preview", "activeItemChange"]);
 
 const activeItem = ref(null);
+
+const typeStyles = {
+    '독서론': 'bg-green-200 text-green-800',
+    '단일 지문': 'bg-blue-200 text-blue-800',
+    '복합 지문': 'bg-purple-200 text-purple-800',
+    default: 'bg-gray-200 text-gray-800'
+}
 
 watch(
     () => props.activeItemId,
