@@ -10,7 +10,7 @@
         </div>
 
         <div class="flex flex-col w-full h-full min-h-[500px] border border-gray-300 bg-white rounded-2xl">
-            <div v-if="$slots.pagination" class="flex w-full h-full min-w-0 m-7 mb-0">
+            <div v-if="$slots.pagination" class="flex  flex-1 w-full h-full min-w-0 m-7 mb-0">
                 <slot name="pagination" />
             </div>
             <div class="flex w-full h-full ">

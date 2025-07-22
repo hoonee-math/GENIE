@@ -75,6 +75,19 @@ export async function savePassageWithQuestionsToDatabase(saveRequestData) {
     }
 }
 
+// 문항 추가하기 요청
+export async function addQuestionToExistingPassageInDatabase(pasCode, questionData) {
+    try {
+        console.log('📝 [DB ADD] 문항 추가 요청:', pasCode, questionData);
+        const response = await apiPost(`/api/pass/ques/add/${pasCode}`, questionData);
+        console.log('📝 [DB ADD] 문항 추가 성공:', response);
+        return response;
+    } catch (error) {
+        console.error('📝 [DB ADD] 문항 추가 실패:', error);
+        throw error;
+    }
+}
+
 // 지문 + 문항 조회 (/api/pass/ques/select/{pasCode})
 export async function getPassageWithQuestionsFromDatabase(pasCode) {
     try {

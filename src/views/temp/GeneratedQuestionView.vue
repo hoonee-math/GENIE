@@ -199,7 +199,7 @@ const editQueAnswerAndDesc = () => {
 const currentPage = ref(1)
 const itemsPerPage = 1
 
-const totalPages = computed(() => Math.ceil(21 / itemsPerPage))
+const totalPages = computed(() => Math.ceil(questions.value.length / itemsPerPage))
 
 // 🔢 페이지 블록 범위 계산
 const pageBlockSize = 5
@@ -328,7 +328,9 @@ const addQuestion = async () => {
     loadingMessage.value = "문항을 추가하고 있습니다. 새로운 문항이 추가될 때까지 최대 3분이 소요될 수 있습니다.";
     try {
         // (custom_passage, selectedQuestionExample, generateType, pasCode) 
-        await addQuestionToExistingPassage(savedPassageContent.value, selectedQuestionExample.value, generateType, passage.value.pasCode)
+        await addQuestionToExistingPassage(savedPassageContent.value, selectedQuestionExample.value, generateType.value, passage.value.pasCode)
+        isQuestionExampleSelectorVisible.value = false;
+        
     } catch {
         console.log("GeneratedQuestionVeiw.addQuestion",error);
     } finally {
@@ -365,5 +367,12 @@ const closePaymentUsageModal = () => { isPaymentUsageModalOpen.value = false; };
 
 onMounted(() => {
     // generateType();
+    // 초기 로드 시 passage 데이터를 savedPassageContent에 설정
+    if (passage.value?.content) {
+        savedPassageContent.value = passage.value.content
+        savedPassageTitle.value = passage.value.title || ''
+    }
+    console.log("GeneratedQuestionView 로드시 초기화 진행된 데이터 출력 savedPassageContent ",savedPassageContent.value)
+    console.log("GeneratedQuestionView 로드시 초기화 진행된 데이터 출력 savedPassageTitle ",savedPassageTitle.value)
 })
 </script>

@@ -1,6 +1,6 @@
 import { computed } from "vue";
 import { useRouter } from "vue-router";
-import { savePassageWithQuestionsToDatabase, getPassageWithQuestionsFromDatabase, updatePassageWithQuestionsInDatabase } from "@/api/passage";
+import { savePassageWithQuestionsToDatabase, getPassageWithQuestionsFromDatabase, updatePassageWithQuestionsInDatabase, addQuestionToExistingPassageInDatabase } from "@/api/passage";
 import { generatePassageDataAPI, generateReadingPassageQuestionAPI, generateSinglePassageQuestionAPI, generateMultiplePassageQuestionAPI } from "@/api/generate";
 import { usePassageStore } from "@/stores/passage";
 import { usePassage } from "@/composables/usePassage";
@@ -54,7 +54,7 @@ export function useQuestion() {
   // ===== API 호출 =====
 
   /**
-   * 문항 생성 API 호출
+   * 문항 생성 API 호출, 사용하지 않음
    */
   const generateQuestion = async (questionData, title, content) => {
     const requestData = {
@@ -90,20 +90,30 @@ export function useQuestion() {
     */
   const addQuestionToExistingPassage = async (custom_passage, selectedQuestionExample, generateType, pasCode) => {
     try {
+      console.log("지문 데이터 받아오는지 체크: ", custom_passage);
       const requestToPython = vueToPython(custom_passage, selectedQuestionExample, generateType);
 
-      const apiFunction = selectPythonApiFunction(generateType);
+      const apiFunction = selectPythonApiFunction('',generateType);
       const responseFromPython = await apiFunction(requestToPython);
 
       // 문항 생성 성공시 데이터 저장 API 함수 호출
-      const requestToJava = pythonToJava(responseFromPython, custom_passage, pasCode);
-      const responseFromJava = await updatePassageWithQuestionsInDatabase(requestToJava);
+      // const requestToJava = pythonToJava(responseFromPython, custom_passage, pasCode);
+      const requestToJava = {
+        queQuery: responseFromPython.generated_question,
+        queOption: formatOption(responseFromPython.generated_option),
+        queAnswer: responseFromPython.generated_answer,
+        description: formatDescription(responseFromPython.generated_description),
+        // subpassage: responseFromPython.generated_subpassage,
+      }
 
+      const responseFromJava = await addQuestionToExistingPassageInDatabase(pasCode, requestToJava);
+      console.log("java 저장후 응답받아온 question Entity 상태 확인: ",responseFromJava)
       // 기존 passage에 새 문항만 추가해서 전체 업데이트
       const updatedPassage = {
           ...passageStore.passage,
-          questions: [...passageStore.passage.questions, ...responseFromJava.questions],
+          questions: [...passageStore.passage.questions, responseFromJava],
       }
+      console.log("문항 저장 성공후 저장한 문항을 pinia store에도 저장", updatedPassage)
 
       passageStore.setPassage(updatedPassage) // 기존 action 재사용!
 
@@ -148,7 +158,8 @@ export function useQuestion() {
   const selectPythonApiFunction = (activeTab, generateType) => {
     if (activeTab === "user") {
       return generatePassageDataAPI; // 해당 api 의 requestData는 
-    } // 분석 + 문항 생성 통합
+    } // 분석 + 문항 생성 통합\
+    console.log("selectPythonApiFunction 에 들어온 generateType 값 : ", generateType)
     const apiMap = {
       "단일 지문": generateSinglePassageQuestionAPI,
       "복합 지문": generateMultiplePassageQuestionAPI,
@@ -249,7 +260,7 @@ export function useQuestion() {
         question_choice_example: selectedQuestionExample.question,
         question_subpassage_example: selectedQuestionExample.subpassage || null
     };
-    
+    console.log("baseRequest 데이터 파싱", baseRequest);
     // activeTab이 'user'인 경우에는 generateType을 type_passage로 전달
     if (activeTab === 'user') {
         return { kind_passage: generateType, ...baseRequest };
@@ -257,36 +268,7 @@ export function useQuestion() {
         return baseRequest;
     }
   };
-  const pythonToJava = (responseFromPython, custom_passage, title = "Untitled") => {
-    console.log("Python 응답 변환 시작:", responseFromPython);
-    
-    // 1. 응답 타입 확인 (사용자 입력 vs 자료실)
-    const isUserInput = responseFromPython.detail && responseFromPython.question;
-    const questionData = isUserInput ? responseFromPython.question : responseFromPython;
-    const detailData = isUserInput ? responseFromPython.detail : null;
-    
-    // description 포맷팅 함수
-    const formatDescription = (generatedDescription) => {
-        if (!generatedDescription) {return "";}
-        
-        // 배열이 아닌 경우 그대로 반환
-        if (!Array.isArray(generatedDescription)) {return generatedDescription;}
-        
-        // 배열 길이에 따른 처리
-        if (generatedDescription.length === 2) {
-            // 각 항목 내의 \n을 </p><p>로 변환하고 <p>로 래핑
-            const formattedFirst = `<p>${generatedDescription[0].replace(/\n/g, '</p><p>')}</p>`;
-            const formattedSecond = `<p>${generatedDescription[1].replace(/\n/g, '</p><p>')}</p>`;
-            return formattedFirst + formattedSecond;
-        } else if (generatedDescription.length === 1) {
-            return generatedDescription[0];
-        } else {
-            // 예외 상황: 3개 이상이거나 빈 배열인 경우
-            console.warn('예상과 다른 description 배열 길이:', generatedDescription.length);
-            return generatedDescription.join('\n\n');
-        }
-    };
-
+  
     const formatOption = (generatedOption) => {
         console.log("generatedOption", generatedOption);
         if (!generatedOption) return "";
@@ -310,6 +292,37 @@ export function useQuestion() {
             return "";
         }
     }
+    
+    // description 포맷팅 함수
+    const formatDescription = (generatedDescription) => {
+        if (!generatedDescription) {return "";}
+        
+        // 배열이 아닌 경우 그대로 반환
+        if (!Array.isArray(generatedDescription)) {return generatedDescription;}
+        
+        // 배열 길이에 따른 처리
+        if (generatedDescription.length === 2) {
+            // 각 항목 내의 \n을 </p><p>로 변환하고 <p>로 래핑
+            const formattedFirst = `<p>${generatedDescription[0].replace(/\n/g, '</p><p>')}</p>`;
+            const formattedSecond = `<p>${generatedDescription[1].replace(/\n/g, '</p><p>')}</p>`;
+            return formattedFirst + formattedSecond;
+        } else if (generatedDescription.length === 1) {
+            return generatedDescription[0];
+        } else {
+            // 예외 상황: 3개 이상이거나 빈 배열인 경우
+            console.warn('예상과 다른 description 배열 길이:', generatedDescription.length);
+            return generatedDescription.join('\n\n');
+        }
+    };
+
+  const pythonToJava = (responseFromPython, custom_passage, title = "Untitled") => {
+    console.log("Python 응답 변환 시작:", responseFromPython);
+    
+    // 1. 응답 타입 확인 (사용자 입력 vs 자료실)
+    const isUserInput = responseFromPython.detail && responseFromPython.question;
+    const questionData = isUserInput ? responseFromPython.question : responseFromPython;
+    const detailData = isUserInput ? responseFromPython.detail : null;
+    
 
     // 2. descriptions 배열 생성
     const descriptions = [];
