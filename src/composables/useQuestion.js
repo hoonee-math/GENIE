@@ -103,7 +103,7 @@ export function useQuestion() {
         queOption: formatOption(responseFromPython.generated_option),
         queAnswer: responseFromPython.generated_answer,
         description: formatDescription(responseFromPython.generated_description),
-        // subpassage: responseFromPython.generated_subpassage,
+        queSubpassage: responseFromPython.generated_subpassage || "",
       }
 
       const responseFromJava = await addQuestionToExistingPassageInDatabase(pasCode, requestToJava);
@@ -373,7 +373,8 @@ export function useQuestion() {
         queQuery: questionData.generated_question,
         queOption: formatOption(questionData.generated_option),
         queAnswer: questionData.generated_answer,
-        description: formatDescription(questionData.generated_description)  // description 포맷팅 '정답 해설'과 '오답 피하기' 가 배열로 저장되는 문제 처리 -> java에서는 String으로 저장되고 정답 및 해설도 Tiptap을 이용해 출력해주는 것으로 통일하기 위해 html 로 변환
+        description: formatDescription(questionData.generated_description),  // description 포맷팅 '정답 해설'과 '오답 피하기' 가 배열로 저장되는 문제 처리 -> java에서는 String으로 저장되고 정답 및 해설도 Tiptap을 이용해 출력해주는 것으로 통일하기 위해 html 로 변환
+        queSubpassage: questionData.generated_subpassage || ''
     }];
     
     // 4. quoted_sentence와 quoted_word를 사용하여 지문에 밑줄 적용

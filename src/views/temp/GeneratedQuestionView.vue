@@ -35,9 +35,12 @@
                                 <Icon icon="mingcute:pencil-fill" width="20" height="20" class="mx-1" :class=" false ? 'text-[#0086FF]' : 'text-[#303030]'" />
                             </button>
                         </div>
+                        <div v-if="existQueSubpassage">
+                            <TipTapEditor :initialContent="question.queSubpassage" :isEditable="editableQueryAndOption" @content-changed="handleQueSubpassageChange" :addClass="'text-xl leading-10'"/>
+                        </div>
                         <!-- question.queOption 은 div 대신 TipTap editor를 이용해 출력해주기. 기본값 editable=false, question.queQuery 옆의 수정 버튼을 눌러 question.queOption의 editable 갑도 true로 변경-->
                         <div>
-                            <!-- 현재 question.queOption는 배열 형식인데 String 으로 수정 예정, 임시로 배열을 String으로 바꿔서 TipTap 에디터에 넣어주기. -->
+                            <!-- question.queOption 영역 -->
                             <TipTapEditor :initialContent="question.queOption" :isEditable="editableQueryAndOption" @content-changed="handleQueOptionChange" :addClass="'text-xl leading-10'"/>
                         </div>
                     </template>
@@ -162,6 +165,7 @@ import { usePassage } from '@/composables/usePassage';
 import TipTapEditor from './TipTapEditor.vue'
 import QuestionExampleSelector from './QuestionExampleSelector.vue'
 import PaymentUsageModal from "@/components/generation/PaymentUsageModal.vue";
+import LoadingModal from '@/components/common/LoadingModal.vue'
 
 // Router 및 Composables
 const router = useRouter()
@@ -176,6 +180,7 @@ const isQuestionExampleSelectorVisible = ref(false)
 const isPaymentUsageModalOpen = ref(false); // 결제 사용 모달 
 const paymentUsageModalRef = ref(null);
 const loadingMessage = ref('');
+const existQueSubpassage = ref(false); // question 에 queSubpassage 데이터가 있는지 확인
 
 // queAnswer 값은 각 question 값에 딸라 초기값이 달라짐. 나중에 구현할 하단 문항을 페이지네이션 처리하게되면 각 question 에 따라서 그 값이 달라지므로 수정 필요
 const queAnswer = ref('①')
@@ -197,19 +202,12 @@ const editQueAnswerAndDesc = () => {
 
 // 페이징 처리 관련 함수
 const currentPage = ref(1)
-const itemsPerPage = 1
-
-const totalPages = computed(() => Math.ceil(questions.value.length / itemsPerPage))
+const totalPages = computed(() => Math.ceil(questions.value.length))
 
 // 🔢 페이지 블록 범위 계산
 const pageBlockSize = 5
 const currentPageBlockStart = computed(() => Math.floor((currentPage.value - 1) / pageBlockSize) * pageBlockSize + 1)
 const currentPageBlockEnd = computed(() => Math.min(currentPageBlockStart.value + pageBlockSize - 1, totalPages.value))
-
-const paginatedQuestion = computed(() => {
-    const start = (currentPage.value - 1) * itemsPerPage
-    return questions.value.slice(start, start + itemsPerPage)
-})
 
 const goToPage = (page) => {
     currentPage.value = page
@@ -256,9 +254,11 @@ const handlePassageContentChange = ({ content, textLength }) => {
 const savedQueQuery = ref('')
 const savedQueOption = ref('')
 const savedDescription = ref('')
+const savedQueSubpassage = ref('')
 const queQueryLength = ref(0)
 const queOptionLength = ref(0)
 const queDescriptionLength = ref(0)
+const queSubpassageLenght = ref=(0)
 const numberLength = ref(3000)
 
 // TipTapEditor 콘텐츠 변경 핸들러
@@ -281,6 +281,13 @@ const handelQueDescriptionChange = ({ content, textLength }) => {
   console.log('Length:', textLength)
   savedDescription.value = content
   queDescriptionLength.value = textLength
+    isSaved.value = false // 저장하기 버튼 활성화
+}
+const handleQueSubpassageChange = ({ content, textLength }) => {
+  console.log('Content:', content)
+  console.log('Length:', textLength)
+  savedQueSubpassage.value = content
+  queSubpassageLenght.value = textLength
     isSaved.value = false // 저장하기 버튼 활성화
 }
 
