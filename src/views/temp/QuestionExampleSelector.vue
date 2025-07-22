@@ -112,7 +112,7 @@ import questionExampleData from '@/assets/data/question_example.json';
 import PassageAndQuestionLayout from "./PassageAndQuestionLayout.vue";
 
 const props = defineProps({
-    generateType: String, // 부모에서 절달된 내용
+    generateType: {type: String}, // 부모에서 절달된 내용
 });
 
 const emit = defineEmits(["selectedQuestionExample"]); // 부모 컴포넌트로 선택된 문항 전달
@@ -139,6 +139,7 @@ const questionTypes = ref([
 
 // 1. 기본 questions를 구조별로 필터링
 const questions = computed(() => {
+    console.log("======= 부모로부터 전달받은 값",props.generateType);
     // structure 타입 결정, props.generateType에서 공백 제거, question_example.json의 구조에 맞게 처리하여 필터링
     let structureType = props.generateType.replace(/\s/g, '');
     

@@ -157,8 +157,8 @@ import QuestionExampleSelector from './QuestionExampleSelector.vue'
 
 // Router 및 Composables
 const router = useRouter()
-const { passage, addQuestionToExistingPassage } = useQuestion()
-const { corePointTabs } = usePassage();
+const { addQuestionToExistingPassage } = useQuestion()
+const { passage, corePointTabs } = usePassage()
 
 const isLoading = ref(false)
 const isSaved = ref(true)
@@ -281,12 +281,29 @@ const handleQuestionSelected = (questionExample) => {
     // console.log('받은 문항 데이터:', questionExample);
 }
 const showQuestionExampleSelector = () => {
+    // 버튼을 클릭하는 시점에 generateType 계산
+    generateType.value = calculateGenerateType()
+    console.log("✅ 계산된 generateType:", generateType.value)
     isQuestionExampleSelectorVisible.value = true
 }
-const generateType = () => {
-    if (corePointTabs.value.length === 1 && corePointTabs.value[0].pasType === '독서론') {return '독서론'}
-    else if (corePointTabs.value.length === 1) return '단일 지문'
-    else if (corePointTabs.value.length > 1) return '복합 지문'
+// computed 대신 ref로 변경
+const generateType = ref('단일 지문')
+
+// 또는 계산 함수로 분리
+const calculateGenerateType = () => {
+    if (!passage.value?.descriptions?.length) {
+        return '단일 지문'
+    }
+    
+    const descriptions = passage.value.descriptions
+    if (descriptions.length === 1 && descriptions[0]?.pasType === '독서론') {
+        return '독서론'
+    } else if (descriptions.length === 1) {
+        return '단일 지문'
+    } else if (descriptions.length > 1) {
+        return '복합 지문'
+    }
+    return '단일 지문'
 }
 
 // 문항 추가 함수
