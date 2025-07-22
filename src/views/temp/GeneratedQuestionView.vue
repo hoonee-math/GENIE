@@ -112,7 +112,7 @@
                     ]">
                     직접 입력하기
                 </button>
-                <button @click="generateQuestion" :disabled="isLoading"
+                <button @click="openPaymentUsageModal" :disabled="isLoading"
                     :class="[
                         'px-8 py-4 text-lg font-medium rounded-lg transition-all duration-200',
                         isLoading 
@@ -132,17 +132,24 @@
                     <span v-else>문항 생성하기</span>
                 </button>
             </div>
-
-            <!-- 문항 생성 확인 모달 -->
-            <ConfirmModalComponent :isOpen="isConfirmModalOpen" title="글자 수를 확인해 주세요."
-                message="500자 이하의 지문으로 정상적인 문항을 생성하기 어렵습니다. 충분한 지문을 입력해 주세요." @close="isConfirmModalOpen = false"
-                @confirm="isConfirmModalOpen = false" />
-
-            <!-- 로딩 모달 -->
-            <LoadingModal :isOpen="isLoading" :message="loadingMessage" />
-
         </template>
     </GeneratedPassageView>
+
+    <!-- 문항 생성 확인 모달 -->
+    <ConfirmModalComponent :isOpen="isConfirmModalOpen" title="글자 수를 확인해 주세요."
+        message="500자 이하의 지문으로 정상적인 문항을 생성하기 어렵습니다. 충분한 지문을 입력해 주세요." @close="isConfirmModalOpen = false"
+        @confirm="isConfirmModalOpen = false" />
+
+
+    <!-- 로딩 모달 -->
+    <LoadingModal :isOpen="isLoading" :message="loadingMessage" />
+
+    <PaymentUsageModal
+        ref="paymentUsageModalRef"
+        :isOpen="isPaymentUsageModalOpen"
+        @close="closePaymentUsageModal"
+        @generate="handleGenerate"
+    />
 </template>
 
 <script setup>
@@ -154,6 +161,7 @@ import { useQuestion } from '@/composables/useQuestion'
 import { usePassage } from '@/composables/usePassage';
 import TipTapEditor from './TipTapEditor.vue'
 import QuestionExampleSelector from './QuestionExampleSelector.vue'
+import PaymentUsageModal from "@/components/generation/PaymentUsageModal.vue";
 
 // Router 및 Composables
 const router = useRouter()
@@ -165,6 +173,8 @@ const isSaved = ref(true)
 const editableQueryAndOption = ref(false)
 const editableAnswerAndDesc = ref(false)
 const isQuestionExampleSelectorVisible = ref(false)
+const isPaymentUsageModalOpen = ref(false); // 결제 사용 모달 
+const paymentUsageModalRef = ref(null);
 
 // queAnswer 값은 각 question 값에 딸라 초기값이 달라짐. 나중에 구현할 하단 문항을 페이지네이션 처리하게되면 각 question 에 따라서 그 값이 달라지므로 수정 필요
 const queAnswer = ref('①')
@@ -329,6 +339,111 @@ const savePassageAndQuestion = async () => {
     // 현재 미구현 상태
     // await updateQuestion()
 }
+
+// payment 모달 관련 함수
+
+// 결제 사용 모달 관련 함수
+const openPaymentUsageModal = () => {
+    
+    isPaymentUsageModalOpen.value = true;
+    if (checkContentLength(new Event("click"))) {
+        // 저장된 지문 데이터를 로컬 스토리지에 임시 저장
+        const passageData = {
+            // title: title.value,
+            // content: content.value,
+            // summary: summary.value,
+            // pasCode: pasCode.value,
+            // type: type.value,
+            // keyword: keyword.value,
+        };
+        // localStorage.setItem(
+        //     "generateQuestionPassageData",
+        //     JSON.stringify(passageData)
+        // );
+
+        // 모달 열기 전에 이용권 정보 갱신
+        if (
+            paymentUsageModalRef.value &&
+            paymentUsageModalRef.value.updateCreditCount
+        ) {
+            authStore.updateTicketCount().then((count) => {
+                paymentUsageModalRef.value.updateCreditCount(count);
+
+                // 갱신 후 모달 열기
+                isPaymentUsageModalOpen.value = true;
+            });
+        } else {
+            // ref나 초기화 메서드가 없어도 모달은 열어줌
+            isPaymentUsageModalOpen.value = true;
+        }
+    }
+};
+
+const closePaymentUsageModal = () => {
+    isPaymentUsageModalOpen.value = false;
+};
+
+const handleGenerate = () => {
+    if (isProcessing.value) {
+        return;
+    }
+
+    closePaymentUsageModal();
+    // 재생성 처리 로직
+    isProcessing.value = true;
+    isLoading.value = true;
+    loadingMessage.value =
+        "지문을 재생성 중입니다.\n재생성까지 최대 3분이 소요될 수 있습니다.";
+
+    // 로컬 스토리지에서 문자열로 데이터 가져오기
+    const savedGenerateDataStr = localStorage.getItem("genieq-passage-data");
+
+    if (!savedGenerateDataStr) {
+        isLoading.value = false;
+        return;
+    }
+
+    // 문자열을 객체로 파싱
+    let savedGenerateData;
+    try {
+        savedGenerateData = JSON.parse(savedGenerateDataStr);
+    } catch (error) {
+        alert("지문 데이터 처리 중 오류가 발생했습니다.");
+        isLoading.value = false;
+        return;
+    }
+
+    const requestData = {
+        type_passage: savedGenerateData.type,
+        keyword: [savedGenerateData.keyword],
+    };
+
+    fetch("/fastapi/generate-passage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestData),
+    })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(`API 호출 실패: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then((data) => {
+            savePassageToBackend(data);
+            isContentChanged.value = false;
+            hasManualSave.value = true;
+        })
+        .catch((error) => {
+            isLoading.value = false;
+            isProcessing.value = false;
+        })
+        .finally(() => {
+            isLoading.value = false;
+            isProcessing.value = false;
+        });
+};
+const savePassageToBackend = (data) => {}
 
 onMounted(() => {
     // generateType();

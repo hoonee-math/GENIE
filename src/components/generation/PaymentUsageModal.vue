@@ -103,7 +103,8 @@ import { ref, watch, onMounted } from "vue";
 import BaseModal from "@/components/common/BaseModal.vue";
 import BaseButton from "@/components/common/BaseButton.vue";
 import { useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/auth";
+// import { useAuthStore } from "@/stores/auth";
+import { useAuth } from "@/composables/useAuth";
 
 const router = useRouter();
 const emit = defineEmits(["close", "generate", "credit-update"]);
@@ -128,13 +129,14 @@ const props = defineProps({
 });
 
 const creditcount = ref(0);
-const authStore = useAuthStore();
+// const authStore = useAuthStore();
+const { updateTicketCount } = useAuth();
 
 watch(
   () => props.isOpen,
   (newVal) => {
     if (newVal === true) {
-      authStore.updateTicketCount().then((count) => {
+      updateTicketCount().then((count) => {
         creditcount.value = count;
       });
     }
@@ -147,8 +149,7 @@ const updateCreditCount = (count) => {
 };
 
 onMounted(() => {
-  authStore
-    .updateTicketCount()
+  updateTicketCount()
     .then((count) => {
       creditcount.value = count;
       emit("credit-update", creditcount.value);

@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
 import { logoutAPI, refreshTokenAPI } from '@/api/auth'; // ✅ API 모듈에서 import
-import { getUserTicketDirectAPI } from '@/api/user'; // ✅ 티켓 API 추가
+import { getUserTicketAPI  } from '@/api/user'; // ✅ 티켓 API 추가
 
 /**
  * 보안 우선 인증 스토어 (Setup Store)
@@ -201,7 +201,7 @@ export const useAuthStore = defineStore('auth', () => {
     
         try {
             // ✅ API 모듈 사용으로 변경
-            const data = await getUserTicketDirectAPI();
+            const data = await getUserTicketAPI();
             const newTicketCount = parseInt(data.balance) || 0;
     
             if (user.value) {
