@@ -44,7 +44,7 @@ async def create_single_passage_question(request: QuestionRequest) -> SinglePass
         logger.debug(f"문항 생성 가이드라인 불러오기 : {question_guidelines[:30]}...")
 
         system_prompt = f"""당신은 대한민국 대학수학능력시험(College Scholastic Ability Test, Republic of Korea) 국어 영역 독서 분야 비문학 지문에 대한 한 개의 문항을 작성하는 시험 출제 전문가이다.
-아래 지문을 기반으로 제시된 문제문 형식과 예시 문항을 참고하여 {request.type_question} 유형 문항을 작성하라. 
+아래 지문을 기반으로 제시된 문제문 형식과 예시 문항을 참고하여 같은 원리로 {request.type_question} 유형 문항을 작성하라. 
 지문의 논점, 문항 작성 원칙은 다음과 같다.
 
 ---
@@ -102,10 +102,10 @@ async def create_single_passage_question(request: QuestionRequest) -> SinglePass
 - [A]가 가리킬 **문단 1개(\\n\\n으로 각 문단이 구분되어 있다.)**를 그대로 quoted_paragraph에 담는다.
 
 2. 문제문에 ㉠과 같은 기호가 포함된 경우:
-- 해당 기호가 가리키는 어구를 포함하는 지문 속 문장을 찾아, 그 문장을 quoted_sentence에 담는다.
-- 해당 기호가 가리키는 어구 자체는 quoted_word에 담는다.
+- 해당 기호가 가리키는 어구를 포함하는 지문 속 문장을 찾아, 그 문장을 그대로 quoted_sentence에 담는다.
+- 해당 기호가 가리키는 어구 자체는 그대로 quoted_word에 담는다.
 - ex)
-quoted_sentence : 경마식 보도는 경마 중계를 하듯 지지율 변화나 득표율 예측 등을 집중 보도하는 선거 방송의 한 방식이다.
+quoted_sentence(기호를 담지 말 것) : 경마식 보도는 경마 중계를 하듯 지지율 변화나 득표율 예측 등을 집중 보도하는 선거 방송의 한 방식이다.
 quoted_word : 경마식 보도
 
 3. 문제문에 [A]와 ㉠ 같은 기호가 **동시에 포함된 경우**:
@@ -131,7 +131,8 @@ quoted_word
 ## 답변 출력 형식
 
 - 해설은 선지 번호(①, ②, ③, ④, ⑤)를 활용하여 <정답 및 해설 예시>를 참고해 [정답해설]과 [오답피하기]로 작성한다.
-- 정답은 선지 번호(①, ②, ③, ④, ⑤)로 출력하고, 선지 출력 결과 안에는 선지 번호(①, ②, ③, ④, ⑤)를 포함하지 않는다.
+- 정답은 선지 번호(①, ②, ③, ④, ⑤)로 출력한다.
+- 선지 출력 결과 안에는 선지 번호(①, ②, ③, ④, ⑤)를 절대 포함하지 않는다.
 - 마크다운 코드 블록(```) 없이, 반드시 아래 JSON 형식을 만족하는 답변을 출력한다.
 {{
     "generated_question": String "문제문",
