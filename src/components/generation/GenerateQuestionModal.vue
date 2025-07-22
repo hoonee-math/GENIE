@@ -1,141 +1,85 @@
 <template>
     <BaseModal :isOpen="isOpen" width="80vw" height="80vh" @close="closeModal">
-        <div
-            class="w-full h-full flex flex-col items-start gap-4 box-border max-w-[1232px] max-h-[968px]"
-        >
+        <div class="w-full h-full flex flex-col items-start gap-4 box-border max-w-[1232px] max-h-[968px]">
             <h1
-                class="w-full font-pretendard font-bold text-lg md:text-xl leading-[150%] tracking-[-0.02em] text-[#303030]"
-            >
+                class="w-full font-pretendard font-bold text-lg md:text-xl leading-[150%] tracking-[-0.02em] text-[#303030]">
                 문항 생성하기
             </h1>
 
             <div class="flex flex-col gap-3 w-full">
                 <!-- 문항 유형 -->
-                <div
-                    class="flex flex-col md:flex-row items-start md:items-center gap-4"
-                >
-                    <span
-                        class="font-pretendard font-normal text-sm leading-[150%] tracking-[-0.02em] text-[#424242]"
-                    >
+                <div class="flex flex-col md:flex-row items-start md:items-center gap-4">
+                    <span class="font-pretendard font-normal text-sm leading-[150%] tracking-[-0.02em] text-[#424242]">
                         문항 유형
                     </span>
-                    <div
-                        class="flex flex-wrap gap-2 md:gap-4 overflow-x-auto w-full md:w-auto"
-                    >
-                        <BaseButton
-                            v-for="type in questionPattern"
-                            :key="type.id"
-                            :text="type.label"
-                            type="type3"
-                            :width="type.width"
-                            class="transition-all duration-200"
-                            :class="{
+                    <div class="flex flex-wrap gap-2 md:gap-4 overflow-x-auto w-full md:w-auto">
+                        <BaseButton v-for="type in questionPattern" :key="type.id" :text="type.label" type="type3"
+                            :width="type.width" class="transition-all duration-200" :class="{
                                 'bg-[#e6f3ff] border-none text-[#0066cc]':
                                     activePattern === type.label,
                                 'bg-white border-[#bdbdbd] text-[#757575] hover:border-[#0086ff] hover:text-[#0086ff]':
                                     activePattern !== type.label,
-                            }"
-                            @click="activePattern = type.label"
-                        />
+                            }" @click="activePattern = type.label" />
                     </div>
                 </div>
 
                 <!-- 서술 방식 -->
-                <div
-                    class="flex flex-col md:flex-row items-start md:items-center gap-4"
-                >
-                    <span
-                        class="font-pretendard font-normal text-sm leading-[150%] tracking-[-0.02em] text-[#424242]"
-                    >
+                <div class="flex flex-col md:flex-row items-start md:items-center gap-4">
+                    <span class="font-pretendard font-normal text-sm leading-[150%] tracking-[-0.02em] text-[#424242]">
                         서술 방식
                     </span>
-                    <div
-                        class="flex flex-wrap gap-2 md:gap-4 overflow-x-auto w-full md:w-auto"
-                    >
-                        <BaseButton
-                            v-for="type in questionTypes"
-                            :key="type.id"
-                            :text="type.label"
-                            type="type3"
-                            :width="type.width"
-                            height="40px"
-                            class="transition-all duration-200"
-                            :class="{
+                    <div class="flex flex-wrap gap-2 md:gap-4 overflow-x-auto w-full md:w-auto">
+                        <BaseButton v-for="type in questionTypes" :key="type.id" :text="type.label" type="type3"
+                            :width="type.width" height="40px" class="transition-all duration-200" :class="{
                                 'bg-[#e6f3ff] border-none text-[#0066cc]':
                                     activeType === type.label,
                                 'bg-white border-[#bdbdbd] text-[#757575] hover:border-[#0086ff] hover:text-[#0086ff]':
                                     activeType !== type.label,
-                            }"
-                            @click="activeType = type.label"
-                        />
+                            }" @click="activeType = type.label" />
                     </div>
                 </div>
             </div>
 
             <!-- 예시 그룹 -->
-            <div
-                class="flex flex-col lg:flex-row gap-4 md:gap-5 flex-1 w-full overflow-hidden"
-            >
+            <div class="flex flex-col lg:flex-row gap-4 md:gap-5 flex-1 w-full overflow-hidden">
                 <!-- 예시 목록 -->
                 <div
-                    class="w-full flex-1 h-full rounded-[20px] border border-[#bdbdbd] p-4 md:p-5 flex items-center justify-center overflow-hidden"
-                >
-                    <div
-                        v-if="filteredQuestions.length > 0"
-                        class="flex flex-col gap-4 w-full h-full overflow-y-auto"
-                    >
-                        <div
-                            v-for="(item, index) in filteredQuestions"
-                            :key="index"
+                    class="w-full flex-1 h-full rounded-[20px] border border-[#bdbdbd] p-4 md:p-5 flex items-center justify-center overflow-hidden">
+                    <div v-if="filteredQuestions.length > 0" class="flex flex-col gap-4 w-full h-full overflow-y-auto">
+                        <div v-for="(item, index) in filteredQuestions" :key="index"
                             class="w-full h-24 rounded-[20px] border border-[#bdbdbd] p-4 flex flex-col items-start gap-2.5 cursor-pointer transition-all duration-200 hover:border-[#0086ff] hover:bg-[#e6f3ff]"
                             :class="{
                                 'border-[#0086ff] bg-[#e6f3ff]':
                                     JSON.stringify(selectedQuestion) ===
                                     JSON.stringify(item),
-                            }"
-                            @click="selectedQuestion = item"
-                        >
+                            }" @click="selectedQuestion = item">
                             <span
-                                class="px-2 py-1 rounded-lg border border-[#0086ff] text-[#0086ff] bg-[#cce5ff] font-semibold text-xs md:text-sm leading-[150%] tracking-[-0.02em]"
-                            >
+                                class="px-2 py-1 rounded-lg border border-[#0086ff] text-[#0086ff] bg-[#cce5ff] font-semibold text-xs md:text-sm leading-[150%] tracking-[-0.02em]">
                                 {{ item.pattern }}
                             </span>
                             <div
-                                class="font-medium text-xs md:text-sm leading-[150%] tracking-[-0.02em] text-[#303030]"
-                            >
+                                class="font-medium text-xs md:text-sm leading-[150%] tracking-[-0.02em] text-[#303030]">
                                 {{ item.title }}
                             </div>
                         </div>
                     </div>
-                    <div
-                        v-else
-                        class="font-bold text-base md:text-lg leading-[150%] tracking-[-0.02em] text-center"
-                    >
+                    <div v-else class="font-bold text-base md:text-lg leading-[150%] tracking-[-0.02em] text-center">
                         문항 유형과 서술 방식을 선택해 주세요.
                     </div>
                 </div>
 
                 <!-- 미리보기 -->
                 <div
-                    class="w-full flex-1 h-full rounded-[20px] border border-[#bdbdbd] p-4 md:p-6 flex flex-col items-start overflow-hidden"
-                >
-                    <h2
-                        class="font-bold text-base md:text-lg leading-[150%] tracking-[-0.02em] mb-6 md:mb-8"
-                    >
+                    class="w-full flex-1 h-full rounded-[20px] border border-[#bdbdbd] p-4 md:p-6 flex flex-col items-start overflow-hidden">
+                    <h2 class="font-bold text-base md:text-lg leading-[150%] tracking-[-0.02em] mb-6 md:mb-8">
                         문항 미리보기
                     </h2>
-                    <div
-                        v-if="selectedQuestion"
-                        class="w-full h-full overflow-y-auto"
-                    >
-                        <div
-                            class="font-normal text-base md:text-lg leading-[150%] tracking-[-0.02em] mb-3 text-left"
-                        >
+                    <div v-if="selectedQuestion" class="w-full h-full overflow-y-auto">
+                        <div class="font-normal text-base md:text-lg leading-[150%] tracking-[-0.02em] mb-3 text-left">
                             {{ selectedQuestion.title }}
                         </div>
                         <div
-                            class="font-normal text-xs md:text-sm leading-10 tracking-[-0.02em] whitespace-pre-wrap text-left"
-                        >
+                            class="font-normal text-xs md:text-sm leading-10 tracking-[-0.02em] whitespace-pre-wrap text-left">
                             {{ selectedQuestion.question }}
                         </div>
                     </div>
@@ -143,31 +87,14 @@
             </div>
 
             <!-- 버튼 영역 -->
-            <div
-                class="flex flex-col sm:flex-row gap-2.5 self-end w-full sm:w-auto"
-            >
+            <div class="flex flex-col sm:flex-row gap-2.5 self-end w-full sm:w-auto">
                 <div class="flex gap-2.5 w-full sm:w-auto relative">
-                    <PlainTooltip
-                        id="tooltip"
-                        message="생성 시 이용권 1회 차감"
-                        width="205px"
-                        class="absolute -top-14 right-0"
-                    />
-                    <BaseButton
-                        text="닫기"
-                        type="type3"
-                        height="54px"
-                        class="w-full sm:w-auto px-8 text-sm"
-                        @click="closeModal"
-                    />
-                    <BaseButton
-                        :text="createText"
-                        type="type1"
-                        height="54px"
-                        class="w-full sm:w-auto px-8 text-sm"
-                        :disabled="!selectedQuestion"
-                        @click.once="handleGenerateQuestion"
-                    />
+                    <PlainTooltip id="tooltip" message="생성 시 이용권 1회 차감" width="205px"
+                        class="absolute -top-14 right-0" />
+                    <BaseButton text="닫기" type="type3" height="54px" class="w-full sm:w-auto px-8 text-sm"
+                        @click="closeModal" />
+                    <BaseButton :text="createText" type="type1" height="54px" class="w-full sm:w-auto px-8 text-sm"
+                        :disabled="!selectedQuestion" @click.once="handleGenerateQuestion" />
                 </div>
             </div>
         </div>

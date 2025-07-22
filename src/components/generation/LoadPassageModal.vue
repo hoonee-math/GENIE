@@ -153,7 +153,7 @@ const loadPreviews = async () => {
     try {
         // usePassage.js의 fetchPassageList 사용 (캐시 우선 + API 호출)
         const listData = await fetchPassageList();
-        
+
         // LoadPassageModal에서 사용하는 데이터 형식으로 변환
         passages.value = listData.map((item) => ({
             PAS_CODE: item.pasCode,
@@ -164,14 +164,14 @@ const loadPreviews = async () => {
             // PAS_DATE: item.date,
             // PAS_FAVORITE: item.favorite,
         }));
-        
+
         // 첫 번째 지문 선택
         if (passages.value.length > 0) {
             const firstPassage = passages.value[0];
             selectedPassageId.value = firstPassage.PAS_CODE;
             selectedPassage.value = null;
         }
-        
+
         console.log('📜 LoadPassageModal 리스트 로드 완료, 개수:', passages.value.length);
     } catch (error) {
         console.error('LoadPassageModal 리스트 로드 실패:', error);
@@ -186,9 +186,9 @@ const handleActiveItemChange = (itemId) => {
 
 // 불러오기 버튼 클릭 시 처리
 const handleLoadPassage = async () => {
-        // 선택된 ID만 부모에게 전달
-        emit("selectPasCode", selectedPassageId.value);
-        closeModal();
+    // 선택된 ID만 부모에게 전달
+    emit("selectPasCode", selectedPassageId.value);
+    closeModal();
 };
 
 const handleSearch = (event) => {
