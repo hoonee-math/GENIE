@@ -151,16 +151,16 @@ export const useAuthStore = defineStore("auth", () => {
 
     refreshPromise.value = (async () => {
       try {
-        console.log("httpOnly 쿠키로 토큰 갱신 시도...");
+        // console.log("httpOnly 쿠키로 토큰 갱신 시도...");
 
         // ✅ API 모듈 사용으로 변경
         const tokenData = await refreshTokenAPI();
         setTokens(tokenData);
-        console.log("토큰 갱신 성공");
+        // console.log("토큰 갱신 성공");
         setupTokenRefresh();
         return true;
       } catch (err) {
-        console.error("토큰 갱신 오류:", err);
+        // console.error("토큰 갱신 오류:", err);
 
         // 401 에러일 때만 강제 로그아웃
         if (err.status === 401) {
@@ -232,7 +232,7 @@ export const useAuthStore = defineStore("auth", () => {
 
   // 로그아웃 (httpOnly 쿠키도 삭제)
   async function logout() {
-    console.log("=== 보안 우선 로그아웃 시작 ===");
+    // console.log("=== 보안 우선 로그아웃 시작 ===");
 
     try {
       // 1. 토큰이 있을 때 서버 로그아웃 먼저 호출 (중요!)
@@ -252,7 +252,7 @@ export const useAuthStore = defineStore("auth", () => {
     isAuthenticated.value = false;
     expiresAt.value = null;
 
-    console.log("로그아웃 완료");
+    // console.log("로그아웃 완료");
   }
 
   // 강제 로그아웃 (메모리만 정리)

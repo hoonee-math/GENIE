@@ -34,19 +34,19 @@ export function useAuth() {
         error.value = null;
         
         try {
-            console.log('=== 보안 우선 로그인 시작 ===');
-            console.log('이메일:', email);
-            console.log('자동 로그인:', autoLogin);
+            // console.log('=== 보안 우선 로그인 시작 ===');
+            // console.log('이메일:', email);
+            // console.log('자동 로그인:', autoLogin);
             
             // API 호출 (httpOnly 쿠키 자동 설정)
-            console.log('useAuth: loginAPI 호출 시작');
+            // console.log('useAuth: loginAPI 호출 시작');
             const loginData = await loginAPI(email, password);
-            console.log('useAuth: loginAPI 응답 데이터:', loginData);
+            // console.log('useAuth: loginAPI 응답 데이터:', loginData);
             
             // 인증 스토어에 토큰 저장 (메모리에만)
-            console.log('useAuth: authStore.setTokens 호출');
+            // console.log('useAuth: authStore.setTokens 호출');
             authStore.setTokens(loginData);
-            console.log('useAuth: authStore.setTokens 완료');
+            // console.log('useAuth: authStore.setTokens 완료');
             
             // 사용자 정보 저장 (autoLogin 설정에 따라)
             authStore.saveUserInfo(autoLogin);
@@ -54,7 +54,7 @@ export function useAuth() {
             // 자동 토큰 갱신 스케줄링
             authStore.setupTokenRefresh();
             
-            console.log('로그인 성공:', loginData.name);
+            // console.log('로그인 성공:', loginData.name);
             return true;
             
         } catch (err) {
@@ -74,12 +74,12 @@ export function useAuth() {
         error.value = null;
         
         try {
-            console.log('=== 보안 우선 로그아웃 시작 ===');
+            // console.log('=== 보안 우선 로그아웃 시작 ===');
             
             // 서버 로그아웃 (httpOnly 쿠키 삭제)
             await authStore.logout();
             
-            console.log('로그아웃 완료');
+            // console.log('로그아웃 완료');
             
             // 로그인 페이지로 리다이렉트
             if (redirectTo) {
@@ -107,7 +107,7 @@ export function useAuth() {
         error.value = null;
         
         try {
-            console.log('=== 자동 로그인 체크 시작 ===');
+            // console.log('=== 자동 로그인 체크 시작 ===');
             
             // 인증 상태 초기화 (httpOnly 쿠키 토큰 갱신 포함)
             const success = await authStore.initializeAuth();

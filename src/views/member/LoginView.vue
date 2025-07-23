@@ -202,11 +202,11 @@ function validateEmail() {
 // 로그인 처리
 // 로그인 처리 - 보안 우선 인증 시스템 사용
 async function loginHandler() {
-    console.log('=== LoginView: 로그인 처리 시작 ===');
+    // console.log('=== LoginView: 로그인 처리 시작 ===');
     
     validateEmail();
     if (!canSubmit.value) {
-        console.log('LoginView: 폼 유효성 검사 실패');
+        // console.log('LoginView: 폼 유효성 검사 실패');
         return;
     }
     
@@ -215,13 +215,13 @@ async function loginHandler() {
     try {
         // 필요할 때만 useAuth 호출
         const { login } = getAuth();
-        console.log('LoginView: useAuth.login() 호출 전');
+        // console.log('LoginView: useAuth.login() 호출 전');
         const success = await login(email.value, password.value, autoLogin.value);
-        console.log('LoginView: useAuth.login() 결과:', success);
+        // console.log('LoginView: useAuth.login() 결과:', success);
         
         if (success) {
-            console.log('로그인 성공 - 새로운 보안 우선 시스템 적용');
-            console.log('LoginView: /home으로 리다이렉트 시도');
+            // console.log('로그인 성공 - 새로운 보안 우선 시스템 적용');
+            // console.log('LoginView: /home으로 리다이렉트 시도');
             router.push("/home");
         } else {
             console.log('LoginView: 로그인 실패 - success = false');

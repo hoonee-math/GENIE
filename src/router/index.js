@@ -17,18 +17,23 @@ import payRoutes from "./payment.routes";
 const requireAuth = async (to, from, next) => {
     const authStore = useAuthStore();
     
-    // console.log('=== 인증 가드 실행 ===');
-    // console.log('이동할 페이지:', to.path);
-    
     try {
-        // 토큰 갱신 먼저 시도 (비동기)
+        // ✅ 1. 이미 유효한 토큰이 있으면 바로 통과
+        if (authStore.isLoggedIn && authStore.hasValidToken) {
+            console.log('✅ 유효한 토큰 존재 - 페이지 접근 허용');
+            next();
+            return;
+        }
+        
+        // ✅ 2. 토큰이 없거나 만료된 경우만 갱신 시도
+        console.log('🔄 토큰 갱신 필요 - initializeAuth 호출');
         const authSuccess = await authStore.initializeAuth();
         
         if (authSuccess && authStore.isLoggedIn) {
-            // console.log('✅ 인증 성공 - 페이지 접근 허용');
+            console.log('✅ 토큰 갱신 성공 - 페이지 접근 허용');
             next();
         } else {
-            // console.log('❌ 인증 실패 - 로그인 필요');
+            console.log('❌ 토큰 갱신 실패 - 로그인 필요');
             next('/login');
         }
     } catch (error) {
