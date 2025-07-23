@@ -2,12 +2,18 @@ package com.cj.genieq.passage.service;
 
 import com.cj.genieq.member.entity.MemberEntity;
 import com.cj.genieq.member.repository.MemberRepository;
+import com.cj.genieq.passage.dto.DescriptionDto;
 import com.cj.genieq.passage.dto.request.*;
 import com.cj.genieq.passage.dto.response.*;
+import com.cj.genieq.passage.entity.DescriptionEntity;
 import com.cj.genieq.passage.entity.PassageEntity;
+import com.cj.genieq.passage.repository.DescriptionRepository;
 import com.cj.genieq.passage.repository.PassageRepository;
+import com.cj.genieq.question.dto.request.QuestionInsertRequestDto;
 import com.cj.genieq.question.dto.request.QuestionUpdateRequestDto;
 import com.cj.genieq.question.dto.response.QuestionSelectResponseDto;
+import com.cj.genieq.question.entity.QuestionEntity;
+import com.cj.genieq.question.repository.QuestionRepository;
 import com.cj.genieq.question.service.QuestionService;
 import com.cj.genieq.usage.service.UsageService;
 import jakarta.persistence.EntityNotFoundException;
@@ -21,6 +27,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,8 +36,10 @@ public class PassageServiceImpl implements PassageService {
 
     private final PassageRepository passageRepository;
     private final MemberRepository memberRepository;
+    private final DescriptionRepository descriptionRepository;
     private final UsageService usageService;
     private final QuestionService questionService;
+    private final QuestionRepository questionRepository;
 
     // 지문 저장
     @Override
@@ -46,30 +55,52 @@ public class PassageServiceImpl implements PassageService {
 
             // Passage 엔티티 생성 및 저장
             PassageEntity passage = PassageEntity.builder()
-                    .pasType(passageDto.getType())
                     .isDeleted(0)
                     .isFavorite(0)
-                    .keyword(passageDto.getKeyword())
                     .title(title)
                     .content(passageDto.getContent())
-                    .gist(passageDto.getGist())
                     .date(LocalDateTime.now())
                     .isGenerated(1)
                     .member(member)
                     .build();
 
+            // Passage 먼저 저장
             PassageEntity savedPassage = passageRepository.save(passage);
 
+            // Description 엔티티들 생성 및 저장
+            List<DescriptionEntity> descriptions = passageDto.getDescriptions().stream()
+                    .map(desc -> DescriptionEntity.builder()
+                            .pasType(desc.getPasType())
+                            .keyword(desc.getKeyword())
+                            .gist(desc.getGist())
+                            .order(desc.getOrder())
+                            .passage(savedPassage)
+                            .build())
+                    .collect(Collectors.toList());
+
+            // 5. Description들 저장
+            descriptionRepository.saveAll(descriptions);
+
+            // 6. 사용량 업데이트 (기존과 동일)
             usageService.updateUsage(memCode, -1, "지문 생성");
 
-            PassageSelectResponseDto selectedPassage =  PassageSelectResponseDto.builder()
-                        .pasCode(savedPassage.getPasCode())
-                        .title(savedPassage.getTitle())
-                        .type(savedPassage.getPasType())
-                        .keyword(savedPassage.getKeyword())
-                        .content(savedPassage.getContent())
-                        .gist(savedPassage.getGist())
-                        .build();
+
+            // 7. 응답 DTO 생성 (Description 리스트 포함)
+            List<DescriptionDto> descriptionDtos = descriptions.stream()
+                    .map(desc -> DescriptionDto.builder()
+                            .pasType(desc.getPasType())
+                            .keyword(desc.getKeyword())
+                            .gist(desc.getGist())
+                            .order(desc.getOrder())
+                            .build())
+                    .collect(Collectors.toList());
+
+            PassageSelectResponseDto selectedPassage =   PassageSelectResponseDto.builder()
+                    .pasCode(savedPassage.getPasCode())
+                    .title(savedPassage.getTitle())
+                    .content(savedPassage.getContent())
+                    .descriptions(descriptionDtos)
+                    .build();
 
             return selectedPassage;
         } catch (EntityNotFoundException e) {
@@ -87,63 +118,84 @@ public class PassageServiceImpl implements PassageService {
     // 지문 수정
     @Override
     @Transactional
-    public PassageSelectResponseDto updatePassage(PassageUpdateRequestDto passageDto) {
-        // 1. 기존 지문 조회
-        PassageEntity passage = passageRepository.findById(passageDto.getPasCode())
-                .orElseThrow(() -> new EntityNotFoundException("지문이 존재하지 않습니다."));
+    public boolean updatePassage(PassageUpdateRequestDto passageDto) {
+        try {
+            // 1. 기존 지문 조회
+            PassageEntity passage = passageRepository.findById(passageDto.getPasCode())
+                    .orElseThrow(() -> new EntityNotFoundException("지문이 존재하지 않습니다."));
 
-        // 2. 제목 수정이 발생한 경우에만 중복 검사 실행
-        String title = passage.getTitle(); // 기존 제목 유지
-        if (passageDto.getTitle() != null && !passage.getTitle().equals(passageDto.getTitle())) {
-            // 제목이 수정된 경우에만 중복 검사 실행
-            title = generateTitle(passageDto.getTitle());
+            // 2. Passage 기본 정보만 수정 / 제목 수정이 발생한 경우에만 중복 검사 실행
+            if (passageDto.getTitle() != null && !passageDto.getTitle().equals(passage.getTitle())) {
+                passage.setTitle(generateTitle(passageDto.getTitle()));
+            }
+            if (passageDto.getContent() != null) {
+                passage.setContent(passageDto.getContent());
+            }
+            passage.setDate(LocalDateTime.now());
+
+            // 3. 저장
+            passageRepository.save(passage);
+
+            // 4. 단순 성공 응답
+            return true;
+
+        } catch (EntityNotFoundException e) {
+            return false;
         }
-
-        // 3. 기존 지문 정보 수정
-        passage.setTitle(title);
-        passage.setContent(passageDto.getContent());
-        passage.setDate(LocalDateTime.now());
-
-        // 4. 지문 수정 후 저장
-        PassageEntity updatedPassage = passageRepository.save(passage);
-
-        // 5. 응답용 DTO 생성
-        return PassageSelectResponseDto.builder()
-                .pasCode(updatedPassage.getPasCode())
-                .title(updatedPassage.getTitle())
-                .type(updatedPassage.getPasType())
-                .keyword(updatedPassage.getKeyword())
-                .content(updatedPassage.getContent())
-                .gist(updatedPassage.getGist())
-                .build();
     }
-
 
     // 지문 미리보기 리스트
     @Override
     public List<PassagePreviewListDto> getPreviewList(Long memCode) {
-        List<PassageEntity> passages = passageRepository.findGeneratedPassagesByMember(memCode);
+        // 1. 기본 지문 정보 조회
+        List<PassagePreviewListDto> previews = passageRepository.findPassagePreviewsByMember(memCode, null);
 
-        if (passages.isEmpty()) {
+        if (previews.isEmpty()) {
             throw new EntityNotFoundException("지문이 존재하지 않습니다.");
         }
 
-        List<PassagePreviewListDto> previews = passages.stream()
-                .map(passage -> {
-                    // date가 null인 경우 기본값 처리 (예시로 현재 날짜)
-                    LocalDate date = passage.getDate() != null ? passage.getDate().toLocalDate() : LocalDate.now();
-
-                    return PassagePreviewListDto.builder()
-                            .passageCode(passage.getPasCode())  // 지문 코드
-                            .passageTitle(passage.getTitle())   // 지문 제목
-                            .subjectKeyword(passage.getKeyword()) // 지문 키워드
-                            .date(date) // 날짜 처리
-                            .content(passage.getContent())
-                            .gist(passage.getGist())
-                            .favorite(passage.getIsFavorite()) // 즐겨찾기 상태
-                            .build();
-                })
+        // 2. pasCode 목록 추출
+        List<Long> pasCodes = previews.stream()
+                .map(PassagePreviewListDto::getPasCode)
                 .collect(Collectors.toList());
+
+        // 3. Description 정보 조회
+        List<DescriptionEntity> descriptions = passageRepository.findDescriptionsByPassageCodes(pasCodes);
+
+        // 4. Description을 pasCode별로 그룹화
+        Map<Long, List<DescriptionDto>> descriptionMap = descriptions.stream()
+                .collect(Collectors.groupingBy(
+                        desc -> desc.getPassage().getPasCode(),
+                        // DescriptionEntity를 DescriptionDto로 변환하는 헬퍼 메소드 호출
+                        Collectors.mapping(this::convertToDescriptionDto, Collectors.toList())
+                ));
+
+        // 5. 각 preview에 Description 매핑
+        previews.forEach(preview -> {
+            List<DescriptionDto> descList = descriptionMap.getOrDefault(preview.getPasCode(), new ArrayList<>());
+            preview.setDescriptions(descList);
+        });
+
+        return previews;
+    }
+    // DescriptionEntity를 DescriptionDto로 변환하는 헬퍼 메소드
+    private DescriptionDto convertToDescriptionDto(DescriptionEntity entity) {
+        return DescriptionDto.builder()
+                .pasType(entity.getPasType())
+                .keyword(entity.getKeyword())
+                .gist(entity.getGist())
+                .order(entity.getOrder())
+                .build();
+    }
+
+    // 지문 미리보기 즐겨찾기 리스트
+    @Override
+    public List<PassagePreviewListDto> getPreviewFavoriteList(Long memCode) {
+        List<PassagePreviewListDto> previews = passageRepository.findPassagePreviewsByMember(memCode, 1);
+
+        if (previews.isEmpty()) {
+            throw new EntityNotFoundException("지문이 존재하지 않습니다.");
+        }
 
         return previews;
     }
@@ -154,13 +206,25 @@ public class PassageServiceImpl implements PassageService {
         PassageEntity passageEntity = passageRepository.findById(pasCode)
                 .orElseThrow(() -> new IllegalArgumentException("지문이 존재하지 않습니다."));
 
-        PassageSelectResponseDto passage = PassageSelectResponseDto.builder()
+        // 2. 연관된 Description들 조회 (순서대로)
+        List<DescriptionEntity> descriptions = descriptionRepository.findByPassage_PasCodeOrderByOrderAsc(pasCode);
+
+        // 3. DescriptionEntity -> DescriptionDto 변환
+        List<DescriptionDto> descriptionDtos = descriptions.stream()
+                .map(desc -> DescriptionDto.builder()
+                        .pasType(desc.getPasType())
+                        .keyword(desc.getKeyword())
+                        .gist(desc.getGist())
+                        .order(desc.getOrder())
+                        .build())
+                .collect(Collectors.toList());
+
+        // 4. 응답 DTO 생성
+        PassageSelectResponseDto passage =  PassageSelectResponseDto.builder()
                 .pasCode(passageEntity.getPasCode())
                 .title(passageEntity.getTitle())
-                .type(passageEntity.getPasType())
-                .keyword(passageEntity.getKeyword())
                 .content(passageEntity.getContent())
-                .gist(passageEntity.getGist())
+                .descriptions(descriptionDtos)  // Description 리스트 포함
                 .build();
 
         return passage;
@@ -201,48 +265,84 @@ public class PassageServiceImpl implements PassageService {
 
     // 지문 + 문항 저장 (트랜잭션 적용)
     @Transactional
-    public PassageWithQuestionsResponseDto  savePassageWithQuestions(Long memCode, PassageWithQuestionsRequestDto requestDto) {
-        // 1. 회원 조회
-        MemberEntity member = memberRepository.findById(memCode)
-                .orElseThrow(() -> new EntityNotFoundException("Member not found"));
-
-        // 2. 제목 중복 처리
-        String title = generateTitle(requestDto.getTitle());
-
-        // 3. 지문 엔티티 생성
-        PassageEntity passage = PassageEntity.builder()
-                .pasType(requestDto.getType())
-                .keyword(requestDto.getKeyword())
-                .title(title)
-                .content(requestDto.getContent())
-                .gist(requestDto.getGist())
-                .date(LocalDateTime.now())
-                .isDeleted(0)
-                .isFavorite(0)
-                .isGenerated(0)
-                .member(member)
-                .build();
-
-        // 4. 지문 저장
-        PassageEntity savedPassage = passageRepository.save(passage);
-
-        // 5. 문항 저장은 QuestionService에서 처리
-        List<QuestionSelectResponseDto> questions = questionService.saveQuestions(savedPassage, requestDto.getQuestions());
-
-        // 6. 사용량 처리
-        usageService.updateUsage(memCode, -1, "문항 생성");
-
-        PassageWithQuestionsResponseDto responseDto =PassageWithQuestionsResponseDto.builder()
-                .pasCode(savedPassage.getPasCode())
-                .title(savedPassage.getTitle())
-                .type(savedPassage.getPasType())
-                .keyword(savedPassage.getKeyword())
-                .content(savedPassage.getContent())
-                .gist(savedPassage.getGist())
-                .questions(questions)  // 필요한 경우 응답에 맞게 변환
-                .build();
-
-        return responseDto;
+    public PassageWithQuestionsResponseDto savePassageWithQuestions(Long memCode, PassageWithQuestionsRequestDto requestDto) {
+        try {
+            // 1. 회원 조회
+            MemberEntity member = memberRepository.findById(memCode)
+                    .orElseThrow(() -> new EntityNotFoundException("Member not found"));
+    
+            // 2. 제목 중복 처리
+            String title = generateTitle(requestDto.getTitle());
+    
+            // 3. 지문 엔티티 생성 (Description 관련 필드 제거)
+            PassageEntity passage = PassageEntity.builder()
+                    .title(title)
+                    .content(requestDto.getContent())
+                    .date(LocalDateTime.now())
+                    .isDeleted(0)
+                    .isFavorite(0)
+                    //.isGenerated(requestDto.getIsGenerated() != null ? requestDto.getIsGenerated() : 0)
+                    .isGenerated(0)
+                    .member(member)
+                    .build();
+    
+            // 4. 지문 저장
+            PassageEntity savedPassage = passageRepository.save(passage);
+    
+            // 5. Description 엔티티들 생성 및 저장 (null 체크 포함)
+            List<DescriptionEntity> savedDescriptions = new ArrayList<>();
+            if (requestDto.getDescriptions() != null && !requestDto.getDescriptions().isEmpty()) {
+                List<DescriptionEntity> descriptions = requestDto.getDescriptions().stream()
+                        .map(desc -> DescriptionEntity.builder()
+                                .pasType(desc.getPasType())
+                                .keyword(desc.getKeyword())
+                                .gist(desc.getGist())
+                                .order(desc.getOrder() != null ? desc.getOrder() : 1)
+                                .passage(savedPassage)
+                                .build())
+                        .collect(Collectors.toList());
+                
+                savedDescriptions = descriptionRepository.saveAll(descriptions);
+            }
+    
+            // 6. 문항 저장은 QuestionService에서 처리
+            List<QuestionSelectResponseDto> questions = new ArrayList<>();
+            if (requestDto.getQuestions() != null && !requestDto.getQuestions().isEmpty()) {
+                questions = questionService.saveQuestions(savedPassage, requestDto.getQuestions());
+            }
+    
+            // 7. 사용량 처리
+            usageService.updateUsage(memCode, -1, "문항 생성");
+    
+            // 8. Description 엔티티를 DTO로 변환
+            List<DescriptionDto> descriptionDtos = savedDescriptions.stream()
+                    .map(desc -> DescriptionDto.builder()
+                            .pasType(desc.getPasType())
+                            .keyword(desc.getKeyword())
+                            .gist(desc.getGist())
+                            .order(desc.getOrder())
+                            .build())
+                    .collect(Collectors.toList());
+    
+            // 9. 응답 DTO 생성
+            PassageWithQuestionsResponseDto responseDto = PassageWithQuestionsResponseDto.builder()
+                    .pasCode(savedPassage.getPasCode())
+                    .title(savedPassage.getTitle())
+                    .content(savedPassage.getContent())
+                    .descriptions(descriptionDtos)
+                    .questions(questions)
+                    .build();
+    
+            return responseDto;
+            
+        } catch (EntityNotFoundException e) {
+            throw new EntityNotFoundException("지문 저장 실패: " + e.getMessage());
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityViolationException("데이터 무결성 위반: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("지문 저장 중 오류가 발생했습니다: " + e.getMessage());
+        }
     }
 
     // 지문 + 문항 조회
@@ -259,21 +359,31 @@ public class PassageServiceImpl implements PassageService {
                 .map(q -> QuestionSelectResponseDto.builder()
                         .queCode(q.getQueCode())
                         .queQuery(q.getQueQuery())
-                        .queOption(q.getQueOption() != null ? List.of(q.getQueOption().split(",")) : new ArrayList<>()) // String → JSON 변환
+                        .queOption(q.getQueOption())
                         .queAnswer(q.getQueAnswer())
                         .description(q.getQueDescription())
+                        .queSubpassage(q.getQueSubpassage())
                         .build())
                 .collect(Collectors.toList())
                 : new ArrayList<>();
 
-        // 3. 응답 DTO 생성 후 반환 값 변수에 저장
+        // 3. DescriptionEntity -> DescriptionDto 변환
+        List<DescriptionEntity> descriptions = descriptionRepository.findByPassage_PasCodeOrderByOrderAsc(pasCode);
+        List<DescriptionDto> descriptionDtos = descriptions.stream()
+                .map(desc -> DescriptionDto.builder()
+                        .pasType(desc.getPasType())
+                        .keyword(desc.getKeyword())
+                        .gist(desc.getGist())
+                        .order(desc.getOrder())
+                        .build())
+                .collect(Collectors.toList());
+
+        // 4. 응답 DTO 생성 후 반환 값 변수에 저장
         PassageWithQuestionsResponseDto result = PassageWithQuestionsResponseDto.builder()
                 .pasCode(passage.getPasCode())
-                .type(passage.getPasType())
-                .keyword(passage.getKeyword())
                 .title(passage.getTitle())
                 .content(passage.getContent())
-                .gist(passage.getGist())
+                .descriptions(descriptionDtos)
                 .questions(questions) // 문항이 없을 경우 빈 리스트 반환
                 .build();
 
@@ -285,67 +395,107 @@ public class PassageServiceImpl implements PassageService {
     //지문 수정 + 문항 수정
     @Transactional
     public PassageWithQuestionsResponseDto updatePassage(Long memCode, Long pasCode, PassageWithQuestionsRequestDto requestDto) {
-        //회원조회
-        MemberEntity member = memberRepository.findById(memCode)
-                .orElseThrow(() -> new EntityNotFoundException("Member not found"));
+        try {
+            // 1. 회원 조회
+            MemberEntity member = memberRepository.findById(memCode)
+                    .orElseThrow(() -> new EntityNotFoundException("Member not found"));
+    
+            // 2. 기존 지문 조회
+            PassageEntity passage = passageRepository.findById(pasCode)
+                    .orElseThrow(() -> new IllegalArgumentException("지문이 존재하지 않습니다."));
+    
+            // 3. 지문 기본 필드 수정 (null 값 무시)
+            if (requestDto.getTitle() != null) {
+                passage.setTitle(requestDto.getTitle());
+            }
+            if (requestDto.getContent() != null) {
+                passage.setContent(requestDto.getContent());
+            }
+            if (requestDto.getIsGenerated() != null) {
+                passage.setIsGenerated(requestDto.getIsGenerated());
+            }
+            passage.setDate(LocalDateTime.now());
+    
+            // 4. 지문 저장
+            passageRepository.save(passage);
+    
+            // 5. Description 업데이트 (기존 삭제 후 새로 생성)
+            List<DescriptionEntity> savedDescriptions = new ArrayList<>();
+            if (requestDto.getDescriptions() != null && !requestDto.getDescriptions().isEmpty()) {
+                // 기존 Description 삭제
+                List<DescriptionEntity> existingDescriptions = descriptionRepository.findByPassage_PasCodeOrderByOrderAsc(pasCode);
+                if (!existingDescriptions.isEmpty()) {
+                    descriptionRepository.deleteAll(existingDescriptions);
+                }
+    
+                // 새로운 Description 생성 및 저장
+                List<DescriptionEntity> newDescriptions = requestDto.getDescriptions().stream()
+                        .map(desc -> DescriptionEntity.builder()
+                                .pasType(desc.getPasType())
+                                .keyword(desc.getKeyword())
+                                .gist(desc.getGist())
+                                .order(desc.getOrder() != null ? desc.getOrder() : 1)
+                                .passage(passage)
+                                .build())
+                        .collect(Collectors.toList());
+    
+                savedDescriptions = descriptionRepository.saveAll(newDescriptions);
+            }
+    
+            // 6. 문항 수정 (Questions가 있는 경우에만)
+            List<QuestionSelectResponseDto> updatedQuestions = new ArrayList<>();
+            if (requestDto.getQuestions() != null && !requestDto.getQuestions().isEmpty()) {
+                // INSERT → UPDATE 변환 처리
+                List<QuestionUpdateRequestDto> questionDtos = requestDto.getQuestions().stream()
+                        .map(q -> QuestionUpdateRequestDto.builder()
+                                .queCode(q.getQueCode())
+                                .queQuery(q.getQueQuery())
+                                .queOption(q.getQueOption())
+                                .queAnswer(q.getQueAnswer())
+                                .description(q.getDescription())
+                                .build())
+                        .collect(Collectors.toList());
+    
+                // 문항 수정 후 반환된 값 받아서 사용
+                updatedQuestions = questionService.updateQuestions(passage, questionDtos);
+            }
+    
+            // 7. 사용량 처리 (mode가 "generate" 또는 "recreate"일 때만 차감)
+            if ("generate".equals(requestDto.getMode()) || "recreate".equals(requestDto.getMode())) {
+                usageService.updateUsage(memCode, -1, "문항 생성");
+            }
 
-        // 1. 기존 지문 조회
-        PassageEntity passage = passageRepository.findById(pasCode)
-                .orElseThrow(() -> new IllegalArgumentException("지문이 존재하지 않습니다."));
-
-        // 2. 지문 필드 수정 (null 값 무시)
-        if (requestDto.getType() != null) {
-            passage.setPasType(requestDto.getType());
+            // 8. Description 엔티티를 DTO로 변환
+            List<DescriptionDto> descriptionDtos = savedDescriptions.stream()
+                    .map(desc -> DescriptionDto.builder()
+                            .pasType(desc.getPasType())
+                            .keyword(desc.getKeyword())
+                            .gist(desc.getGist())
+                            .order(desc.getOrder())
+                            .build())
+                    .collect(Collectors.toList());
+    
+            // 9. 응답 DTO 생성
+            PassageWithQuestionsResponseDto responseDto = PassageWithQuestionsResponseDto.builder()
+                    .pasCode(passage.getPasCode())
+                    .title(passage.getTitle())
+                    .content(passage.getContent())
+                    .descriptions(descriptionDtos)
+                    .questions(updatedQuestions)
+                    .build();
+    
+            return responseDto;
+    
+        } catch (EntityNotFoundException e) {
+            throw new EntityNotFoundException("지문 수정 실패: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("잘못된 요청: " + e.getMessage());
+        } catch (DataIntegrityViolationException e) {
+            throw new DataIntegrityViolationException("데이터 무결성 위반: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("지문 수정 중 오류가 발생했습니다: " + e.getMessage());
         }
-        if (requestDto.getKeyword() != null) {
-            passage.setKeyword(requestDto.getKeyword());
-        }
-        if (requestDto.getTitle() != null) {
-            passage.setTitle(requestDto.getTitle());
-        }
-        if (requestDto.getContent() != null) {
-            passage.setContent(requestDto.getContent());
-        }
-        if (requestDto.getGist() != null) {
-            passage.setGist(requestDto.getGist());
-        }
-        if (requestDto.getIsGenerated() != null) {
-            passage.setIsGenerated(requestDto.getIsGenerated());
-        }
-
-        passage.setDate(LocalDateTime.now());
-
-        // INSERT → UPDATE 변환 처리 추가
-        List<QuestionUpdateRequestDto> questionDtos = requestDto.getQuestions().stream()
-                .map(q -> QuestionUpdateRequestDto.builder()
-                        .queCode(q.getQueCode())
-                        .queQuery(q.getQueQuery())
-                        .queOption(q.getQueOption())
-                        .queAnswer(q.getQueAnswer())
-                        .description(q.getDescription())
-                        .build())
-                .collect(Collectors.toList());
-
-        //문항 수정 후 반환된 값 받아서 그대로 사용
-        List<QuestionSelectResponseDto> updatedQuestions = questionService.updateQuestions(passage, questionDtos);
-
-        // ✅ mode가 "generate" 또는 "recreate"일 때만 차감 (수정 시에는 차감 X)
-        if ("generate".equals(requestDto.getMode()) || "recreate".equals(requestDto.getMode())) {
-            usageService.updateUsage(memCode, -1, "문항 생성");
-        }
-
-        // 응답 DTO 생성 후 변수에 저장
-        PassageWithQuestionsResponseDto responseDto = PassageWithQuestionsResponseDto.builder()
-                .pasCode(passage.getPasCode())
-                .title(passage.getTitle())
-                .type(passage.getPasType())
-                .keyword(passage.getKeyword())
-                .content(passage.getContent())
-                .gist(passage.getGist())
-                .questions(updatedQuestions)
-                .build();
-
-        return responseDto;
     }
 
     // 자료실 메인화면 리스트(즐겨찾기+최근 작업)
@@ -361,8 +511,6 @@ public class PassageServiceImpl implements PassageService {
         List<PassageStorageEachResponseDto> passages = passageEntities.stream()
                 .map(p -> PassageStorageEachResponseDto.builder()
                         .title(p.getTitle())
-                        .pasType(p.getPasType())
-                        .keyword(p.getKeyword())
                         .isGenerated(p.getIsGenerated())
                         .date(p.getDate().toLocalDate())
                         .isFavorite(p.getIsFavorite())
@@ -386,9 +534,7 @@ public class PassageServiceImpl implements PassageService {
                 .filter(p -> p.getIsDeleted() == 0) // isDeleted = 0 필터링
                 .map(p -> PassageStorageEachResponseDto.builder()
                         .pasCode(p.getPasCode())
-                        .pasType(p.getPasType())
                         .title(p.getTitle())
-                        .keyword(p.getKeyword())
                         .isGenerated(p.getIsGenerated())
                         .date(p.getDate().toLocalDate())
                         .isFavorite(p.getIsFavorite())
@@ -413,9 +559,7 @@ public class PassageServiceImpl implements PassageService {
                 .filter(p -> p.getIsDeleted() == 0) // isDeleted = 0 필터링
                 .map(p -> PassageStorageEachResponseDto.builder()
                         .pasCode(p.getPasCode())
-                        .pasType(p.getPasType())
                         .title(p.getTitle())
-                        .keyword(p.getKeyword())
                         .isGenerated(p.getIsGenerated())
                         .date(p.getDate().toLocalDate())
                         .isFavorite(p.getIsFavorite())
@@ -493,9 +637,7 @@ public class PassageServiceImpl implements PassageService {
         List<PassageStorageEachResponseDto> passages = entities.stream()
                 .map(p -> PassageStorageEachResponseDto.builder()
                         .pasCode(p.getPasCode())
-                        .pasType(p.getPasType())
                         .title(p.getTitle())
-                        .keyword(p.getKeyword())
                         .isGenerated(p.getIsGenerated())
                         .date(p.getDate().toLocalDate())
                         .isFavorite(p.getIsFavorite())

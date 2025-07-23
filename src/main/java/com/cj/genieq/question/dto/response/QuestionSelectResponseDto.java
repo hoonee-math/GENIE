@@ -16,7 +16,8 @@ import java.util.List;
 public class QuestionSelectResponseDto {
     private Long queCode;
     private String queQuery;
-    private List<String> queOption;
+    private String queOption;
     private String queAnswer;
     private String description; //해설
+    private String queSubpassage; //박스형 보기에 들어가는 글
 }
