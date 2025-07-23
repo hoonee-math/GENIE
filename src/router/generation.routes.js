@@ -10,6 +10,7 @@ const generationRoutes = [
     name: "passage",
     children: [
       { path: "", name: "passage-main", component: GeneratePassageForm },
+      { path: "form", name: "passage-form", component: GeneratePassageForm },
       { path: "view/:pasCode", name: "passage-view", component: GeneratedPassageView },
     ],
   },
@@ -18,6 +19,7 @@ const generationRoutes = [
     name: "questions",
     children: [
       { path: "", name: "question-main", component: GenerateQuestionForm },
+      { path: "form", name: "question-form", component: GenerateQuestionForm },
       { path: "view/:pasCode", name: "question-view", component: GeneratedQuestionView },
     ],
   },
