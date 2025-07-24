@@ -660,52 +660,29 @@ const fetchWorkItems = async () => {
 
 // 작업명 클릭시, 해당 화면으로 이동
 const handleWorkItemClick = async (item) => {
+    console.log("item",item)
     try{
         const pasCode = item.PAS_CODE;
 
         // PAS_IS_GENERATED 값에 따라 API 및 페이지 분기처리
         const isGeneratedText = item.PAS_IS_GENERATED === "지문";
-        const endpoint = isGeneratedText ? `/api/pass/select/${pasCode}` : `/api/pass/ques/select/${pasCode}`;
-        
-        const data = await apiGet(endpoint);
 
+        console.log("isGeneratedText : ",isGeneratedText)
         if (isGeneratedText) {
-            // 지문인 경우 - PassageContent.vue로 이동
-            // 데이터 형식 변환 및 저장
-            const passageData = {
-                pasCode: data.pasCode,  title: data.title,      type: data.type,
-                keyword: data.keyword,  content: data.content,  gist: data.gist,
-            };
-
-            // 통합 키로 저장
-            localStorage.setItem("genieq-passage-data",JSON.stringify(passageData));
-
             // 지문 생성 페이지로 이동
-            router.push("/passage/create");
+            router.push({
+                path: `/passage/view/${pasCode}`,
+                query: { from: route.path }, // 현재 경로 전달
+            });
         } else {
-            // 문항인 경우 - GenerateQuestion.vue로 이동
-            // 데이터 형식 변환 및 저장
-            const questionData = {
-                passage: {
-                    pasCode: data.pasCode,  title: data.title,      type: data.type,
-                    keyword: data.keyword,  content: data.content,  gist: data.gist,
-                    questions: data.questions.map((q) => ({
-                        queCode: q.queCode,     queQuery: q.queQuery,   queOption: q.queOption,
-                        queAnswer: q.queAnswer, description: q.description,
-                    })),
-                },
-            };
-
-            // 로컬 스토리지에 저장
-            localStorage.setItem("saveResponse",JSON.stringify(questionData));
-
             // 문항 생성 페이지로 이동
             router.push({
-                path: "/questions/generate",
+                path: `/questions/view/${pasCode}`,
                 query: { from: route.path }, // 현재 경로 전달
             });
         }
     } catch(error) {
+        console.log(error.message)
         alert("데이터를 가져오는 중 오류가 발생했습니다.");
     }
 };
