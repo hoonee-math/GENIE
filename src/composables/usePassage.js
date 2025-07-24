@@ -4,10 +4,123 @@ import {
   getPassageFromDatabase,
   getPrevPassageListInDatabase,
   getPassageWithQuestionsFromDatabase,
+  savePassageToDatabase,
 } from "@/api/passage";
+import {
+  generateSinglePassageAPI,
+  generateReadingPassageAPI,
+  generateMultiplePassageAPI,
+} from "@/api/generate";
 
 export function usePassage() {
   const store = usePassageStore();
+
+  // 지문 생성
+  const generateAndSavePassage = async (generateType, requestData) => {
+    let pythonResponse = "";
+
+    // 2. FastAPI 호출 (지문 생성)
+    switch (generateType) {
+      case "single" || "단일 지문" || "단일지문":
+        pythonResponse = await generateSinglePassageAPI(requestData);
+        // generateType = 'single' 일 경우 requestData 형식
+        // requestData = {
+        //     type_passage: singleForm.type_passage,
+        //     keyword: singleForm.keyword
+        // }
+        break;
+      case "multiple" || "복합 지문" || "복합지문":
+        pythonResponse = await generateMultiplePassageAPI(requestData);
+        // generateType = 'multiple' 일 경우 requestData 형식
+        // requestData = {
+        //     first_type_passage: multipleForm.first_type_passage,
+        //     first_keyword: multipleForm.first_keyword,
+        //     second_type_passage: multipleForm.second_type_passage,
+        //     second_keyword: multipleForm.second_keyword
+        // }
+        break;
+      case "reading" || "독서론":
+        pythonResponse = await generateReadingPassageAPI(requestData);
+        // generateType = 'reading' 일 경우 requestData 형식
+        // requestData = {
+        //     type_passage: '독서론',
+        //     keyword: readingForm.keyword
+        // }
+        break;
+      default:
+        console.log("잘못된 요청입니다.");
+    }
+
+    // 3. 데이터 변환 (백엔드 저장 형식)
+    const dbData = transformApiResponseToDbFormat(pythonResponse, requestData, generateType);
+    // 4. 백엔드 DB 저장
+    const savedPassage = await savePassageToDatabase(dbData);
+    // 5. Simple Store 에 캐싱 (중복 API 호출 방지)
+    cacheGeneratedPassage(savedPassage.pasCode, apiResponse, savedPassage);
+  };
+
+  // 지문 생성 헬퍼 함수 : DescriptionDto 구조에 맞춰 생성
+  const createDescriptions = (apiResponse, requestData, generateType) => {
+    if (generateType === "single") {
+      return [
+        {
+          pasType: requestData.type_passage,
+          keyword: requestData.keyword,
+          gist: apiResponse.generated_core_point[0],
+          order: 1,
+        },
+      ];
+    } else if (generateType === "multiple") {
+      return [
+        {
+          pasType: requestData.first_type_passage,
+          keyword: requestData.first_keyword,
+          gist: apiResponse.generated_core_point[0],
+          order: 1,
+        },
+        {
+          pasType: requestData.second_type_passage,
+          keyword: requestData.second_keyword,
+          gist: apiResponse.generated_core_point[1],
+          order: 2,
+        },
+      ];
+    } else if (generateType === "reading") {
+      return [
+        {
+          pasType: "독서론",
+          keyword: requestData.keyword,
+          gist: apiResponse.generated_core_point[0],
+          order: 1,
+        },
+      ];
+    }
+  };
+
+  // 지문 생성 헬퍼 함수 :
+  const transformApiResponseToDbFormat = (
+    apiResponse,
+    requestData,
+    generateType
+  ) => {
+    return {
+      title: generateTitle(generateType, requestData),
+      content: convertNewlinesToParagraphs(apiResponse.generated_passage),
+      isGenerated: 1,
+      descriptions: createDescriptions(apiResponse, requestData, generateType),
+    };
+  };
+
+  // fastApi 응답 데이터의 '\n' 형식을 Tiptap 형식에 맞게 수정하여 db 저장할 때 사용
+  const convertNewlinesToParagraphs = (text) => {
+    if (!text) return "";
+    return text
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0)
+      .map((line) => `<p>${line}</p>`)
+      .join("");
+  };
 
   // 지문 조회 (캐시 우선 + API 호출 + 파싱)
   // 호출 방식: await fetchPassage(123, { force: true, includeQuestions: true })
