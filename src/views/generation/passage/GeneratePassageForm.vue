@@ -16,10 +16,10 @@
                     <!-- 탭 네비게이션 -->
                     <div class="flex space-x-2 px-2">
                         <button v-for="tab in tabs" :key="tab.key" @click="activeTab = tab.key" :class="[
-                            'flex items-center px-6 py-3 text-base text-nowrap font-medium rounded-t transition-all duration-200',
+                            'flex items-center px-6 py-3 text-base text-nowrap font-medium rounded-t transition-all duration-200 border border-b-0',
                             activeTab === tab.key
-                                ? 'border border-gray-300'
-                                : 'text-gray-600 bg-white hover:border-brand hover:text-brand'
+                                ? 'text-gray-600 bg-white'
+                                : 'border-gray-300 hover:border-brand hover:text-brand'
                         ]">
                             {{ tab.label }}
 
