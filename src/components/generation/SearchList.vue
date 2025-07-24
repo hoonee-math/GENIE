@@ -15,11 +15,11 @@
                 </span>
                 {{ item.PAS_TITLE }}
             </div>
-            <div class="h-14 border border-[#bdbdbd] rounded-lg px-4 py-3.5 font-medium text-base leading-[150%] tracking-[-0.02em] text-left transition-colors duration-200 mr-3"
+            <div class="h-14 border border-[#bdbdbd] rounded-lg px-4 py-3.5 font-medium text-base leading-[150%] tracking-[-0.02em] text-left transition-colors duration-200 mr-3 "
                 :class="[
                     activeItem === item.PAS_CODE
                         ? 'border-[#303030] text-[#303030]'
-                        : 'border-[#bdbdbd] text-[#bdbdbd] hover:border-gray-400 hover:text-gray-400',
+                        : 'border-[#bdbdbd] text-[#bdbdbd] hover:border-gray-400 hover:text-gray-400 pointer-events-none',
                 ]" @click.stop="previewPassage(item)">미리보기
             </div>
         </div>

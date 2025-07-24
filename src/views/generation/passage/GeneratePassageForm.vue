@@ -45,10 +45,10 @@
                                     <h3 class="text-2xl font-semibold text-gray-900 mb-6">
                                         지문 분야 선택 <span class="text-red-500">*</span>
                                     </h3>
-                                    <div class="grid grid-cols-3 gap-8">
+                                    <div class="min-w-[340px] grid grid-cols-3 gap-8">
                                         <button v-for="pasType in pasTypes" :key="pasType"
                                             @click="singleForm.type_passage = pasType" :class="[
-                                                'py-6 px-6 text-xl font-medium rounded-lg border-2 transition-all duration-200',
+                                                'py-6 min-w-[50px] text-xl font-medium rounded-lg border-2 transition-all duration-200 text-nowrap',
                                                 singleForm.type_passage === pasType
                                                     ? 'bg-brand/20 border-brand text-brand'
                                                     : 'bg-white border-gray-300 text-gray-700 hover:border-brand hover:text-brand'
@@ -76,10 +76,10 @@
                                     <h3 class="text-2xl font-semibold text-gray-900 mb-6">
                                         지문 구조 설계 (선택)
                                     </h3>
-                                    <div class="grid grid-cols-3 gap-8">
+                                    <div class="min-w-[340px] grid grid-cols-3 gap-8">
                                         <button v-for="structure in structures" :key="structure"
                                             @click="singleForm.type_structure = structure" :class="[
-                                                'py-6 text-xl text-nowrap font-medium rounded-lg border-2 transition-all duration-200',
+                                                'py-6 min-w-[100px] text-xl text-nowrap font-medium rounded-lg border-2 transition-all duration-200',
                                                 singleForm.type_structure === structure
                                                     ? 'bg-brand/20 border-brand text-brand'
                                                     : 'bg-white border-gray-300 text-gray-700 hover:border-brand hover:text-brand'
@@ -109,10 +109,10 @@
                                     <h3 class="text-2xl font-semibold text-gray-900 mb-6">
                                         분야 선택 <span class="text-red-500">*</span>
                                     </h3>
-                                    <div class="grid grid-cols-5 gap-3">
+                                    <div class="min-w-[340px] grid grid-cols-5 gap-3">
                                         <button v-for="pasType in pasTypes" :key="'first-' + pasType"
                                             @click="multipleForm.first_type_passage = pasType" :class="[
-                                                'py-3 px-4 text-xl font-medium rounded-lg border-2 transition-all duration-200',
+                                                'py-3 text-xl font-medium rounded-lg border-2 transition-all duration-200',
                                                 multipleForm.first_type_passage === pasType
                                                     ? 'bg-brand/20 border-brand text-brand'
                                                     : 'bg-white border-gray-300 text-gray-700 hover:border-brand hover:text-brand'
@@ -148,10 +148,10 @@
                                     <h3 class="text-2xl font-semibold text-gray-900 mb-6">
                                         분야 선택 <span class="text-red-500">*</span>
                                     </h3>
-                                    <div class="grid grid-cols-5 gap-3">
+                                    <div class="min-w-[340px] grid grid-cols-5 gap-3">
                                         <button v-for="pasType in pasTypes" :key="'second-' + pasType"
                                             @click="multipleForm.second_type_passage = pasType" :class="[
-                                                'py-3 px-4 text-xl font-medium rounded-lg border-2 transition-all duration-200',
+                                                'py-3 text-xl font-medium rounded-lg border-2 transition-all duration-200',
                                                 multipleForm.second_type_passage === pasType
                                                     ? 'bg-brand/20 border-brand text-brand'
                                                     : 'bg-white border-gray-300 text-gray-700 hover:border-brand hover:text-brand'
@@ -570,31 +570,4 @@ const closePaymentUsageModal = () => { isPaymentUsageModalOpen.value = false; };
 </script>
 
 <style scoped>
-.bg-brand {
-    background-color: #0086FF;
-}
-
-.text-brand {
-    color: #0086FF;
-}
-
-.border-brand {
-    border-color: #0086FF;
-}
-
-.hover\:bg-blue-600:hover {
-    background-color: #004499;
-}
-
-.hover\:border-brand:hover {
-    border-color: #0086FF;
-}
-
-.hover\:text-brand:hover {
-    color: #0086FF;
-}
-
-.focus\:border-brand:focus {
-    border-color: #0086FF;
-}
 </style>
