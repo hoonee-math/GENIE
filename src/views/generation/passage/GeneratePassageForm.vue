@@ -465,6 +465,9 @@ const convertNewlinesToParagraphs = (text) => {
 const generatePassage = async () => {
     // 에러 및 로딩 상태 초기화
     errorMessage.value = ''
+    if(isLoading.value){
+        return;
+    }
     isLoading.value = true
 
     try {
