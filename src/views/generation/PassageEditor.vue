@@ -144,8 +144,8 @@ const symbolSeries = {
 
 // 편집 가능 여부 설정 함수 추가
 const setEditable = () => {
-    // GeneratedQuestionView에서만 편집 가능
-    isEditable.value = props.parentComponent === 'GeneratedQuestionView'
+    const editableComponents = ['GeneratedQuestionView', 'GenerateQuestionForm']
+    isEditable.value = editableComponents.includes(props.parentComponent)
     console.log('편집 가능 여부 설정:', props.parentComponent, '→', isEditable.value)
 }
 
