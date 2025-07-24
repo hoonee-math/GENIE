@@ -154,6 +154,10 @@ defineExpose({
 </script>
 
 <style scoped>
+:deep(.ProseMirror p) {
+    margin: 0 0 1em 0;
+}
+
 /* TipTap 에디터 커스텀 스타일 */
 /* 스크롤바 스타일링 */
 :deep(.ProseMirror)::-webkit-scrollbar {

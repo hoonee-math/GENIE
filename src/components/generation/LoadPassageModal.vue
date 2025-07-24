@@ -65,7 +65,8 @@
                     </div>
                     <div
                         class="w-full h-full font-normal text-base leading-7 tracking-[-0.02em] px-4 pb-4 text-left overflow-y-auto whitespace-pre-wrap">
-                        {{ selectedPassage.PAS_CONTENT }}
+                        <TipTapEditor :initialContent="selectedPassage.PAS_CONTENT" :isEditable="false"
+                            :addClass="'leading-7 tracking-[-0.02em] '" />
                     </div>
                 </div>
 
@@ -107,6 +108,7 @@ import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { Icon } from "@iconify/vue";
 import { usePassage } from '@/composables/usePassage';
+import TipTapEditor from '@/views/generation/TipTapEditor.vue'
 
 // 라우터와 스토어 초기화
 const router = useRouter();
