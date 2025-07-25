@@ -199,6 +199,7 @@ const currentParentComponent = computed(() => {
 // 컴포넌트 마운트 시 데이터 로드
 onMounted(() => {
     loadPassageData()
+    isReGenerating.value=false
     
     // localStorage에서 필요한 데이터 확인
     const generateType = localStorage.getItem('generateType')
@@ -225,9 +226,10 @@ onMounted(() => {
     }
 })
 
+
 onBeforeUnmount(() => {
     // 컴포넌트 언마운트 시 localStorage 정리
-    if (!isReGenerating) { // 재생성 요청시에는 localStorage 유지, 그 이외의 경우에만 removeItem 시도
+    if (!isReGenerating.value) { // 재생성 요청시에는 localStorage 유지, 그 이외의 경우에만 removeItem 시도
         localStorage.removeItem('generateType')
         localStorage.removeItem('requestData')
     }
