@@ -81,7 +81,7 @@ const editedTitle = ref('')
 // 지문 재생성 요청을 위한 변수
 const isReGenerating = ref(false)
 const existRequestData = ref(false) // 요청 데이터 존재 여부 상태, 이전 페이지가 GeneratePassageForm 일 경우 localStorage에 저장된 requestData를 확인함
-const loadingMessage = ref('지문을 생성 중입니다.\n생성까지 최대 3분이 소요될 수 있습니다.')
+const loadingMessage = ref('')
 const isPaymentUsageModalOpen = ref(false)
 const paymentUsageModalRef = ref()
 
@@ -170,6 +170,7 @@ const GenerateQuestionWithThisPassage = () => {
 // 기존 제재를 이용해 지문 다시 만들기 요청
 const reGeneratePassageWithPrevDescription = async () => {
     isLoading.value = true
+    loadingMessage.value = '지문을 생성 중입니다.\n생성까지 최대 3분이 소요될 수 있습니다.'
     try{
         const generateType = localStorage.getItem('generateType')
         const requestData = JSON.parse(localStorage.getItem('requestData') || '{}')
@@ -182,6 +183,7 @@ const reGeneratePassageWithPrevDescription = async () => {
     } catch(error) {
         alert('지문 재생성 요청에 실패하였습니다. 관리자에게 문의하세요')
     } finally {
+        loadingMessage.value = ''
         isLoading.value = false;
     }
 }

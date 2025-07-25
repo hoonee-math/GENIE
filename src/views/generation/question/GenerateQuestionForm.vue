@@ -142,7 +142,7 @@ const errorMessage = ref('')
 const isGenerating = ref(false)
 const isLeavingPageWithClear = ref(true) // 페이지를 나갈 때 passage 데이터를 초기화할지 여부, 문항 생성 요청시에는 false로 설정 예정
 
-const loadingMessage = ref('문항을 생성 중입니다.생성까지 최대 3분이 소요될 수 있습니다.')
+const loadingMessage = ref('문항을 생성 중입니다.\n생성까지 최대 3분이 소요될 수 있습니다.')
 const isPaymentUsageModalOpen = ref(false); // 결제 사용 모달 
 const paymentUsageModalRef = ref(null);
 
