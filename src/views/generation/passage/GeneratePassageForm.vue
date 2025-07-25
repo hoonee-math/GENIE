@@ -280,6 +280,7 @@ import { usePassage } from '@/composables/usePassage'
 import EditableTitle from '@/views/generation/EditableTitle.vue'
 import PaymentUsageModal from "@/components/generation/PaymentUsageModal.vue";
 import LoadingModal from '@/components/common/LoadingModal.vue'
+import { isNonEmpty } from '@/utils/validation' 
 
 // Router 및 Composable 설정
 const router = useRouter()
@@ -293,7 +294,7 @@ const errorMessage = ref('')
 const newPassageTitle = ref('Untitled')
 const isPaymentUsageModalOpen = ref(false); // 결제 사용 모달 
 const paymentUsageModalRef = ref(null);
-const loadingMessage = ref('');
+const loadingMessage = ref('지문을 생성 중입니다.\n생성까지 최대 3분이 소요될 수 있습니다.');
 
 // 탭 데이터
 const tabs = [
@@ -520,6 +521,13 @@ const generatePassage = async () => {
             }
             apiFunction = generateReadingPassageAPI
         }
+        if(isNonEmpty(requestData)){
+            // Optional 값은 있을 때만 추가됨. 필수 값들은 항상 포함되어있으면서 값이 실제로 들어있는지를 체크
+        } else{
+            alert("필수 값을 설정해주세요")
+            return
+        }
+
 
         console.log('🚀 지문 생성 시작:', { generateType, requestData })
 

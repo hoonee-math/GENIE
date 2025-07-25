@@ -19,7 +19,7 @@ export function usePassage() {
   const generateAndSavePassage = async (generateType, inputTitle, requestData) => {
     let apiResponse = "";
     try {
-        // 1. FastAPI 호출 (지문 생성)
+        // 1. FastAPI 호출 (지문 생성, 모듈화 하면서 requestData는 페이지에서 만들어서 요청)
         switch (generateType) {
         case "single" || "단일 지문" || "단일지문":
             apiResponse = await generateSinglePassageAPI(requestData);
@@ -27,6 +27,13 @@ export function usePassage() {
             // requestData = {
             //     type_passage: singleForm.type_passage,
             //     keyword: singleForm.keyword
+            // }
+            // // Optional 필드들은 값이 있을 때만 추가
+            // if (singleForm.type_structure) {
+            //     requestData.type_structure = singleForm.type_structure
+            // }
+            // if (singleForm.requirement && singleForm.requirement.trim()) {
+            //     requestData.requirement = singleForm.requirement
             // }
             break;
         case "multiple" || "복합 지문" || "복합지문":
@@ -38,6 +45,13 @@ export function usePassage() {
             //     second_type_passage: multipleForm.second_type_passage,
             //     second_keyword: multipleForm.second_keyword
             // }
+            // // Optional 필드들은 값이 있을 때만 추가
+            // if (multipleForm.first_requirement && multipleForm.first_requirement.trim()) {
+            //     requestData.first_requirement = multipleForm.first_requirement
+            // }
+            // if (multipleForm.second_requirement && multipleForm.second_requirement.trim()) {
+            //     requestData.second_requirement = multipleForm.second_requirement
+            // }
             break;
         case "reading" || "독서론":
             apiResponse = await generateReadingPassageAPI(requestData);
@@ -45,6 +59,10 @@ export function usePassage() {
             // requestData = {
             //     type_passage: '독서론',
             //     keyword: readingForm.keyword
+            // }
+            // // Optional 필드들은 값이 있을 때만 추가
+            // if (readingForm.requirement && readingForm.requirement.trim()) {
+            //     requestData.requirement = readingForm.requirement
             // }
             break;
         default:
