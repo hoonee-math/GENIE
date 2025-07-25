@@ -17,7 +17,7 @@
                         <div class="flex flex-wrap gap-2 md:gap-4 overflow-x-auto w-full md:w-auto">
                             <BaseButton v-for="pattern in questionPatterns" :key="pattern.id" :text="pattern.label"
                                 type="type3" :width="pattern.width" class="transition-all duration-200" :class="{
-                                    'bg-[#e6f3ff] border-none text-[#0066cc]':
+                                    'bg-[#e6f3ff] border-[#e6f3ff] text-[#0066cc]':
                                         activePattern === pattern.label,
                                     'bg-white border-[#bdbdbd] text-[#757575] hover:border-[#0086ff] hover:text-[#0086ff]':
                                         activePattern !== pattern.label,
@@ -34,7 +34,7 @@
                         <div class="flex flex-wrap gap-2 md:gap-4 overflow-x-auto w-full md:w-auto">
                             <BaseButton v-for="type in questionTypes" :key="type.id" :text="type.label" type="type3"
                                 :width="type.width" height="40px" class="transition-all duration-200" :class="{
-                                    'bg-[#e6f3ff] border-none text-[#0066cc]':
+                                    'bg-[#e6f3ff] border-[#e6f3ff] text-[#0066cc]':
                                         activeType === type.label,
                                     'bg-white border-[#bdbdbd] text-[#757575] hover:border-[#0086ff] hover:text-[#0086ff]':
                                         activeType !== type.label,
