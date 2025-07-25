@@ -30,14 +30,14 @@
                     class="font-pretendard text-base leading-7 tracking-[-0.02em] text-[#757575] border-b-3 border-transparent hover:text-[#0086ff] transition-colors"
                     :class="{
                         'border-[#0086ff] text-[#0086ff]': activeTab === 'recent',
-                    }" @click="activeTab = 'recent'">
+                    }" @click="activeTab = 'recent'; selectedPassage = null;">
                     최근 작업 내역
                 </button>
                 <button
                     class="font-pretendard text-base leading-7 tracking-[-0.02em] text-[#757575] border-b-3 border-transparent hover:text-[#0086ff] transition-colors"
                     :class="{
                         'border-[#0086ff] text-[#0086ff]': activeTab === 'favorites',
-                    }" @click="activeTab = 'favorites'">
+                    }" @click="activeTab = 'favorites'; selectedPassage = null;">
                     즐겨찾기
                 </button>
             </div>
