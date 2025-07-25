@@ -540,8 +540,12 @@ const generatePassage = async () => {
         // 5. Simple Store 에 캐싱 (중복 API 호출 방지)
         cacheGeneratedPassage(savedPassage.pasCode, apiResponse, savedPassage)
         console.log('✅ Simple Store 캐싱 완료:', savedPassage.pasCode)
+        
+        // 6. localStorage에 현재 요청에 대한 데이터 저장
+        localStorage.setItem('generateType',generateType)
+        localStorage.setItem('requestData',JSON.stringify(requestData))
 
-        // 6. 결과 페이지로 이동
+        // 7. 결과 페이지로 이동
         console.log('📫 결과 페이지로 이동:', `/passage/view/${savedPassage.pasCode}`)
         await router.push(`/passage/view/${savedPassage.pasCode}`)
 

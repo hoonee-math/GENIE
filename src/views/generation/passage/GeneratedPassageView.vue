@@ -22,16 +22,26 @@
         <!-- 재생성하기, 문항 이어서 생성하기, 저장하기, 추출하기 버튼 추가 예정 -->
 
         <!-- 하단 버튼 -->
-        <div v-if="!isCalledFromGeneratedQuestionView" class="flex justify-end space-x-4 flex-shrink-0">
+        <div v-if="existRequestData" class="flex justify-end space-x-4 flex-shrink-0">
             <button @click="GenerateQuestionWithThisPassage" :disabled="isLoading"
                 class="px-8 py-4 text-lg font-medium rounded-lg transition-all duration-200 bg-brand text-white hover:bg-blue-600">
                 이어서 문항 생성하기
             </button>
+            <button @click="openPaymentUsageModal" :disabled="isLoading"
+                class="px-8 py-4 text-lg font-medium rounded-lg transition-all duration-200 bg-brand text-white hover:bg-blue-600">
+                재생성하기
+            </button>
         </div>
-
+        
         <!-- GeneratedQuestionView에서 사용할 슬롯 -->
         <slot name="questions"></slot>
     </div>
+
+    <!-- 로딩 모달 -->
+    <LoadingModal :isOpen="isLoading" :message="loadingMessage" />
+
+    <PaymentUsageModal ref="paymentUsageModalRef" :isOpen="isPaymentUsageModalOpen" @close="closePaymentUsageModal"
+        @generate="reGeneratePassageWithPrevDescription" />
 </template>
 
 <script setup>
@@ -42,6 +52,8 @@ import PassageSummaryLayout from '@/views/generation/PassageSummaryLayout.vue'
 import PassageEditor from '@/views/generation/PassageEditor.vue'
 import { usePassage } from '@/composables/usePassage'
 import EditableTitle from '@/views/generation/EditableTitle.vue'
+import PaymentUsageModal from "@/components/generation/PaymentUsageModal.vue";
+import LoadingModal from '@/components/common/LoadingModal.vue'
 
 const props = defineProps({
     isCalledFromGeneratedQuestionView: {
@@ -55,7 +67,7 @@ const emit = defineEmits(['title-changed', 'content-changed'])
 // Router 및 Composable 설정
 const route = useRoute()
 const router = useRouter()
-const { fetchPassage, passage, isLoading: passageLoading } = usePassage()
+const { fetchPassage, generateAndSavePassage, passage, isLoading: passageLoading } = usePassage()
 
 // 로딩 및 에러 상태
 const isLoading = ref(true)
@@ -65,6 +77,13 @@ const goToQuestionGenerateForm = ref(false)
 // script에 추가할 상태들
 const editableTitle = ref(false)
 const editedTitle = ref('')
+
+// 지문 재생성 요청을 위한 변수
+const isReGenerating = ref(false)
+const existRequestData = ref(false) // 요청 데이터 존재 여부 상태, 이전 페이지가 GeneratePassageForm 일 경우 localStorage에 저장된 requestData를 확인함
+const loadingMessage = ref('지문을 생성 중입니다.\n생성까지 최대 3분이 소요될 수 있습니다.')
+const isPaymentUsageModalOpen = ref(false)
+const paymentUsageModalRef = ref()
 
 // 타이틀 편집 토글
 const toggleTitleEdit = () => {
@@ -148,6 +167,28 @@ const GenerateQuestionWithThisPassage = () => {
     router.push(`/questions/form`)
 }
 
+// 기존 제재를 이용해 지문 다시 만들기 요청
+const reGeneratePassageWithPrevDescription = async () => {
+    isLoading.value = true
+    try{
+        const generateType = localStorage.getItem('generateType')
+        const requestData = JSON.parse(localStorage.getItem('requestData') || '{}')
+
+        const newPasCode = await generateAndSavePassage(generateType,passageTitle.value ,requestData)
+        
+        isReGenerating.value = true
+        router.push(`/passage/view/${newPasCode}`)
+        
+    } catch(error) {
+        alert('지문 재생성 요청에 실패하였습니다. 관리자에게 문의하세요')
+    } finally {
+        isLoading.value = false;
+    }
+}
+// 결제 사용 모달 관련 함수
+const openPaymentUsageModal = () => { isPaymentUsageModalOpen.value = true; };
+const closePaymentUsageModal = () => { isPaymentUsageModalOpen.value = false; };
+
 // Computed 속성들 (usePassage에서 데이터 가져오기)
 const passageTitle = computed(() => {
     if (isLoading.value) return '로딩 중...'
@@ -163,9 +204,38 @@ const currentParentComponent = computed(() => {
 // 컴포넌트 마운트 시 데이터 로드
 onMounted(() => {
     loadPassageData()
+    
+    // localStorage에서 필요한 데이터 확인
+    const generateType = localStorage.getItem('generateType')
+    const requestData = localStorage.getItem('requestData')
+    
+    // 두 값이 모두 존재하는지 확인
+    if (generateType && requestData) {
+        try {
+        // requestData가 유효한 JSON인지 검증
+        JSON.parse(requestData)
+        existRequestData.value = true
+        console.log('✅ 이전 생성 데이터 발견:', { generateType, requestData })
+        } catch (error) {
+        // JSON 파싱 실패시 무효한 데이터로 간주
+        console.warn('⚠️ 유효하지 않은 requestData:', error)
+        existRequestData.value = false
+        // 잘못된 데이터 정리
+        localStorage.removeItem('generateType')
+        localStorage.removeItem('requestData')
+        }
+    } else {
+        existRequestData.value = false
+        console.log('ℹ️ 이전 생성 데이터 없음')
+    }
 })
 
 onBeforeUnmount(() => {
+    // 컴포넌트 언마운트 시 localStorage 정리
+    if (!isReGenerating) { // 재생성 요청시에는 localStorage 유지, 그 이외의 경우에만 removeItem 시도
+        localStorage.removeItem('generateType')
+        localStorage.removeItem('requestData')
+    }
     // 컴포넌트 종료 시 리스트만 클리어
     const { clearPassage } = usePassage()
     if (!goToQuestionGenerateForm.value) { // QuestionGenerateForm.vue 로 이동하지 않는 경우에만 passage 데이터 클리어

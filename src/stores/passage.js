@@ -21,7 +21,7 @@ export const usePassageStore = defineStore("passage", {
       updatedAt: null,
     },
 
-    // === 캐시 (복수 지문 저장) ===
+    // === 캐시 ===
     cache: {
       entities: {}, // { [pasCode]: passage스키마 }
       ttl: 5 * 60 * 1000,

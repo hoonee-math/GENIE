@@ -15,48 +15,62 @@ import {
 export function usePassage() {
   const store = usePassageStore();
 
-  // 지문 생성
-  const generateAndSavePassage = async (generateType, requestData) => {
-    let pythonResponse = "";
+  // 지문 생성 후 응답 값으로 저장된 pasCode 값 반환
+  const generateAndSavePassage = async (generateType, inputTitle, requestData) => {
+    let apiResponse = "";
+    try {
+        // 1. FastAPI 호출 (지문 생성)
+        switch (generateType) {
+        case "single" || "단일 지문" || "단일지문":
+            apiResponse = await generateSinglePassageAPI(requestData);
+            // generateType = 'single' 일 경우 requestData 형식
+            // requestData = {
+            //     type_passage: singleForm.type_passage,
+            //     keyword: singleForm.keyword
+            // }
+            break;
+        case "multiple" || "복합 지문" || "복합지문":
+            apiResponse = await generateMultiplePassageAPI(requestData);
+            // generateType = 'multiple' 일 경우 requestData 형식
+            // requestData = {
+            //     first_type_passage: multipleForm.first_type_passage,
+            //     first_keyword: multipleForm.first_keyword,
+            //     second_type_passage: multipleForm.second_type_passage,
+            //     second_keyword: multipleForm.second_keyword
+            // }
+            break;
+        case "reading" || "독서론":
+            apiResponse = await generateReadingPassageAPI(requestData);
+            // generateType = 'reading' 일 경우 requestData 형식
+            // requestData = {
+            //     type_passage: '독서론',
+            //     keyword: readingForm.keyword
+            // }
+            break;
+        default:
+            console.log("잘못된 요청입니다.");
+        }
+        console.log("1. ",generateType, " 지문 생성 성공: ", apiResponse);
 
-    // 2. FastAPI 호출 (지문 생성)
-    switch (generateType) {
-      case "single" || "단일 지문" || "단일지문":
-        pythonResponse = await generateSinglePassageAPI(requestData);
-        // generateType = 'single' 일 경우 requestData 형식
-        // requestData = {
-        //     type_passage: singleForm.type_passage,
-        //     keyword: singleForm.keyword
-        // }
-        break;
-      case "multiple" || "복합 지문" || "복합지문":
-        pythonResponse = await generateMultiplePassageAPI(requestData);
-        // generateType = 'multiple' 일 경우 requestData 형식
-        // requestData = {
-        //     first_type_passage: multipleForm.first_type_passage,
-        //     first_keyword: multipleForm.first_keyword,
-        //     second_type_passage: multipleForm.second_type_passage,
-        //     second_keyword: multipleForm.second_keyword
-        // }
-        break;
-      case "reading" || "독서론":
-        pythonResponse = await generateReadingPassageAPI(requestData);
-        // generateType = 'reading' 일 경우 requestData 형식
-        // requestData = {
-        //     type_passage: '독서론',
-        //     keyword: readingForm.keyword
-        // }
-        break;
-      default:
-        console.log("잘못된 요청입니다.");
+        // 2. 데이터 변환 (백엔드 저장 형식)
+        const dbData = transformApiResponseToDbFormat(
+        apiResponse,
+        requestData,
+        generateType,
+        inputTitle
+        );
+        console.log("2. 데이터 변환 성공 dbData:", dbData);
+        // 3. 백엔드 DB 저장
+        const savedPassage = await savePassageToDatabase(dbData);
+        console.log("3. 백엔드 저장 성공 savedPassage:", savedPassage);
+        // 4. Simple Store 에 캐싱 (중복 API 호출 방지)
+        cacheGeneratedPassage(savedPassage.pasCode, apiResponse, savedPassage);
+        console.log("4. setPassage 로 pinia store에 새 지문 데이터 저장 성공 pasCode: ", savedPassage.pasCode);
+        // 5. DB에 저장된 pasCode값 반환
+        return savedPassage.pasCode;
+    } catch(error) {
+        console.log(error)
     }
-
-    // 3. 데이터 변환 (백엔드 저장 형식)
-    const dbData = transformApiResponseToDbFormat(pythonResponse, requestData, generateType);
-    // 4. 백엔드 DB 저장
-    const savedPassage = await savePassageToDatabase(dbData);
-    // 5. Simple Store 에 캐싱 (중복 API 호출 방지)
-    cacheGeneratedPassage(savedPassage.pasCode, apiResponse, savedPassage);
   };
 
   // 지문 생성 헬퍼 함수 : DescriptionDto 구조에 맞춰 생성
@@ -96,15 +110,37 @@ export function usePassage() {
       ];
     }
   };
+  // 지문 생성 헬퍼 함수 : 타이틀 자동 생성
+  const generateTitle = (inputTitle, generateType, requestData) => {
+    if (inputTitle !== "Untitled") {
+      return inputTitle;
+    }
 
-  // 지문 생성 헬퍼 함수 :
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}.${String(now.getDate()).padStart(2, "0")}`;
+
+    if (generateType === "single") {
+      return `[단일 지문] ${requestData.keyword.slice(0, 10)} (${dateStr})`;
+    } else if (generateType === "multiple") {
+      return `[복합 지문] ${requestData.first_type_passage} & ${requestData.second_type_passage} (${dateStr})`;
+    } else if (generateType === "reading") {
+      return `[독서론 지문] ${requestData.keyword.slice(0, 10)} (${dateStr})`;
+    }
+    return inputTitle;
+  };
+
+  // 지문 생성 헬퍼 함수 : python 응답을 java 형식으로 파싱
   const transformApiResponseToDbFormat = (
     apiResponse,
     requestData,
-    generateType
+    generateType,
+    inputTitle
   ) => {
     return {
-      title: generateTitle(generateType, requestData),
+      title: generateTitle(inputTitle, generateType, requestData),
       content: convertNewlinesToParagraphs(apiResponse.generated_passage),
       isGenerated: 1,
       descriptions: createDescriptions(apiResponse, requestData, generateType),
@@ -231,6 +267,7 @@ export function usePassage() {
     storageList: computed(() => store.lists.storage),
 
     // Actions
+    generateAndSavePassage,
     fetchPassage,
     cacheGeneratedPassage,
     fetchPassageList, // 이름 변경: fetchStorageList -> fetchPassageList
