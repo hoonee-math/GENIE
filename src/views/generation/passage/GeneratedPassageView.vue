@@ -61,8 +61,8 @@ const props = defineProps({
         default: false
     }
 })
-// defineEmits 추가
-const emit = defineEmits(['title-changed', 'content-changed'])
+// 문항 보기 페이지에서 지문 내용을 수정할경우 emit 을 통해 수정된 내용 전달
+const emit = defineEmits(['content-changed'])
 
 // Router 및 Composable 설정
 const route = useRoute()
@@ -74,35 +74,11 @@ const isLoading = ref(true)
 const errorMessage = ref('')
 const goToQuestionGenerateForm = ref(false)
 
-// script에 추가할 상태들
-const editableTitle = ref(false)
-const editedTitle = ref('')
-
 // 지문 재생성 요청을 위한 변수
 const isReGenerating = ref(false)
 const existRequestData = ref(false) // 요청 데이터 존재 여부 상태, 이전 페이지가 GeneratePassageForm 일 경우 localStorage에 저장된 requestData를 확인함
 const loadingMessage = ref('')
 const isPaymentUsageModalOpen = ref(false)
-
-// 타이틀 편집 토글
-const toggleTitleEdit = () => {
-    if (!editableTitle.value) {
-        // 편집 시작
-        editableTitle.value = true
-        editedTitle.value = passage.value.title || ''
-    } else {
-        // 편집 완료
-        editableTitle.value = false
-        // 부모 컴포넌트에 변경사항 전달
-        emit('title-changed', editedTitle.value)
-    }
-}
-
-// 타이틀 변경 핸들러
-const handleTitleChange = () => {
-    // 실시간으로 변경사항을 부모에게 알림 (저장하기 버튼 활성화용)
-    emit('title-changed', editedTitle.value)
-}
 
 // TipTapEditor 관련 변수
 const savedContent = ref('')
@@ -142,8 +118,8 @@ const loadPassageData = async () => {
 
         // TipTap 에디터에 초기 콘텐츠 설정
         savedContent.value = passage.value.content || ''
-        // 데이터 로드 후 title 초기화
-        editedTitle.value = passage.value.title || ''
+        // Title 초기화는 자식 컴포넌트인 EditableTitle.vue 에서 pinia store를 이용해서 직접 초기화
+        // editedTitle.value = passage.value.title || ''
 
         console.log('✅ 지문 데이터 로드 완료:', {
             pasCode: passage.value.pasCode,

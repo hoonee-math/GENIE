@@ -3,7 +3,7 @@
      1. GeneratedPassageView에서 pinia store를 업데이트하는 fetch 요청에 문항을 포함할지 결정함
      2. PassageEditor 에서 사용하는 parentComponent 값을 GeneratedQuestionView로 인식하게함
      3. PassageEditor 에서 TipTap 에디터 영역을 수정가능하게 만들어줌 -->
-    <GeneratedPassageView :isCalledFromGeneratedQuestionView="true" @title-changed="handlePassageTitleChange"
+    <GeneratedPassageView :isCalledFromGeneratedQuestionView="true"
         @content-changed="handlePassageContentChange">
         <template #questions>
             <PassageAndQuestionLayout>
@@ -235,18 +235,9 @@ const selectQueAnswerOption = (option) => {
     // 이건 저장하기 버튼 활성화를 어떻게 할지 고민 필요
 }
 
-// #GeneratedPassageView 영역 content, title 관련 변수
-const savedPassageTitle = ref('')
+// #GeneratedPassageView 영역 content 관련 변수, title 값은 GeneratedPassageView.vue의 자식 컴포넌트인 EditableTitle.vue 에서 처리함
 const savedPassageContent = ref('')
 const isPassageModified = ref(false)
-
-// GeneratedPassageView에서 오는 title 변경 이벤트 핸들러
-const handlePassageTitleChange = (newTitle) => {
-    console.log('Passage title changed:', newTitle)
-    savedPassageTitle.value = newTitle
-    isPassageModified.value = true
-    isSaved.value = false // 저장하기 버튼 활성화
-}
 
 // GeneratedPassageView에서 오는 content 변경 이벤트 핸들러  
 const handlePassageContentChange = ({ content, textLength }) => {
@@ -358,7 +349,7 @@ const addQuestion = async () => {
 const savePassageAndQuestion = async () => {
     // 수정된 지문 데이터와 현재 문항 데이터를 함께 전달
     const passageData = {
-        title: savedPassageTitle.value || passage.value.title,
+        // title: passage.value.title, // title 수정은 바로 수정되도록 EditableTitle.vue 에서 직접 처리
         content: savedPassageContent.value || passage.value.content
     }
 
@@ -383,7 +374,8 @@ onMounted(() => {
     // 초기 로드 시 passage 데이터를 savedPassageContent에 설정
     if (passage.value?.content) {
         savedPassageContent.value = passage.value.content
-        savedPassageTitle.value = passage.value.title || ''
+        // title 값은 GeneratedPassageView.vue의 자식 컴포넌트인 EditableTitle.vue 에서 처리하도록 변경
+        // savedPassageTitle.value = passage.value.title || ''
     }
     console.log("GeneratedQuestionView 로드시 초기화 진행된 데이터 출력 savedPassageContent ", savedPassageContent.value)
     console.log("GeneratedQuestionView 로드시 초기화 진행된 데이터 출력 savedPassageTitle ", savedPassageTitle.value)
