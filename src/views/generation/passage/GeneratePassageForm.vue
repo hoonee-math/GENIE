@@ -266,7 +266,7 @@
     <LoadingModal :isOpen="isLoading" :message="loadingMessage" />
 
     <PaymentUsageModal ref="paymentUsageModalRef" :isOpen="isPaymentUsageModalOpen" @close="closePaymentUsageModal"
-        @generate="generatePassage" />
+        @click="generatePassage" />
 </template>
 
 <script setup>
@@ -521,13 +521,20 @@ const generatePassage = async () => {
             }
             apiFunction = generateReadingPassageAPI
         }
-        if(isNonEmpty(requestData)){
-            // Optional 값은 있을 때만 추가됨. 필수 값들은 항상 포함되어있으면서 값이 실제로 들어있는지를 체크
-        } else{
-            alert("필수 값을 설정해주세요")
-            return
-        }
 
+        // if(isNonEmpty(requestData)){
+        //     // Optional 값은 있을 때만 추가됨. 필수 값들은 항상 포함되어있으면서 값이 실제로 들어있는지를 체크
+        // } else{
+        //     console.log("test222 ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ" , isNonEmpty(requestData))
+        //     console.log("requestData222 ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ" , requestData)
+        //     alert("필수 값을 설정해주세요")
+        //     return;
+        // }
+            
+        if(!isNonEmpty(requestData)) {
+            alert("필수 값을 설정해주세요") ;
+            return;
+        }
 
         console.log('🚀 지문 생성 시작:', { generateType, requestData })
 
