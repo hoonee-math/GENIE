@@ -294,7 +294,7 @@ const errorMessage = ref('')
 const newPassageTitle = ref('Untitled')
 const isPaymentUsageModalOpen = ref(false); // 결제 사용 모달 
 const paymentUsageModalRef = ref(null);
-const loadingMessage = ref('지문을 생성 중입니다.\n생성까지 최대 3분이 소요될 수 있습니다.');
+const loadingMessage = ref('지문을 생성 중입니다.\n생성까지 최대 1분이 소요될 수 있습니다.');
 
 // 탭 데이터
 const tabs = [

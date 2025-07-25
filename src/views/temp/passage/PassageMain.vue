@@ -120,7 +120,7 @@ const paymentUsageRef = ref(null);
 const isConfirmModalOpen = ref(false);
 const isLoading = ref(false);
 const loadingMessage = ref(
-    "지문을 생성 중입니다.\n생성까지 최대 3분이 소요될 수 있습니다."
+    "지문을 생성 중입니다.\n생성까지 최대 1분이 소요될 수 있습니다."
 );
 
 // 중복 요청 방지를 위한 처리 상태 플래그 추가
@@ -248,7 +248,7 @@ const confirmCreatePassage = () => {
     isConfirmModalOpen.value = false;
     isLoading.value = true;
     loadingMessage.value =
-        "지문을 생성 중입니다.\n생성까지 최대 3분이 소요될 수 있습니다.";
+        "지문을 생성 중입니다.\n생성까지 최대 1분이 소요될 수 있습니다.";
 
     try {
         if (authStore.userTicketCount <= 0) {

@@ -208,7 +208,7 @@ const isProcessing = ref(false);
 const pasCode = ref(0);
 const isLoading = ref(false);
 const loadingMessage = ref(
-    "문항을 생성 중입니다.\n생성까지 최대 3분이 소요될 수 있습니다."
+    "문항을 생성 중입니다.\n생성까지 최대 1분이 소요될 수 있습니다."
 );
 
 // 내용 변경 감지를 위한 타이머 설정
@@ -322,7 +322,7 @@ const handleRecreateGeneration = async () => {
 
     isLoading.value = true;
     loadingMessage.value =
-        "문항을 재생성 중입니다.\n재생성까지 최대 3분이 소요될 수 있습니다.";
+        "문항을 재생성 중입니다.\n재생성까지 최대 1분이 소요될 수 있습니다.";
 
     try {
         // 1단계: 문항 생성 API 호출
@@ -724,7 +724,7 @@ const handleQuestionGeneration = async () => {
 
     isLoading.value = true;
     loadingMessage.value =
-        "새로운 문항을 생성 중입니다.\n생성까지 최대 3분이 소요될 수 있습니다.";
+        "새로운 문항을 생성 중입니다.\n생성까지 최대 1분이 소요될 수 있습니다.";
 
     try {
         // 임시 api 연결

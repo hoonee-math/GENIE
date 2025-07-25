@@ -650,7 +650,7 @@ function prevStep() {
 const isProcessing = ref(false);
 const isLoading = ref(false);
 const loadingMessage = ref(
-    "문항을 생성 중입니다.\n생성까지 최대 3분이 소요될 수 있습니다."
+    "문항을 생성 중입니다.\n생성까지 최대 1분이 소요될 수 있습니다."
 );
 
 // 문항 생성 함수

@@ -176,7 +176,7 @@ const isWarningModalOpen = ref(false); // 경고 모달 상태
 const isPaymentUsageModalOpen = ref(false); // 결제 사용 모달 상태
 const isLoading = ref(false); // 로딩 상태 추가
 const loadingMessage = ref(
-    "지문을 생성 중입니다.\n생성까지 최대 3분이 소요될 수 있습니다."
+    "지문을 생성 중입니다.\n생성까지 최대 1분이 소요될 수 있습니다."
 ); // 로딩 메시지
 const isFromRoute = ref(false); // 이전 페이지의 루트 확인용
 const isSaveSuccessModalOpen = ref(false); // 저장 확인 모달 오픈
@@ -369,7 +369,7 @@ const handleGenerate = () => {
     isProcessing.value = true;
     isLoading.value = true;
     loadingMessage.value =
-        "지문을 재생성 중입니다.\n재생성까지 최대 3분이 소요될 수 있습니다.";
+        "지문을 재생성 중입니다.\n재생성까지 최대 1분이 소요될 수 있습니다.";
 
     // 로컬 스토리지에서 문자열로 데이터 가져오기
     const savedGenerateDataStr = localStorage.getItem("genieq-passage-data");

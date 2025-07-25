@@ -339,7 +339,7 @@ const addQuestion = async () => {
     // 재생성 처리 로직
     // isProcessing.value = true;
     isLoading.value = true;
-    loadingMessage.value = "문항을 추가하고 있습니다.\n새로운 문항이 추가될 때까지 최대 3분이 소요될 수 있습니다.";
+    loadingMessage.value = "문항을 추가하고 있습니다.\n새로운 문항이 추가될 때까지 최대 1분이 소요될 수 있습니다.";
     try {
         // (custom_passage, selectedQuestionExample, generateType, pasCode) 
         await addQuestionToExistingPassage(savedPassageContent.value, selectedQuestionExample.value, generateType.value, passage.value.pasCode)

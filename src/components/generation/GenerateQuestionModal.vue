@@ -132,7 +132,7 @@ const selectedQuestion = ref(null); // 선택된 문항을 ref로 저장
 const isProcessing = ref(false);
 const isLoading = ref(false);
 const loadingMessage = ref(
-    "문항을 생성 중입니다.\n생성까지 최대 3분이 소요될 수 있습니다."
+    "문항을 생성 중입니다.\n생성까지 최대 1분이 소요될 수 있습니다."
 );
 
 const closeModal = () => {
@@ -175,7 +175,7 @@ const handleGenerateQuestion = async () => {
             } else {
                 isLoading.value = true;
                 loadingMessage.value =
-                    "문항을 생성 중입니다.\n생성까지 최대 3분이 소요될 수 있습니다.";
+                    "문항을 생성 중입니다.\n생성까지 최대 1분이 소요될 수 있습니다.";
 
                 const requestData = {
                     custom_passage: passageData?.PAS_CONTENT || "",

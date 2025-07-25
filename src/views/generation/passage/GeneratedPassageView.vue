@@ -170,7 +170,7 @@ const GenerateQuestionWithThisPassage = () => {
 // 기존 제재를 이용해 지문 다시 만들기 요청
 const reGeneratePassageWithPrevDescription = async () => {
     isLoading.value = true
-    loadingMessage.value = '지문을 생성 중입니다.\n생성까지 최대 3분이 소요될 수 있습니다.'
+    loadingMessage.value = '지문을 생성 중입니다.\n생성까지 최대 1분이 소요될 수 있습니다.'
     try{
         const generateType = localStorage.getItem('generateType')
         const requestData = JSON.parse(localStorage.getItem('requestData') || '{}')
