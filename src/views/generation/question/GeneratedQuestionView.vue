@@ -149,7 +149,7 @@
     <!-- 로딩 모달 -->
     <LoadingModal :isOpen="isLoading" :message="loadingMessage" />
 
-    <PaymentUsageModal ref="paymentUsageModalRef" :isOpen="isPaymentUsageModalOpen" @close="closePaymentUsageModal"
+    <PaymentUsageModal :isOpen="isPaymentUsageModalOpen" @close="closePaymentUsageModal"
         @generate="addQuestion" />
 </template>
 
@@ -176,7 +176,6 @@ const editableQueryAndOption = ref(false)
 const editableAnswerAndDesc = ref(false)
 const isQuestionExampleSelectorVisible = ref(false)
 const isPaymentUsageModalOpen = ref(false); // 결제 사용 모달 
-const paymentUsageModalRef = ref(null);
 const loadingMessage = ref('');
 // existQueSubpassage는 computed로 변경되어 아래에서 정의됨
 

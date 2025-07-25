@@ -48,7 +48,7 @@
             <div class="absolute left-5 bottom-5 flex gap-5 w-[calc(100%-40px)]">
                 <BaseButton text="닫기" type="type3" class="w-[140px] h-[54px]" @click="closeModal" />
                 <BaseButton v-if="creditcount > 0" :text="createText" class="flex-1 h-[54px]"
-                    @click="generateQuestion" />
+                    @click="handleOkButton" />
                 <BaseButton v-else text="이용권 구매하기" class="flex-1 h-[54px]" @click="goToTicketPage" />
             </div>
         </div>
@@ -65,6 +65,7 @@ import { useAuth } from "@/composables/useAuth";
 
 const router = useRouter();
 const emit = defineEmits(["close", "generate", "credit-update"]);
+const isLoading = ref(false);
 
 const props = defineProps({
     isOpen: {
@@ -121,14 +122,15 @@ const closeModal = () => {
     emit("close");
 };
 
-const generateQuestion = () => {
-    const savedPassageData = localStorage.getItem("generateQuestionPassageData");
-    const selectedQuestionData = localStorage.getItem("selectedQuestionData");
-
+// handleOkButton 함수 호출시 부모 컴포넌트의 @generate, @close 에 정의한 함수를 실행시킴.
+// <PaymentUsageModal @generate="parentFunction1" @close="parentFunction2" />
+const handleOkButton = () => {
+    isLoading.value=true;
     try {
         emit("generate");
         emit("close");
     } catch (error) { }
+    finally { isLoading.value=false }
 };
 
 const goToTicketPage = () => {

@@ -265,8 +265,8 @@
     <!-- 로딩 모달 -->
     <LoadingModal :isOpen="isLoading" :message="loadingMessage" />
 
-    <PaymentUsageModal ref="paymentUsageModalRef" :isOpen="isPaymentUsageModalOpen" @close="closePaymentUsageModal"
-        @click="generatePassage" />
+    <PaymentUsageModal :isOpen="isPaymentUsageModalOpen" @close="closePaymentUsageModal"
+        @generate="generatePassage" />
 </template>
 
 <script setup>
@@ -293,7 +293,6 @@ const errorMessage = ref('')
 // 문서 제목
 const newPassageTitle = ref('Untitled')
 const isPaymentUsageModalOpen = ref(false); // 결제 사용 모달 
-const paymentUsageModalRef = ref(null);
 const loadingMessage = ref('지문을 생성 중입니다.\n생성까지 최대 1분이 소요될 수 있습니다.');
 
 // 탭 데이터

@@ -108,7 +108,7 @@
         <!-- 로딩 모달 -->
         <LoadingModal :isOpen="isGenerating" :message="loadingMessage" />
 
-        <PaymentUsageModal ref="paymentUsageModalRef" :isOpen="isPaymentUsageModalOpen" @close="closePaymentUsageModal"
+        <PaymentUsageModal :isOpen="isPaymentUsageModalOpen" @close="closePaymentUsageModal"
             @generate="generateQuestion" />
     </div>
 </template>
@@ -144,7 +144,6 @@ const isLeavingPageWithClear = ref(true) // 페이지를 나갈 때 passage 데�
 
 const loadingMessage = ref('문항을 생성 중입니다.\n생성까지 최대 1분이 소요될 수 있습니다.')
 const isPaymentUsageModalOpen = ref(false); // 결제 사용 모달 
-const paymentUsageModalRef = ref(null);
 
 // 데이터 상태
 const newPassageTitle = ref('')

@@ -40,7 +40,7 @@
     <!-- 로딩 모달 -->
     <LoadingModal :isOpen="isLoading" :message="loadingMessage" />
 
-    <PaymentUsageModal ref="paymentUsageModalRef" :isOpen="isPaymentUsageModalOpen" @close="closePaymentUsageModal"
+    <PaymentUsageModal :isOpen="isPaymentUsageModalOpen" @close="closePaymentUsageModal"
         @generate="reGeneratePassageWithPrevDescription" />
 </template>
 
@@ -83,7 +83,6 @@ const isReGenerating = ref(false)
 const existRequestData = ref(false) // 요청 데이터 존재 여부 상태, 이전 페이지가 GeneratePassageForm 일 경우 localStorage에 저장된 requestData를 확인함
 const loadingMessage = ref('')
 const isPaymentUsageModalOpen = ref(false)
-const paymentUsageModalRef = ref()
 
 // 타이틀 편집 토글
 const toggleTitleEdit = () => {
