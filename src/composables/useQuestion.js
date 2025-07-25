@@ -216,6 +216,7 @@ export function useQuestion() {
             const codePoint = baseCode + index;
             return String.fromCharCode(codePoint);
         };
+        const koreanCircleMaker = ['㉠','㉡','㉢','㉣','㉤']
 
         if (!quotedSentences || !quotedWords || quotedSentences.length !== quotedWords.length) {
             console.warn('quoted_sentence와 quoted_word 배열 길이가 다르거나 없습니다.');
@@ -238,7 +239,7 @@ export function useQuestion() {
             const underlinedSentence = sentence.replace(word, `<u>${word}</u>`);
             modifiedContent = modifiedContent.replace(sentence, underlinedSentence);
             
-            console.log(`밑줄 적용: "${word}" -> "${getKoreanCircleMarker(i)}<u>${word}</u>"`);
+            console.log(`밑줄 적용: "${word}" -> "${koreanCircleMaker[0]}<u>${word}</u>"`);
         }
     
         return modifiedContent;
