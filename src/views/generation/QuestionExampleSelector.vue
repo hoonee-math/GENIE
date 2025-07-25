@@ -141,9 +141,8 @@ const questionPatterns = ref([
 
 const questionTypes = ref([
     { id: 6, label: "전체" },
-    { id: 7, label: "정답형" },
+    { id: 7, label: "긍정형" },
     { id: 8, label: "부정형" },
-    { id: 12, label: "긍정형" },
 ]);
 
 // 1. 기본 questions를 구조별로 필터링
