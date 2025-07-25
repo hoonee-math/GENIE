@@ -174,7 +174,7 @@ const reGeneratePassageWithPrevDescription = async () => {
         const generateType = localStorage.getItem('generateType')
         const requestData = JSON.parse(localStorage.getItem('requestData') || '{}')
 
-        const newPasCode = await generateAndSavePassage(generateType,passageTitle.value ,requestData)
+        const newPasCode = await generateAndSavePassage(generateType, passage.value.title, requestData)
         
         isReGenerating.value = true
         router.push(`/passage/view/${newPasCode}`)
@@ -188,13 +188,6 @@ const reGeneratePassageWithPrevDescription = async () => {
 // 결제 사용 모달 관련 함수
 const openPaymentUsageModal = () => { isPaymentUsageModalOpen.value = true; };
 const closePaymentUsageModal = () => { isPaymentUsageModalOpen.value = false; };
-
-// Computed 속성들 (usePassage에서 데이터 가져오기)
-const passageTitle = computed(() => {
-    if (isLoading.value) return '로딩 중...'
-    if (errorMessage.value) return '오류'
-    return passage.value.title || 'Untitled'
-})
 
 // PassageEditor 의 parentComponent 변수에 전달할 값(currentParentComponent) 설정 
 const currentParentComponent = computed(() => {

@@ -395,14 +395,14 @@ const generateTitle = (generateType, requestData) => {
     }
 
     const now = new Date()
-    const dateStr = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`
+    const dateStr = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
 
     if (generateType === 'single') {
-        return `[단일 지문] ${requestData.keyword.slice(0, 10)} (${dateStr})`
+        return `${requestData.keyword.slice(0, 10)} (${dateStr})`
     } else if (generateType === 'multiple') {
-        return `[복합 지문] ${requestData.first_type_passage} & ${requestData.second_type_passage} (${dateStr})`
+        return `${requestData.first_type_passage} & ${requestData.second_type_passage} (${dateStr})`
     } else if (generateType === 'reading') {
-        return `[독서론 지문] ${requestData.keyword.slice(0, 10)} (${dateStr})`
+        return `${requestData.keyword.slice(0, 10)} (${dateStr})`
     }
     return newPassageTitle.value;
 }
