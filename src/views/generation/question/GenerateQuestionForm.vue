@@ -299,6 +299,9 @@ const handleLoadPassage = async (selectPasCode) => {
  * 문항 생성 처리
  */
 const generateQuestion = async (questionData) => {
+    if(isGenerating) {
+        return;
+    }
     isGenerating.value = true
 
     try {
