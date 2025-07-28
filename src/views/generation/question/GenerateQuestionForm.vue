@@ -12,15 +12,20 @@
             <template #left>
                 <div>
                     <!-- 탭 네비게이션 -->
-                    <div class="flex border-b border-gray-200 mb-6">
+                    <div class="flex border-b border-gray-200 mb-6 mi">
                         <button @click="switchTab('user')"
-                            :class="['px-4 py-2 text-sm font-medium border-b-2 transition-colors', activeTab === 'user' ? 'border-brand text-brand' : 'border-transparent text-gray-500 hover:text-gray-700']">
+                            :class="['px-4 py-2 text-sm font-medium border-b-2 transition-colors text-nowrap', activeTab === 'user' ? 'border-brand text-brand' : 'border-transparent text-gray-500 hover:text-gray-700']">
                             사용자 입력
                         </button>
                         <button @click="switchTab('storage')"
-                            :class="['px-4 py-2 text-sm font-medium border-b-2 transition-colors', activeTab === 'storage' ? 'border-brand text-brand' : 'border-transparent text-gray-500 hover:text-gray-700']">
+                            :class="['px-4 py-2 text-sm font-medium border-b-2 transition-colors text-nowrap', activeTab === 'storage' ? 'border-brand text-brand' : 'border-transparent text-gray-500 hover:text-gray-700']">
                             자료실 지문
                         </button>
+                        <div v-if="passageTitle" class="flex flex-1 justify-end text-end py-2 text-sm font-medium transition-colors">
+                            <div class="text-nowrap align-bottom cursor-pointer" @click="switchTab('storage')">{{passageTitle}} </div>
+                            <Icon icon="humbleicons:times" width="22" height="22" @click="handleDelete" class="text-white border rounded-lg bg-brand cursor-pointer ml-2 hover:scale-110" />
+                        </div>
+                        
                     </div>
 
                     <!-- 사용자 입력 탭, 자료실 지문 탭 모두 같은 에디터에 데이터 입력 -->
@@ -121,7 +126,6 @@ import { ref, computed, onMounted, watch, nextTick, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PassageAndQuestionLayout from '@/views/generation/PassageAndQuestionLayout.vue'
 import PassageSummaryLayout from '@/views/generation/PassageSummaryLayout.vue'
-import PassageEditor from '@/views/generation/PassageEditor.vue'
 import LoadPassageModal from '@/components/generation/LoadPassageModal.vue'
 import ConfirmModalComponent from '@/components/common/ConfirmModalComponent.vue'
 import LoadingModal from '@/components/common/LoadingModal.vue'
@@ -135,8 +139,8 @@ import TipTapEditor from '../TipTapEditor.vue'
 // Router 및 Composables
 const route = useRoute()
 const router = useRouter()
-const { passage, generateQuestionWithNewPassage } = useQuestion()
-const { fetchPassage, clearPassage, corePointTabs } = usePassage();
+const { generateQuestionWithNewPassage } = useQuestion()
+const { passage, fetchPassage, clearPassage, corePointTabs } = usePassage();
 
 // ===== 상태 관리 =====
 
@@ -150,9 +154,9 @@ const loadingMessage = ref('문항을 생성 중입니다.\n생성까지 최대 
 const isPaymentUsageModalOpen = ref(false); // 결제 사용 모달 
 
 // 데이터 상태
-const newPassageTitle = ref('')
 const questionTitle = ref('Untitled')
 const passageContent = ref('')
+const passageTitle = ref('')
 const textLength = ref(0)
 const selectedQuestionExample = ref(null)
 const handleQuestionSelected = (questionExample) => {
@@ -217,12 +221,25 @@ const switchTab = (tabKey) => {
     }
 }
 
+const handleDelete = () => {
+  if (confirm('정말 삭제하시겠습니까?')) {
+    // OK 클릭 시 지연시간을 갖고 모두 초기화한 후 모달 띄우기
+    resetAll()
+    handleLoadPassage()
+    // 실제 삭제 로직
+  } else {
+    // Cancel 클릭 시
+    console.log('삭제 취소')
+    // 취소 시 로직 (보통 아무것도 안함)
+  }
+}
 /**
  * 전체 초기화
  */
 const resetAll = () => {
     questionTitle.value = 'Untitled'
     passageContent.value = ''
+    passageTitle.value = ''
     textLength.value = 0
     activeTab.value = 'user'
     isQuestionExampleSelectorVisible.value = false
@@ -364,6 +381,7 @@ watch(() => passage.value, (newPassage) => {
 
         // questionTitle.value = newPassage.title // EditableTitle 에서 자동 감지?
         passageContent.value = newPassage.content
+        passageTitle.value = newPassage.title
 
         if (corePointTabs.value.length === 1 && corePointTabs.value[0].pasType === '독서론') { generateType.value = '독서론' }
         else if (corePointTabs.value.length === 1) generateType.value = '단일 지문'
