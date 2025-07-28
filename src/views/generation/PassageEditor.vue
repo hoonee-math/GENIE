@@ -87,7 +87,7 @@
             </div>
             <!-- 오른쪽 정렬 -->
             <div class="flex justify-end mt-2">
-                <span class="text-brand">{{ textLength }}</span><span class="text-[#BDBDBD]">/{{ MAX_LENGTH }}</span>
+                <span class="text-brand">{{ textLength }}</span><span class="text-[#BDBDBD]">/{{ MAX_LENGTH }}자</span>
             </div>
         </div>
     </div>
