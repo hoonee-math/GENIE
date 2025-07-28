@@ -240,6 +240,8 @@ const insertSymbol = (symbol) => {
 const setContent = (newContent) => {
     if (editor.value && newContent !== editor.value.getHTML()) {
         editor.value.commands.setContent(newContent)
+        // ✅ 추가: textLength 업데이트
+        textLength.value = editor.value.getText().length
     }
 }
 

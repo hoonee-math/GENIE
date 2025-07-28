@@ -29,6 +29,9 @@
                         <!-- TipTap 에디터 -->
                         <PassageEditor ref="editorRef" :initialContent="passageContent"
                             :parentComponent="'GenerateQuestionForm'" @content-changed="handleContentChange" />
+                        
+                        <TipTapEditor :initialContent="passageContent" :isEditable="true" :showContentLength="true"
+                            @content-changed="handleContentChange" :addClass="'text-basic p-4'" />
                     </div>
                 </div>
             </template>
@@ -127,6 +130,7 @@ import { usePassage } from '@/composables/usePassage';
 import QuestionExampleSelector from '@/views/generation/QuestionExampleSelector.vue'
 import EditableTitle from '@/views/generation/EditableTitle.vue'
 import PaymentUsageModal from "@/components/generation/PaymentUsageModal.vue";
+import TipTapEditor from '../TipTapEditor.vue'
 
 // Router 및 Composables
 const route = useRoute()

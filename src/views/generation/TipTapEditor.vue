@@ -3,6 +3,10 @@
     <div :class="['box-border pt-[1px] ', isEditable ? ' border border-[#757575] ' : '']">
         <editor-content :editor="editor" :class="['text-[#303030] text-left ', addClass]" />
     </div>
+    <!-- 오른쪽 정렬 -->
+    <div v-if="props.showContentLength" class="flex justify-end mt-2">
+        <span class="text-brand">{{ textLength }}</span><span class="text-[#BDBDBD]">/{{ MAX_LENGTH }}</span>
+    </div>
 </template>
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
@@ -18,11 +22,15 @@ const props = defineProps({
     },
     isEditable: {
         type: Boolean,
-        default: 'false',
+        default: false,
     },
     addClass: {
         type: String,
         default: 'text-base',
+    },
+    showContentLength: {
+        type: Boolean,
+        default: false,
     }
 })
 
@@ -104,6 +112,8 @@ const editor = useEditor({
 const setContent = (newContent) => {
     if (editor.value && newContent !== editor.value.getHTML()) {
         editor.value.commands.setContent(newContent)
+        // ✅ 추가: textLength 업데이트
+        textLength.value = editor.value.getText().length
     }
 }
 
