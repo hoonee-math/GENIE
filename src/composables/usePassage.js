@@ -248,10 +248,14 @@ export function usePassage() {
     console.log("🌐 리스트 API 호출 시작 (캐시 없음)");
 
     const selectGenerateType = (descriptions) => {
-      // console.log("descriptions.length & descriptions[0].pasType",descriptions.length, descriptions[0].pasType)
-      if (descriptions.length > 1) return "복합 지문";
-      else if (descriptions[0].pasTpye === "독서론") return "독서론";
-      else return "단일 지문";
+      try{
+        // console.log("descriptions.length & descriptions[0].pasType",descriptions.length, descriptions[0].pasType)
+        if (descriptions.length > 1) return "복합 지문";
+        else if (descriptions[0].pasType === "독서론") return "독서론";
+        else return "단일 지문";
+      } catch {
+        return '호출오류';
+      }
     };
 
     try {
