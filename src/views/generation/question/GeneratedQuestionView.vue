@@ -378,6 +378,6 @@ onMounted(() => {
         // savedPassageTitle.value = passage.value.title || ''
     }
     console.log("GeneratedQuestionView 로드시 초기화 진행된 데이터 출력 savedPassageContent ", savedPassageContent.value)
-    console.log("GeneratedQuestionView 로드시 초기화 진행된 데이터 출력 savedPassageTitle ", savedPassageTitle.value)
+    // console.log("GeneratedQuestionView 로드시 초기화 진행된 데이터 출력 savedPassageTitle ", savedPassageTitle.value)
 })
 </script>
