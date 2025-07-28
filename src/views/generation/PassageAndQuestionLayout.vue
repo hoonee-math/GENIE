@@ -1,4 +1,5 @@
 <template>
+    <!-- PassageAndQuestionLayout.vue -->
     <div class="flex flex-col items-start gap-4 w-full h-full md:mt-0 bg-white md:bg-[#f9fafb] dev-border">
 
         <!-- 헤더 -->
@@ -11,6 +12,7 @@
             </div>
         </div>
 
+        <!-- 메인 영역 #pagination(GeneratedQuestionView.vue 에서만 사용됨), #left, #right -->
         <div class="flex flex-col w-full h-full min-h-[500px] border border-gray-300 bg-white rounded-2xl">
             <div v-if="$slots.pagination" class="flex  flex-1 w-full h-full min-w-0 m-7 mb-0">
                 <slot name="pagination" />
