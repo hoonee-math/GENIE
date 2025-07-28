@@ -8,8 +8,8 @@
         :disabled="disabled"
         @mouseover="hover = true"
         @mouseleave="hover = false"
-        @click="handleClick"
     >
+        <!-- @click="handleClick" -->
         {{ text }}
     </button>
 </template>
@@ -39,9 +39,9 @@ export default {
         },
     },
     methods: {
-        handleClick(event) {
-            if (!this.disabled) this.$emit("click", event);
-        },
+        // handleClick(event) {
+        //     if (!this.disabled) this.$emit("click", event);
+        // },
     },
 };
 </script>
