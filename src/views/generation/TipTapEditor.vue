@@ -60,8 +60,8 @@ const editor = useEditor({
     editable: isEditable.value,  // 편집 가능 여부 설정
     editorProps: {
         attributes: {
-            class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none',
-            style: 'height: 60vh; overflow-y: auto;'
+            class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[40vh] max-h-[400px] md:min-h-[40vh] md:max-h-[45vh] overflow-y-auto', //md:max-h-[800px] 
+            style: ''
         },
         handleKeyDown: (view, event) => {
             // 편집 불가능한 상태에서는 모든 입력 차단
@@ -186,5 +186,27 @@ defineExpose({
 
 :deep(.ProseMirror)::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
+}
+
+:deep(.editor-responsive-height) {
+    min-height: 40vh;
+    max-height: 800px;
+    overflow-y: auto;
+}
+
+/* 태블릿/데스크톱: md 브레이크포인트 (768px) 이상 */
+@media (min-width: 768px) {
+    :deep(.editor-responsive-height) {
+        min-height: 40vh;
+        max-height: 800px;
+    }
+}
+
+/* 또는 더 큰 화면용 추가 */
+@media (min-width: 1024px) {
+    :deep(.editor-responsive-height) {
+        min-height: 45vh;
+        max-height: 45vh;
+    }
 }
 </style>
