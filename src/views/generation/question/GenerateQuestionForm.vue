@@ -31,7 +31,7 @@
                             :parentComponent="'GenerateQuestionForm'" @content-changed="handleContentChange" /> -->
                         
                         <TipTapEditor :initialContent="passageContent" :isEditable="true" :showContentLength="true"
-                            @content-changed="handleContentChange" :addClass="'text-basic p-4 min-'" />
+                            @content-changed="handleContentChange" :addClass="'text-basic p-4 '" />
                     </div>
                 </div>
             </template>

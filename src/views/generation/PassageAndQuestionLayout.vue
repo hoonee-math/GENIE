@@ -29,8 +29,8 @@
                 <div v-if="$slots.right" class="w-px my-7 border-[1px] border-[#D9D9D9] flex-shrink-0"></div>
 
                 <!-- 오른쪽 영역 (지문 분석) -->
-                <div v-if="$slots.right" class="min-w-0 m-7 dev-border" :class="`flex-[${rightRatio}]`">
-                    <div class="flex flex-col h-full">
+                <div v-if="$slots.right" class="min-w-0 max-h-[100vh] m-7 dev-border overflow-hidden" :class="`flex-[${rightRatio}]`">
+                    <div class="flex flex-col h-full max-h-full overflow-hidden">
                         <slot name="right" />
                     </div>
                 </div>

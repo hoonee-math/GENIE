@@ -1,6 +1,6 @@
 <template>
-    <div class="flex flex-col items-start p-0 h-full">
-        <div class="flex flex-col items-start p-0 gap-4 w-full h-full">
+    <div class="flex flex-col items-start p-0 h-full max-h-full overflow-hidden">
+        <div class="flex flex-col items-start p-0 gap-4 w-full h-full min-h-0">
             <div>
                 <span class="font-bold text-2xl md:text-xl leading-[150%] tracking-[-0.02em] text-[#303030]">
                     지문 분석
@@ -22,7 +22,7 @@
             </div>
 
             <div
-                class="box-border flex flex-col flex-1 items-start px-4 py-4 gap-4 w-full bg-white border border-[#E5E7EB] rounded-xl shadow-sm overflow-y-auto scrollbar-hide">
+                class="box-border flex flex-col flex-1 items-start px-4 py-4 gap-4 w-full bg-white border border-[#E5E7EB] rounded-xl shadow-sm overflow-hidden min-h-0">
                 <div v-if="structure" class="flex flex-row items-center w-full gap-4">
                     <p class="font-bold text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030]">
                         지문 종류
@@ -60,13 +60,12 @@
                     </div>
                 </div>
 
-                <div class="flex flex-col items-start gap-4 w-full flex-1">
-                    <p
-                        class="font-bold text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030] min-w-[80px] shrink-0">
+                <div class="flex flex-col items-start gap-4 w-full flex-1 min-h-0 overflow-hidden">
+                    <p class="font-bold text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030] shrink-0">
                         핵심 논점
                     </p>
                     <div
-                        class="w-full font-normal text-sm md:text-base leading-[200%] tracking-[-0.02em] text-[#303030] flex-1 overflow-auto">
+                        class="w-full font-normal text-sm md:text-base leading-[200%] tracking-[-0.02em] text-[#303030] flex-1 overflow-y-auto min-h-0 scrollbar-hide">
                         <slot name="generated_core_point">{{ gist }}</slot>
                     </div>
                 </div>

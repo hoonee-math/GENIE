@@ -61,7 +61,7 @@ const editor = useEditor({
     editorProps: {
         attributes: {
             class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none',
-            style: ''
+            style: 'height: 60vh; overflow-y: auto;'
         },
         handleKeyDown: (view, event) => {
             // 편집 불가능한 상태에서는 모든 입력 차단
