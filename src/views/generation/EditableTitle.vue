@@ -31,6 +31,7 @@
 import { ref, computed, nextTick } from 'vue'
 import { apiPut } from '@/utils/http'
 import { usePassage } from '@/composables/usePassage'
+import { updatePassagePartial } from '@/api/passage'
 
 const props = defineProps({
     // v-model 지원 (새 지문용)
@@ -115,7 +116,7 @@ const finishEdit = async () => {
 
         isSaving.value = true
         try {
-            await apiPut(`/api/passage/title/${passage.value.pasCode}`, {
+            await updatePassagePartial(passage.value.pasCode, {
                 title: newValue
             })
             //console.log('제목 저장 완료')

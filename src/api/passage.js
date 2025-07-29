@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPut } from "@/utils/http";
+import { apiGet, apiPost, apiPut, apiPatch } from "@/utils/http";
 
 /**
  * Passage Storage API 모듈
@@ -43,6 +43,19 @@ export async function updatePassageInDatabase(passageData) {
     return response;
   } catch (error) {
     console.error("✏️ [DB UPDATE] 지문 수정 실패:", error);
+    throw error;
+  }
+}
+
+// 지문 데이터 수정 (/api/pass/{pasCode}) - updates 추가 가능한 key 목록: title, content, isFavorite 수정 가능 (null 이면 수정안함)
+export async function updatePassagePartial(pasCode, updates) {
+  try {
+    console.log('🔄 [PATCH] 지문 부분 수정 요청:', { pasCode, updates });
+    const response = await apiPatch(`/api/pass/${pasCode}`, updates);
+    console.log('✅ [PATCH] 지문 부분 수정 성공:', response);
+    return response;
+  } catch (error) {
+    console.error('❌ [PATCH] 지문 부분 수정 실패:', error);
     throw error;
   }
 }
