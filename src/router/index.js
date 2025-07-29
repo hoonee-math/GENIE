@@ -72,10 +72,15 @@ const router = createRouter({
 // Google Tag Manager - 페이지 추적
 router.afterEach((to) => {
     try {
+        console.log('🔄 페이지 이동:', to.fullPath);
+        console.log('📊 dataLayer 존재:', !!window.dataLayer);
+
         // 안전한 dataLayer 체크
         if (typeof window !== 'undefined' && 
             window.dataLayer && 
             typeof window.dataLayer.push === 'function') {
+
+            console.log('✅ GTM 이벤트 전송 시작');
             
             window.dataLayer.push({
                 event: 'page_view',
@@ -83,6 +88,7 @@ router.afterEach((to) => {
                 page_location: window.location.href,
                 page_path: to.fullPath
             });
+            console.log('✅ GTM 이벤트 전송 완료');
         }
     } catch (error) {
         console.error('❌ GTM 페이지 추적 실패:', error);
