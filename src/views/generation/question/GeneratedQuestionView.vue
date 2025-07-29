@@ -41,7 +41,7 @@
                                 :class="false ? 'text-[#0086FF]' : 'text-[#303030]'" />
                         </button>
                     </div>
-                    <div v-if="existQueSubpassage" class="border border-black p-4">
+                    <div v-if="existQueSubpassage" class="border border-black p-4 mb-4">
                         <TipTapEditor :initialContent="question.queSubpassage" :isEditable="editableQueryAndOption"
                             @content-changed="handleQueSubpassageChange" :addClass="'text-xl leading-10'" />
                     </div>

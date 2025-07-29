@@ -60,7 +60,7 @@ const editor = useEditor({
     editable: isEditable.value,  // 편집 가능 여부 설정
     editorProps: {
         attributes: {
-            class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[40vh] max-h-[400px] md:min-h-[40vh] md:max-h-[45vh] overflow-y-auto', //md:max-h-[800px] 
+            class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none max-h-[400px] md:max-h-[45vh] overflow-y-auto', //md:max-h-[800px] min 값은 props로 addClass 에 담아서 전달하는 것으로 수정
             style: ''
         },
         handleKeyDown: (view, event) => {

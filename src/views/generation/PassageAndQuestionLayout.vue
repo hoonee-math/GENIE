@@ -20,7 +20,7 @@
             <div class="flex w-full h-full ">
                 <!-- 왼쪽 영역 (편집 도구, 지문 출력) -->
                 <div class="min-w-0 m-7 dev-border" :class="`flex-[${leftRatio}]`">
-                    <div class="flex flex-col gap-5 h-full">
+                    <div class="flex flex-col h-full">
                         <slot name="left" />
                     </div>
                 </div>
