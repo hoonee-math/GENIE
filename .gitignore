@@ -31,6 +31,6 @@ coverage
 
 *.tsbuildinfo
 
-.env
+.env*
 vite.config.js
 tailwind.config.js

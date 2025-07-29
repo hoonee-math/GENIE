@@ -69,4 +69,17 @@ const router = createRouter({
     ],
 });
 
+// Google Tag Manager - 페이지 추적
+router.afterEach((to) => {
+    // GTM이 활성화된 경우에만 이벤트 전송
+    if (typeof window !== 'undefined' && window.dataLayer) {
+        window.dataLayer.push({
+            event: 'page_view',
+            page_title: document.title,
+            page_location: window.location.href,
+            page_path: to.fullPath
+        });
+    }
+});
+
 export default router;
