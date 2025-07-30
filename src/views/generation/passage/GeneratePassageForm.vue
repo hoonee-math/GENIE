@@ -14,17 +14,16 @@
 
 
                     <!-- 탭 네비게이션 -->
-                    <div class="flex space-x-2 px-2">
+                    <!-- <div class="flex space-x-2 px-2 relative z-10">
                         <button v-for="tab in tabs" :key="tab.key" @click="activeTab = tab.key" :class="[
-                            'flex items-center px-6 py-3 text-base text-nowrap font-medium rounded-t transition-all duration-200 border border-b-0',
+                            'flex items-center px-6 py-3 text-base text-nowrap font-medium rounded-t transition-all duration-200 border border-b-0 relative',
                             activeTab === tab.key
-                                ? 'text-gray-600 bg-white'
-                                : 'border-gray-300 hover:border-brand hover:text-brand'
+                                ? 'text-gray-600 bg-white border-gray-300 border-b-white -mb-px'
+                                : 'border-gray-300 hover:border-brand hover:text-brand '
                         ]">
                             {{ tab.label }}
-
-                            <!-- Tooltip 적용 -->
-                            <BaseTooltip v-if="tab.tooltip" :content="tab.tooltipContent" position="top" class="ml-2 hidden md:block">
+                            <BaseTooltip v-if="tab.tooltip" :content="tab.tooltipContent" position="top"
+                                class="ml-2 hidden md:block">
                                 <template #trigger>
                                     <svg width="17" height="17" viewBox="0 0 17 17" fill="currentColor"
                                         xmlns="http://www.w3.org/2000/svg">
@@ -32,71 +31,86 @@
                                         <path fill-rule="evenodd" d="M2.47949 8.5013C2.47949 6.90448..." />
                                     </svg>
                                 </template>
-                            </BaseTooltip>
-                        </button>
-                    </div>
+</BaseTooltip>
+</button>
+</div> -->
 
                     <!-- 메인 영역 -->
-                    <div class="col-span-8 bg-white rounded-lg p-9 border min-h-[752px]">
+                    <div class="flex flex-col col-span-8 bg-white rounded-lg p-9 border min-h-[830px]">
+
+                        <!-- 탭 네비게이션 -->
+                        <div class="flex border-b border-gray-200 mb-6 mi">
+                            <button v-for="tab in tabs" :key="tab.key" @click="activeTab = tab.key"
+                                :class="['px-4 py-2 text-lg font-medium border-b-2 transition-colors text-nowrap', activeTab === tab.key ? 'border-brand text-brand' : 'border-transparent text-gray-500 hover:text-gray-700']">
+                                {{ tab.label }}
+                            </button>
+
+                        </div>
+
                         <PassageGenerationFormSplitLayout v-if="activeTab === 'single'">
                             <template #left>
-                                <!-- 지문 분야 선택 -->
-                                <div>
-                                    <h3 class="text-2xl font-semibold text-gray-900 mb-6">
-                                        지문 분야 선택 <span class="text-red-500">*</span>
-                                    </h3>
-                                    <div class=" grid grid-cols-3 gap-3 md:gap-8">
-                                        <button v-for="pasType in pasTypes" :key="pasType"
-                                            @click="singleForm.type_passage = pasType" :class="[
-                                                'py-6 min-w-10 md:min-w-[50px] text-xl font-medium rounded-lg border-2 transition-all duration-200 text-nowrap',
-                                                singleForm.type_passage === pasType
-                                                    ? 'bg-brand/20 border-brand text-brand'
-                                                    : 'bg-white border-gray-300 text-gray-700 hover:border-brand hover:text-brand'
-                                            ]">
-                                            {{ pasType }}
-                                        </button>
+                                <div class="flex flex-col h-full">
+
+                                    <!-- 지문 분야 선택 -->
+                                    <div class="mb-6">
+                                        <h3 class="text-2xl font-semibold text-gray-900 mb-6">
+                                            지문 분야 선택 <span class="text-red-500">*</span>
+                                        </h3>
+                                        <div class=" grid grid-cols-3 gap-3 md:gap-8">
+                                            <button v-for="pasType in pasTypes" :key="pasType"
+                                                @click="singleForm.type_passage = pasType" :class="[
+                                                    'py-6 min-w-10 md:min-w-[50px] text-xl font-medium rounded-lg border-2 transition-all duration-200 text-nowrap',
+                                                    singleForm.type_passage === pasType
+                                                        ? 'bg-brand/20 border-brand text-brand'
+                                                        : 'bg-white border-gray-300 text-gray-700 hover:border-brand hover:text-brand'
+                                                ]">
+                                                {{ pasType }}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- 지문 제재 입력 -->
+                                    <div class="flex flex-col flex-1">
+                                        <h3 class="text-2xl font-semibold text-gray-900 mb-6">
+                                            지문 제재 입력 <span class="text-red-500">*</span>
+                                        </h3>
+                                        <textarea v-model="singleForm.keyword"
+                                            placeholder="50자 이내의 원하는 지문의 제재, 필수 포함 키워드를 작성해 주세요.&#10;(ex : 인공지능, 기계학습)"
+                                            class="w-full flex-1 p-6 text-xl border-2 border-gray-300 rounded-lg resize-none focus:border-brand focus:outline-none transition-colors duration-200" />
                                     </div>
                                 </div>
 
-                                <!-- 지문 제재 입력 -->
-                                <div>
-                                    <h3 class="text-2xl font-semibold text-gray-900 mb-6">
-                                        지문 제재 입력 <span class="text-red-500">*</span>
-                                    </h3>
-                                    <textarea v-model="singleForm.keyword"
-                                        placeholder="50자 이내의 원하는 지문의 제재, 필수 포함 키워드를 작성해 주세요.&#10;(ex : 인공지능, 기계학습)"
-                                        rows="8"
-                                        class="w-full p-6 text-xl border-2 border-gray-300 rounded-lg resize-none focus:border-brand focus:outline-none transition-colors duration-200" />
-                                </div>
+
                             </template>
 
                             <template #right>
-                                <!-- 지문 구조 설계 (선택) -->
-                                <div>
-                                    <h3 class="text-2xl font-semibold text-gray-900 mb-6">
-                                        지문 구조 설계 (선택)
-                                    </h3>
-                                    <div class=" grid grid-cols-3 gap-3 md:gap-8">
-                                        <button v-for="structure in structures" :key="structure"
-                                            @click="singleForm.type_structure = structure" :class="[
-                                                'py-6 min-w-10 md:min-w-[50px] text-xl text-nowrap font-medium rounded-lg border-2 transition-all duration-200',
-                                                singleForm.type_structure === structure
-                                                    ? 'bg-brand/20 border-brand text-brand'
-                                                    : 'bg-white border-gray-300 text-gray-700 hover:border-brand hover:text-brand'
-                                            ]">
-                                            {{ structure }}
-                                        </button>
+                                <div class="flex flex-col h-full">
+                                    <!-- 지문 구조 설계 (선택) -->
+                                    <div class="mb-6">
+                                        <h3 class="text-2xl font-semibold text-gray-900 mb-6">
+                                            지문 구조 설계 (선택)
+                                        </h3>
+                                        <div class=" grid grid-cols-3 gap-3 md:gap-8">
+                                            <button v-for="structure in structures" :key="structure"
+                                                @click="singleForm.type_structure = structure" :class="[
+                                                    'py-6 min-w-10 md:min-w-[50px] text-xl text-nowrap font-medium rounded-lg border-2 transition-all duration-200',
+                                                    singleForm.type_structure === structure
+                                                        ? 'bg-brand/20 border-brand text-brand'
+                                                        : 'bg-white border-gray-300 text-gray-700 hover:border-brand hover:text-brand'
+                                                ]">
+                                                {{ structure }}
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
 
-                                <!-- 추가 요청 사항 (선택) -->
-                                <div>
-                                    <h3 class="text-2xl font-semibold text-gray-900 mb-6">
-                                        추가 요청 사항 (선택)
-                                    </h3>
-                                    <textarea v-model="singleForm.requirement" placeholder="지문 작성에 유의할 점이 있다면 작성해 주세요."
-                                        rows="8"
-                                        class="w-full p-6 text-xl border-2 border-gray-300 rounded-lg resize-none focus:border-brand focus:outline-none transition-colors duration-200" />
+                                    <!-- 추가 요청 사항 (선택) -->
+                                    <div class="flex flex-col flex-1">
+                                        <h3 class="text-2xl font-semibold text-gray-900 mb-6">
+                                            추가 요청 사항 (선택)
+                                        </h3>
+                                        <textarea v-model="singleForm.requirement" placeholder="지문 작성에 유의할 점이 있다면 작성해 주세요."
+                                            class="w-full flex-1 p-6 text-xl border-2 border-gray-300 rounded-lg resize-none focus:border-brand focus:outline-none transition-colors duration-200" />
+                                    </div>
                                 </div>
                             </template>
                         </PassageGenerationFormSplitLayout>
