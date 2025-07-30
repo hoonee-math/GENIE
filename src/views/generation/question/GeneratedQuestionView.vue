@@ -57,7 +57,7 @@
                     <div
                         class="box-border flex flex-col flex-1 items-start px-4 py-4 gap-4 w-full max-h-full bg-white border border-[#E5E7EB] rounded-xl shadow-sm overflow-y-auto scrollbar-hide">
                         <div class="flex flex-row items-center w-full gap-4">
-                            <p class="font-bold text-sm md:text-2xl leading-[150%] tracking-[-0.02em] text-[#303030]">
+                            <p class="font-bold text-sm md:text-2xl text-nowrap  leading-[150%] tracking-[-0.02em] text-[#303030]">
                                 정답
                             </p>
                             <!-- question.queAnswer 값은 editQueAnswer 값에 따라서 저장된 값을 출력하거나, 라디오 버튼으로 수정가능하게 변경 -->
@@ -78,7 +78,7 @@
 
                             <!-- 수정 버튼을 누르면 #right 영역의 question.queAnswer 값과 아래 question.description 값을 각각 수정할 수 있게 변경. -->
                             <button @click="editQueAnswerAndDesc"
-                                class="flex flex-row justify-center items-center text-sm md:text-xl pl-2 py-3 w-[86px] h-[35px] bg-[#CCCCCC] rounded-lg">
+                                class="flex flex-row justify-center items-center text-sm md:text-xl pl-2 py-3 w-[86px] h-[35px] text-nowrap bg-[#CCCCCC] rounded-lg">
                                 {{ editableAnswerAndDesc ? '완료' : '수정' }}
                                 <Icon icon="mingcute:pencil-fill" width="20" height="20" class="mx-1"
                                     :class="false ? 'text-[#0086FF]' : 'text-[#303030]'" />

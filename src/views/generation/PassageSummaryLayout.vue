@@ -24,7 +24,7 @@
             <div
                 class="box-border flex flex-col flex-1 items-start px-4 py-4 gap-4 w-full bg-white border border-[#E5E7EB] rounded-xl shadow-sm overflow-hidden min-h-0">
                 <div v-if="structure" class="flex flex-row items-center w-full gap-4">
-                    <p class="font-bold text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030]">
+                    <p class="font-bold text-sm md:text-base text-nowrap leading-[150%] tracking-[-0.02em] text-[#303030]">
                         지문 종류
                     </p>
                     <p
@@ -33,14 +33,14 @@
                     </p>
                 </div>
                 <div v-if="!structure" class="flex flex-col items-start w-full gap-4">
-                    <p class="font-bold text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030]">
+                    <p class="font-bold text-sm md:text-base text-nowrap leading-[150%] tracking-[-0.02em] text-[#303030]">
                         지문 종류
                     </p>
                     <!-- 단일 지문, 복합 지문, 독서론 을 선택할 수 있는 라디오 버튼, 해당 선택 값을 부모 객체에 전달 -->
                     <slot name="select_generateType" />
                 </div>
                 <div class="flex flex-row items-center w-full gap-4">
-                    <p class="font-bold text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030]">
+                    <p class="font-bold text-sm md:text-base text-nowrap leading-[150%] tracking-[-0.02em] text-[#303030]">
                         지문 분야
                     </p>
                     <p
@@ -49,7 +49,7 @@
                     </p>
                 </div>
                 <div class="flex flex-row items-start w-full gap-4">
-                    <p class="font-bold text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030] shrink-0">
+                    <p class="font-bold text-sm md:text-base text-nowrap leading-[150%] tracking-[-0.02em] text-[#303030] shrink-0">
                         지문 제재
                     </p>
                     <div class="flex-1 min-w-0">
@@ -61,7 +61,7 @@
                 </div>
 
                 <div class="flex flex-col items-start gap-4 w-full flex-1 min-h-0 overflow-hidden">
-                    <p class="font-bold text-sm md:text-base leading-[150%] tracking-[-0.02em] text-[#303030] shrink-0">
+                    <p class="font-bold text-sm md:text-base text-nowrap leading-[150%] tracking-[-0.02em] text-[#303030] shrink-0">
                         핵심 논점
                     </p>
                     <div

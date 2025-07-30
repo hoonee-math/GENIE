@@ -24,7 +24,7 @@
                             {{ tab.label }}
 
                             <!-- Tooltip 적용 -->
-                            <BaseTooltip v-if="tab.tooltip" :content="tab.tooltipContent" position="top" class="ml-2">
+                            <BaseTooltip v-if="tab.tooltip" :content="tab.tooltipContent" position="top" class="ml-2 hidden md:block">
                                 <template #trigger>
                                     <svg width="17" height="17" viewBox="0 0 17 17" fill="currentColor"
                                         xmlns="http://www.w3.org/2000/svg">
@@ -37,7 +37,7 @@
                     </div>
 
                     <!-- 메인 영역 -->
-                    <div class="col-span-8 bg-white rounded-lg p-9 border h-[752px]">
+                    <div class="col-span-8 bg-white rounded-lg p-9 border min-h-[752px]">
                         <PassageGenerationFormSplitLayout v-if="activeTab === 'single'">
                             <template #left>
                                 <!-- 지문 분야 선택 -->
@@ -45,10 +45,10 @@
                                     <h3 class="text-2xl font-semibold text-gray-900 mb-6">
                                         지문 분야 선택 <span class="text-red-500">*</span>
                                     </h3>
-                                    <div class="min-w-[340px] grid grid-cols-3 gap-8">
+                                    <div class=" grid grid-cols-3 gap-3 md:gap-8">
                                         <button v-for="pasType in pasTypes" :key="pasType"
                                             @click="singleForm.type_passage = pasType" :class="[
-                                                'py-6 min-w-[50px] text-xl font-medium rounded-lg border-2 transition-all duration-200 text-nowrap',
+                                                'py-6 min-w-10 md:min-w-[50px] text-xl font-medium rounded-lg border-2 transition-all duration-200 text-nowrap',
                                                 singleForm.type_passage === pasType
                                                     ? 'bg-brand/20 border-brand text-brand'
                                                     : 'bg-white border-gray-300 text-gray-700 hover:border-brand hover:text-brand'
@@ -76,10 +76,10 @@
                                     <h3 class="text-2xl font-semibold text-gray-900 mb-6">
                                         지문 구조 설계 (선택)
                                     </h3>
-                                    <div class="min-w-[340px] grid grid-cols-3 gap-8">
+                                    <div class=" grid grid-cols-3 gap-3 md:gap-8">
                                         <button v-for="structure in structures" :key="structure"
                                             @click="singleForm.type_structure = structure" :class="[
-                                                'py-6 min-w-[100px] text-xl text-nowrap font-medium rounded-lg border-2 transition-all duration-200',
+                                                'py-6 min-w-10 md:min-w-[50px] text-xl text-nowrap font-medium rounded-lg border-2 transition-all duration-200',
                                                 singleForm.type_structure === structure
                                                     ? 'bg-brand/20 border-brand text-brand'
                                                     : 'bg-white border-gray-300 text-gray-700 hover:border-brand hover:text-brand'
@@ -109,7 +109,7 @@
                                     <h3 class="text-2xl font-semibold text-gray-900 mb-6">
                                         분야 선택 <span class="text-red-500">*</span>
                                     </h3>
-                                    <div class="min-w-[340px] grid grid-cols-5 gap-3">
+                                    <div class=" grid grid-cols-5 gap-3">
                                         <button v-for="pasType in pasTypes" :key="'first-' + pasType"
                                             @click="multipleForm.first_type_passage = pasType" :class="[
                                                 'py-3 text-xl font-medium rounded-lg border-2 transition-all duration-200',
@@ -148,7 +148,7 @@
                                     <h3 class="text-2xl font-semibold text-gray-900 mb-6">
                                         분야 선택 <span class="text-red-500">*</span>
                                     </h3>
-                                    <div class="min-w-[340px] grid grid-cols-5 gap-3">
+                                    <div class=" grid grid-cols-5 gap-3">
                                         <button v-for="pasType in pasTypes" :key="'second-' + pasType"
                                             @click="multipleForm.second_type_passage = pasType" :class="[
                                                 'py-3 text-xl font-medium rounded-lg border-2 transition-all duration-200',
@@ -226,7 +226,7 @@
                 </div>
 
                 <!-- 하단 버튼 -->
-                <div class="flex justify-end space-x-4 mt-12">
+                <div class="flex flex-col sm:flex-row justify-end gap-4 mt-8">
                     <button @click="openPaymentUsageModal" :disabled="isLoading" :class="[
                         'px-8 py-4 text-lg font-medium rounded-lg transition-all duration-200',
                         isLoading
@@ -265,8 +265,7 @@
     <!-- 로딩 모달 -->
     <LoadingModal :isOpen="isLoading" :message="loadingMessage" />
 
-    <PaymentUsageModal :isOpen="isPaymentUsageModalOpen" @close="closePaymentUsageModal"
-        @generate="generatePassage" />
+    <PaymentUsageModal :isOpen="isPaymentUsageModalOpen" @close="closePaymentUsageModal" @generate="generatePassage" />
 </template>
 
 <script setup>
@@ -280,7 +279,7 @@ import { usePassage } from '@/composables/usePassage'
 import EditableTitle from '@/views/generation/EditableTitle.vue'
 import PaymentUsageModal from "@/components/generation/PaymentUsageModal.vue";
 import LoadingModal from '@/components/common/LoadingModal.vue'
-import { isNonEmpty } from '@/utils/validation' 
+import { isNonEmpty } from '@/utils/validation'
 
 // Router 및 Composable 설정
 const router = useRouter()
@@ -395,7 +394,7 @@ const generateTitle = (generateType, requestData) => {
     }
 
     const now = new Date()
-    const dateStr = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
+    const dateStr = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
 
     if (generateType === 'single') {
         return `${requestData.keyword.slice(0, 10)} (${dateStr})`
@@ -465,7 +464,7 @@ const convertNewlinesToParagraphs = (text) => {
 const generatePassage = async () => {
     // 에러 및 로딩 상태 초기화
     errorMessage.value = ''
-    if(isLoading.value){
+    if (isLoading.value) {
         return;
     }
     isLoading.value = true
@@ -529,9 +528,9 @@ const generatePassage = async () => {
         //     alert("필수 값을 설정해주세요")
         //     return;
         // }
-            
-        if(!isNonEmpty(requestData)) {
-            alert("필수 값을 설정해주세요") ;
+
+        if (!isNonEmpty(requestData)) {
+            alert("필수 값을 설정해주세요");
             return;
         }
 
@@ -554,10 +553,10 @@ const generatePassage = async () => {
         // 5. Simple Store 에 캐싱 (중복 API 호출 방지)
         cacheGeneratedPassage(savedPassage.pasCode, apiResponse, savedPassage)
         console.log('✅ Simple Store 캐싱 완료:', savedPassage.pasCode)
-        
+
         // 6. localStorage에 현재 요청에 대한 데이터 저장
-        localStorage.setItem('generateType',generateType)
-        localStorage.setItem('requestData',JSON.stringify(requestData))
+        localStorage.setItem('generateType', generateType)
+        localStorage.setItem('requestData', JSON.stringify(requestData))
 
         // 7. 결과 페이지로 이동
         console.log('📫 결과 페이지로 이동:', `/passage/view/${savedPassage.pasCode}`)
@@ -587,5 +586,4 @@ const openPaymentUsageModal = () => { isPaymentUsageModalOpen.value = true; };
 const closePaymentUsageModal = () => { isPaymentUsageModalOpen.value = false; };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>
