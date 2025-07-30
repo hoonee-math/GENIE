@@ -1,13 +1,13 @@
 <template>
     <div class="w-full max-h-[560px] overflow-y-auto flex flex-col">
         <div v-for="item in items" :key="item.PAS_CODE"
-            class="flex justify-between items-center py-3 md:p-3 cursor-pointer bg-white transition-all duration-200 group"
+            class="flex justify-between items-center py-3 md:p-3 bg-white transition-all duration-200 group"
             :data-id="item.PAS_CODE" @click="toggleActive(item.PAS_CODE)">
 
-            <div class="flex-1 h-14 border border-[#bdbdbd] rounded-lg px-4 py-3.5 font-medium text-base leading-[150%] tracking-[-0.02em] text-left transition-all duration-200 mr-3 group-hover:border-[#0086ff] group-hover:bg-[#e6f3ff]"
+            <div class="flex-1 h-14 border border-[#bdbdbd] rounded-lg px-4 py-3.5 font-medium text-base leading-[150%] tracking-[-0.02em] text-left transition-all duration-200 mr-3 cursor-pointer group-hover:border-[#0086ff] group-hover:bg-[#e6f3ff]"
                 :class="[
                     activeItem === item.PAS_CODE
-                        ? 'border-[#bdbdbd] text-[#303030] bg-[#e6f3ff]'
+                        ? 'border-[#0086ff] text-[#303030] bg-[#e6f3ff]'
                         : 'border-[#bdbdbd] text-[#bdbdbd]',
                 ]">
                 <span :class="[typeStyles[item.generateType] || typeStyles.default, 'px-3 py-1 rounded text-sm mr-2']">
@@ -16,10 +16,10 @@
                 {{ item.PAS_TITLE }}
             </div>
 
-            <div class="h-14 border border-[#bdbdbd] rounded-lg px-4 py-3.5 font-medium text-base leading-[150%] tracking-[-0.02em] text-left transition-all duration-200 mr-3 group-hover:border-[#0086ff] group-hover:bg-[#e6f3ff]"
+            <div class="h-14 border border-[#bdbdbd] rounded-lg px-4 py-3.5 font-medium text-base leading-[150%] tracking-[-0.02em] text-left transition-all duration-200 mr-3 cursor-pointer group-hover:border-[#0086ff] group-hover:bg-[#e6f3ff]"
                 :class="[
                     activeItem === item.PAS_CODE
-                        ? 'border-[#bdbdbd] text-[#303030] bg-[#e6f3ff]'
+                        ? 'border-[#0086ff] text-[#303030] bg-[#e6f3ff]'
                         : 'border-[#bdbdbd] text-[#bdbdbd] pointer-events-none',
                 ]" @click.stop="previewPassage(item)">미리보기
             </div>
