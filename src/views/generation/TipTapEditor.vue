@@ -1,7 +1,57 @@
 <template>
     <!-- TipTap 에디터 -->
-    <div :class="['box-border pt-[1px] ', isEditable ? ' border border-[#757575] ' : '']">
+    <div :class="['box-border pt-[1px] relative', isEditable ? ' border border-[#757575] ' : '']">
         <editor-content :editor="editor" :class="['text-[#303030] text-left ', addClass]" />
+        <!-- 컨텍스트 메뉴 툴팁 -->
+        <div v-if="showContextMenu && isEditable" :style="{
+            top: menuPosition.top + 'px',
+            left: menuPosition.left + 'px',
+            transform: 'translateX(-50%)' // 중앙 정렬을 위한 transform
+        }"
+            class="absolute z-50 bg-white border border-gray-200 rounded-lg shadow-lg px-2 py-1 flex gap-1 pointer-events-auto">
+            <!-- 굵게 버튼 -->
+            <button @click="toggleBold" :class="[
+                'p-2 rounded hover:bg-gray-100 transition-colors',
+                editor?.isActive('bold') ? 'bg-blue-100 text-blue-600' : 'text-gray-600'
+            ]" title="굵게 (Ctrl+B)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M15.6 10.79c.97-.67 1.65-1.77 1.65-2.79 0-2.26-1.75-4-4-4H7v14h7.04c2.09 0 3.71-1.7 3.71-3.79 0-1.52-.86-2.82-2.15-3.42zM10 6.5h3c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-3v-3zm3.5 9H10v-3h3.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5z" />
+                </svg>
+            </button>
+
+            <!-- 밑줄 버튼 -->
+            <button @click="toggleUnderline" :class="[
+                'p-2 rounded hover:bg-gray-100 transition-colors',
+                editor?.isActive('underline') ? 'bg-blue-100 text-blue-600' : 'text-gray-600'
+            ]" title="밑줄 (Ctrl+U)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M12 17c3.31 0 6-2.69 6-6V3h-2.5v8c0 1.93-1.57 3.5-3.5 3.5S8.5 12.93 8.5 11V3H6v8c0 3.31 2.69 6 6 6zm-7 2v2h14v-2H5z" />
+                </svg>
+            </button>
+
+            <!-- 기울임꼴 버튼 -->
+            <button @click="toggleItalic" :class="[
+                'p-2 rounded hover:bg-gray-100 transition-colors',
+                editor?.isActive('italic') ? 'bg-blue-100 text-blue-600' : 'text-gray-600'
+            ]" title="기울임꼴 (Ctrl+I)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M10 4v3h2.21l-3.42 8H6v3h8v-3h-2.21l3.42-8H18V4h-8z" />
+                </svg>
+            </button>
+
+            <!-- 취소선 버튼 -->
+            <button @click="toggleStrike" :class="[
+                'p-2 rounded hover:bg-gray-100 transition-colors',
+                editor?.isActive('strike') ? 'bg-blue-100 text-blue-600' : 'text-gray-600'
+            ]" title="취소선 (Ctrl+S)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M6.85 7.08C6.85 4.37 9.45 3 12.24 3c1.64 0 3 .49 3.9 1.28.77.65 1.46 1.73 1.46 3.24h-3.01c0-.31-.05-.59-.15-.85-.29-.86-1.2-1.28-2.25-1.28-1.86 0-2.34 1.02-2.34 1.7 0 .48.25.88.74 1.21.38.25.77.48 1.41.7H7.39c-.21-.34-.54-.89-.54-1.92zM21 12v-2H3v2h9.62c1.15.45 1.96.75 1.96 1.97 0 1-.81 1.67-2.28 1.67-1.54 0-2.93-.54-2.93-2.51H6.4c0 .55.08 1.13.24 1.58.81 2.29 3.29 3.3 5.67 3.3 2.27 0 5.3-.89 5.30-4.05 0-.3-.01-1.16-.48-1.94H21V12z" />
+                </svg>
+            </button>
+        </div>
     </div>
     <!-- 오른쪽 정렬 -->
     <div v-if="props.showContentLength" class="flex justify-end mt-2">
@@ -45,6 +95,10 @@ const content = ref(props.initialContent || '')
 const textLength = ref(0)
 const isEditable = ref(true) // 편집 가능 여부 상태
 
+// 컨텍스트 메뉴 관련 반응형 상태 추가
+const showContextMenu = ref(false)
+const menuPosition = ref({ top: 0, left: 0 })
+
 // 편집 가능 여부 설정 함수 추가
 const setEditable = () => {
     isEditable.value = props.isEditable;
@@ -57,25 +111,80 @@ const editor = useEditor({
         Underline,
     ],
     content: props.initialContent,
-    editable: isEditable.value,  // 편집 가능 여부 설정
+    editable: isEditable.value,
     editorProps: {
         attributes: {
-            class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none max-h-[400px] md:max-h-[45vh] overflow-y-auto', //md:max-h-[800px] min 값은 props로 addClass 에 담아서 전달하는 것으로 수정
+            class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none max-h-[400px] md:max-h-[45vh] overflow-y-auto',
             style: ''
         },
         handleKeyDown: (view, event) => {
-            // 편집 불가능한 상태에서는 모든 입력 차단
+            // 기존 키보드 이벤트 처리...
             if (!isEditable.value) {
                 event.preventDefault()
                 return true
             }
-            // 최대 길이 체크
+
+            const isCtrlOrCmd = event.ctrlKey || event.metaKey
+
+            if (isCtrlOrCmd) {
+                switch (event.key.toLowerCase()) {
+                    case 'b':
+                        event.preventDefault()
+                        toggleBold()
+                        return true
+                    case 'u':
+                        event.preventDefault()
+                        toggleUnderline()
+                        return true
+                    case 'i':
+                        event.preventDefault()
+                        toggleItalic()
+                        return true
+                    case 's':
+                        event.preventDefault()
+                        toggleStrike()
+                        return true
+                }
+            }
+
             if (textLength.value >= MAX_LENGTH &&
                 !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
                 event.preventDefault()
                 return true
             }
             return false
+        },
+        // 🆕 마우스 이벤트 처리 추가
+        handleDOMEvents: {
+            contextmenu: (view, event) => {
+                if (!isEditable.value) {
+                    return false
+                }
+
+                const { from, to } = view.state.selection
+                if (from !== to) {
+                    event.preventDefault()
+                    calculateMenuPositionFromClick(event)
+                    return true
+                }
+
+                return false
+            },
+            // 🆕 일반 클릭 이벤트 추가
+            click: (view, event) => {
+                // 툴팁이 열려있으면 숨김
+                if (showContextMenu.value) {
+                    showContextMenu.value = false
+                }
+                return false // 기본 클릭 동작은 유지
+            },
+            // 🆕 스크롤 시 툴팁 숨김
+            scroll: (view, event) => {
+                if (showContextMenu.value) {
+                    showContextMenu.value = false
+                }
+                return false
+            }
         }
     },
     onUpdate: ({ editor }) => {
@@ -128,6 +237,72 @@ const validateTextLength = () => {
 }
 
 
+// 서식 적용 함수들
+const toggleBold = () => {
+    editor.value.chain().focus().toggleBold().run()
+}
+
+const toggleUnderline = () => {
+    editor.value.chain().focus().toggleUnderline().run()
+}
+
+const toggleItalic = () => {
+    editor.value.chain().focus().toggleItalic().run()
+}
+
+const toggleStrike = () => {
+    editor.value.chain().focus().toggleStrike().run()
+}
+
+// 우클릭 위치 계산 함수
+const calculateMenuPositionFromClick = (event) => {
+    const editorElement = document.querySelector('.ProseMirror')
+    if (!editorElement) return
+    
+    const editorRect = editorElement.getBoundingClientRect()
+    
+    // 마우스 커서의 정확한 위치 계산
+    const relativeX = event.clientX - editorRect.left
+    const relativeY = event.clientY - editorRect.top
+    
+    // 🎯 원하는 오프셋 (간단하고 자연스럽게)
+    const offsetX = 100   // 커서 오른쪽 15px
+    const offsetY = 20  // 커서 위쪽 50px
+    
+    // 📍 기본 위치 계산 (경계 제한 없이)
+    let finalTop = relativeY + offsetY
+    let finalLeft = relativeX + offsetX
+    
+    // 🚫 복잡한 경계 체크 제거! 
+    // 단순한 최소값만 체크 (완전히 가려지는 것만 방지)
+    if (finalTop < -20) {  // 너무 위로 올라가면
+        finalTop = relativeY + 25  // 아래쪽으로
+    }
+    
+    if (finalLeft < -50) {  // 너무 왼쪽으로 가면  
+        finalLeft = relativeX - 180  // 왼쪽에 표시
+    }
+    
+    // 최종 위치 (에디터 밖으로 나가는 것 허용)
+    menuPosition.value = {
+        top: finalTop,
+        left: finalLeft
+    }
+    
+    showContextMenu.value = true
+}
+
+// 문서 클릭 시 메뉴 숨김
+const handleDocumentClick = (event) => {
+    // 툴팁 메뉴 영역인지 확인
+    const isTooltipClick = event.target.closest('.absolute.z-50.bg-white')
+    
+    // 툴팁 영역이 아닌 곳을 클릭하면 메뉴 숨김
+    if (!isTooltipClick) {
+        showContextMenu.value = false
+    }
+}
+
 // Props 변경 감지
 watch(() => props.initialContent, (newContent) => {
     if (newContent !== content.value) {
@@ -146,9 +321,11 @@ watch(() => props.isEditable, () => {
 // 마운트/언마운트 처리
 onMounted(() => {
     setEditable()  // 편집 가능 여부 설정
+    document.addEventListener('click', handleDocumentClick)
 })
 
 onBeforeUnmount(() => {
+    document.removeEventListener('click', handleDocumentClick)
     if (editor.value) {
         editor.value.destroy()
     }
