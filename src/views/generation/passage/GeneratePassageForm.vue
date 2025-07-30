@@ -41,8 +41,19 @@
                         <!-- 탭 네비게이션 -->
                         <div class="flex border-b border-gray-200 mb-6 mi">
                             <button v-for="tab in tabs" :key="tab.key" @click="activeTab = tab.key"
-                                :class="['px-4 py-2 text-lg font-medium border-b-2 transition-colors text-nowrap', activeTab === tab.key ? 'border-brand text-brand' : 'border-transparent text-gray-500 hover:text-gray-700']">
+                                :class="['flex items-center px-4 py-2 text-lg font-medium border-b-2 text-nowrap',
+                                activeTab === tab.key ? 'border-brand text-brand' : 'border-transparent text-gray-500 hover:text-gray-700']">
                                 {{ tab.label }}
+                                <BaseTooltip v-if="tab.tooltip" :content="tab.tooltipContent" position="top"
+                                    class="ml-2 hidden md:block">
+                                    <template #trigger>
+                                        <svg width="17" height="17" viewBox="0 0 17 17" fill="currentColor"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path fill-rule="evenodd" d="M8.50033 6.02083C8.21853 6.02083..." />
+                                            <path fill-rule="evenodd" d="M2.47949 8.5013C2.47949 6.90448..." />
+                                        </svg>
+                                    </template>
+                                </BaseTooltip>
                             </button>
 
                         </div>
@@ -108,7 +119,8 @@
                                         <h3 class="text-2xl font-semibold text-gray-900 mb-6">
                                             추가 요청 사항 (선택)
                                         </h3>
-                                        <textarea v-model="singleForm.requirement" placeholder="지문 작성에 유의할 점이 있다면 작성해 주세요."
+                                        <textarea v-model="singleForm.requirement"
+                                            placeholder="지문 작성에 유의할 점이 있다면 작성해 주세요."
                                             class="w-full flex-1 p-6 text-xl border-2 border-gray-300 rounded-lg resize-none focus:border-brand focus:outline-none transition-colors duration-200" />
                                     </div>
                                 </div>
@@ -312,7 +324,7 @@ const loadingMessage = ref('지문을 생성 중입니다.\n생성까지 최대 
 const tabs = [
     { key: 'single', label: '단일 지문', tooltip: true, tooltipContent: '하나의 주제와 분야로 출제되는 지문 유형입니다.' },
     { key: 'multiple', label: '복합 지문', tooltip: true, tooltipContent: '서로 다른 주제나 분야의 지문 두 개가 조합되어 하나의 세트로 출제되는 지문 유형입니다.' },
-    { key: 'reading', label: '독서 지문', tooltip: true, tooltipContent: '독서의 방법론이나 독서 과정, 독서에 대한 이론 등을 다루는 지문 유형입니다.' }
+    { key: 'reading', label: '독서론 지문', tooltip: true, tooltipContent: '독서의 방법론이나 독서 과정, 독서에 대한 이론 등을 다루는 지문 유형입니다.' }
 ]
 
 // 현재 활성 탭
