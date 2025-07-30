@@ -199,11 +199,23 @@ const existQueSubpassage = computed(() => {
 })
 
 const editQueQueryAndOption = () => {
-    editableQueryAndOption.value = !editableQueryAndOption.value;
+    // 수정 버튼 클릭시
+    if(!editableQueryAndOption.value){
+        editableQueryAndOption.value = true;
+        return;
+    }
+    // 완료 버튼 클릭시
+    editableQueryAndOption.value = false;
 }
 
 const editQueAnswerAndDesc = () => {
-    editableAnswerAndDesc.value = !editableAnswerAndDesc.value;
+    // 수정 버튼 클릭시
+    if(!editableAnswerAndDesc.value){
+        editableAnswerAndDesc.value = true;
+        return;
+    }
+    // 완료 버튼 클릭시
+    editableAnswerAndDesc.value = false;
 }
 
 // 페이징 처리 관련 함수
