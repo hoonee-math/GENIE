@@ -7,10 +7,14 @@
                     <EditableTitle title-class="text-3xl font-semibold" />
                 </template>
                 <template #left>
-                    <!-- TipTapEditor (1) savedContent 값을 props 로 자식 컴포넌트의 initialContent 변수로 전달 -->
-                    <!-- TipTapEditor (2) 자식 컴포넌트에서 emit 으로 부모 컴포넌트에 전달, 자식이 emit 한 데이터를 받는 함수 handleContentChange -->
-                    <PassageEditor :max-length="numberLength" :initialContent="savedContent"
-                        :parentComponent="currentParentComponent" @content-changed="handleContentChange" />
+                    <!-- TipTapEditor 로 교체: PassageEditor 기능 포함 -->
+                    <TipTapEditor 
+                        :initialContent="savedContent"
+                        :isEditable="isCalledFromGeneratedQuestionView"
+                        :showFixedToolbar="isCalledFromGeneratedQuestionView"
+                        :showContentLength="true"
+                        @content-changed="handleContentChange"
+                        :addClass="[isCalledFromGeneratedQuestionView?'p-4':' border border-[#757575] p-4 ']" />
                 </template>
                 <template #right>
                     <!-- 지문 분석 (Pinia Store에서 자동으로 데이터 가져옴) -->
@@ -49,7 +53,7 @@ import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import PassageAndQuestionLayout from '@/views/generation/PassageAndQuestionLayout.vue'
 import PassageSummaryLayout from '@/views/generation/PassageSummaryLayout.vue'
-import PassageEditor from '@/views/generation/PassageEditor.vue'
+import TipTapEditor from '@/views/generation/TipTapEditor.vue'
 import { usePassage } from '@/composables/usePassage'
 import EditableTitle from '@/views/generation/EditableTitle.vue'
 import PaymentUsageModal from "@/components/generation/PaymentUsageModal.vue";
@@ -83,7 +87,6 @@ const isPaymentUsageModalOpen = ref(false)
 // TipTapEditor 관련 변수
 const savedContent = ref('')
 const currentLength = ref(0)
-const numberLength = ref(3000)
 
 // TipTapEditor 콘텐츠 변경 핸들러
 const handleContentChange = ({ content, textLength }) => {
@@ -165,11 +168,6 @@ const reGeneratePassageWithPrevDescription = async () => {
 // 결제 사용 모달 관련 함수
 const openPaymentUsageModal = () => { isPaymentUsageModalOpen.value = true; };
 const closePaymentUsageModal = () => { isPaymentUsageModalOpen.value = false; };
-
-// PassageEditor 의 parentComponent 변수에 전달할 값(currentParentComponent) 설정 
-const currentParentComponent = computed(() => {
-    return props.isCalledFromGeneratedQuestionView ? 'GeneratedQuestionView' : 'GeneratedPassageView'
-})
 
 // 컴포넌트 마운트 시 데이터 로드
 onMounted(() => {

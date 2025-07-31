@@ -1,7 +1,7 @@
 import { apiPost } from "@/utils/http";
 
 // 더미 데이터 모드 설정 (true: 더미 데이터 사용, false: 실제 API 호출)
-const USE_DUMMY_DATA = true;
+const USE_DUMMY_DATA = false;
 
 // 더미 응답 데이터
 const DUMMY_PASSAGE_RESPONSES = {

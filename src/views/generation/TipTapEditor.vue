@@ -1,4 +1,77 @@
 <template>
+    <!-- 고정 툴바 (PassageEditor 호환) -->
+    <div v-if="showFixedToolbar" class="flex flex-col items-start gap-2 mb-4">
+        <p class="font-bold text-xl sm:text-2xl leading-[150%] tracking-[-0.02em] text-[#16252d]">
+            편집 도구
+        </p>
+
+        <!-- 편집 도구 박스 -->
+        <div
+            class="relative box-border min-h-[73px] bg-white border border-[#757575] rounded-xl w-full flex flex-col sm:flex-row gap-4 items-center px-4 sm:px-10 py-3 sm:py-0">
+            <!-- 단어·문장 기호 섹션 -->
+            <div class="flex flex-row items-center gap-3 sm:gap-4 w-full">
+                <p
+                    class="font-normal text-base sm:text-xl leading-[150%] tracking-[-0.02em] text-black whitespace-nowrap">
+                    단어·문장 기호
+                </p>
+                <div class="flex flex-row items-center gap-2 sm:gap-3 overflow-x-auto w-full sm:w-auto">
+                    <ul class="flex flex-row items-center gap-2 sm:gap-3 list-none">
+                        <li v-for="symbol in mainSymbols" :key="symbol.type" :data-symbol="symbol.type"
+                            @click="showSymbolTooltip(symbol.type)"
+                            class="text-base sm:text-xl leading-[150%] tracking-[-0.02em] text-black cursor-pointer hover:text-brand">
+                            {{ symbol.display }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 에디터 섹션 -->
+            <div class="flex flex-row items-center gap-3 sm:gap-4 w-full">
+                <p
+                    class="font-normal text-base sm:text-xl leading-[150%] tracking-[-0.02em] text-black whitespace-nowrap">
+                    에디터
+                </p>
+                <div class="flex flex-row items-center gap-2 sm:gap-3">
+                    <ul class="flex flex-row items-center gap-2 sm:gap-3 list-none">
+                        <li @click="editor?.chain().focus().toggleBold().run()"
+                            :class="{ 'text-brand': editor?.isActive('bold') }"
+                            class="text-base sm:text-xl leading-[150%] tracking-[-0.02em] text-black cursor-pointer hover:text-brand">
+                            <b>B</b>
+                        </li>
+                        <li @click="editor?.chain().focus().toggleUnderline().run()"
+                            :class="{ 'text-brand': editor?.isActive('underline') }"
+                            class="text-base sm:text-xl leading-[150%] tracking-[-0.02em] text-black cursor-pointer hover:text-brand">
+                            <u>U</u>
+                        </li>
+                        <li @click="editor?.chain().focus().toggleStrike().run()"
+                            :class="{ 'text-brand': editor?.isActive('strike') }"
+                            class="text-base sm:text-xl leading-[150%] tracking-[-0.02em] text-black cursor-pointer hover:text-brand">
+                            <s>S</s>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 심볼 툴팁 -->
+            <div v-if="showTooltip"
+                class="absolute top-[75px] left-[166px] bg-white border border-gray-300 rounded-lg shadow-lg p-3 z-50">
+                <div class="flex flex-nowrap gap-1 max-w-[200px]">
+                    <button v-for="symbol in symbolList" :key="symbol" @click="insertSymbol(symbol)"
+                        class="px-2 py-1 hover:bg-blue-50 hover:text-brand rounded text-lg min-w-[32px] transition-colors">
+                        {{ symbol }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 지문 섹션 -->
+    <div v-if="showFixedToolbar">
+        <p class="mb-4 font-bold text-lg leading-[150%] tracking-[-0.02em] text-[#16252d]">
+            다음 글을 읽고 물음에 답하시오
+        </p>
+    </div>
+
     <!-- TipTap 에디터 -->
     <div :class="['box-border pt-[1px] relative', isEditable ? ' border border-[#757575] ' : '']">
         <editor-content :editor="editor" :class="['text-[#303030] text-left ', addClass]" />
@@ -6,23 +79,13 @@
     <!-- 🆕 툴팁을 body에 텔레포트 (잘림 방지) -->
     <!-- 컨텍스트 메뉴 툴팁 -->
     <Teleport to="body">
-        <div 
-            v-if="showContextMenu && isEditable" 
-            :style="{
-                position: 'fixed',  // absolute → fixed로 변경
-                top: menuPosition.top + 'px',
-                left: menuPosition.left + 'px',
-                transform: 'translateX(-50%)',
-                zIndex: 9999  // 높은 z-index
-            }"
-            class="bg-white border border-gray-200 rounded-lg shadow-lg px-2 py-1 flex gap-1 pointer-events-auto"
-        >
-        <!-- <div v-if="showContextMenu && isEditable" :style="{
+        <div v-if="showContextMenu && isEditable" :style="{
+            position: 'fixed',
             top: menuPosition.top + 'px',
             left: menuPosition.left + 'px',
-            transform: 'translateX(-50%)' // 중앙 정렬을 위한 transform
-        }"
-            class="absolute z-50 bg-white border border-gray-200 rounded-lg shadow-lg px-2 py-1 flex gap-1 pointer-events-auto"> -->
+            transform: 'translateX(-50%)',
+            zIndex: 9999
+        }" class="bg-white border border-gray-200 rounded-lg shadow-lg px-2 py-1 flex gap-1 pointer-events-auto">
             <!-- 굵게 버튼 -->
             <button @click="toggleBold" :class="[
                 'p-2 rounded hover:bg-gray-100 transition-colors',
@@ -65,14 +128,14 @@
                         d="M6.85 7.08C6.85 4.37 9.45 3 12.24 3c1.64 0 3 .49 3.9 1.28.77.65 1.46 1.73 1.46 3.24h-3.01c0-.31-.05-.59-.15-.85-.29-.86-1.2-1.28-2.25-1.28-1.86 0-2.34 1.02-2.34 1.7 0 .48.25.88.74 1.21.38.25.77.48 1.41.7H7.39c-.21-.34-.54-.89-.54-1.92zM21 12v-2H3v2h9.62c1.15.45 1.96.75 1.96 1.97 0 1-.81 1.67-2.28 1.67-1.54 0-2.93-.54-2.93-2.51H6.4c0 .55.08 1.13.24 1.58.81 2.29 3.29 3.3 5.67 3.3 2.27 0 5.3-.89 5.30-4.05 0-.3-.01-1.16-.48-1.94H21V12z" />
                 </svg>
             </button>
-            <!-- 기존 버튼들... -->
         </div>
     </Teleport>
-    <!-- 오른쪽 정렬 -->
+
     <div v-if="props.showContentLength" class="flex justify-end mt-2">
         <span class="text-brand">{{ textLength }}</span><span class="text-[#BDBDBD]">/{{ MAX_LENGTH }}자</span>
     </div>
 </template>
+
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
@@ -96,6 +159,10 @@ const props = defineProps({
     showContentLength: {
         type: Boolean,
         default: false,
+    },
+    showFixedToolbar: {
+        type: Boolean,
+        default: false,
     }
 })
 
@@ -109,6 +176,27 @@ const emit = defineEmits(['content-changed'])
 const content = ref(props.initialContent || '')
 const textLength = ref(0)
 const isEditable = ref(true) // 편집 가능 여부 상태
+
+// 심볼 관련 상태 (showFixedToolbar 모드용)
+const showTooltip = ref(false)
+const currentSymbolType = ref('㉠')
+const symbolList = ref([])
+
+// 메인 심볼 목록
+const mainSymbols = [
+    { type: '㉠', display: '㉠' },
+    { type: 'ⓐ', display: 'ⓐ' },
+    { type: '㉮', display: '㉮' },
+    { type: '①', display: '①' }
+]
+
+// 심볼 시리즈 정의
+const symbolSeries = {
+    '㉠': ['㉠', '㉡', '㉢', '㉣', '㉤'],
+    '㉮': ['㉮', '㉯', '㉰', '㉱', '㉲'],
+    'ⓐ': ['ⓐ', 'ⓑ', 'ⓒ', 'ⓓ', 'ⓔ'],
+    '①': ['①', '②', '③', '④', '⑤']
+}
 
 // 컨텍스트 메뉴 관련 반응형 상태 추가
 const showContextMenu = ref(false)
@@ -251,6 +339,34 @@ const validateTextLength = () => {
     return textLength.value >= 500
 }
 
+// 심볼 툴팁 표시 (showFixedToolbar 모드용)
+const showSymbolTooltip = (symbolType) => {
+    if (showTooltip.value && currentSymbolType.value === symbolType) {
+        showTooltip.value = false
+        return
+    }
+
+    currentSymbolType.value = symbolType
+    symbolList.value = symbolSeries[symbolType] || []
+    showTooltip.value = true
+}
+
+// 심볼 삽입 (showFixedToolbar 모드용)
+const insertSymbol = (symbol) => {
+    if (editor.value) {
+        // 에디터에 포커스를 먼저 설정
+        editor.value.view.focus()
+
+        // 커서 위치에 심볼 삽입
+        editor.value.chain().focus().insertContent(symbol).run()
+
+        // 삽입 후 포커스 유지
+        setTimeout(() => {
+            editor.value.view.focus()
+        }, 50)
+    }
+    showTooltip.value = false
+}
 
 // 서식 적용 함수들
 const toggleBold = () => {
@@ -272,52 +388,61 @@ const toggleStrike = () => {
 // 우클릭 위치 계산 함수
 const calculateMenuPositionFromClick = (event) => {
     console.log('🎯 위치 계산 시작 (body 기준)')
-    
+
     // 🎯 viewport 기준 절대 위치 사용
     const viewportX = event.clientX
     const viewportY = event.clientY
-    
+
     console.log('viewport 위치:', { viewportX, viewportY })
-    
+
     // 오프셋 적용
     const offsetX = 100
     const offsetY = 20
-    
+
     let finalTop = viewportY + offsetY
     let finalLeft = viewportX + offsetX
-    
+
     // 🔍 화면 경계 체크 (선택사항)
     const tooltipWidth = 180
     const tooltipHeight = 45
-    
+
     // 오른쪽 경계 체크
     if (finalLeft + tooltipWidth > window.innerWidth) {
         finalLeft = viewportX - 10
     }
-    
+
     // 아래쪽 경계 체크  
     if (finalTop + tooltipHeight > window.innerHeight) {
         finalTop = viewportY - tooltipHeight - 10
     }
-    
+
     console.log('최종 위치:', { finalTop, finalLeft })
-    
+
     menuPosition.value = {
         top: finalTop,
         left: finalLeft
     }
-    
+
     showContextMenu.value = true
 }
 
 // 문서 클릭 시 메뉴 숨김
 const handleDocumentClick = (event) => {
-    // 툴팁 메뉴 영역인지 확인
-    const isTooltipClick = event.target.closest('.absolute.z-50.bg-white')
-    
-    // 툴팁 영역이 아닌 곳을 클릭하면 메뉴 숨김
-    if (!isTooltipClick) {
+    // 컨텍스트 메뉴 툴팁 영역인지 확인
+    const isContextMenuClick = event.target.closest('.absolute.z-50.bg-white')
+
+    // 심볼 툴팁 영역인지 확인
+    const isSymbolTooltipClick = event.target.closest('.absolute.top-\\[75px\\]') ||
+        event.target.closest('li[data-symbol]')
+
+    // 컨텍스트 메뉴 숨김
+    if (!isContextMenuClick) {
         showContextMenu.value = false
+    }
+
+    // 심볼 툴팁 숨김 (showFixedToolbar 모드에서만)
+    if (props.showFixedToolbar && !isSymbolTooltipClick && showTooltip.value) {
+        showTooltip.value = false
     }
 }
 
@@ -359,8 +484,20 @@ defineExpose({
 </script>
 
 <style scoped>
+/* PassageEditor 호환성을 위한 추가 스타일 */
+:deep(.ProseMirror) {
+    overflow-y: auto;
+}
+
 :deep(.ProseMirror p) {
     margin: 0 0 1em 0;
+}
+
+:deep(.ProseMirror:empty:before) {
+    content: "내용을 입력해주세요.";
+    color: #9CA3AF;
+    float: left;
+    pointer-events: none;
 }
 
 /* TipTap 에디터 커스텀 스타일 */
