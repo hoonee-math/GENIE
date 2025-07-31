@@ -9,7 +9,7 @@
 
         <!-- 읽기 모드 -->
         <div v-else @click="startEdit" :class="[
-            'cursor-pointer hover:bg-gray-50 rounded px-2 py-1',
+            'cursor-title hover:bg-gray-50 rounded px-2 py-1',
             titleClass
         ]">
             {{ displayTitle || placeholder }}
