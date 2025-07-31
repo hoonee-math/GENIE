@@ -73,8 +73,8 @@
     </div>
 
     <!-- TipTap 에디터 -->
-    <div :class="['box-border pt-[1px] relative', isEditable ? ' border border-[#757575] ' : '']">
-        <editor-content :editor="editor" :class="['text-[#303030] text-left ', addClass]" />
+    <div :class="['box-border pt-[1px] relative', isEditable ? ' border border-[#757575] ' : '']"  @click="handleEditorWrapperClick">
+        <editor-content :editor="editor" :class="['text-[#303030] text-left ', isEditable ? 'cursor-text':'cursor-context-menu caret-transparent',addClass]" />
     </div>
     <!-- 🆕 툴팁을 body에 텔레포트 (잘림 방지) -->
     <!-- 컨텍스트 메뉴 툴팁 -->
@@ -443,6 +443,23 @@ const handleDocumentClick = (event) => {
     // 심볼 툴팁 숨김 (showFixedToolbar 모드에서만)
     if (props.showFixedToolbar && !isSymbolTooltipClick && showTooltip.value) {
         showTooltip.value = false
+    }
+}
+
+// 에디터 래퍼 클릭 핸들러
+const handleEditorWrapperClick = (event) => {
+    if (!isEditable.value || !editor.value) return
+    
+    // 에디터에 포커스
+    editor.value.view.focus()
+    
+    // 빈 문서이면 커서를 끝으로 이동
+    if (!editor.value.getText().trim()) {
+        setTimeout(() => {
+            const { view } = editor.value
+            const { dispatch, state } = view
+            dispatch(state.tr.setSelection(TextSelection.atEnd(state.doc)))
+        }, 0)
     }
 }
 
