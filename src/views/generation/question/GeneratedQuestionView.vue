@@ -160,6 +160,7 @@ import GeneratedPassageView from '@/views/generation/passage/GeneratedPassageVie
 import PassageAndQuestionLayout from '@/views/generation/PassageAndQuestionLayout.vue'
 import { useQuestion } from '@/composables/useQuestion'
 import { usePassage } from '@/composables/usePassage';
+import { updateQuestionPartial } from '@/api/passage';
 import TipTapEditor from '@/views/generation/TipTapEditor.vue'
 import QuestionExampleSelector from '@/views/generation/QuestionExampleSelector.vue'
 import PaymentUsageModal from "@/components/generation/PaymentUsageModal.vue";
@@ -167,7 +168,7 @@ import LoadingModal from '@/components/common/LoadingModal.vue'
 
 // Router 및 Composables
 const router = useRouter()
-const { addQuestionToExistingPassage } = useQuestion()
+const { addQuestionToExistingPassage, updateQuestionInPassageStore } = useQuestion()
 const { passage, corePointTabs } = usePassage()
 
 const isLoading = ref(false)
@@ -179,7 +180,7 @@ const isPaymentUsageModalOpen = ref(false); // 결제 사용 모달
 const loadingMessage = ref('');
 // existQueSubpassage는 computed로 변경되어 아래에서 정의됨
 
-// queAnswer 값은 각 question 값에 딸라 초기값이 달라짐. 나중에 구현할 하단 문항을 페이지네이션 처리하게되면 각 question 에 따라서 그 값이 달라지므로 수정 필요
+// queAnswer 값은 각 question 값에 따라 초기값이 달라짐. 나중에 구현할 하단 문항을 페이지네이션 처리하게되면 각 question 에 따라서 그 값이 달라지므로 수정 필요
 const queAnswer = ref('①')
 
 const questions = computed(() => {
@@ -198,24 +199,75 @@ const existQueSubpassage = computed(() => {
         question.value.queSubpassage.trim().length > 0
 })
 
-const editQueQueryAndOption = () => {
-    // 수정 버튼 클릭시
+const editQueQueryAndOption = async () => {
     if(!editableQueryAndOption.value){
         editableQueryAndOption.value = true;
         return;
     }
-    // 완료 버튼 클릭시
-    editableQueryAndOption.value = false;
+    
+    try {
+        const updates = {};
+        
+        if (savedQueQuery.value && savedQueQuery.value !== question.value.queQuery) {
+            updates.queQuery = savedQueQuery.value;
+        }
+        if (savedQueOption.value && savedQueOption.value !== question.value.queOption) {
+            updates.queOption = savedQueOption.value;
+        }
+        if (savedQueSubpassage.value && savedQueSubpassage.value !== question.value.queSubpassage) {
+            updates.queSubpassage = savedQueSubpassage.value;
+        }
+
+        if (Object.keys(updates).length > 0) {
+            // API 호출
+            await updateQuestionPartial(passage.value.pasCode, question.value.queCode, updates);
+            console.log("===문제문, 보기, 선지 업데이트 api 요청 완료====");
+            // ✅ Store 업데이트 (useQuestion에서)
+            updateQuestionInPassageStore(question.value.queCode, updates);
+            console.log("===문제문, 보기, 선지 업데이트 store 요청 완료====");
+        }
+        
+        editableQueryAndOption.value = false;
+        isSaved.value = true;
+        
+    } catch (error) {
+        console.error('문항 수정 실패:', error);
+        alert('문항 수정에 실패했습니다. 다시 시도해주세요.');
+    }
 }
 
-const editQueAnswerAndDesc = () => {
-    // 수정 버튼 클릭시
+const editQueAnswerAndDesc = async () => {
     if(!editableAnswerAndDesc.value){
         editableAnswerAndDesc.value = true;
+        queAnswer.value = question.value.queAnswer || '①';
         return;
     }
-    // 완료 버튼 클릭시
-    editableAnswerAndDesc.value = false;
+    
+    try {
+        const updates = {};
+        
+        if (queAnswer.value !== question.value.queAnswer) {
+            updates.queAnswer = queAnswer.value;
+        }
+        if (savedDescription.value && savedDescription.value !== question.value.description) {
+            updates.queDescription = savedDescription.value;
+        }
+
+        if (Object.keys(updates).length > 0) {
+            // API 호출
+            await updateQuestionPartial(passage.value.pasCode, question.value.queCode, updates);
+            
+            // ✅ Store 업데이트 (useQuestion에서)
+            updateQuestionInPassageStore(question.value.queCode, updates);
+        }
+        
+        editableAnswerAndDesc.value = false;
+        isSaved.value = true;
+        
+    } catch (error) {
+        console.error('문항 수정 실패:', error);
+        alert('문항 수정에 실패했습니다. 다시 시도해주세요.');
+    }
 }
 
 // 페이징 처리 관련 함수

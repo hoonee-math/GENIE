@@ -142,15 +142,15 @@ export async function updatePassageWithQuestionsInDatabase(
   }
 }
 
-// 문항 수정 (/api/pass/ques/{pasCode}) - updates 추가 가능한 key 목록: description, queAnswer, queOption, queQuery, queSubpassage 수정 가능 (null 이면 수정안함)
-export async function updateQuestionPartial(queCode, updates) {
+// 문항 수정 (/api/pass/{pasCode}/ques/{queCode}) - updates 추가 가능한 key 목록: description, queAnswer, queOption, queQuery, queSubpassage 수정 가능 (null 이면 수정안함)
+export async function updateQuestionPartial(pasCode, queCode, updates) {
   try {
-    console.log('🔄 [PATCH] 지문 부분 수정 요청:', { queCode, updates });
-    const response = await apiPatch(`/api/pass/ques/${queCode}`, updates);
-    console.log('✅ [PATCH] 지문 부분 수정 성공:', response);
+    console.log('🔄 [PATCH] 문항 부분 수정 요청:', { queCode, updates });
+    const response = await apiPatch(`/api/pass/${pasCode}/ques/${queCode}`, updates);
+    console.log('✅ [PATCH] 문항 부분 수정 성공:', response);
     return response;
   } catch (error) {
-    console.error('❌ [PATCH] 지문 부분 수정 실패:', error);
+    console.error('❌ [PATCH] 문항 부분 수정 실패:', error);
     throw error;
   }
 }

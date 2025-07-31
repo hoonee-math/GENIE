@@ -85,15 +85,15 @@ export function useQuestion() {
     };
   };
 
-   /**
-    * 생성된 지문 및 문항 보기 페이지에서 문항 추가하기 요청시 사용하는 api
-    */
+  /**
+   * 생성된 지문 및 문항 보기 페이지에서 문항 추가하기 요청시 사용하는 api
+   */
   const addQuestionToExistingPassage = async (custom_passage, selectedQuestionExample, generateType, pasCode) => {
     try {
       console.log("지문 데이터 받아오는지 체크: ", custom_passage);
       const requestToPython = vueToPython(custom_passage, selectedQuestionExample, generateType);
 
-      const apiFunction = selectPythonApiFunction('',generateType);
+      const apiFunction = selectPythonApiFunction('', generateType);
       const responseFromPython = await apiFunction(requestToPython);
 
       // 문항 생성 성공시 데이터 저장 API 함수 호출
@@ -107,11 +107,11 @@ export function useQuestion() {
       }
 
       const responseFromJava = await addQuestionToExistingPassageInDatabase(pasCode, requestToJava);
-      console.log("java 저장후 응답받아온 question Entity 상태 확인: ",responseFromJava)
+      console.log("java 저장후 응답받아온 question Entity 상태 확인: ", responseFromJava)
       // 기존 passage에 새 문항만 추가해서 전체 업데이트
       const updatedPassage = {
-          ...passageStore.passage,
-          questions: [...passageStore.passage.questions, responseFromJava],
+        ...passageStore.passage,
+        questions: [...passageStore.passage.questions, responseFromJava],
       }
       console.log("문항 저장 성공후 저장한 문항을 pinia store에도 저장", updatedPassage)
 
@@ -123,6 +123,36 @@ export function useQuestion() {
       throw error;
     }
   }
+
+  // store의 문항 부분 업데이트 함수 추가
+  const updateQuestionInPassageStore = (queCode, updates) => {
+    const currentPassage = passageStore.passage;
+
+    if (!currentPassage.questions?.length) {
+      console.warn('문항이 없습니다.');
+      return false;
+    }
+
+    const questionIndex = currentPassage.questions.findIndex(q => q.queCode === queCode);
+    if (questionIndex === -1) {
+      console.warn('해당 문항을 찾을 수 없습니다:', queCode);
+      return false;
+    }
+
+    const updatedPassage = {
+      ...currentPassage,
+      questions: currentPassage.questions.map((question, index) =>
+        index === questionIndex
+          ? { ...question, ...updates }  // ✅ 기존 + 수정분만 병합
+          : question
+      )
+    };
+
+    // Store 업데이트 (기존 setPassage 액션 재사용)
+    passageStore.setPassage(updatedPassage);
+    console.log('문항 Store 업데이트 완료:', queCode, updates);
+    return true;
+  };
 
   /**
    * GenerateQuestionForm.vue 에서 '사용자 지문(user)' 탭이나 '자료실 지문(storage)' 탭에서 문항을 갖고있지 않는 지문을 이용해서 처음 문항을 생성할 때 사용하는 API
@@ -184,10 +214,10 @@ export function useQuestion() {
       gist: passage.value.descriptions[0]?.gist || questionResult.generated_core_point,
       isGenerated: 0,
       questions: [{
-          queQuery: questionResult.generated_question,
-          queOption: questionResult.generated_option,
-          queAnswer: questionResult.generated_answer,
-          description: questionResult.generated_description,
+        queQuery: questionResult.generated_question,
+        queOption: questionResult.generated_option,
+        queAnswer: questionResult.generated_answer,
+        description: questionResult.generated_description,
       }],
     }
 
@@ -200,209 +230,209 @@ export function useQuestion() {
     return response.json();
   };
 
-   // ===== 데이터 변환 =====
-   
-   /**
-   * quoted_sentence와 quoted_word를 매핑하여 지문에 밑줄 태그 적용
-   * @param {string} content - 원본 지문 내용
-   * @param {Array<string>} quotedSentences - 인용 문장 목록
-   * @param {Array<string>} quotedWords - 인용 단어 목록
-   * @returns {string} - 밑줄 태그가 적용된 지문
-   */
-   const applyUnderlineToQuotedWords = (content, quotedSentences, quotedWords) => {
-        // '㉠'은 유니코드 U+32A0 (16진수), 10진수로는 12960
-        const getKoreanCircleMarker = (index) => {
-            const baseCode = 0x32A0; // '㉠'
-            const codePoint = baseCode + index;
-            return String.fromCharCode(codePoint);
-        };
-        const koreanCircleMaker = ['㉠','㉡','㉢','㉣','㉤']
+  // ===== 데이터 변환 =====
 
-        if (!quotedSentences || !quotedWords || quotedSentences.length !== quotedWords.length) {
-            console.warn('quoted_sentence와 quoted_word 배열 길이가 다르거나 없습니다.');
-            return content;
-        }
-    
-        let modifiedContent = content;
-    
-        // 각 quoted_sentence를 순회하면서 해당하는 quoted_word에 밑줄 적용
-        for (let i = 0; i < quotedSentences.length; i++) {
-            const sentence = quotedSentences[i];
-            const word = quotedWords[i];
-            
-            if (!sentence || !word) {
-                console.warn(`Index ${i}에서 sentence 또는 word가 비어있습니다.`);
-                continue;
-            }
-        
-            // 원본 문장을 찾아서 해당 단어에 밑줄 태그 적용한 문장으로 교체
-            const underlinedSentence = sentence.replace(word, `<u>${word}</u>`);
-            modifiedContent = modifiedContent.replace(sentence, underlinedSentence);
-            
-            console.log(`밑줄 적용: "${word}" -> "${koreanCircleMaker[0]}<u>${word}</u>"`);
-        }
-    
-        return modifiedContent;
-   };
-   
+  /**
+  * quoted_sentence와 quoted_word를 매핑하여 지문에 밑줄 태그 적용
+  * @param {string} content - 원본 지문 내용
+  * @param {Array<string>} quotedSentences - 인용 문장 목록
+  * @param {Array<string>} quotedWords - 인용 단어 목록
+  * @returns {string} - 밑줄 태그가 적용된 지문
+  */
+  const applyUnderlineToQuotedWords = (content, quotedSentences, quotedWords) => {
+    // '㉠'은 유니코드 U+32A0 (16진수), 10진수로는 12960
+    const getKoreanCircleMarker = (index) => {
+      const baseCode = 0x32A0; // '㉠'
+      const codePoint = baseCode + index;
+      return String.fromCharCode(codePoint);
+    };
+    const koreanCircleMaker = ['㉠', '㉡', '㉢', '㉣', '㉤']
+
+    if (!quotedSentences || !quotedWords || quotedSentences.length !== quotedWords.length) {
+      console.warn('quoted_sentence와 quoted_word 배열 길이가 다르거나 없습니다.');
+      return content;
+    }
+
+    let modifiedContent = content;
+
+    // 각 quoted_sentence를 순회하면서 해당하는 quoted_word에 밑줄 적용
+    for (let i = 0; i < quotedSentences.length; i++) {
+      const sentence = quotedSentences[i];
+      const word = quotedWords[i];
+
+      if (!sentence || !word) {
+        console.warn(`Index ${i}에서 sentence 또는 word가 비어있습니다.`);
+        continue;
+      }
+
+      // 원본 문장을 찾아서 해당 단어에 밑줄 태그 적용한 문장으로 교체
+      const underlinedSentence = sentence.replace(word, `<u>${word}</u>`);
+      modifiedContent = modifiedContent.replace(sentence, underlinedSentence);
+
+      console.log(`밑줄 적용: "${word}" -> "${koreanCircleMaker[0]}<u>${word}</u>"`);
+    }
+
+    return modifiedContent;
+  };
+
   const vueToPython = (custom_passage, selectedQuestionExample, generateType, activeTab) => {
     if (!selectedQuestionExample) {
-        throw new Error('선택된 문항 예제가 없습니다.');
+      throw new Error('선택된 문항 예제가 없습니다.');
     }
 
     console.log("Python 요청 데이터 생성:", { selectedQuestionExample, generateType, activeTab });
-    
+
     // 실제 Python API에 전달할 데이터 구조
     const baseRequest = {
-        custom_passage,
-        type_question: selectedQuestionExample.pattern,
-        question_format: selectedQuestionExample.title,
-        question_statement_example: selectedQuestionExample.statement,
-        question_choice_example: selectedQuestionExample.question,
-        question_subpassage_example: selectedQuestionExample.subpassage || null
+      custom_passage,
+      type_question: selectedQuestionExample.pattern,
+      question_format: selectedQuestionExample.title,
+      question_statement_example: selectedQuestionExample.statement,
+      question_choice_example: selectedQuestionExample.question,
+      question_subpassage_example: selectedQuestionExample.subpassage || null
     };
     console.log("baseRequest 데이터 파싱", baseRequest);
     // activeTab이 'user'인 경우에는 generateType을 type_passage로 전달
     if (activeTab === 'user') {
-        return { kind_passage: generateType, ...baseRequest };
+      return { kind_passage: generateType, ...baseRequest };
     } else {
-        return baseRequest;
+      return baseRequest;
     }
   };
-  
-    const formatOption = (generatedOption) => {
-        console.log("generatedOption", generatedOption);
-        if (!generatedOption) return "";
-        
-        // 배열이 아닌 경우 그대로 반환
-        if (!Array.isArray(generatedOption)) return generatedOption;
-        
-        // 배열 길이에 따른 처리
-        if (generatedOption.length > 0) {
-            let formattedOption = '';
-            const numberOption = ['①','②','③','④','⑤'];
-            
-            // ✅ 올바른 for 루프 사용
-            for (let index = 0; index < generatedOption.length; index++) {
-                formattedOption += '<p>' + numberOption[index] + ' ' + generatedOption[index] + '</p>';
-            }
-            
-            console.log("formattedOption", formattedOption);
-            return formattedOption;
-        } else {
-            return "";
-        }
+
+  const formatOption = (generatedOption) => {
+    console.log("generatedOption", generatedOption);
+    if (!generatedOption) return "";
+
+    // 배열이 아닌 경우 그대로 반환
+    if (!Array.isArray(generatedOption)) return generatedOption;
+
+    // 배열 길이에 따른 처리
+    if (generatedOption.length > 0) {
+      let formattedOption = '';
+      const numberOption = ['①', '②', '③', '④', '⑤'];
+
+      // ✅ 올바른 for 루프 사용
+      for (let index = 0; index < generatedOption.length; index++) {
+        formattedOption += '<p>' + numberOption[index] + ' ' + generatedOption[index] + '</p>';
+      }
+
+      console.log("formattedOption", formattedOption);
+      return formattedOption;
+    } else {
+      return "";
     }
-    
-    // description 포맷팅 함수
-    const formatDescription = (generatedDescription) => {
-        if (!generatedDescription) {return "";}
-        
-        // 배열이 아닌 경우 그대로 반환
-        if (!Array.isArray(generatedDescription)) {return generatedDescription;}
-        
-        // 배열 길이에 따른 처리
-        if (generatedDescription.length === 2) {
-            // 각 항목 내의 \n을 </p><p>로 변환하고 <p>로 래핑
-            const formattedFirst = `<p>${generatedDescription[0].replace(/\n/g, '</p><p>')}</p>`;
-            const formattedSecond = `<p>${generatedDescription[1].replace(/\n/g, '</p><p>')}</p>`;
-            return formattedFirst + formattedSecond;
-        } else if (generatedDescription.length === 1) {
-            return generatedDescription[0];
-        } else {
-            // 예외 상황: 3개 이상이거나 빈 배열인 경우
-            console.warn('예상과 다른 description 배열 길이:', generatedDescription.length);
-            return generatedDescription.join('\n\n');
-        }
-    };
+  }
+
+  // description 포맷팅 함수
+  const formatDescription = (generatedDescription) => {
+    if (!generatedDescription) { return ""; }
+
+    // 배열이 아닌 경우 그대로 반환
+    if (!Array.isArray(generatedDescription)) { return generatedDescription; }
+
+    // 배열 길이에 따른 처리
+    if (generatedDescription.length === 2) {
+      // 각 항목 내의 \n을 </p><p>로 변환하고 <p>로 래핑
+      const formattedFirst = `<p>${generatedDescription[0].replace(/\n/g, '</p><p>')}</p>`;
+      const formattedSecond = `<p>${generatedDescription[1].replace(/\n/g, '</p><p>')}</p>`;
+      return formattedFirst + formattedSecond;
+    } else if (generatedDescription.length === 1) {
+      return generatedDescription[0];
+    } else {
+      // 예외 상황: 3개 이상이거나 빈 배열인 경우
+      console.warn('예상과 다른 description 배열 길이:', generatedDescription.length);
+      return generatedDescription.join('\n\n');
+    }
+  };
 
   const pythonToJava = (responseFromPython, custom_passage, title = "Untitled") => {
     console.log("Python 응답 변환 시작:", responseFromPython);
-    
+
     // 1. 응답 타입 확인 (사용자 입력 vs 자료실)
     const isUserInput = responseFromPython.detail && responseFromPython.question;
     const questionData = isUserInput ? responseFromPython.question : responseFromPython;
     const detailData = isUserInput ? responseFromPython.detail : null;
-    
+
 
     // 2. descriptions 배열 생성
     const descriptions = [];
-    
+
     if (detailData) {
-        // 사용자 입력: detail에서 descriptions 생성
-        if (detailData.kind_passage === "복합 지문") {
-            // 복합 지문인 경우
-            descriptions.push({
-                pasType: detailData.first_passage_type,
-                keyword: detailData.first_passage_keyword,
-                gist: detailData.generated_core_point[0] || "",
-                order: 1
-            });
-            descriptions.push({
-                pasType: detailData.second_passage_type, 
-                keyword: detailData.second_passage_keyword,
-                gist: detailData.generated_core_point[1] || "",
-                order: 2
-            });
-        } else {
-            // 단일 지문 or 독서론인 경우
-            descriptions.push({
-                pasType: detailData.type_passage || detailData.kind_passage,
-                keyword: detailData.keyword,
-                gist: detailData.generated_core_point[0] || "",
-                order: 1
-            });
-        }
+      // 사용자 입력: detail에서 descriptions 생성
+      if (detailData.kind_passage === "복합 지문") {
+        // 복합 지문인 경우
+        descriptions.push({
+          pasType: detailData.first_passage_type,
+          keyword: detailData.first_passage_keyword,
+          gist: detailData.generated_core_point[0] || "",
+          order: 1
+        });
+        descriptions.push({
+          pasType: detailData.second_passage_type,
+          keyword: detailData.second_passage_keyword,
+          gist: detailData.generated_core_point[1] || "",
+          order: 2
+        });
+      } else {
+        // 단일 지문 or 독서론인 경우
+        descriptions.push({
+          pasType: detailData.type_passage || detailData.kind_passage,
+          keyword: detailData.keyword,
+          gist: detailData.generated_core_point[0] || "",
+          order: 1
+        });
+      }
     } else {
-        // 자료실 지문: Store에서 기존 descriptions 가져오기
-        const passageStore = usePassageStore();
-        if (passageStore.passage.descriptions?.length > 0) {
-            descriptions.push(...passageStore.passage.descriptions);
-        } else {
-            // fallback: 최소한의 description 생성
-            descriptions.push({
-                pasType: questionData.kind_passage,
-                keyword: "자동 생성",
-                gist: "문항 생성됨",
-                order: 1
-            });
-        }
+      // 자료실 지문: Store에서 기존 descriptions 가져오기
+      const passageStore = usePassageStore();
+      if (passageStore.passage.descriptions?.length > 0) {
+        descriptions.push(...passageStore.passage.descriptions);
+      } else {
+        // fallback: 최소한의 description 생성
+        descriptions.push({
+          pasType: questionData.kind_passage,
+          keyword: "자동 생성",
+          gist: "문항 생성됨",
+          order: 1
+        });
+      }
     }
-    
+
     // 3. questions 배열 생성
     const questions = [{
-        queQuery: questionData.generated_question,
-        queOption: formatOption(questionData.generated_option),
-        queAnswer: questionData.generated_answer,
-        description: formatDescription(questionData.generated_description),  // description 포맷팅 '정답 해설'과 '오답 피하기' 가 배열로 저장되는 문제 처리 -> java에서는 String으로 저장되고 정답 및 해설도 Tiptap을 이용해 출력해주는 것으로 통일하기 위해 html 로 변환
-        queSubpassage: questionData.generated_subpassage || ''
+      queQuery: questionData.generated_question,
+      queOption: formatOption(questionData.generated_option),
+      queAnswer: questionData.generated_answer,
+      description: formatDescription(questionData.generated_description),  // description 포맷팅 '정답 해설'과 '오답 피하기' 가 배열로 저장되는 문제 처리 -> java에서는 String으로 저장되고 정답 및 해설도 Tiptap을 이용해 출력해주는 것으로 통일하기 위해 html 로 변환
+      queSubpassage: questionData.generated_subpassage || ''
     }];
-    
+
     // 4. quoted_sentence와 quoted_word를 사용하여 지문에 밑줄 적용
     let processedContent = custom_passage;
     if (questionData.quoted_sentence && questionData.quoted_word) {
-        processedContent = applyUnderlineToQuotedWords(
-            custom_passage,
-            questionData.quoted_sentence,
-            questionData.quoted_word
-        );
-        console.log('밑줄 태그 적용 완료:', processedContent !== custom_passage);
+      processedContent = applyUnderlineToQuotedWords(
+        custom_passage,
+        questionData.quoted_sentence,
+        questionData.quoted_word
+      );
+      console.log('밑줄 태그 적용 완료:', processedContent !== custom_passage);
     }
-    
+
     // 5. 최종 Java 요청 데이터 생성
     const javaRequestData = {
-        title: title,
-        content: processedContent,
-        isGenerated: 0,
-        descriptions: descriptions,
-        questions: questions,
-        mode: "question_generation" // 구분용
+      title: title,
+      content: processedContent,
+      isGenerated: 0,
+      descriptions: descriptions,
+      questions: questions,
+      mode: "question_generation" // 구분용
     };
-    
+
     console.log("Java 요청 데이터 변환 완료:", javaRequestData);
     return javaRequestData;
   };
-  
+
 
 
 
@@ -418,6 +448,9 @@ export function useQuestion() {
     // 문항 생성 함수
     generateQuestionWithNewPassage,
     addQuestionToExistingPassage,
+
+    // passage store의 기존 문항 업데이트 함수
+    updateQuestionInPassageStore,
 
     // API 함수 (개별)
     generateQuestion,
