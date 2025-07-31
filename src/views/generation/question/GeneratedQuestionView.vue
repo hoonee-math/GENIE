@@ -166,6 +166,8 @@ import TipTapEditor from '@/views/generation/TipTapEditor.vue'
 import QuestionExampleSelector from '@/views/generation/QuestionExampleSelector.vue'
 import PaymentUsageModal from "@/components/generation/PaymentUsageModal.vue";
 import LoadingModal from '@/components/common/LoadingModal.vue'
+import ConfirmModalComponent from '@/components/common/ConfirmModalComponent.vue'
+
 
 // Router 및 Composables
 const router = useRouter()
@@ -173,6 +175,7 @@ const { addQuestionToExistingPassage, updateQuestionInPassageStore } = useQuesti
 const { passage, corePointTabs } = usePassage()
 
 const isLoading = ref(false)
+const isConfirmModalOpen = ref(false)
 const isSaved = ref(true)
 const editableQueryAndOption = ref(false)
 const editableAnswerAndDesc = ref(false)

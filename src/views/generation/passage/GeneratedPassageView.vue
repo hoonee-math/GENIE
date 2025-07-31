@@ -14,7 +14,7 @@
                         :showFixedToolbar="editableQueContent"
                         :showContentLength="true"
                         @content-changed="handleContentChange"
-                        :addClass="[isCalledFromGeneratedQuestionView?'p-4':' border border-[#757575] p-4 ']" >
+                        :addClass="isCalledFromGeneratedQuestionView?'p-4':'border border-[#757575] p-4'" >
 
                         <template #editButtoon>
                             <button @click="editQueContent"
@@ -192,7 +192,7 @@ const editQueContent = async () => {
         });
         
         editableQueContent.value = false;
-        
+
     } catch (error) {
         console.error('지문 수정 실패:', error);
         alert('지문 수정에 실패했습니다. 다시 시도해주세요.');
