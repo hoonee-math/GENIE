@@ -155,7 +155,7 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import GeneratedPassageView from '@/views/generation/passage/GeneratedPassageView.vue'
 import PassageAndQuestionLayout from '@/views/generation/PassageAndQuestionLayout.vue'
@@ -399,6 +399,13 @@ const addQuestion = async () => {
         // (custom_passage, selectedQuestionExample, generateType, pasCode) 
         await addQuestionToExistingPassage(savedPassageContent.value, selectedQuestionExample.value, generateType.value, passage.value.pasCode)
         isQuestionExampleSelectorVisible.value = false;
+        
+        // ✅ 새로 추가된 문항으로 페이지 이동 (마지막 페이지로)
+        // nextTick을 사용하여 DOM 업데이트 완료 후 페이지 이동
+        await nextTick()
+        const newTotalPages = Math.ceil(questions.value.length)
+        currentPage.value = newTotalPages
+        console.log(`✅ 문항 추가 완료! 총 ${newTotalPages}개 문항 중 ${newTotalPages}번째 문항으로 이동`)
 
     } catch {
         console.log("GeneratedQuestionVeiw.addQuestion", error);
