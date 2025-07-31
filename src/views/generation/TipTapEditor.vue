@@ -2,13 +2,27 @@
     <!-- TipTap 에디터 -->
     <div :class="['box-border pt-[1px] relative', isEditable ? ' border border-[#757575] ' : '']">
         <editor-content :editor="editor" :class="['text-[#303030] text-left ', addClass]" />
-        <!-- 컨텍스트 메뉴 툴팁 -->
-        <div v-if="showContextMenu && isEditable" :style="{
+    </div>
+    <!-- 🆕 툴팁을 body에 텔레포트 (잘림 방지) -->
+    <!-- 컨텍스트 메뉴 툴팁 -->
+    <Teleport to="body">
+        <div 
+            v-if="showContextMenu && isEditable" 
+            :style="{
+                position: 'fixed',  // absolute → fixed로 변경
+                top: menuPosition.top + 'px',
+                left: menuPosition.left + 'px',
+                transform: 'translateX(-50%)',
+                zIndex: 9999  // 높은 z-index
+            }"
+            class="bg-white border border-gray-200 rounded-lg shadow-lg px-2 py-1 flex gap-1 pointer-events-auto"
+        >
+        <!-- <div v-if="showContextMenu && isEditable" :style="{
             top: menuPosition.top + 'px',
             left: menuPosition.left + 'px',
             transform: 'translateX(-50%)' // 중앙 정렬을 위한 transform
         }"
-            class="absolute z-50 bg-white border border-gray-200 rounded-lg shadow-lg px-2 py-1 flex gap-1 pointer-events-auto">
+            class="absolute z-50 bg-white border border-gray-200 rounded-lg shadow-lg px-2 py-1 flex gap-1 pointer-events-auto"> -->
             <!-- 굵게 버튼 -->
             <button @click="toggleBold" :class="[
                 'p-2 rounded hover:bg-gray-100 transition-colors',
@@ -51,8 +65,9 @@
                         d="M6.85 7.08C6.85 4.37 9.45 3 12.24 3c1.64 0 3 .49 3.9 1.28.77.65 1.46 1.73 1.46 3.24h-3.01c0-.31-.05-.59-.15-.85-.29-.86-1.2-1.28-2.25-1.28-1.86 0-2.34 1.02-2.34 1.7 0 .48.25.88.74 1.21.38.25.77.48 1.41.7H7.39c-.21-.34-.54-.89-.54-1.92zM21 12v-2H3v2h9.62c1.15.45 1.96.75 1.96 1.97 0 1-.81 1.67-2.28 1.67-1.54 0-2.93-.54-2.93-2.51H6.4c0 .55.08 1.13.24 1.58.81 2.29 3.29 3.3 5.67 3.3 2.27 0 5.3-.89 5.30-4.05 0-.3-.01-1.16-.48-1.94H21V12z" />
                 </svg>
             </button>
+            <!-- 기존 버튼들... -->
         </div>
-    </div>
+    </Teleport>
     <!-- 오른쪽 정렬 -->
     <div v-if="props.showContentLength" class="flex justify-end mt-2">
         <span class="text-brand">{{ textLength }}</span><span class="text-[#BDBDBD]">/{{ MAX_LENGTH }}자</span>
@@ -256,34 +271,37 @@ const toggleStrike = () => {
 
 // 우클릭 위치 계산 함수
 const calculateMenuPositionFromClick = (event) => {
-    const editorElement = document.querySelector('.ProseMirror')
-    if (!editorElement) return
+    console.log('🎯 위치 계산 시작 (body 기준)')
     
-    const editorRect = editorElement.getBoundingClientRect()
+    // 🎯 viewport 기준 절대 위치 사용
+    const viewportX = event.clientX
+    const viewportY = event.clientY
     
-    // 마우스 커서의 정확한 위치 계산
-    const relativeX = event.clientX - editorRect.left
-    const relativeY = event.clientY - editorRect.top
+    console.log('viewport 위치:', { viewportX, viewportY })
     
-    // 🎯 원하는 오프셋 (간단하고 자연스럽게)
-    const offsetX = 100   // 커서 오른쪽 15px
-    const offsetY = 20  // 커서 위쪽 50px
+    // 오프셋 적용
+    const offsetX = 100
+    const offsetY = 20
     
-    // 📍 기본 위치 계산 (경계 제한 없이)
-    let finalTop = relativeY + offsetY
-    let finalLeft = relativeX + offsetX
+    let finalTop = viewportY + offsetY
+    let finalLeft = viewportX + offsetX
     
-    // 🚫 복잡한 경계 체크 제거! 
-    // 단순한 최소값만 체크 (완전히 가려지는 것만 방지)
-    if (finalTop < -20) {  // 너무 위로 올라가면
-        finalTop = relativeY + 25  // 아래쪽으로
+    // 🔍 화면 경계 체크 (선택사항)
+    const tooltipWidth = 180
+    const tooltipHeight = 45
+    
+    // 오른쪽 경계 체크
+    if (finalLeft + tooltipWidth > window.innerWidth) {
+        finalLeft = viewportX - 10
     }
     
-    if (finalLeft < -50) {  // 너무 왼쪽으로 가면  
-        finalLeft = relativeX - 180  // 왼쪽에 표시
+    // 아래쪽 경계 체크  
+    if (finalTop + tooltipHeight > window.innerHeight) {
+        finalTop = viewportY - tooltipHeight - 10
     }
     
-    // 최종 위치 (에디터 밖으로 나가는 것 허용)
+    console.log('최종 위치:', { finalTop, finalLeft })
+    
     menuPosition.value = {
         top: finalTop,
         left: finalLeft
