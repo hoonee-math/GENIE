@@ -11,10 +11,21 @@
                     <TipTapEditor 
                         :initialContent="savedContent"
                         :isEditable="isCalledFromGeneratedQuestionView"
-                        :showFixedToolbar="isCalledFromGeneratedQuestionView"
+                        :showFixedToolbar="editableQueContent"
                         :showContentLength="true"
                         @content-changed="handleContentChange"
-                        :addClass="[isCalledFromGeneratedQuestionView?'p-4':' border border-[#757575] p-4 ']" />
+                        :addClass="[isCalledFromGeneratedQuestionView?'p-4':' border border-[#757575] p-4 ']" >
+
+                        <template #editButtoon>
+                            <button @click="editQueContent"
+                                class="flex flex-row justify-center items-center text-sm md:text-xl pl-2 py-3 w-[86px] h-[35px] left-[1485px] top-[50px] bg-[#CCCCCC] rounded-lg">
+                                {{ isCalledFromGeneratedQuestionView && editableQueContent ? '완료' : '수정' }}
+                                <Icon icon="mingcute:pencil-fill" width="20" height="20" class="mx-1"
+                                    :class="false ? 'text-[#0086FF]' : 'text-[#303030]'" />
+                            </button>
+                        </template>
+
+                    </TipTapEditor>
                 </template>
                 <template #right>
                     <!-- 지문 분석 (Pinia Store에서 자동으로 데이터 가져옴) -->
@@ -55,6 +66,7 @@ import PassageAndQuestionLayout from '@/views/generation/PassageAndQuestionLayou
 import PassageSummaryLayout from '@/views/generation/PassageSummaryLayout.vue'
 import TipTapEditor from '@/views/generation/TipTapEditor.vue'
 import { usePassage } from '@/composables/usePassage'
+import { updatePassagePartial } from '@/api/passage'
 import EditableTitle from '@/views/generation/EditableTitle.vue'
 import PaymentUsageModal from "@/components/generation/PaymentUsageModal.vue";
 import LoadingModal from '@/components/common/LoadingModal.vue'
@@ -87,6 +99,7 @@ const isPaymentUsageModalOpen = ref(false)
 // TipTapEditor 관련 변수
 const savedContent = ref('')
 const currentLength = ref(0)
+const editableQueContent = ref(false)
 
 // TipTapEditor 콘텐츠 변경 핸들러
 const handleContentChange = ({ content, textLength }) => {
@@ -163,6 +176,26 @@ const reGeneratePassageWithPrevDescription = async () => {
     } finally {
         loadingMessage.value = ''
         isLoading.value = false;
+    }
+}
+
+//
+const editQueContent = async () => {
+    if(!editableQueContent.value){
+        editableQueContent.value = true;
+        return;
+    }
+    
+    try {
+        await updatePassagePartial(passage.value.pasCode, {
+            content: savedContent.value
+        });
+        
+        editableQueContent.value = false;
+        
+    } catch (error) {
+        console.error('지문 수정 실패:', error);
+        alert('지문 수정에 실패했습니다. 다시 시도해주세요.');
     }
 }
 // 결제 사용 모달 관련 함수

@@ -66,10 +66,11 @@
     </div>
 
     <!-- 지문 섹션 -->
-    <div v-if="showFixedToolbar">
+    <div v-if="showFixedToolbar || isEditable" class="flex justify-between">
         <p class="mb-4 font-bold text-lg leading-[150%] tracking-[-0.02em] text-[#16252d]">
             다음 글을 읽고 물음에 답하시오
         </p>
+        <slot name="editButtoon"></slot>
     </div>
 
     <!-- TipTap 에디터 -->
