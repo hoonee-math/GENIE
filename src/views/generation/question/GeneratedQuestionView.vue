@@ -26,14 +26,14 @@
 
                 </template>
                 <template #left>
-                    <!-- question.queQuery 생성된 문제문 -->
                     <div class="flex">
+                        <!-- 문항의 문제문(문제의 질문): question.queQuery -->
                         <div class="flex flex-1 font-semibold text-sm md:text-2xl mr-5">
                             <span>Q.</span>
                             <TipTapEditor :initialContent="question.queQuery" :isEditable="editableQueryAndOption"
                                 @content-changed="handleQueQueryChange" :addClass="'text-2xl'" />
                         </div>
-                        <!-- 수정 버튼을 누르면 #left 영역의 question.queQuery 값과 아래 question.queOption 값을 각각 수정할 수 있게 변경. 각각 TipTap Editor로 따로 구현하거나 더 나은방법 고려해보기. -->
+                        <!-- 문항의 문제문, 보기, 선지를 수정하는 버튼 -->
                         <button @click="editQueQueryAndOption"
                             class="flex flex-row justify-center items-center text-sm md:text-xl pl-2 py-3 w-[86px] h-[35px] left-[1485px] top-[50px] bg-[#CCCCCC] rounded-lg">
                             {{ editableQueryAndOption ? '완료' : '수정' }}
@@ -41,11 +41,12 @@
                                 :class="false ? 'text-[#0086FF]' : 'text-[#303030]'" />
                         </button>
                     </div>
+                    <!-- 문항의 보기: question.queSubpassage -->
                     <div v-if="existQueSubpassage" class="border border-black p-4 mb-4">
                         <TipTapEditor :initialContent="question.queSubpassage" :isEditable="editableQueryAndOption"
                             @content-changed="handleQueSubpassageChange" :addClass="'text-xl leading-10'" />
                     </div>
-                    <!-- question.queOption 은 div 대신 TipTap editor를 이용해 출력해주기. 기본값 editable=false, question.queQuery 옆의 수정 버튼을 눌러 question.queOption의 editable 갑도 true로 변경-->
+                    <!-- 문항의 선지:question.queQuery-->
                     <div>
                         <!-- question.queOption 영역 -->
                         <TipTapEditor :initialContent="question.queOption" :isEditable="editableQueryAndOption"
@@ -60,7 +61,7 @@
                             <p class="font-bold text-sm md:text-2xl text-nowrap  leading-[150%] tracking-[-0.02em] text-[#303030]">
                                 정답
                             </p>
-                            <!-- question.queAnswer 값은 editQueAnswer 값에 따라서 저장된 값을 출력하거나, 라디오 버튼으로 수정가능하게 변경 -->
+                            <!-- 문항의 정답: question.queAnswer -->
                             <p v-if="!editableAnswerAndDesc"
                                 class="font-normal text-xl md:text-3xl leading-[150%] tracking-[-0.02em] text-[#303030] break-words flex-1">
                                 {{ question.queAnswer }}
@@ -89,7 +90,7 @@
                                 class="font-bold text-sm md:text-2xl leading-[150%] tracking-[-0.02em] text-[#303030] min-w-[80px] shrink-0">
                                 해설
                             </p>
-                            <!-- 해설 데이터인 question.description 는 div 대신 TipTap 에디터를 이용해서 출력 -->
+                            <!-- 문항의 해설: question.description -->
                             <div
                                 class="w-full font-normal text-sm md:text-xl leading-[200%] tracking-[-0.02em] text-[#303030] flex-1 overflow-auto">
                                 <TipTapEditor :initialContent="question.description" :isEditable="editableAnswerAndDesc"
@@ -104,15 +105,15 @@
             <div v-if="!isQuestionExampleSelectorVisible" class="flex flex-col justify-between sm:flex-row gap-4">
                 <div class="flex gap-5">
                     <button @click="" :disabled="false"
-                        :class="['px-12 py-4 text-2xl font-medium rounded-lg transition-colors duration-200', isSaved ? 'text-gray-700 bg-gray-200 hover:bg-gray-300 cursor-not-allowed' : 'bg-brand text-white hover:bg-blue-600']">
+                        :class="['px-8 py-4 text-lg font-medium rounded-lg transition-all duration-200', isSaved ? 'text-gray-700 bg-gray-200 hover:bg-gray-300 cursor-not-allowed' : 'bg-brand text-white hover:bg-blue-600']">
                         저장하기
                     </button>
                     <button @click="" :disabled="false"
-                        :class="['px-12 py-4 text-2xl font-medium rounded-lg transition-colors duration-200', isSaved ? 'bg-brand text-white hover:bg-blue-600' : 'text-gray-400 bg-gray-100 cursor-not-allowed']">
+                        :class="['px-8 py-4 text-lg font-medium rounded-lg transition-all duration-200', isSaved ? 'bg-brand text-white hover:bg-blue-600' : 'text-gray-400 bg-gray-100 cursor-not-allowed']">
                         추출하기
                     </button>
                 </div>
-                <!-- 여기는 문항 추가하기지만 우선 문항 유형 선택하기가 먼저 출력된 후 다시 문한 추가하기 버튼을 눌러줘야함. -->
+                <!-- 문항 추가하기 버튼을 누르면 추가할 문항 유형 선택하기 form이 출력됨. -->
                 <button @click="showQuestionExampleSelector"
                     :class="['px-8 py-4 text-lg font-medium rounded-lg transition-all duration-200 bg-brand text-white hover:bg-blue-600']">
                     문항 추가하기
