@@ -1,6 +1,6 @@
 <template>
     <div class="flex flex-col items-start p-0 h-full max-h-full overflow-hidden">
-        <div class="flex flex-col items-start p-0 gap-4 w-full h-full min-h-0">
+        <div class="flex flex-col items-start p-0 gap-4 w-full h-full max-h-[900px] min-h-[600px]">
             <div>
                 <span class="font-bold text-2xl md:text-xl leading-[150%] tracking-[-0.02em] text-[#303030]">
                     지문 분석

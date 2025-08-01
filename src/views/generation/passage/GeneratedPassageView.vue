@@ -7,25 +7,27 @@
                     <EditableTitle title-class="text-3xl font-semibold" />
                 </template>
                 <template #left>
-                    <!-- TipTapEditor 로 교체: PassageEditor 기능 포함 -->
-                    <TipTapEditor 
-                        :initialContent="savedContent"
-                        :isEditable="isCalledFromGeneratedQuestionView && editableQueContent"
-                        :showFixedToolbar="editableQueContent"
-                        :showContentLength="true"
-                        @content-changed="handleContentChange"
-                        :addClass="[editableQueContent?'p-4':'border border-[#757575] p-4']" >
+                    <div class="flex flex-col p-0 h-full max-h-full overflow-hidden">
+                        <div class="flex flex-col p-0 w-full h-full max-h-[900px] min-h-[600px]">
+                            <!-- TipTapEditor 로 교체: PassageEditor 기능 포함 -->
+                            <TipTapEditor :initialContent="savedContent"
+                                :isEditable="isCalledFromGeneratedQuestionView && editableQueContent"
+                                :showFixedToolbar="editableQueContent" :showContentLength="true"
+                                @content-changed="handleContentChange"
+                                :addClass="[editableQueContent ? 'p-4' : 'border border-[#757575] p-4']">
 
-                        <template #editButtoon>
-                            <button @click="editQueContent"
-                                class="flex flex-row justify-center items-center text-sm md:text-xl pl-2 py-3 w-[86px] h-[35px] left-[1485px] top-[50px] bg-[#CCCCCC] rounded-lg">
-                                {{ isCalledFromGeneratedQuestionView && editableQueContent ? '완료' : '수정' }}
-                                <Icon icon="mingcute:pencil-fill" width="20" height="20" class="mx-1"
-                                    :class="false ? 'text-[#0086FF]' : 'text-[#303030]'" />
-                            </button>
-                        </template>
+                                <template #editButtoon>
+                                    <button v-if="isCalledFromGeneratedQuestionView" @click="editQueContent"
+                                        class="flex flex-row justify-center items-center text-sm md:text-xl pl-2 py-3 w-[86px] h-[35px] left-[1485px] top-[50px] bg-[#CCCCCC] rounded-lg">
+                                        {{ isCalledFromGeneratedQuestionView && editableQueContent ? '완료' : '수정' }}
+                                        <Icon icon="mingcute:pencil-fill" width="20" height="20" class="mx-1"
+                                            :class="false ? 'text-[#0086FF]' : 'text-[#303030]'" />
+                                    </button>
+                                </template>
 
-                    </TipTapEditor>
+                            </TipTapEditor>
+                        </div>
+                    </div>
                 </template>
                 <template #right>
                     <!-- 지문 분석 (Pinia Store에서 자동으로 데이터 가져옴) -->
@@ -47,7 +49,7 @@
                 재생성하기
             </button>
         </div>
-        
+
         <!-- GeneratedQuestionView에서 사용할 슬롯 -->
         <slot name="questions"></slot>
     </div>
@@ -163,16 +165,16 @@ const GenerateQuestionWithThisPassage = () => {
 const reGeneratePassageWithPrevDescription = async () => {
     isLoading.value = true
     loadingMessage.value = '지문을 생성 중입니다.\n생성까지 최대 1분이 소요될 수 있습니다.'
-    try{
+    try {
         const generateType = localStorage.getItem('generateType')
         const requestData = JSON.parse(localStorage.getItem('requestData') || '{}')
 
         const newPasCode = await generateAndSavePassage(generateType, passage.value.title, requestData)
-        
+
         isReGenerating.value = true
         router.push(`/passage/view/${newPasCode}`)
-        
-    } catch(error) {
+
+    } catch (error) {
         alert('지문 재생성 요청에 실패하였습니다. 관리자에게 문의하세요')
     } finally {
         loadingMessage.value = ''
@@ -182,16 +184,16 @@ const reGeneratePassageWithPrevDescription = async () => {
 
 //
 const editQueContent = async () => {
-    if(!editableQueContent.value){
+    if (!editableQueContent.value) {
         editableQueContent.value = true;
         return;
     }
-    
+
     try {
         await updatePassagePartial(passage.value.pasCode, {
             content: savedContent.value
         });
-        
+
         // ✅ Store 업데이트 추가 - passage.content를 업데이트
         const passageStore = usePassageStore();
         const updatedPassage = {
@@ -200,7 +202,7 @@ const editQueContent = async () => {
         };
         passageStore.setPassage(updatedPassage);
         console.log('✅ 지문 내용 Store 업데이트 완료');
-        
+
         editableQueContent.value = false;
 
     } catch (error) {
@@ -215,26 +217,26 @@ const closePaymentUsageModal = () => { isPaymentUsageModalOpen.value = false; };
 // 컴포넌트 마운트 시 데이터 로드
 onMounted(() => {
     loadPassageData()
-    isReGenerating.value=false
-    
+    isReGenerating.value = false
+
     // localStorage에서 필요한 데이터 확인
     const generateType = localStorage.getItem('generateType')
     const requestData = localStorage.getItem('requestData')
-    
+
     // 두 값이 모두 존재하는지 확인
     if (generateType && requestData) {
         try {
-        // requestData가 유효한 JSON인지 검증
-        JSON.parse(requestData)
-        existRequestData.value = true
-        console.log('✅ 이전 생성 데이터 발견:', { generateType, requestData })
+            // requestData가 유효한 JSON인지 검증
+            JSON.parse(requestData)
+            existRequestData.value = true
+            console.log('✅ 이전 생성 데이터 발견:', { generateType, requestData })
         } catch (error) {
-        // JSON 파싱 실패시 무효한 데이터로 간주
-        console.warn('⚠️ 유효하지 않은 requestData:', error)
-        existRequestData.value = false
-        // 잘못된 데이터 정리
-        localStorage.removeItem('generateType')
-        localStorage.removeItem('requestData')
+            // JSON 파싱 실패시 무효한 데이터로 간주
+            console.warn('⚠️ 유효하지 않은 requestData:', error)
+            existRequestData.value = false
+            // 잘못된 데이터 정리
+            localStorage.removeItem('generateType')
+            localStorage.removeItem('requestData')
         }
     } else {
         existRequestData.value = false
