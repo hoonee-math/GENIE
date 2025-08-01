@@ -24,7 +24,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { apiPost } from "@/utils/http";
+import { verifyPaymentAmountAPI, confirmPaymentAPI } from "@/api/payment.js";
 
 const route = useRoute();
 const router = useRouter();
@@ -36,7 +36,7 @@ const ticCode = ref(route.query.ticCode || "");
 
 const valid = ref(false);
 const message = ref("결제 정보를 처리 중입니다…");
-const loading = ref(true);
+const loading = ref(true); 
 
 onMounted(async () => {
   if (!orderId.value || !amount.value) {
@@ -47,47 +47,17 @@ onMounted(async () => {
 
   try {
     // 1. 결제 금액 검증
-    const verifyResult = await apiPost("/api/tosspay/verifyAmount", {
-      orderId: orderId.value,
-      amount: amount.value,
-    });
+    const verifyResult = await verifyPaymentAmountAPI(orderId.value, amount.value);
+    console.log("결제 금액 검증 성공:", verifyResult.message);
 
-    console.log("금액 검증 결과:", verifyResult);
-    
-    if (!verifyResult.success) {
-      message.value = verifyResult.message || "금액 검증에 실패했습니다.";
-      loading.value = false;
-      return;
-    }
-
-    // 2. 결제 승인 요청
-    const confirmResult = await apiPost("/api/tosspay/confirm", {
-      paymentKey: paymentKey.value,
-      orderId: orderId.value,
-      amount: amount.value,
-      ticCode: ticCode.value,
-    });
-
-    console.log("결제 승인 결과:", confirmResult);
-    
-    if (!confirmResult.success) {
-      message.value = confirmResult.message || "결제 저장에 실패했습니다.";
-      loading.value = false;
-      return;
-    }
+    // 2. 결제 승인 확정
+    const confirmResult = await confirmPaymentAPI(paymentKey.value, orderId.value, amount.value, ticCode.value);
+    console.log("결제 승인 완료:", confirmResult.message);
 
     valid.value = true;
-    message.value = "결제가 성공적으로 완료되었습니다.";
-    
-  } catch (e) {
-    console.error("결제 처리 중 오류:", e);
-    
-    // APIError인 경우 더 구체적인 메시지 제공
-    if (e.name === 'APIError') {
-      message.value = e.message || "결제 처리 중 오류가 발생했습니다.";
-    } else {
-      message.value = "결제 처리 중 오류가 발생했습니다.";
-    }
+  } catch (error) {
+    console.error("결제 처리 중 오류:", error.message || error);
+    message.value = error.message || "결제 처리 중 오류가 발생했습니다.";
   } finally {
     loading.value = false;
   }
@@ -167,7 +137,6 @@ button:hover {
   0% {
     transform: rotate(0deg);
   }
-
   100% {
     transform: rotate(360deg);
   }

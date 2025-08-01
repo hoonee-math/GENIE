@@ -2,7 +2,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { apiPost } from "@/utils/http";
+import { savePaymentAmountAPI } from "@/api/payment.js";
 
 const props = defineProps({
   defaultAmount: { type: String, required: true },
@@ -15,35 +15,25 @@ const props = defineProps({
 const orderId = ref("");
 
 const requestTossPayment = async () => {
+  orderId.value = generateRandomString();
+
+  const amount = props.defaultAmount;
+
   try {
-    orderId.value = generateRandomString();
-    const amount = props.defaultAmount;
+    const result = await savePaymentAmountAPI(orderId.value, amount, props.ticCode);
+    console.log("[TossPay] saveAmount 성공:", result.message);
+  } catch (error) {
+    console.error("[TossPay] saveAmount 실패:", error.message || error);
+    alert(`결제 초기화에 실패했습니다: ${error.message || "다시 시도해주세요."}`);
+    return;
+  }
 
-    // 1. 결제 정보 임시 저장
-    const response = await apiPost("/api/tosspay/saveAmount", {
-        orderId: orderId.value,
-        amount: amount,
-        ticCode: props.ticCode,
-    });
+  const clientKey = import.meta.env.VITE_TOSS_CLIENT_KEY || "test_ck_jExPeJWYVQbme15w45pQr49R5gvN";
+  const customerKey = generateRandomString();
+  const tossPayments = window.TossPayments(clientKey);
+  const payment = tossPayments.payment({ customerKey });
 
-    console.log("[TossPay] saveAmount response:", response);
-    
-    // 응답 검증
-    if (!response.success) {
-      console.error("[TossPay] saveAmount 실패:", response.message);
-      alert("결제 정보 저장에 실패했습니다: " + response.message);
-      return;
-    }
-
-    // 2. 토스페이먼츠 결제 위젯 초기화
-    const clientKey = import.meta.env.VITE_TOSS_CLIENT_KEY || "test_ck_jExPeJWYVQbme15w45pQr49R5gvN";
-    const customerKey = generateRandomString();
-    const tossPayments = window.TossPayments(clientKey);
-    const payment = tossPayments.payment({ customerKey });
-
-    console.log('[TossPay] 토스페이 결제 요청 시작:', payment);
-
-    // 3. 결제 요청
+  try {
     await payment.requestPayment({
       method: "CARD",
       amount: {
@@ -64,16 +54,8 @@ const requestTossPayment = async () => {
         useAppCardOnly: false,
       },
     });
-    
   } catch (err) {
-    console.error("[TossPay] 결제 처리 중 오류:", err);
-    
-    if (err.name === 'APIError') {
-      alert("결제 처리 중 오류가 발생했습니다: " + err.message);
-    } else {
-      console.warn("[TossPay] 사용자 취소 또는 토스페이먼츠 오류:", err);
-      // 토스페이먼츠 오류는 사용자에게 알리지 않음 (취소일 가능성 높음)
-    }
+    console.warn("[TossPay] 사용자 취소 또는 오류 발생", err);
   }
 };
 
