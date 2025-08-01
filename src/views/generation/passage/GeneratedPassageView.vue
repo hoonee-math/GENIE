@@ -10,11 +10,11 @@
                     <!-- TipTapEditor 로 교체: PassageEditor 기능 포함 -->
                     <TipTapEditor 
                         :initialContent="savedContent"
-                        :isEditable="isCalledFromGeneratedQuestionView"
+                        :isEditable="isCalledFromGeneratedQuestionView && editableQueContent"
                         :showFixedToolbar="editableQueContent"
                         :showContentLength="true"
                         @content-changed="handleContentChange"
-                        :addClass="isCalledFromGeneratedQuestionView?'p-4':'border border-[#757575] p-4'" >
+                        :addClass="[editableQueContent?'p-4':'border border-[#757575] p-4']" >
 
                         <template #editButtoon>
                             <button @click="editQueContent"
