@@ -28,6 +28,8 @@ coverage
 *.sw?
 *merged.md
 .gemini
+CLAUDE.md
+.claude/*
 
 *.tsbuildinfo
 
