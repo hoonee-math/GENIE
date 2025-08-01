@@ -46,36 +46,48 @@ onMounted(async () => {
   }
 
   try {
-    const verifyRes = await apiPost("/api/tosspay/verifyAmount", {
+    // 1. 결제 금액 검증
+    const verifyResult = await apiPost("/api/tosspay/verifyAmount", {
       orderId: orderId.value,
       amount: amount.value,
     });
 
-    if (!verifyRes.ok) {
-      const err = await verifyRes.json();
-      message.value = err.message || "금액 검증에 실패했습니다.";
+    console.log("금액 검증 결과:", verifyResult);
+    
+    if (!verifyResult.success) {
+      message.value = verifyResult.message || "금액 검증에 실패했습니다.";
       loading.value = false;
       return;
     }
 
-    const confirmRes = await apiPost("/api/tosspay/confirm", {
+    // 2. 결제 승인 요청
+    const confirmResult = await apiPost("/api/tosspay/confirm", {
       paymentKey: paymentKey.value,
       orderId: orderId.value,
       amount: amount.value,
       ticCode: ticCode.value,
     });
 
-    if (!confirmRes.ok) {
-      const err = await confirmRes.json();
-      message.value = err.message || "결제 저장에 실패했습니다.";
+    console.log("결제 승인 결과:", confirmResult);
+    
+    if (!confirmResult.success) {
+      message.value = confirmResult.message || "결제 저장에 실패했습니다.";
       loading.value = false;
       return;
     }
 
     valid.value = true;
+    message.value = "결제가 성공적으로 완료되었습니다.";
+    
   } catch (e) {
     console.error("결제 처리 중 오류:", e);
-    message.value = "결제 처리 중 오류가 발생했습니다.";
+    
+    // APIError인 경우 더 구체적인 메시지 제공
+    if (e.name === 'APIError') {
+      message.value = e.message || "결제 처리 중 오류가 발생했습니다.";
+    } else {
+      message.value = "결제 처리 중 오류가 발생했습니다.";
+    }
   } finally {
     loading.value = false;
   }
