@@ -2,6 +2,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { apiPost } from "@/utils/http";
 
 const props = defineProps({
   defaultAmount: { type: String, required: true },
@@ -18,15 +19,10 @@ const requestTossPayment = async () => {
 
   const amount = props.defaultAmount;
 
-  const response = await fetch("/api/tosspay/saveAmount", {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
+  const response = await apiPost("/api/tosspay/saveAmount", {
       orderId: orderId.value,
       amount: amount,
       ticCode: props.ticCode,
-    }),
   });
 
   console.log("[TossPay] saveAmount response status:", response.status);

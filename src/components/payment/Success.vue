@@ -24,6 +24,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { apiPost } from "@/utils/http";
 
 const route = useRoute();
 const router = useRouter();
@@ -35,7 +36,7 @@ const ticCode = ref(route.query.ticCode || "");
 
 const valid = ref(false);
 const message = ref("결제 정보를 처리 중입니다…");
-const loading = ref(true); 
+const loading = ref(true);
 
 onMounted(async () => {
   if (!orderId.value || !amount.value) {
@@ -45,14 +46,9 @@ onMounted(async () => {
   }
 
   try {
-    const verifyRes = await fetch("/api/tosspay/verifyAmount", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        orderId: orderId.value,
-        amount: amount.value,
-      }),
+    const verifyRes = await apiPost("/api/tosspay/verifyAmount", {
+      orderId: orderId.value,
+      amount: amount.value,
     });
 
     if (!verifyRes.ok) {
@@ -62,16 +58,11 @@ onMounted(async () => {
       return;
     }
 
-    const confirmRes = await fetch("/api/tosspay/confirm", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        paymentKey: paymentKey.value,
-        orderId: orderId.value,
-        amount: amount.value,
-        ticCode: ticCode.value,
-      }),
+    const confirmRes = await apiPost("/api/tosspay/confirm", {
+      paymentKey: paymentKey.value,
+      orderId: orderId.value,
+      amount: amount.value,
+      ticCode: ticCode.value,
     });
 
     if (!confirmRes.ok) {
@@ -164,6 +155,7 @@ button:hover {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
