@@ -102,7 +102,7 @@ export function useQuestion() {
         queQuery: responseFromPython.generated_question,
         queOption: formatOption(responseFromPython.generated_option),
         queAnswer: responseFromPython.generated_answer,
-        description: formatDescription(responseFromPython.generated_description),
+        queDescription: formatDescription(responseFromPython.generated_description),
         queSubpassage: responseFromPython.generated_subpassage || "",
       }
 
@@ -217,7 +217,7 @@ export function useQuestion() {
         queQuery: questionResult.generated_question,
         queOption: questionResult.generated_option,
         queAnswer: questionResult.generated_answer,
-        description: questionResult.generated_description,
+        queDescription: questionResult.generated_description,
       }],
     }
 
@@ -404,7 +404,7 @@ export function useQuestion() {
       queQuery: questionData.generated_question,
       queOption: formatOption(questionData.generated_option),
       queAnswer: questionData.generated_answer,
-      description: formatDescription(questionData.generated_description),  // description 포맷팅 '정답 해설'과 '오답 피하기' 가 배열로 저장되는 문제 처리 -> java에서는 String으로 저장되고 정답 및 해설도 Tiptap을 이용해 출력해주는 것으로 통일하기 위해 html 로 변환
+      queDescription: formatDescription(questionData.generated_description),  // description 포맷팅 '정답 해설'과 '오답 피하기' 가 배열로 저장되는 문제 처리 -> java에서는 String으로 저장되고 정답 및 해설도 Tiptap을 이용해 출력해주는 것으로 통일하기 위해 html 로 변환
       queSubpassage: questionData.generated_subpassage || ''
     }];
 

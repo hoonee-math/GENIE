@@ -77,7 +77,7 @@
                             </div>
 
 
-                            <!-- 수정 버튼을 누르면 #right 영역의 question.queAnswer 값과 아래 question.description 값을 각각 수정할 수 있게 변경. -->
+                            <!-- 수정 버튼을 누르면 #right 영역의 question.queAnswer 값과 아래 question.queDescription 값을 각각 수정할 수 있게 변경. -->
                             <button @click="editQueAnswerAndDesc"
                                 class="flex flex-row justify-center items-center text-sm md:text-xl pl-2 py-3 w-[86px] h-[35px] text-nowrap bg-[#CCCCCC] rounded-lg">
                                 {{ editableAnswerAndDesc ? '완료' : '수정' }}
@@ -90,10 +90,10 @@
                                 class="font-bold text-sm md:text-2xl leading-[150%] tracking-[-0.02em] text-[#303030] min-w-[80px] shrink-0">
                                 해설
                             </p>
-                            <!-- 문항의 해설: question.description -->
+                            <!-- 문항의 해설: question.queDescription -->
                             <div
                                 class="w-full font-normal text-sm md:text-xl leading-[200%] tracking-[-0.02em] text-[#303030] flex-1 overflow-auto">
-                                <TipTapEditor :initialContent="question.description" :isEditable="editableAnswerAndDesc"
+                                <TipTapEditor :initialContent="question.queDescription" :isEditable="editableAnswerAndDesc"
                                     @content-changed="handelQueDescriptionChange" :addClass="'text-xl'" />
                             </div>
                         </div>
@@ -432,7 +432,7 @@ const savePassageAndQuestion = async () => {
         queQuery: savedQueQuery.value,
         queOption: savedQueOption.value,
         queAnswer: queAnswer.value,
-        description: savedDescription.value
+        queDescription: savedDescription.value
     }
     // 현재 미구현 상태
     // await updateQuestion()

@@ -66,6 +66,7 @@ import PassageAndQuestionLayout from '@/views/generation/PassageAndQuestionLayou
 import PassageSummaryLayout from '@/views/generation/PassageSummaryLayout.vue'
 import TipTapEditor from '@/views/generation/TipTapEditor.vue'
 import { usePassage } from '@/composables/usePassage'
+import { usePassageStore } from '@/stores/passage'
 import { updatePassagePartial } from '@/api/passage'
 import EditableTitle from '@/views/generation/EditableTitle.vue'
 import PaymentUsageModal from "@/components/generation/PaymentUsageModal.vue";
@@ -190,6 +191,15 @@ const editQueContent = async () => {
         await updatePassagePartial(passage.value.pasCode, {
             content: savedContent.value
         });
+        
+        // ✅ Store 업데이트 추가 - passage.content를 업데이트
+        const passageStore = usePassageStore();
+        const updatedPassage = {
+            ...passage.value,
+            content: savedContent.value
+        };
+        passageStore.setPassage(updatedPassage);
+        console.log('✅ 지문 내용 Store 업데이트 완료');
         
         editableQueContent.value = false;
 

@@ -142,7 +142,7 @@ export async function updatePassageWithQuestionsInDatabase(
   }
 }
 
-// 문항 수정 (/api/pass/{pasCode}/ques/{queCode}) - updates 추가 가능한 key 목록: description, queAnswer, queOption, queQuery, queSubpassage 수정 가능 (null 이면 수정안함)
+// 문항 수정 (/api/pass/{pasCode}/ques/{queCode}) - updates 추가 가능한 key 목록: queDescription, queAnswer, queOption, queQuery, queSubpassage 수정 가능 (null 이면 수정안함)
 export async function updateQuestionPartial(pasCode, queCode, updates) {
   try {
     console.log('🔄 [PATCH] 문항 부분 수정 요청:', { queCode, updates });
