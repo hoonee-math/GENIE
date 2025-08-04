@@ -1,5 +1,6 @@
 <template>
-    <div class="hidden md:block flex flex-col gap-3 mx-auto p-4 sm:p-8 w-full">
+    <!-- Desktop View -->
+    <div class="hidden md:block flex flex-col gap-3 mx-auto p-4 sm:p-8 w-full"><!-- Desktop View -->
         <!-- ===== 타이틀 & 카운트 ===== -->
         <div class="flex items-start gap-3 mb-2">
             <p class="text-xl sm:text-2xl font-bold text-black">
@@ -70,9 +71,24 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- Mobile View -->
+    <div class="md:hidden w-full h-full flex flex-col bg-gray-50"><!-- Mobile View -->
+        <!-- Header -->
+        <header
+            class="sticky top-0 z-999 bg-white/80 backdrop-blur-md justify-center shadow-[0_1px_3px_rgba(0,0,0,0.05)] px-4 py-3.5 flex items-center">
+            <div class="flex items-center gap-2">
+                <div class="flex justify-center items-center w-full">
+                    <router-link to="/"
+                        class="text-base text-center font-bold bg-[#222] bg-clip-text text-transparent">{{
+                        title }}</router-link>
+                </div>
+            </div>
+        </header>
+
         <!-- ===== 모바일 필터 토글 (추후 확장용) ===== -->
-        <div class="md:hidden">
-            <!-- 모바일에서는 접을 수 있는 필터 영역 -->
+        <div class="bg-white border-b border-gray-200">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-2">
                     <button @click="isMobileFilterOpen = !isMobileFilterOpen"
@@ -104,7 +120,7 @@
             </div>
 
             <!-- 모바일 필터 패널 -->
-            <div v-if="isMobileFilterOpen" class="flex flex-col gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
+            <div v-if="isMobileFilterOpen" class="flex flex-col gap-4 mb-4 rounded-lg">
                 <!-- 검색 -->
                 <div class="flex flex-row items-center gap-4">
                     <span class="text-sm font-medium text-gray-700 w-12">작업명</span>
@@ -117,7 +133,7 @@
                             </svg>
                         </div>
                         <input type="text" placeholder="작업명 검색" v-model="localFilters.search" @input="debounceSearch"
-                            class="w-full h-11 pl-10 pr-4 text-base text-[#757575] border border-gray-200 rounded-md focus:outline-none focus:border-[#0086ff] bg-white" />
+                            class="w-full h-11 pl-10 pr-4 text-base text-[#757575] border border-gray-200 rounded-md focus:outline-none focus:border-[#0086ff] bg-gray-50" />
                     </div>
                 </div>
 
@@ -133,14 +149,14 @@
                             </button>
                             <button v-for="field in fieldOptions" :key="field" @click="selectField(field)"
                                 class="px-3 py-1.5 rounded-lg text-sm transition-colors whitespace-nowrap"
-                                :class="localFilters.field === field ? 'bg-blue-50 text-blue-600' : 'bg-white text-gray-600 hover:bg-gray-100'">
+                                :class="localFilters.field === field ? 'bg-blue-50 text-blue-600' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'">
                                 {{ field }}
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- 유형 필터 -->
+                <!-- 유형 필터, 더이상 필요없어진 기능, 관련 코드 삭제 예정 -->
                 <!-- <div class="flex flex-row items-center gap-4">
                     <span class="text-sm font-medium text-gray-700 w-12">유형</span>
                     <div class="overflow-x-auto w-full scrollbar-hide">

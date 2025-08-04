@@ -11,7 +11,7 @@
         <!-- ===== 에러 상태 ===== -->
         <div v-else-if="error" class="flex justify-center items-center w-full h-[430px] bg-white rounded-xl">
             <div class="flex flex-col items-center gap-3">
-                <Icon icon="hugeicons:alert-circle" width="45" height="45"  style="color: #f00" />
+                <Icon icon="hugeicons:alert-circle" width="45" height="45" style="color: #f00" />
                 <span class="text-base text-red-500">{{ error }}</span>
                 <button @click="$emit('retry')"
                     class="px-4 py-2 text-sm bg-[#0086ff] text-white rounded-md hover:bg-[#0073e6] transition-colors">
@@ -34,9 +34,9 @@
         </div>
 
         <!-- ===== 실제 데이터 테이블 ===== -->
-        <div v-else class="w-full bg-white rounded-xl shadow-sm overflow-hidden">
+        <div v-else class="w-full bg-white rounded-xl shadow-sm overflow-hidden"><!-- Table view -->
             <!-- ===== 데스크톱 테이블 ===== -->
-            <div class="hidden md:block w-full overflow-x-auto">
+            <div class="hidden md:block w-full overflow-x-auto"><!-- Desktop View -->
                 <table id="storageTable" class="w-full table-auto whitespace-nowrap text-left min-w-[800px]">
                     <thead class="bg-white text-sm text-slate-700 border-b border-blue-100">
                         <tr>
@@ -201,7 +201,7 @@
             </div>
 
             <!-- ===== 모바일 리스트 ===== -->
-            <div class="md:hidden">
+            <div class="md:hidden"><!-- Mobile View -->
                 <div v-for="(item, index) in items" :key="item.pasCode"
                     class="border-b border-gray-100 p-4 hover:bg-gray-50 cursor-pointer transition-colors"
                     :class="{ 'bg-blue-50': selectedItems.has(item.pasCode) }" @click="handleRowClick(item, $event)">
@@ -433,7 +433,7 @@ const closeContextMenu = (event) => {
 
 // ===== 유틸리티 함수들 =====
 const getPrimaryDescription = (item) => {
-    console.log("================",item)
+    console.log("================", item)
     return item.descriptions?.[0] || null
 }
 

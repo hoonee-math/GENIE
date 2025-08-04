@@ -1,7 +1,7 @@
 <template>
     <div v-if="shouldShow" class="storage-pagination">
         <!-- ===== 데스크톱 페이지네이션 ===== -->
-        <div class="hidden md:flex justify-center items-center gap-4 mt-5">
+        <div class="hidden md:flex justify-center items-center gap-4 mt-5"><!-- Desktop View -->
             <!-- 첫 페이지 -->
             <button @click="$emit('change-page', 1)" :disabled="pagination.current === 1" :title="'첫 페이지로 이동'"
                 class="pagination-btn pagination-nav-btn" :class="{ 'disabled': pagination.current === 1 }">
@@ -63,7 +63,7 @@
         </div>
 
         <!-- ===== 모바일 페이지네이션 ===== -->
-        <div class="md:hidden flex flex-col items-center gap-4 mt-5">
+        <div class="md:hidden flex flex-col items-center gap-4 mt-5"><!-- Mobile View -->
             <!-- 페이지 정보 -->
             <div class="text-sm text-gray-600 text-center">
                 <span class="font-medium text-[#0086ff]">{{ pagination.current }}</span>
