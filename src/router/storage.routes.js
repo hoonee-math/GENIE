@@ -8,10 +8,10 @@ const storageRoutes = [
         path: 'storage',
         name: 'storage',
         children: [
-            { path : 'worklistMain', name:'worklistMain', component: WorkListMain},
-            { path : 'likelistMain', name:'likelistMain', component: LikeMain},
-            { path : 'deletedMain', name:'deletedMain', component: TrashMain},
-            { path : '', redirect: '/storage/worklistMain' }
+            { path : 'recent', name:'worklistMain', component: WorkListMain},
+            { path : 'favorites', name:'likelistMain', component: LikeMain},
+            { path : 'trash', name:'deletedMain', component: TrashMain},
+            { path : '', redirect: '/storage/recent' }
         ]
     }
 ]

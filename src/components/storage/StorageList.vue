@@ -502,7 +502,7 @@ const props = defineProps({
     type: {
         type: String,
         required: true,
-        validator: value => ['workList', 'favorite', 'trash'].includes(value)
+        validator: value => ['recent', 'favorite', 'trash'].includes(value)
     },
     title: {
         type: String,
@@ -576,7 +576,7 @@ onUnmounted(() => {
 // 작업 내역 리스트 가져오기
 const fetchWorkItems = async () => {
     try {
-        if (props.type === 'workList' && !requireAuth()) return;
+        if (props.type === 'recent' && !requireAuth()) return;
 
         const data = await apiGet(props.apiEndpoint);
 
@@ -602,8 +602,8 @@ const handleWorkItemClick = async (item) => {
         const pasCode = item.PAS_CODE;
         const isGeneratedText = item.PAS_IS_GENERATED === "지문";
 
-        if (props.type === 'workList') {
-            // WorkList: 라우팅 방식
+        if (props.type === 'recent') {
+            // recent: 라우팅 방식
             if (isGeneratedText) {
                 router.push({
                     path: `/passage/view/${pasCode}`,

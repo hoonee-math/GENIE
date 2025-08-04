@@ -142,30 +142,30 @@
                         class="flex flex-col pl-8 mt-1 space-y-1 w-full"
                     >
                         <router-link
-                            to="/storage/worklistMain"
+                            to="/storage/recent"
                             class="flex items-center h-8 px-3 text-sm font-medium no-underline rounded-md transition-all duration-300 hover:bg-gray-100 w-full"
                             :class="{
-                                'text-brand': isActive('/storage/worklistMain'),
+                                'text-brand': isActive('/storage/recent'),
                             }"
                             @click="closeSidebar"
                         >
                             최근문서함
                         </router-link>
                         <router-link
-                            to="/storage/likelistMain"
+                            to="/storage/favorites"
                             class="flex items-center h-8 px-3 text-sm font-medium no-underline rounded-md transition-all duration-300 hover:bg-gray-100 w-full"
                             :class="{
-                                'text-brand': isActive('/storage/likelistMain'),
+                                'text-brand': isActive('/storage/favorites'),
                             }"
                             @click="closeSidebar"
                         >
                             즐겨찾기
                         </router-link>
                         <router-link
-                            to="/storage/deletedMain"
+                            to="/storage/trash"
                             class="flex items-center h-8 px-3 text-sm font-medium no-underline rounded-md transition-all duration-300 hover:bg-gray-100 w-full"
                             :class="{
-                                'text-brand': isActive('/storage/deletedMain'),
+                                'text-brand': isActive('/storage/trash'),
                             }"
                             @click="closeSidebar"
                         >
