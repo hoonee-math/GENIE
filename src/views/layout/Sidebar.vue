@@ -171,6 +171,16 @@
                         >
                             휴지통
                         </router-link>
+                        <router-link
+                            to="/storage/old"
+                            class="flex items-center h-8 px-3 text-sm font-medium no-underline rounded-md transition-all duration-300 hover:bg-gray-100 w-full"
+                            :class="{
+                                'text-brand': isActive('/storage/old'),
+                            }"
+                            @click="closeSidebar"
+                        >
+                            구 문서함
+                        </router-link>
                     </div>
                 </div>
             </nav>
