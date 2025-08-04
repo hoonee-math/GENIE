@@ -1,10 +1,10 @@
 <template>
-    <div v-if="shouldShow" class="storage-pagination">
+    <div v-if="shouldShow" class="storage-pagination select-none">
         <!-- ===== 데스크톱 페이지네이션 ===== -->
         <div class="hidden md:flex justify-center items-center gap-4 mt-5"><!-- Desktop View -->
             <!-- 첫 페이지 -->
             <button @click="$emit('change-page', 1)" :disabled="pagination.current === 1" :title="'첫 페이지로 이동'"
-                class="pagination-btn pagination-nav-btn" :class="{ 'disabled': pagination.current === 1 }">
+                class="min-w-[36px] h-9 flex items-center justify-center rounded-md transition-all duration-200 font-medium px-3 text-gray-600 hover:bg-gray-100 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-200 hover:transform hover:translate-y-[-1px] hover:shadow-sm active:transform active:translate-y-0 disabled:text-gray-300 disabled:cursor-not-allowed disabled:bg-transparent disabled:hover:bg-transparent disabled:hover:text-gray-300 disabled:transform-none disabled:shadow-none">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M11 17l-5-5 5-5M18 17l-5-5 5-5" />
                 </svg>
@@ -13,8 +13,7 @@
 
             <!-- 이전 페이지 -->
             <button @click="$emit('change-page', pagination.current - 1)" :disabled="pagination.current === 1"
-                :title="'이전 페이지로 이동'" class="pagination-btn pagination-nav-btn"
-                :class="{ 'disabled': pagination.current === 1 }">
+                :title="'이전 페이지로 이동'" class="min-w-[36px] h-9 flex items-center justify-center rounded-md transition-all duration-200 font-medium px-3 text-gray-600 hover:bg-gray-100 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-200 hover:transform hover:translate-y-[-1px] hover:shadow-sm active:transform active:translate-y-0 disabled:text-gray-300 disabled:cursor-not-allowed disabled:bg-transparent disabled:hover:bg-transparent disabled:hover:text-gray-300 disabled:transform-none disabled:shadow-none">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M15 18l-6-6 6-6" />
                 </svg>
@@ -26,10 +25,11 @@
                 <template v-for="page in visiblePages" :key="page">
                     <!-- 일반 페이지 번호 -->
                     <button v-if="typeof page === 'number'" @click="$emit('change-page', page)"
-                        class="pagination-btn pagination-number-btn" :class="{
-                            'active': pagination.current === page,
-                            'current': pagination.current === page
-                        }" :title="`${page}페이지로 이동`">
+                        class="min-w-[36px] h-9 flex items-center justify-center rounded-md transition-all duration-200 font-medium px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 hover:transform hover:translate-y-[-1px] hover:shadow-sm active:transform active:translate-y-0"
+                        :class="pagination.current === page 
+                            ? 'bg-[#0086ff] text-white font-bold hover:bg-[#0073e6] hover:text-white' 
+                            : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'" 
+                        :title="`${page}페이지로 이동`">
                         {{ page }}
                     </button>
 
@@ -43,8 +43,7 @@
             <!-- 다음 페이지 -->
             <button @click="$emit('change-page', pagination.current + 1)"
                 :disabled="pagination.current === pagination.total" :title="'다음 페이지로 이동'"
-                class="pagination-btn pagination-nav-btn"
-                :class="{ 'disabled': pagination.current === pagination.total }">
+                class="min-w-[36px] h-9 flex items-center justify-center rounded-md transition-all duration-200 font-medium px-3 text-gray-600 hover:bg-gray-100 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-200 hover:transform hover:translate-y-[-1px] hover:shadow-sm active:transform active:translate-y-0 disabled:text-gray-300 disabled:cursor-not-allowed disabled:bg-transparent disabled:hover:bg-transparent disabled:hover:text-gray-300 disabled:transform-none disabled:shadow-none">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M9 18l6-6-6-6" />
                 </svg>
@@ -53,8 +52,7 @@
 
             <!-- 마지막 페이지 -->
             <button @click="$emit('change-page', pagination.total)" :disabled="pagination.current === pagination.total"
-                :title="'마지막 페이지로 이동'" class="pagination-btn pagination-nav-btn"
-                :class="{ 'disabled': pagination.current === pagination.total }">
+                :title="'마지막 페이지로 이동'" class="min-w-[36px] h-9 flex items-center justify-center rounded-md transition-all duration-200 font-medium px-3 text-gray-600 hover:bg-gray-100 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-200 hover:transform hover:translate-y-[-1px] hover:shadow-sm active:transform active:translate-y-0 disabled:text-gray-300 disabled:cursor-not-allowed disabled:bg-transparent disabled:hover:bg-transparent disabled:hover:text-gray-300 disabled:transform-none disabled:shadow-none">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M13 17l5-5-5-5M6 17l5-5-5-5" />
                 </svg>
@@ -78,7 +76,7 @@
             <div class="flex items-center justify-center gap-3">
                 <!-- 이전 페이지 -->
                 <button @click="$emit('change-page', pagination.current - 1)" :disabled="pagination.current === 1"
-                    class="mobile-pagination-btn" :class="{ 'disabled': pagination.current === 1 }">
+                    class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200 hover:transform hover:translate-y-[-1px] active:transform active:translate-y-0 disabled:text-gray-400 disabled:cursor-not-allowed disabled:bg-white disabled:hover:bg-white disabled:transform-none">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M15 18l-6-6 6-6" />
                     </svg>
@@ -88,7 +86,7 @@
                 <!-- 페이지 점프 (5페이지 이상일 때만) -->
                 <div v-if="pagination.total > 4" class="flex items-center gap-2">
                     <!-- 첫 페이지 (현재가 3페이지 이상일 때) -->
-                    <button v-if="pagination.current > 2" @click="$emit('change-page', 1)" class="mobile-page-btn">
+                    <button v-if="pagination.current > 2" @click="$emit('change-page', 1)" class="min-w-[32px] h-8 flex items-center justify-center text-sm rounded-md transition-all duration-200 hover:transform hover:translate-y-[-1px] active:transform active:translate-y-0 text-gray-700 bg-white border border-gray-300 hover:bg-gray-50">
                         1
                     </button>
 
@@ -96,7 +94,7 @@
                     <span v-if="pagination.current > 3" class="text-gray-400 text-sm">…</span>
 
                     <!-- 현재 페이지 -->
-                    <span class="mobile-page-btn active">
+                    <span class="min-w-[32px] h-8 flex items-center justify-center text-sm rounded-md text-white bg-[#0086ff] font-bold">
                         {{ pagination.current }}
                     </span>
 
@@ -105,15 +103,14 @@
 
                     <!-- 마지막 페이지 (현재가 마지막-2 페이지 이하일 때) -->
                     <button v-if="pagination.current < pagination.total - 1"
-                        @click="$emit('change-page', pagination.total)" class="mobile-page-btn">
+                        @click="$emit('change-page', pagination.total)" class="min-w-[32px] h-8 flex items-center justify-center text-sm rounded-md transition-all duration-200 hover:transform hover:translate-y-[-1px] active:transform active:translate-y-0 text-gray-700 bg-white border border-gray-300 hover:bg-gray-50">
                         {{ pagination.total }}
                     </button>
                 </div>
 
                 <!-- 다음 페이지 -->
                 <button @click="$emit('change-page', pagination.current + 1)"
-                    :disabled="pagination.current === pagination.total" class="mobile-pagination-btn"
-                    :class="{ 'disabled': pagination.current === pagination.total }">
+                    :disabled="pagination.current === pagination.total" class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200 hover:transform hover:translate-y-[-1px] active:transform active:translate-y-0 disabled:text-gray-400 disabled:cursor-not-allowed disabled:bg-white disabled:hover:bg-white disabled:transform-none">
                     <span>다음</span>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M9 18l6-6-6-6" />
@@ -125,7 +122,7 @@
             <div v-if="pagination.total >= 10" class="flex items-center gap-2 text-sm">
                 <span class="text-gray-600">빠른 이동:</span>
                 <select :value="pagination.current" @change="$emit('change-page', parseInt($event.target.value))"
-                    class="px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:border-[#0086ff] bg-white">
+                    class="px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:border-[#0086ff] focus:ring-2 focus:ring-blue-200 bg-white">
                     <option v-for="page in Array.from({ length: pagination.total }, (_, i) => i + 1)" :key="page"
                         :value="page">
                         {{ page }}페이지
@@ -138,7 +135,7 @@
         <div v-if="showPageSizeSelector" class="hidden justify-center items-center gap-4 mt-3">
             <span class="text-sm text-gray-600">페이지당:</span>
             <select :value="pageSize" @change="$emit('change-page-size', parseInt($event.target.value))"
-                class="px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:border-[#0086ff] bg-white">
+                class="px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:border-[#0086ff] focus:ring-2 focus:ring-blue-200 bg-white">
                 <option value="10">10개</option>
                 <option value="15">15개</option>
                 <option value="20">20개</option>
@@ -240,95 +237,11 @@ const pageInfoText = computed(() => {
 </script>
 
 <style scoped>
-.storage-pagination {
-    @apply select-none;
-}
-
-/* ===== 데스크톱 페이지네이션 스타일 ===== */
-.pagination-btn {
-    @apply min-w-[36px] h-9 flex items-center justify-center rounded-md transition-all duration-200 font-medium;
-}
-
-.pagination-nav-btn {
-    @apply px-3 text-gray-600 hover:bg-gray-100 hover:text-gray-800;
-}
-
-.pagination-nav-btn.disabled {
-    @apply text-gray-300 cursor-not-allowed;
-}
-
-.pagination-nav-btn.disabled:hover {
-    @apply bg-transparent text-gray-300;
-}
-
-.pagination-number-btn {
-    @apply px-3 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900;
-}
-
-.pagination-number-btn.active {
-    @apply bg-[#0086ff] text-white font-bold;
-}
-
-.pagination-number-btn.active:hover {
-    @apply bg-[#0073e6] text-white;
-}
-
-/* ===== 모바일 페이지네이션 스타일 ===== */
-.mobile-pagination-btn {
-    @apply flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors;
-}
-
-.mobile-pagination-btn.disabled {
-    @apply text-gray-400 cursor-not-allowed;
-}
-
-.mobile-pagination-btn.disabled:hover {
-    @apply bg-white;
-}
-
-.mobile-page-btn {
-    @apply min-w-[32px] h-8 flex items-center justify-center text-sm rounded-md transition-colors;
-}
-
-.mobile-page-btn:not(.active) {
-    @apply text-gray-700 bg-white border border-gray-300 hover:bg-gray-50;
-}
-
-.mobile-page-btn.active {
-    @apply text-white bg-[#0086ff] font-bold;
-}
-
-/* ===== 호버 효과 ===== */
-.pagination-btn:hover:not(.disabled) {
-    @apply transform translate-y-[-1px] shadow-sm;
-}
-
-.pagination-btn:active:not(.disabled) {
-    @apply transform translate-y-0;
-}
-
-/* ===== 포커스 효과 ===== */
-.pagination-btn:focus {
-    @apply outline-none ring-2 ring-blue-200;
-}
-
-select:focus {
-    @apply outline-none ring-2 ring-blue-200;
-}
-
-/* ===== 스크린 리더용 텍스트 ===== */
-.sr-only {
-    @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
-    clip: rect(0, 0, 0, 0);
-}
-
-/* ===== 애니메이션 ===== */
 @keyframes fadeIn {
     from {
         opacity: 0;
         transform: translateY(10px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
@@ -339,29 +252,15 @@ select:focus {
     animation: fadeIn 0.3s ease-out;
 }
 
-/* ===== 반응형 조정 ===== */
-@media (max-width: 480px) {
-    .mobile-pagination-btn {
-        @apply px-3 py-1.5 text-xs;
-    }
-
-    .mobile-page-btn {
-        @apply min-w-[28px] h-7 text-xs;
-    }
-}
-
-/* ===== 다크모드 대응 (추후 확장용) ===== */
-@media (prefers-color-scheme: dark) {
-    .pagination-btn:not(.active) {
-        @apply text-gray-300 hover:text-white;
-    }
-
-    .pagination-nav-btn:hover {
-        @apply bg-gray-800;
-    }
-
-    .pagination-number-btn:hover {
-        @apply bg-gray-800;
-    }
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    white-space: nowrap;
+    border: 0;
+    clip: rect(0, 0, 0, 0);
 }
 </style>

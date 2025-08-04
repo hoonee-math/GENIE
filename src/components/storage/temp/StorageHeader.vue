@@ -1,11 +1,9 @@
 <template>
     <!-- Desktop View -->
-    <div class="hidden md:block flex flex-col gap-3 mx-auto p-4 sm:p-8 w-full"><!-- Desktop View -->
+    <div class="hidden md:block"><!-- Desktop View -->
         <!-- ===== 타이틀 & 카운트 ===== -->
         <div class="flex items-start gap-3 mb-2">
-            <p class="text-xl sm:text-2xl font-bold text-black">
-                {{ title }}
-            </p>
+            <p class="text-xl sm:text-2xl font-bold text-black">{{ title }}</p>
         </div>
 
         <!-- ===== 필터 & 검색 영역 ===== -->
@@ -26,7 +24,7 @@
                 <!-- 분야 필터 -->
                 <div class="flex items-center gap-2 w-full sm:w-auto">
                     <select v-model="localFilters.field" @change="handleFilterChange"
-                        class="w-full sm:w-[140px] h-9 px-3 pr-8 text-sm text-[#757575] border border-[#757575] rounded-md focus:outline-none focus:border-[#0086ff] bg-white appearance-none bg-no-repeat bg-[length:16px] bg-[center_right_8px] bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%23757575%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')]">
+                        class="w-full sm:w-[140px] h-9 px-3 pr-8 text-sm text-[#757575] border border-[#757575] rounded-md focus:outline-none focus:border-[#0086ff] focus:ring-2 focus:ring-blue-200 bg-white appearance-none bg-no-repeat bg-[length:16px] bg-[center_right_8px] bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%23757575%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')]">
                         <option value="">전체 분야</option>
                         <option value="인문">인문</option>
                         <option value="사회">사회</option>
@@ -49,7 +47,7 @@
                 <!-- 검색 박스 -->
                 <div class="relative w-full sm:w-[140px]">
                     <input type="text" placeholder="작업명 검색" v-model="localFilters.search" @input="debounceSearch"
-                        class="w-full h-9 pl-8 pr-3 text-sm text-[#757575] border border-[#757575] rounded-md focus:outline-none focus:border-[#0086ff] bg-white" />
+                        class="w-full h-9 pl-8 pr-3 text-sm text-[#757575] border border-[#757575] rounded-md focus:outline-none focus:border-[#0086ff] focus:ring-2 focus:ring-blue-200 bg-white" />
                     <div class="absolute left-2.5 top-1/2 -translate-y-1/2">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#757575" stroke-width="2">
                             <circle cx="11" cy="11" r="8"></circle>
@@ -60,7 +58,7 @@
 
                 <!-- 필터 초기화 버튼 -->
                 <button v-if="hasActiveFilters" @click="$emit('clear-filters')"
-                    class="w-full sm:w-auto flex items-center justify-center gap-2 text-sm font-semibold text-gray-600 border border-gray-300 rounded-md px-3 py-1.5 hover:bg-gray-50 transition-colors bg-white">
+                    class="w-full sm:w-auto flex items-center justify-center gap-2 text-sm font-semibold text-gray-600 border border-gray-300 rounded-md px-3 py-1.5 hover:bg-gray-50 transition-all duration-200 hover:transform hover:translate-y-[-1px] active:transform active:translate-y-0 bg-white">
                     <span>초기화</span>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M3 6h18"></path>
@@ -74,7 +72,7 @@
     </div>
 
     <!-- Mobile View -->
-    <div class="md:hidden w-full h-full flex flex-col bg-gray-50"><!-- Mobile View -->
+    <div class="md:hidden"><!-- Mobile View -->
         <!-- Header -->
         <header
             class="sticky top-0 z-999 bg-white/80 backdrop-blur-md justify-center shadow-[0_1px_3px_rgba(0,0,0,0.05)] px-4 py-3.5 flex items-center">
@@ -82,7 +80,7 @@
                 <div class="flex justify-center items-center w-full">
                     <router-link to="/"
                         class="text-base text-center font-bold bg-[#222] bg-clip-text text-transparent">{{
-                        title }}</router-link>
+                            title }}</router-link>
                 </div>
             </div>
         </header>
@@ -92,7 +90,7 @@
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-2">
                     <button @click="isMobileFilterOpen = !isMobileFilterOpen"
-                        class="flex items-center gap-1 px-3 py-1.5 text-sm">
+                        class="flex items-center gap-1 px-3 py-1.5 text-sm transition-all duration-200 hover:transform hover:translate-y-[-1px] active:transform active:translate-y-0">
                         <span>필터</span>
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform duration-200"
                             :class="{ 'rotate-180': isMobileFilterOpen }" fill="none" viewBox="0 0 24 24"
@@ -133,7 +131,7 @@
                             </svg>
                         </div>
                         <input type="text" placeholder="작업명 검색" v-model="localFilters.search" @input="debounceSearch"
-                            class="w-full h-11 pl-10 pr-4 text-base text-[#757575] border border-gray-200 rounded-md focus:outline-none focus:border-[#0086ff] bg-gray-50" />
+                            class="w-full h-11 pl-10 pr-4 text-base text-[#757575] border border-gray-200 rounded-md focus:outline-none focus:border-[#0086ff] focus:ring-2 focus:ring-blue-200 bg-gray-50" />
                     </div>
                 </div>
 
@@ -143,12 +141,12 @@
                     <div class="overflow-x-auto w-full scrollbar-hide">
                         <div class="flex gap-2 min-w-max">
                             <button @click="selectField('')"
-                                class="px-3 py-1.5 rounded-lg text-sm transition-colors whitespace-nowrap"
+                                class="px-3 py-1.5 rounded-lg text-sm transition-all duration-200 whitespace-nowrap hover:transform hover:translate-y-[-1px] active:transform active:translate-y-0"
                                 :class="localFilters.field === '' ? 'bg-blue-50 text-blue-600' : 'bg-white text-gray-600 hover:bg-gray-100'">
                                 전체
                             </button>
                             <button v-for="field in fieldOptions" :key="field" @click="selectField(field)"
-                                class="px-3 py-1.5 rounded-lg text-sm transition-colors whitespace-nowrap"
+                                class="px-3 py-1.5 rounded-lg text-sm transition-all duration-200 whitespace-nowrap hover:transform hover:translate-y-[-1px] active:transform active:translate-y-0"
                                 :class="localFilters.field === field ? 'bg-blue-50 text-blue-600' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'">
                                 {{ field }}
                             </button>
@@ -277,8 +275,6 @@ const selectType = (type) => {
 </script>
 
 <style scoped>
-
-/* 모바일 스크롤바 숨김 */
 .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -286,35 +282,5 @@ const selectType = (type) => {
 
 .scrollbar-hide::-webkit-scrollbar {
     display: none;
-}
-
-/* 셀렉트 박스 커스텀 스타일 */
-select {
-    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%23757575' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: center right 8px;
-    background-size: 16px;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-}
-
-/* 포커스 효과 */
-select:focus,
-input:focus {
-    @apply ring-2 ring-blue-200;
-}
-
-/* 버튼 호버 효과 */
-button {
-    @apply transition-all duration-200;
-}
-
-button:hover:not(:disabled) {
-    @apply transform translate-y-[-1px];
-}
-
-button:active:not(:disabled) {
-    @apply transform translate-y-0;
 }
 </style>

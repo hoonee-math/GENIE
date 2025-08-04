@@ -14,7 +14,7 @@
                 <Icon icon="hugeicons:alert-circle" width="45" height="45" style="color: #f00" />
                 <span class="text-base text-red-500">{{ error }}</span>
                 <button @click="$emit('retry')"
-                    class="px-4 py-2 text-sm bg-[#0086ff] text-white rounded-md hover:bg-[#0073e6] transition-colors">
+                    class="px-4 py-2 text-sm bg-[#0086ff] text-white rounded-md hover:bg-[#0073e6] transition-all duration-200 hover:transform hover:translate-y-[-1px] active:transform active:translate-y-0">
                     다시 시도
                 </button>
             </div>
@@ -26,7 +26,8 @@
             <div class="flex flex-col items-center gap-3">
                 <span class="text-base text-[#757575]">{{ emptyMessage }}</span>
                 <router-link v-if="type !== 'trash'" to="/passage">
-                    <button class="px-6 py-2 bg-[#0086ff] text-white rounded-md hover:bg-[#0073e6] transition-colors">
+                    <button
+                        class="px-6 py-2 bg-[#0086ff] text-white rounded-md hover:bg-[#0073e6] transition-all duration-200 hover:transform hover:translate-y-[-1px] active:transform active:translate-y-0">
                         지문 생성하기
                     </button>
                 </router-link>
@@ -42,74 +43,50 @@
                         <tr>
                             <!-- 선택 체크박스 (휴지통일 때만) -->
                             <th v-if="type === 'trash'"
-                                class="relative group px-4 py-3 w-[7%] min-w-[60px] max-w-[80px] cursor-pointer hover:bg-blue-50 transition-colors text-base sm:text-lg text-center">
+                                class="px-4 py-3 w-[7%] min-w-[60px] max-w-[80px] hover:bg-blue-50 transition-colors text-base sm:text-lg text-center">
                                 선택
-                                <div
-                                    class="absolute top-0 right-0 h-full w-2 cursor-col-resize group-hover:bg-[#0086ff1c] resizer">
-                                </div>
                             </th>
 
                             <!-- 작업명 -->
                             <th
-                                class="relative group px-4 py-3 w-[20%] min-w-[200px] max-w-[400px] cursor-pointer hover:bg-blue-50 transition-colors text-base sm:text-lg">
+                                class="px-4 py-3 w-[20%] min-w-[200px] max-w-[400px] hover:bg-blue-50 transition-colors text-base sm:text-lg">
                                 작업명
-                                <div
-                                    class="absolute top-0 right-0 h-full w-2 cursor-col-resize group-hover:bg-[#0086ff1c] resizer">
-                                </div>
                             </th>
 
                             <!-- 분야 -->
                             <th
-                                class="relative group px-4 py-3 w-[12%] min-w-[120px] max-w-[200px] cursor-pointer hover:bg-blue-50 transition-colors text-base sm:text-lg">
+                                class="px-4 py-3 w-[12%] min-w-[120px] max-w-[200px] hover:bg-blue-50 transition-colors text-base sm:text-lg">
                                 분야
-                                <div
-                                    class="absolute top-0 right-0 h-full w-2 cursor-col-resize group-hover:bg-[#0086ff1c] resizer">
-                                </div>
                             </th>
 
                             <!-- 제재 -->
                             <th
-                                class="relative group px-4 py-3 w-[12%] min-w-[120px] max-w-[200px] cursor-pointer hover:bg-blue-50 transition-colors text-base sm:text-lg">
+                                class="px-4 py-3 w-[12%] min-w-[120px] max-w-[200px] hover:bg-blue-50 transition-colors text-base sm:text-lg">
                                 제재
-                                <div
-                                    class="absolute top-0 right-0 h-full w-2 cursor-col-resize group-hover:bg-[#0086ff1c] resizer">
-                                </div>
                             </th>
 
                             <!-- 유형 -->
                             <th
-                                class="relative group px-4 py-3 w-[9%] min-w-[80px] max-w-[120px] cursor-pointer hover:bg-blue-50 transition-colors text-base sm:text-lg text-center">
+                                class="px-4 py-3 w-[9%] min-w-[80px] max-w-[120px] hover:bg-blue-50 transition-colors text-base sm:text-lg text-center">
                                 유형
-                                <div
-                                    class="absolute top-0 right-0 h-full w-2 cursor-col-resize group-hover:bg-[#0086ff1c] resizer">
-                                </div>
                             </th>
 
                             <!-- 최종 작업일 -->
                             <th
-                                class="relative group px-4 py-3 w-[11%] min-w-[100px] max-w-[150px] cursor-pointer hover:bg-blue-50 transition-colors text-base sm:text-lg text-center">
+                                class="px-4 py-3 w-[11%] min-w-[100px] max-w-[150px] hover:bg-blue-50 transition-colors text-base sm:text-lg text-center">
                                 최종 작업일
-                                <div
-                                    class="absolute top-0 right-0 h-full w-2 cursor-col-resize group-hover:bg-[#0086ff1c] resizer">
-                                </div>
                             </th>
 
                             <!-- 다운로드 -->
                             <th
-                                class="relative group px-4 py-3 w-[10%] min-w-[90px] max-w-[120px] cursor-pointer hover:bg-blue-50 transition-colors text-base sm:text-lg text-center">
+                                class="px-4 py-3 w-[10%] min-w-[90px] max-w-[120px] hover:bg-blue-50 transition-colors text-base sm:text-lg text-center">
                                 다운로드
-                                <div
-                                    class="absolute top-0 right-0 h-full w-2 cursor-col-resize group-hover:bg-[#0086ff1c] resizer">
-                                </div>
                             </th>
 
                             <!-- 즐겨찾기 -->
                             <th
-                                class="relative group px-4 py-3 w-[9%] min-w-[80px] max-w-[120px] cursor-pointer hover:bg-blue-50 transition-colors text-base sm:text-lg text-center">
+                                class="px-4 py-3 w-[9%] min-w-[80px] max-w-[120px] hover:bg-blue-50 transition-colors text-base sm:text-lg text-center">
                                 즐겨찾기
-                                <div
-                                    class="absolute top-0 right-0 h-full w-2 cursor-col-resize group-hover:bg-[#0086ff1c] resizer">
-                                </div>
                             </th>
                         </tr>
                     </thead>
@@ -121,7 +98,7 @@
                             <!-- 선택 체크박스 (휴지통일 때만) -->
                             <td v-if="type === 'trash'" class="px-4 py-2 text-center" @click.stop>
                                 <label class="relative inline-block cursor-pointer">
-                                    <input type="checkbox" class="absolute opacity-0 cursor-pointer"
+                                    <input type="checkbox" class="absolute opacity-0 cursor-pointer appearance-none"
                                         :checked="selectedItems.has(item.pasCode)"
                                         @change="toggleSelection(item.pasCode)" />
                                     <span class="relative inline-block w-5 h-5 bg-white border border-[#303030]">
@@ -136,7 +113,7 @@
                                 <div v-if="editingIndex === index" @click.stop>
                                     <input type="text" v-model="editingTitle" @blur="finishEditing"
                                         @keyup.enter="finishEditing" @keyup.esc="cancelEditing" ref="editInput"
-                                        class="w-full p-2.5 border border-black rounded" />
+                                        class="w-full p-2.5 border border-black rounded outline-none focus:ring-2 focus:ring-blue-200" />
                                 </div>
                                 <div v-else class="text-[#303030] truncate">
                                     {{ item.title }}
@@ -173,7 +150,7 @@
                                 <div
                                     class="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition">
                                     <button @click="$emit('download', item)" title="다운로드"
-                                        class="p-1 rounded hover:bg-gray-100 text-gray-500 hover:text-gray-700">
+                                        class="p-1 rounded hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-all duration-200 hover:transform hover:translate-y-[-1px] active:transform active:translate-y-0">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -185,7 +162,8 @@
 
                             <!-- 즐겨찾기 -->
                             <td class="px-4 py-2 text-center">
-                                <button @click.stop="$emit('toggle-favorite', item)" class="p-1">
+                                <button @click.stop="$emit('toggle-favorite', item)"
+                                    class="p-1 transition-all duration-200 hover:transform hover:translate-y-[-1px] active:transform active:translate-y-0">
                                     <svg width="24" height="24" viewBox="0 0 24 24"
                                         :fill="item.isFavorite ? '#FF9F40' : 'none'"
                                         :stroke="item.isFavorite ? '#FF9F40' : '#d1d5db'" stroke-width="2">
@@ -203,7 +181,7 @@
             <!-- ===== 모바일 리스트 ===== -->
             <div class="md:hidden"><!-- Mobile View -->
                 <div v-for="(item, index) in items" :key="item.pasCode"
-                    class="border-b border-gray-100 p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                    class="border-b border-gray-100 p-4 hover:bg-gray-50 cursor-pointer transition-colors active:bg-gray-100"
                     :class="{ 'bg-blue-50': selectedItems.has(item.pasCode) }" @click="handleRowClick(item, $event)">
                     <div class="flex justify-between items-start mb-2">
                         <!-- 제목 -->
@@ -216,11 +194,13 @@
                             <!-- 체크박스 (휴지통일 때만) -->
                             <label v-if="type === 'trash'" class="cursor-pointer" @click.stop>
                                 <input type="checkbox" :checked="selectedItems.has(item.pasCode)"
-                                    @change="toggleSelection(item.pasCode)" class="w-4 h-4 text-blue-600 rounded" />
+                                    @change="toggleSelection(item.pasCode)"
+                                    class="w-4 h-4 text-blue-600 rounded appearance-none" />
                             </label>
 
                             <!-- 즐겨찾기 -->
-                            <button @click.stop="$emit('toggle-favorite', item)" class="p-1">
+                            <button @click.stop="$emit('toggle-favorite', item)"
+                                class="p-1 transition-all duration-200 hover:transform hover:translate-y-[-1px] active:transform active:translate-y-0">
                                 <svg width="20" height="20" viewBox="0 0 24 24"
                                     :fill="item.isFavorite ? '#FF9F40' : 'none'"
                                     :stroke="item.isFavorite ? '#FF9F40' : '#d1d5db'" stroke-width="2">
@@ -231,7 +211,8 @@
                             </button>
 
                             <!-- 다운로드 -->
-                            <button @click.stop="$emit('download', item)" class="p-1 text-gray-600">
+                            <button @click.stop="$emit('download', item)"
+                                class="p-1 text-gray-600 transition-all duration-200 hover:transform hover:translate-y-[-1px] active:transform active:translate-y-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
                                     stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -270,7 +251,8 @@
                 top: contextMenuPosition.y + 'px',
                 left: contextMenuPosition.x + 'px',
             }">
-            <div class="px-4 py-2.5 text-sm cursor-pointer hover:bg-[#f5f5f5]" @click="startEditing">
+            <div class="px-4 py-2.5 text-sm cursor-pointer hover:bg-[#f5f5f5] transition-all duration-200 hover:transform hover:translate-y-[-1px] active:transform active:translate-y-0"
+                @click="startEditing">
                 이름 변경
             </div>
         </div>
@@ -283,10 +265,11 @@
                 <p class="text-gray-600 mb-6">삭제를 진행한 자료는 영구 삭제됩니다.</p>
                 <div class="flex justify-end gap-3">
                     <button @click="closeDeleteModal"
-                        class="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50">
+                        class="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-all duration-200 hover:transform hover:translate-y-[-1px] active:transform active:translate-y-0">
                         취소
                     </button>
-                    <button @click="confirmDelete" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                    <button @click="confirmDelete"
+                        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-all duration-200 hover:transform hover:translate-y-[-1px] active:transform active:translate-y-0">
                         삭제
                     </button>
                 </div>
@@ -451,49 +434,10 @@ const formatDate = (dateString) => {
     })
 }
 
-// ===== 테이블 리사이즈 기능 =====
-const setupTableResize = () => {
-    const resizableColumns = document.querySelectorAll("#storageTable th .resizer")
-
-    resizableColumns.forEach((resizer) => {
-        const th = resizer.parentElement
-
-        resizer.addEventListener("mousedown", (e) => {
-            e.preventDefault()
-
-            const startX = e.pageX
-            const startWidth = th.offsetWidth
-
-            document.body.style.cursor = "col-resize"
-
-            const onMouseMove = (e) => {
-                const minWidth = 60
-                const maxWidth = 400
-                const newWidth = Math.min(
-                    Math.max(startWidth + (e.pageX - startX), minWidth),
-                    maxWidth
-                )
-                th.style.width = `${newWidth}px`
-            }
-
-            const onMouseUp = () => {
-                document.removeEventListener("mousemove", onMouseMove)
-                document.removeEventListener("mouseup", onMouseUp)
-                document.body.style.cursor = ""
-            }
-
-            document.addEventListener("mousemove", onMouseMove)
-            document.addEventListener("mouseup", onMouseUp)
-        })
-    })
-}
 
 // ===== 라이프사이클 =====
 onMounted(() => {
     document.addEventListener("click", closeContextMenu)
-    nextTick(() => {
-        setupTableResize()
-    })
 })
 
 onUnmounted(() => {
@@ -522,16 +466,6 @@ defineExpose({
 </script>
 
 <style scoped>
-.storage-table-container {
-    @apply min-h-[430px];
-}
-
-/* 테이블 호버 효과 */
-.group:hover .opacity-0 {
-    @apply opacity-100;
-}
-
-/* 로딩 애니메이션 */
 @keyframes spin {
     to {
         transform: rotate(360deg);
@@ -542,56 +476,7 @@ defineExpose({
     animation: spin 1s linear infinite;
 }
 
-/* 컨텍스트 메뉴 */
-.context-menu {
-    @apply fixed bg-white border border-gray-300 rounded shadow-lg z-50;
-}
-
-/* 리사이저 커서 */
-.resizer {
-    @apply cursor-col-resize;
-}
-
-.resizer:hover {
-    @apply bg-blue-200;
-}
-
-/* 체크박스 커스텀 스타일 */
-input[type="checkbox"] {
-    @apply appearance-none;
-}
-
-/* 선택된 행 하이라이트 */
 tr.bg-[#0086ff1c] {
     background-color: rgba(0, 134, 255, 0.1);
-}
-
-/* 편집 입력창 스타일 */
-input[type="text"] {
-    @apply outline-none;
-}
-
-input[type="text"]:focus {
-    @apply ring-2 ring-blue-200;
-}
-
-/* 버튼 호버 효과 */
-button {
-    @apply transition-all duration-200;
-}
-
-button:hover:not(:disabled) {
-    @apply transform translate-y-[-1px];
-}
-
-button:active:not(:disabled) {
-    @apply transform translate-y-0;
-}
-
-/* 모바일 터치 피드백 */
-@media (max-width: 768px) {
-    .cursor-pointer:active {
-        @apply bg-gray-100;
-    }
 }
 </style>

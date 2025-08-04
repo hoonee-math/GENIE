@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col mx-auto p-4 sm:p-8 w-full">
+    <div class="flex flex-col mx-auto p-4 sm:p-8 w-full min-h-screen storage-view-container">
         <!-- ===== 헤더 컴포넌트 ===== -->
         <StorageHeader :current-type="currentType" :title="getTypeTitle(currentType)"
             :total-count="pagination.totalCount" :current-filters="currentFilters" @change-type="changeType"
@@ -307,31 +307,18 @@ if (import.meta.env.DEV) {
 </script>
 
 <style scoped>
-.storage-view-container {
-    @apply flex flex-col gap-3 mx-auto p-4 sm:p-8 w-full min-h-screen;
-}
-
-/* 로딩 상태일 때 컨테이너 최소 높이 보장 */
-.storage-view-container:has([data-loading="true"]) {
-    @apply min-h-[600px];
-}
-
-/* 컴포넌트 간 간격 조정 */
-.storage-view-container>*+* {
-    @apply mt-4;
-}
-
-/* 반응형 패딩 조정 */
-@media (max-width: 640px) {
-    .storage-view-container {
-        @apply p-3;
-    }
-}
-
 /* 디버그 모드 표시 (개발 환경에서만) */
 .storage-view-container::before {
     content: "🔧 Dev Mode";
-    @apply fixed top-2 right-2 px-2 py-1 text-xs bg-yellow-200 text-yellow-800 rounded z-50;
+    position: fixed;
+    top: 8px;
+    right: 8px;
+    padding: 4px 8px;
+    font-size: 12px;
+    background-color: #fef3c7;
+    color: #92400e;
+    border-radius: 4px;
+    z-index: 50;
     display: none;
 }
 
