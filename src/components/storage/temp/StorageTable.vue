@@ -41,15 +41,17 @@
                 <table id="storageTable" class="w-full table-auto whitespace-nowrap text-left min-w-[800px]">
                     <thead class="bg-white text-sm text-slate-700 border-b border-blue-100">
                         <tr>
-                            <!-- 선택 체크박스 (휴지통일 때만) -->
-                            <th v-if="type === 'trash'"
-                                class="px-4 py-3 w-[7%] min-w-[60px] max-w-[80px] hover:bg-blue-50 transition-colors text-base sm:text-lg text-center">
+                            <!-- 선택 체크박스 (선택 모드일 때만) -->
+                            <th v-if="isSelectionMode"
+                                class="px-4 py-3 hover:bg-blue-50 transition-all duration-300 text-base sm:text-lg text-center"
+                                :class="isSelectionMode ? 'w-[7%] min-w-[60px] max-w-[80px]' : 'w-0 min-w-0 max-w-0 overflow-hidden'">
                                 선택
                             </th>
 
                             <!-- 작업명 -->
                             <th
-                                class="px-4 py-3 w-[20%] min-w-[200px] max-w-[400px] hover:bg-blue-50 transition-colors text-base sm:text-lg">
+                                class="px-4 py-3 hover:bg-blue-50 transition-all duration-300 text-base sm:text-lg"
+                                :class="isSelectionMode ? 'w-[18%] min-w-[180px] max-w-[380px]' : 'w-[20%] min-w-[200px] max-w-[400px]'">
                                 작업명
                             </th>
 
@@ -95,8 +97,8 @@
                             class="group hover:bg-[#eeeeee] cursor-pointer"
                             :class="{ 'bg-[#0086ff1c]': selectedItems.has(item.pasCode) }"
                             @click="handleRowClick(item, $event)" @contextmenu="handleContextMenu(item, index, $event)">
-                            <!-- 선택 체크박스 (휴지통일 때만) -->
-                            <td v-if="type === 'trash'" class="px-4 py-2 text-center" @click.stop>
+                            <!-- 선택 체크박스 (선택 모드일 때만) -->
+                            <td v-if="isSelectionMode" class="px-4 py-2 text-center transition-all duration-300" @click.stop>
                                 <label class="relative inline-block cursor-pointer">
                                     <input type="checkbox" class="absolute opacity-0 cursor-pointer appearance-none"
                                         :checked="selectedItems.has(item.pasCode)"
@@ -109,7 +111,7 @@
                             </td>
 
                             <!-- 작업명 -->
-                            <td class="px-4 py-2 text-[#424242]">
+                            <td class="px-4 py-2 text-[#424242] transition-all duration-300">
                                 <div v-if="editingIndex === index" @click.stop>
                                     <input type="text" v-model="editingTitle" @blur="finishEditing"
                                         @keyup.enter="finishEditing" @keyup.esc="cancelEditing" ref="editInput"
@@ -150,7 +152,7 @@
                                 <div
                                     class="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition">
                                     <button @click="$emit('download', item)" title="다운로드"
-                                        class="p-1 rounded hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-all duration-200 hover:transform hover:translate-y-[-1px] active:transform active:translate-y-0">
+                                        class="p-1 rounded hover:bg-gray-100 text-gray-500 hover:text-gray-700">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -191,8 +193,8 @@
 
                         <!-- 우측 액션 버튼들 -->
                         <div class="flex items-center gap-2">
-                            <!-- 체크박스 (휴지통일 때만) -->
-                            <label v-if="type === 'trash'" class="cursor-pointer" @click.stop>
+                            <!-- 체크박스 (선택 모드일 때만) -->
+                            <label v-if="isSelectionMode" class="cursor-pointer" @click.stop>
                                 <input type="checkbox" :checked="selectedItems.has(item.pasCode)"
                                     @change="toggleSelection(item.pasCode)"
                                     class="w-4 h-4 text-blue-600 rounded appearance-none" />
@@ -257,24 +259,6 @@
             </div>
         </div>
 
-        <!-- ===== 삭제 확인 모달 (휴지통용) ===== -->
-        <div v-if="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-            @click="closeDeleteModal">
-            <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4" @click.stop>
-                <h3 class="text-lg font-semibold mb-4">선택한 자료를 삭제하시겠습니까?</h3>
-                <p class="text-gray-600 mb-6">삭제를 진행한 자료는 영구 삭제됩니다.</p>
-                <div class="flex justify-end gap-3">
-                    <button @click="closeDeleteModal"
-                        class="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-all duration-200 hover:transform hover:translate-y-[-1px] active:transform active:translate-y-0">
-                        취소
-                    </button>
-                    <button @click="confirmDelete"
-                        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-all duration-200 hover:transform hover:translate-y-[-1px] active:transform active:translate-y-0">
-                        삭제
-                    </button>
-                </div>
-            </div>
-        </div>
     </div>
 </template>
 
@@ -303,6 +287,10 @@ const props = defineProps({
     emptyMessage: {
         type: String,
         default: '데이터가 없습니다.'
+    },
+    isSelectionMode: {
+        type: Boolean,
+        default: false
     }
 })
 
@@ -313,6 +301,7 @@ const emit = defineEmits([
     'download',          // 다운로드
     'update-title',      // 제목 수정
     'delete-items',      // 선택 아이템 삭제
+    'selection-change',  // 선택 변경
     'retry'              // 재시도
 ])
 
@@ -323,7 +312,6 @@ const editingTitle = ref('')
 const showContextMenu = ref(false)
 const contextMenuPosition = ref({ x: 0, y: 0 })
 const contextMenuIndex = ref(-1)
-const showDeleteModal = ref(false)
 const editInput = ref(null)
 
 // ===== Computed =====
@@ -355,6 +343,9 @@ const toggleSelection = (pasCode) => {
     } else {
         selectedItems.value.add(pasCode)
     }
+    
+    // 선택 변경 이벤트 발생
+    emit('selection-change')
 }
 
 const startEditing = () => {
@@ -391,22 +382,6 @@ const cancelEditing = () => {
     editingTitle.value = ''
 }
 
-const openDeleteModal = () => {
-    if (hasSelectedItems.value) {
-        showDeleteModal.value = true
-    }
-}
-
-const closeDeleteModal = () => {
-    showDeleteModal.value = false
-}
-
-const confirmDelete = () => {
-    const itemsToDelete = Array.from(selectedItems.value)
-    emit('delete-items', itemsToDelete)
-    selectedItems.value.clear()
-    showDeleteModal.value = false
-}
 
 const closeContextMenu = (event) => {
     if (showContextMenu.value && !event.target.closest('.context-menu')) {
@@ -416,7 +391,7 @@ const closeContextMenu = (event) => {
 
 // ===== 유틸리티 함수들 =====
 const getPrimaryDescription = (item) => {
-    console.log("================", item)
+    // console.log("================", item)
     return item.descriptions?.[0] || null
 }
 
@@ -445,10 +420,6 @@ onUnmounted(() => {
 })
 
 // ===== 외부 노출 메서드 (부모에서 호출 가능) =====
-const openDeleteModalExternal = () => {
-    openDeleteModal()
-}
-
 const getSelectedItems = () => {
     return Array.from(selectedItems.value)
 }
@@ -458,7 +429,6 @@ const clearSelection = () => {
 }
 
 defineExpose({
-    openDeleteModal: openDeleteModalExternal,
     getSelectedItems,
     clearSelection,
     hasSelectedItems

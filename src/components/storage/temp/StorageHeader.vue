@@ -66,6 +66,46 @@
                         <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
                     </svg>
                 </button>
+
+                <!-- 통합 액션 버튼들 -->
+                <div class="flex items-center gap-2">
+                    <!-- 기본 상태: 선택 버튼 -->
+                    <button v-if="!isSelectionMode" @click="handleSelectionButtonClick"
+                        class="w-full sm:w-auto flex items-center justify-center gap-2 text-sm font-semibold text-gray-600 border border-gray-600 rounded-md px-3 py-1.5 hover:bg-gray-50 transition-colors bg-white">
+                        <span>선택</span>
+                        <Icon icon="entypo:check" width="16" height="16"  style="color: 000" />
+                    </button>
+
+                    <!-- 선택 모드: 최근문서함/즐겨찾기 - 삭제 버튼 -->
+                    <button v-if="isSelectionMode && currentType !== 'trash'" @click="handleActionButtonClick('delete')"
+                        class="w-full sm:w-auto flex items-center justify-center gap-2 text-sm font-semibold text-red-600 border border-red-600 rounded-md px-3 py-1.5 hover:bg-red-50 transition-colors bg-white">
+                        <span>삭제</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 6h18"></path>
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-2 0-2-1-2-2V6"></path>
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                        </svg>
+                    </button>
+
+                    <!-- 선택 모드: 휴지통 - 복원 버튼 -->
+                    <button v-if="isSelectionMode && currentType === 'trash'" @click="handleActionButtonClick('restore')"
+                        class="w-full sm:w-auto flex items-center justify-center gap-2 text-sm font-semibold rounded-md px-3 py-1.5 transition-all duration-200 hover:transform hover:translate-y-[-1px] active:transform active:translate-y-0 bg-white border border-green-600 text-green-600 hover:bg-green-50">
+                        <span>복원</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+                            <path d="M21 3v5h-5"></path>
+                            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+                            <path d="M3 21v-5h5"></path>
+                        </svg>
+                    </button>
+
+                    <!-- 선택 모드: 휴지통 - 영구 삭제 버튼 -->
+                    <button v-if="isSelectionMode && currentType === 'trash'" @click="handleActionButtonClick('permanentDelete')"
+                        class="w-full sm:w-auto flex items-center justify-center gap-2 text-sm font-semibold rounded-md px-3 py-1.5 transition-all duration-200 hover:transform hover:translate-y-[-1px] active:transform active:translate-y-0 bg-white border border-red-600 text-red-600 hover:bg-red-50">
+                        <span>영구 삭제</span>
+                        <Icon icon="entypo:check" width="16" height="16"  style="color: #f00" />
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -206,14 +246,20 @@ const props = defineProps({
             sort: 'date',
             order: 'desc'
         })
+    },
+    isSelectionMode: {
+        type: Boolean,
+        default: false
     }
 })
 
 // ===== Emits =====
 const emit = defineEmits([
-    'change-type',      // 타입 변경 (recent, favorites, trash)
-    'update-filters',   // 필터 업데이트
-    'clear-filters'     // 필터 초기화
+    'change-type',           // 타입 변경 (recent, favorites, trash)
+    'update-filters',        // 필터 업데이트
+    'clear-filters',         // 필터 초기화
+    'toggle-selection-mode', // 선택 모드 토글
+    'action-button-click'    // 액션 버튼 클릭 (delete, restore, permanentDelete)
 ])
 
 // ===== 로컬 상태 =====
@@ -235,6 +281,7 @@ const hasActiveFilters = computed(() => {
         localFilters.value.type ||
         localFilters.value.search
 })
+
 
 // ===== Props 변경 시 로컬 상태 동기화 =====
 watch(() => props.currentFilters, (newFilters) => {
@@ -271,6 +318,17 @@ const selectField = (field) => {
 const selectType = (type) => {
     localFilters.value.type = type
     handleFilterChange()
+}
+
+// 간소화된 버튼 클릭 핸들러들
+const handleSelectionButtonClick = () => {
+    // '선택' 버튼 클릭 → 선택 모드 활성화
+    emit('toggle-selection-mode')
+}
+
+const handleActionButtonClick = (action) => {
+    // 액션 버튼 클릭 → 선택된 항목이 있는지 확인 후 동작 또는 선택 모드 해제
+    emit('action-button-click', action)
 }
 </script>
 
