@@ -1,7 +1,7 @@
 import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { usePassageStore } from "@/stores/passage";
-import { apiGet } from "@/utils/http";
+import { apiGet, apiPatch } from "@/utils/http";
 
 /**
  * Storage 관련 상태 및 로직을 관리하는 Composable
@@ -227,16 +227,29 @@ export function useStorage() {
    */
   const toggleFavorite = async (item) => {
     try {
-      // API 호출 (기존 로직 유지)
-      const response = await apiGet("/api/pass/favo", {
-        method: "PATCH",
-        data: { pasCode: item.pasCode },
+      // API 호출 (기존 StorageList.vue와 동일한 방식)
+      const response = await apiPatch("/api/pass/favo", { 
+        pasCode: item.pasCode 
       });
 
-      // Store의 해당 아이템 업데이트
-      store.updateListItem(currentType.value, item.pasCode, {
-        isFavorite: response.isFavorite === 1,
-      });
+      // 로컬 데이터 즉시 업데이트
+      const itemIndex = currentData.value.findIndex(dataItem => dataItem.pasCode === item.pasCode);
+      if (itemIndex !== -1) {
+        if (response.isFavorite !== undefined) {
+          currentData.value[itemIndex].isFavorite = response.isFavorite === 1;
+        } else {
+          // API 응답에 isFavorite가 없으면 토글
+          currentData.value[itemIndex].isFavorite = !item.isFavorite;
+        }
+        console.log('🌟 즐겨찾기 업데이트 완료:', currentData.value[itemIndex].isFavorite);
+      }
+
+      // Store 업데이트 (선택사항 - 필요에 따라)
+      if (store.updateListItem) {
+        store.updateListItem(currentType.value, item.pasCode, {
+          isFavorite: response.isFavorite !== undefined ? response.isFavorite === 1 : !item.isFavorite,
+        });
+      }
     } catch (error) {
       console.error("즐겨찾기 업데이트 실패:", error);
     }

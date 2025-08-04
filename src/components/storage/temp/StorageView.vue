@@ -440,10 +440,11 @@ watch([currentType, currentPage, currentFilters], async ([newType, newPage, newF
         filters: newFilters
     })
 
-    // 타입이 변경되면 선택 상태 초기화
+    // 타입이 변경되면 선택 상태 및 선택 모드 초기화
     if (storageTable.value) {
         storageTable.value.clearSelection()
     }
+    isSelectionMode.value = false
 
     await fetchData()
 }, { immediate: true })
