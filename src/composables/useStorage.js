@@ -34,13 +34,13 @@ export function useStorage() {
   const error = computed(() => store.getListError(currentType.value));
 
   // ===== API 엔드포인트 매핑 =====
-  const getApiEndpoint = (type) => {
+  const getApiEndpoint = (storageType) => {
     const endpoints = {
-      recent: "/api/pass/select/recelist",
-      favorites: "/api/pass/select/favolist",
-      trash: "/api/pass/select/deletedList",
+      recent: "/api/pass/storage/recent",
+      favorites: "/api/pass/storage/favorite",
+      trash: "/api/pass/storage/deleted",
     };
-    return endpoints[type] || endpoints.recent;
+    return endpoints[storageType] || endpoints.recent;
   };
 
   // ===== 타입별 제목 매핑 =====
@@ -86,38 +86,45 @@ export function useStorage() {
       const endpoint = getApiEndpoint(type);
       console.log(`📡 API 호출: ${endpoint}`, params);
 
+      const response = await apiGet(endpoint, { params });
+      // try{
       //   const response = await apiGet(endpoint, { params });
-      const tempResponse = await apiGet("/api/pass/select/recelist");
-      console.log("tempResponse: ", tempResponse[0]);
+      //   console.log('****',endpoint,'요청에 대한 응답 데이터: ', response);
+      // }catch{
+      //   console.log('****',endpoint,'로 요청 실패');
+      // }
 
-      // 임시로 childPassages 추가
-      const itemsWithChildPassages = tempResponse.map(item => ({
-        ...item,
-        childPassages: [
-          {
-            pasCode: 10001,
-            title: `${item.title} - 하위 지문 1`,
-            type: "지문+문항", isFavorite: false,
-            date: new Date().toISOString(),
-            questions: []
-          },
-          {
-            pasCode: 10002,
-            title: `${item.title} - 하위 지문 2`,
-            type: "지문+문항", isFavorite: true,
-            date: new Date().toISOString(),
-            questions: []
-          }
-        ]
-      }));
+      // const tempResponse = await apiGet("/api/pass/select/recelist");
+      // console.log("tempResponse: ", tempResponse[0]);
 
-      console.log("itemsWithChildPassages: ", itemsWithChildPassages[0]);
+      // // 임시로 childPassages 추가
+      // const itemsWithChildPassages = tempResponse.map(item => ({
+      //   ...item,
+      //   childPassages: [
+      //     {
+      //       pasCode: 10001,
+      //       title: `${item.title} - 하위 지문 1`,
+      //       type: "지문+문항", isFavorite: false,
+      //       date: new Date().toISOString(),
+      //       questions: []
+      //     },
+      //     {
+      //       pasCode: 10002,
+      //       title: `${item.title} - 하위 지문 2`,
+      //       type: "지문+문항", isFavorite: true,
+      //       date: new Date().toISOString(),
+      //       questions: []
+      //     }
+      //   ]
+      // }));
 
-      const response = {
-        totalCount: 50,
-        totalPages: 4,
-        items: itemsWithChildPassages,
-      };
+      // console.log("itemsWithChildPassages: ", itemsWithChildPassages[0]);
+
+      // const response = {
+      //   totalCount: 50,
+      //   totalPages: 4,
+      //   items: itemsWithChildPassages,
+      // };
 
       // 🔥 백엔드 응답 구조 예상
       // {
