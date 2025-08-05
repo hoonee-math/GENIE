@@ -49,8 +49,7 @@
                             </th>
 
                             <!-- 작업명 -->
-                            <th
-                                class="px-4 py-3 hover:bg-blue-50 transition-all duration-300 text-base sm:text-lg"
+                            <th class="px-4 py-3 hover:bg-blue-50 transition-all duration-300 text-base sm:text-lg"
                                 :class="isSelectionMode ? 'w-[18%] min-w-[180px] max-w-[380px]' : 'w-[20%] min-w-[200px] max-w-[400px]'">
                                 작업명
                             </th>
@@ -93,89 +92,192 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y text-[14px] sm:text-[16px]">
-                        <tr v-for="(item, index) in items" :key="item.pasCode"
-                            class="group hover:bg-[#eeeeee] cursor-pointer"
-                            :class="{ 'bg-[#0086ff1c]': selectedItems.has(item.pasCode) }"
-                            @click="handleRowClick(item, $event)" @contextmenu="handleContextMenu(item, index, $event)">
-                            <!-- 선택 체크박스 (선택 모드일 때만) -->
-                            <td v-if="isSelectionMode" class="px-4 py-2 text-center transition-all duration-300" @click.stop>
-                                <label class="relative inline-block cursor-pointer">
-                                    <input type="checkbox" class="absolute opacity-0 cursor-pointer appearance-none"
-                                        :checked="selectedItems.has(item.pasCode)"
-                                        @change="toggleSelection(item.pasCode)" />
-                                    <span class="relative inline-block w-5 h-5 bg-white border border-[#303030]">
-                                        <span v-if="selectedItems.has(item.pasCode)"
-                                            class="absolute left-[6px] top-[2px] w-[5px] h-[10px] border-r-2 border-b-2 border-[#303030] transform rotate-45"></span>
+                        <template v-for="(item, index) in items" :key="item.pasCode">
+                            <!-- 부모 행 -->
+                            <tr class="group hover:bg-[#eeeeee] cursor-pointer"
+                                :class="{ 'bg-[#0086ff1c]': selectedItems.has(item.pasCode) }"
+                                @click="handleRowClick(item, $event)"
+                                @contextmenu="handleContextMenu(item, index, $event)">
+                                <!-- 선택 체크박스 (선택 모드일 때만) -->
+                                <td v-if="isSelectionMode" class="px-4 py-2 text-center transition-all duration-300"
+                                    @click.stop>
+                                    <label class="relative inline-block cursor-pointer">
+                                        <input type="checkbox" class="absolute opacity-0 cursor-pointer appearance-none"
+                                            :checked="selectedItems.has(item.pasCode)"
+                                            @change="toggleSelection(item.pasCode)" />
+                                        <span class="relative inline-block w-5 h-5 bg-white border border-[#303030]">
+                                            <span v-if="selectedItems.has(item.pasCode)"
+                                                class="absolute left-[6px] top-[2px] w-[5px] h-[10px] border-r-2 border-b-2 border-[#303030] transform rotate-45"></span>
+                                        </span>
+                                    </label>
+                                </td>
+
+                                <!-- 작업명 -->
+                                <td class="px-4 py-2 text-[#424242] transition-all duration-300">
+                                    <div v-if="editingIndex === index" @click.stop>
+                                        <input type="text" v-model="editingTitle" @blur="finishEditing"
+                                            @keyup.enter="finishEditing" @keyup.esc="cancelEditing" ref="editInput"
+                                            class="w-full p-2.5 border border-black rounded outline-none focus:ring-2 focus:ring-blue-200" />
+                                    </div>
+                                    <div v-else class="flex items-center gap-2">
+                                        <!-- 확장 표시기 (childPassages가 있을 때만) -->
+                                        <div v-if="item.childPassages && item.childPassages.length > 0"
+                                            class="flex-shrink-0 w-4 h-4 flex items-center justify-center">
+                                            <svg class="w-3 h-3 transition-transform duration-200"
+                                                :class="{ 'rotate-90': expandedRows.has(item.pasCode) }" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </div>
+                                        <div class="text-[#303030] truncate">
+                                            {{ item.title }}
+                                            <span v-if="item.childPassages && item.childPassages.length > 0"
+                                                class="text-sm text-gray-500 ml-1">
+                                                ({{ item.childPassages.length }}개)
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- 분야 -->
+                                <td class="px-4 py-2 text-[#424242]">
+                                    {{ getPrimaryDescription(item)?.pasType || '-' }}
+                                </td>
+
+                                <!-- 제재 -->
+                                <td class="px-4 py-2 text-[#424242]">
+                                    {{ getPrimaryDescription(item)?.keyword || '-' }}
+                                </td>
+
+                                <!-- 유형 -->
+                                <td class="px-4 py-2 text-center">
+                                    <span :class="{
+                                        'bg-blue-100 text-blue-700': item.isGenerated === 1,
+                                        'bg-purple-100 text-purple-700': item.isGenerated === 0,
+                                    }" class="px-2 py-0.5 rounded text-sm">
+                                        {{ getTypeLabel(item.isGenerated) }}
                                     </span>
-                                </label>
-                            </td>
+                                </td>
 
-                            <!-- 작업명 -->
-                            <td class="px-4 py-2 text-[#424242] transition-all duration-300">
-                                <div v-if="editingIndex === index" @click.stop>
-                                    <input type="text" v-model="editingTitle" @blur="finishEditing"
-                                        @keyup.enter="finishEditing" @keyup.esc="cancelEditing" ref="editInput"
-                                        class="w-full p-2.5 border border-black rounded outline-none focus:ring-2 focus:ring-blue-200" />
-                                </div>
-                                <div v-else class="text-[#303030] truncate">
-                                    {{ item.title }}
-                                </div>
-                            </td>
+                                <!-- 최종 작업일 -->
+                                <td class="px-4 py-2 text-[#424242] text-center">
+                                    {{ formatDate(item.date) }}
+                                </td>
 
-                            <!-- 분야 -->
-                            <td class="px-4 py-2 text-[#424242]">
-                                {{ getPrimaryDescription(item)?.pasType || '-' }}
-                            </td>
+                                <!-- 다운로드 -->
+                                <td class="px-4 py-2 text-center" @click.stop>
+                                    <div
+                                        class="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                                        <button @click="$emit('download', item)" title="다운로드"
+                                            class="p-1 rounded hover:bg-gray-100 text-gray-500 hover:text-gray-700">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
 
-                            <!-- 제재 -->
-                            <td class="px-4 py-2 text-[#424242]">
-                                {{ getPrimaryDescription(item)?.keyword || '-' }}
-                            </td>
-
-                            <!-- 유형 -->
-                            <td class="px-4 py-2 text-center">
-                                <span :class="{
-                                    'bg-blue-100 text-blue-700': item.isGenerated === 1,
-                                    'bg-purple-100 text-purple-700': item.isGenerated === 0,
-                                }" class="px-2 py-0.5 rounded text-sm">
-                                    {{ getTypeLabel(item.isGenerated) }}
-                                </span>
-                            </td>
-
-                            <!-- 최종 작업일 -->
-                            <td class="px-4 py-2 text-[#424242] text-center">
-                                {{ formatDate(item.date) }}
-                            </td>
-
-                            <!-- 다운로드 -->
-                            <td class="px-4 py-2 text-center" @click.stop>
-                                <div
-                                    class="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition">
-                                    <button @click="$emit('download', item)" title="다운로드"
-                                        class="p-1 rounded hover:bg-gray-100 text-gray-500 hover:text-gray-700">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                <!-- 즐겨찾기 -->
+                                <td class="px-4 py-2 text-center">
+                                    <button @click.stop="$emit('toggle-favorite', item)"
+                                        class="p-1 transition-all duration-200 hover:transform hover:translate-y-[-1px] active:transform active:translate-y-0">
+                                        <svg width="24" height="24" viewBox="0 0 24 24"
+                                            :fill="item.isFavorite ? '#FF9F40' : 'none'"
+                                            :stroke="item.isFavorite ? '#FF9F40' : '#d1d5db'" stroke-width="2">
+                                            <polygon
+                                                points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26">
+                                            </polygon>
                                         </svg>
                                     </button>
-                                </div>
-                            </td>
+                                </td>
+                            </tr>
 
-                            <!-- 즐겨찾기 -->
-                            <td class="px-4 py-2 text-center">
-                                <button @click.stop="$emit('toggle-favorite', item)"
-                                    class="p-1 transition-all duration-200 hover:transform hover:translate-y-[-1px] active:transform active:translate-y-0">
-                                    <svg width="24" height="24" viewBox="0 0 24 24"
-                                        :fill="item.isFavorite ? '#FF9F40' : 'none'"
-                                        :stroke="item.isFavorite ? '#FF9F40' : '#d1d5db'" stroke-width="2">
-                                        <polygon
-                                            points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26">
-                                        </polygon>
-                                    </svg>
-                                </button>
-                            </td>
-                        </tr>
+                            <!-- 자식 행들 (확장된 경우에만 표시) -->
+                            <template v-if="expandedRows.has(item.pasCode) && item.childPassages">
+                                <tr v-for="(childItem, childIndex) in item.childPassages"
+                                    :key="`${item.pasCode}_child_${childIndex}`"
+                                    class="bg-gray-50 hover:bg-gray-100 border-l-4 border-blue-200">
+                                    <!-- 선택 체크박스 (선택 모드일 때만) -->
+                                    <td v-if="isSelectionMode" class="px-4 py-2 text-center transition-all duration-300"
+                                        @click.stop>
+                                        <label class="relative inline-block cursor-pointer">
+                                            <input type="checkbox"
+                                                class="absolute opacity-0 cursor-pointer appearance-none"
+                                                :checked="selectedItems.has(childItem.pasCode)"
+                                                @change="toggleSelection(childItem.pasCode)" />
+                                            <span
+                                                class="relative inline-block w-5 h-5 bg-white border border-[#303030]">
+                                                <span v-if="selectedItems.has(childItem.pasCode)"
+                                                    class="absolute left-[6px] top-[2px] w-[5px] h-[10px] border-r-2 border-b-2 border-[#303030] transform rotate-45"></span>
+                                            </span>
+                                        </label>
+                                    </td>
+
+                                    <!-- 자식 작업명 (들여쓰기) -->
+                                    <td class="px-4 py-2 text-[#424242] transition-all duration-300">
+                                        <div class="flex items-center gap-2 pl-6">
+                                            <div class="flex text-[#424242] truncate cursor-pointer" @click="handleRowClick(item, $event)">
+                                                <span class="mr-2 text-[#919191]">-</span>{{ childItem.title }}
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <!-- 자식 분야 -->
+                                    <td class="px-4 py-2 text-[#424242]">
+                                        {{ getPrimaryDescription(childItem)?.pasType || '-' }}
+                                    </td>
+
+                                    <!-- 자식 제재 -->
+                                    <td class="px-4 py-2 text-[#424242]">
+                                        {{ getPrimaryDescription(childItem)?.keyword || '-' }}
+                                    </td>
+
+                                    <!-- 자식 유형 -->
+                                    <td class="px-4 py-2 text-center">
+                                        <span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-sm">
+                                            {{ childItem.type || '지문+문항' }}
+                                        </span>
+                                    </td>
+
+                                    <!-- 자식 최종 작업일 -->
+                                    <td class="px-4 py-2 text-[#424242] text-center">
+                                        {{ formatDate(childItem.date) }}
+                                    </td>
+
+                                    <!-- 자식 다운로드 -->
+                                    <td class="px-4 py-2 text-center" @click.stop>
+                                        <div
+                                            class="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                                            <button @click="$emit('download', childItem)" title="다운로드"
+                                                class="p-1 rounded hover:bg-gray-100 text-gray-500 hover:text-gray-700">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                    stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+
+                                    <!-- 자식 즐겨찾기 -->
+                                    <td class="px-4 py-2 text-center">
+                                        <button @click.stop="$emit('toggle-favorite', childItem)"
+                                            class="p-1 transition-all duration-200 hover:transform hover:translate-y-[-1px] active:transform active:translate-y-0">
+                                            <svg width="24" height="24" viewBox="0 0 24 24"
+                                                :fill="childItem.isFavorite ? '#FF9F40' : 'none'"
+                                                :stroke="childItem.isFavorite ? '#FF9F40' : '#d1d5db'" stroke-width="2">
+                                                <polygon
+                                                    points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26">
+                                                </polygon>
+                                            </svg>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </template>
+                        </template>
                     </tbody>
                 </table>
             </div>
@@ -313,6 +415,7 @@ const showContextMenu = ref(false)
 const contextMenuPosition = ref({ x: 0, y: 0 })
 const contextMenuIndex = ref(-1)
 const editInput = ref(null)
+const expandedRows = ref(new Set()) // 확장된 행들을 추적
 
 // ===== Computed =====
 const hasSelectedItems = computed(() => selectedItems.value.size > 0)
@@ -322,7 +425,21 @@ const handleRowClick = (item, event) => {
     // 편집 중이면 클릭 무시
     if (editingIndex.value !== -1) return
 
-    emit('item-click', item)
+    // childPassages가 있으면 확장/축소 토글
+    if (item.childPassages && item.childPassages.length > 0) {
+        toggleRowExpansion(item.pasCode)
+    } else {
+        // childPassages가 없으면 기존처럼 상세 페이지로 이동
+        emit('item-click', item)
+    }
+}
+
+const toggleRowExpansion = (pasCode) => {
+    if (expandedRows.value.has(pasCode)) {
+        expandedRows.value.delete(pasCode)
+    } else {
+        expandedRows.value.add(pasCode)
+    }
 }
 
 const handleContextMenu = (item, index, event) => {
@@ -343,7 +460,7 @@ const toggleSelection = (pasCode) => {
     } else {
         selectedItems.value.add(pasCode)
     }
-    
+
     // 선택 변경 이벤트 발생
     emit('selection-change')
 }
@@ -446,7 +563,7 @@ defineExpose({
     animation: spin 1s linear infinite;
 }
 
-tr.bg-[#0086ff1c] {
+tr.bg {
     background-color: rgba(0, 134, 255, 0.1);
 }
 </style>

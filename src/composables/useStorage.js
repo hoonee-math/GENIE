@@ -89,10 +89,34 @@ export function useStorage() {
       //   const response = await apiGet(endpoint, { params });
       const tempResponse = await apiGet("/api/pass/select/recelist");
       console.log("tempResponse: ", tempResponse[0]);
+
+      // 임시로 childPassages 추가
+      const itemsWithChildPassages = tempResponse.map(item => ({
+        ...item,
+        childPassages: [
+          {
+            pasCode: 10001,
+            title: `${item.title} - 하위 지문 1`,
+            type: "지문+문항", isFavorite: false,
+            date: new Date().toISOString(),
+            questions: []
+          },
+          {
+            pasCode: 10002,
+            title: `${item.title} - 하위 지문 2`,
+            type: "지문+문항", isFavorite: true,
+            date: new Date().toISOString(),
+            questions: []
+          }
+        ]
+      }));
+
+      console.log("itemsWithChildPassages: ", itemsWithChildPassages[0]);
+
       const response = {
         totalCount: 50,
         totalPages: 4,
-        items: tempResponse,
+        items: itemsWithChildPassages,
       };
 
       // 🔥 백엔드 응답 구조 예상
@@ -228,8 +252,8 @@ export function useStorage() {
   const toggleFavorite = async (item) => {
     try {
       // API 호출 (기존 StorageList.vue와 동일한 방식)
-      const response = await apiPatch("/api/pass/favo", { 
-        pasCode: item.pasCode 
+      const response = await apiPatch("/api/pass/favo", {
+        pasCode: item.pasCode
       });
 
       // 로컬 데이터 즉시 업데이트
