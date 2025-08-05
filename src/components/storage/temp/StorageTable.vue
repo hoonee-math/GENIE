@@ -130,7 +130,8 @@
                                                     d="M9 5l7 7-7 7" />
                                             </svg>
                                         </div>
-                                        <div class="text-[#303030] truncate">
+                                        <div class="text-[#303030] truncate cursor-pointer hover:text-brand transition-colors" 
+                                             @click.stop="handleTitleClick(item)">
                                             {{ item.title }}
                                             <span v-if="item.childPassages && item.childPassages.length > 0"
                                                 class="text-sm text-gray-500 ml-1">
@@ -219,7 +220,8 @@
                                     <!-- 자식 작업명 (들여쓰기) -->
                                     <td class="px-4 py-2 text-[#424242] transition-all duration-300">
                                         <div class="flex items-center gap-2 pl-6">
-                                            <div class="flex text-[#424242] truncate cursor-pointer" @click="handleRowClick(item, $event)">
+                                        <div class="text-[#303030] truncate cursor-pointer hover:text-brand transition-colors" 
+                                             @click.stop="handleTitleClick(item)">
                                                 <span class="mr-2 text-[#919191]">-</span>{{ childItem.title }}
                                             </div>
                                         </div>
@@ -440,6 +442,11 @@ const toggleRowExpansion = (pasCode) => {
     } else {
         expandedRows.value.add(pasCode)
     }
+}
+
+const handleTitleClick = (item) => {
+    // 작업명 클릭 시 항상 상세 페이지로 이동
+    emit('item-click', item)
 }
 
 const handleContextMenu = (item, index, event) => {
