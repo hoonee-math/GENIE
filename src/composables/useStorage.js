@@ -87,63 +87,8 @@ export function useStorage() {
       console.log(`📡 API 호출: ${endpoint}`, params);
 
       const response = await apiGet(endpoint, { params });
-      // try{
-      //   const response = await apiGet(endpoint, { params });
-      //   console.log('****',endpoint,'요청에 대한 응답 데이터: ', response);
-      // }catch{
-      //   console.log('****',endpoint,'로 요청 실패');
-      // }
 
-      // const tempResponse = await apiGet("/api/pass/select/recelist");
-      // console.log("tempResponse: ", tempResponse[0]);
-
-      // // 임시로 childPassages 추가
-      // const itemsWithChildPassages = tempResponse.map(item => ({
-      //   ...item,
-      //   childPassages: [
-      //     {
-      //       pasCode: 10001,
-      //       title: `${item.title} - 하위 지문 1`,
-      //       type: "지문+문항", isFavorite: false,
-      //       date: new Date().toISOString(),
-      //       questions: []
-      //     },
-      //     {
-      //       pasCode: 10002,
-      //       title: `${item.title} - 하위 지문 2`,
-      //       type: "지문+문항", isFavorite: true,
-      //       date: new Date().toISOString(),
-      //       questions: []
-      //     }
-      //   ]
-      // }));
-
-      // console.log("itemsWithChildPassages: ", itemsWithChildPassages[0]);
-
-      // const response = {
-      //   totalCount: 50,
-      //   totalPages: 4,
-      //   items: itemsWithChildPassages,
-      // };
-
-      // 🔥 백엔드 응답 구조 예상
-      // {
-      //   totalCount: 50,
-      //   totalPages: 4,
-      //   items: [
-      //     {
-      //       pasCode: 1,
-      //       title: "지문 제목",
-      //       descriptions: [{ pasType: "기술", keyword: "AI", gist: "..." }],
-      //       isGenerated: 1,
-      //       date: "2024-01-01",
-      //       isFavorite: true,
-      //       childPassages: [...]  // 추후 추가 예정
-      //     }
-      //   ]
-      // }
-
-      console.log("response: ", response);
+      console.log("====== 지문 데이터 호출 응답 데이터 ====== : ", response);
       // Store에 데이터 저장 (변환 없이 그대로)
       store.setListData(
         type,

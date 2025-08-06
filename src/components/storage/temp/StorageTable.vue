@@ -152,12 +152,23 @@
                                 </td>
 
                                 <!-- 유형 -->
+                                <!-- 과거 데이터들은 isGenerated 값이 0인 경우에 문항이었음 -->
+                                <!-- DB 수정 후 데이터들 다음과 같이 구분함 -->
+                                <!-- item.isGenerated === 0 && item.isUserEntered === 0 : 문항 -->
+                                <!-- item.isGenerated === 0 && item.isUserEntered === 1 : 지문 (문항생성시 만들어진 사용자가 입력한 지문) -->
+                                <!-- item.isGenerated === 1 && item.isUserEntered === 0 : 지문 (지문 생성 페이지에서 ai 만든 지문)-->
+                                <!-- item.isGenerated === 1 && item.isUserEntered === 1 : 이런 경우는 존재하지 않음-->
+
+                                <!-- item.isGenerated === 0 && item.isUserEntered === 2 : 과거 문항 데이터 -->
+                                <!-- item.isGenerated === 1 && item.isUserEntered === 2 : 과거 지문 데이터 -->
+
+                                <!-- 즉, item.isGenerated === 1 || item.isUserEntered === 1 인 경우는 무조건 지문임 -->
+
                                 <td class="px-4 py-2 text-center">
-                                    <span :class="{
-                                        'bg-blue-100 text-blue-700': item.isGenerated === 1,
-                                        'bg-purple-100 text-purple-700': item.isGenerated === 0,
-                                    }" class="px-2 py-0.5 rounded text-sm">
-                                        {{ getTypeLabel(item.isGenerated) }}
+                                    <span :class="[
+                                        item.isGenerated === 1 || item.isUserEntered === 1 ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+                                        ]" class="px-2 py-0.5 rounded text-sm">
+                                        {{ getTypeLabel(item.isGenerated === 1 || item.isUserEntered === 1) }}
                                     </span>
                                 </td>
 
@@ -334,10 +345,10 @@
                             <span>{{ getPrimaryDescription(item)?.pasType || '-' }}</span>
                             <span class="w-1 h-1 bg-gray-400 rounded-full"></span>
                             <span :class="{
-                                'bg-blue-100 text-blue-700': item.isGenerated === 1,
-                                'bg-purple-100 text-purple-700': item.isGenerated === 0,
+                                'bg-blue-100 text-blue-700': item.isGenerated || item.isUserEntered === 1,
+                                'bg-purple-100 text-purple-700': item.isGenerated && item.isUserEntered === 0,
                             }" class="px-2 py-0.5 rounded text-xs">
-                                {{ getTypeLabel(item.isGenerated) }}
+                                {{ getTypeLabel(item.isGenerated || item.isUserEntered === 1) }}
                             </span>
                         </div>
                         <span>{{ formatDate(item.date) }}</span>
@@ -520,8 +531,8 @@ const getPrimaryDescription = (item) => {
     return item.descriptions?.[0] || null
 }
 
-const getTypeLabel = (isGenerated) => {
-    return isGenerated === 1 ? '지문' : '문항'
+const getTypeLabel = (isPassage) => {
+    return isPassage ? '지문' : '문항'
 }
 
 const formatDate = (dateString) => {
