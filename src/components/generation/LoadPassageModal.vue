@@ -166,10 +166,10 @@ const loadPreviews = async () => {
             PAS_TITLE: item.title,
             PAS_CONTENT: item.content, // 리스트에서 미리보기용으로 포함
             generateType: item.generateType,
+            isFavorite: item.isFavorite, // 즐겨찾기 데이터 매핑 추가
             // PAS_KEYWORD: item.keyword,
             // PAS_GIST: item.gist,
             // PAS_DATE: item.date,
-            // PAS_FAVORITE: item.favorite,
         }));
 
         // 첫 번째 지문 선택
@@ -234,7 +234,7 @@ const filteredPassages = computed(() => {
     // 즐겨찾기 탭 상태일 때만 즐겨찾기 필터링
     let list =
         activeTab.value === "favorites"
-            ? passages.value.filter((passage) => passage.PAS_FAVORITE === 1)
+            ? passages.value.filter((passage) => passage.isFavorite === 1)
             : passages.value;
 
     // 검색어 필터링 적용

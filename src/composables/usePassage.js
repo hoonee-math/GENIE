@@ -240,6 +240,8 @@ export function usePassage() {
 
   // 지문 리스트 조회 (캐시 우선 + API 호출)
   const fetchPassageList = async (options = {}) => {
+    console.log("====== LooadPAssageModal 에서 fetchPassageList 함수이용하여 api 호출 ======")
+
     // 캐시 확인 (강제 새로고침이 아니고 캐시된 데이터가 있으면)
     if (!options.force && store.lists.storage.length > 0) {
       console.log("⭐ 리스트 캐시에서 로드 (API 호출 없음)");
@@ -261,13 +263,14 @@ export function usePassage() {
 
     try {
       const apiResponse = await getPrevPassageListInDatabase();
-      // console.log("usePassage 에서 fetchPassageList 호출, apiResponse 응답 확인 :", apiResponse)
+      console.log("usePassage 에서 fetchPassageList 호출, apiResponse (총 ", apiResponse.length,"개) 응답 확인 :", apiResponse)
       // 단순 파싱 (API → Store 리스트 스키마)
       const parsed = apiResponse.map((item) => ({
         pasCode: item.pasCode,
         title: item.title,
         content: item.content, // 리스트에서도 content 포함 (미리보기용)
         generateType: selectGenerateType(item.descriptions),
+        isFavorite: item.isFavorite,
         createdAt: item.createdAt,
         hasQuestions: false, // 리스트에서는 questions 정보 없음
       }));
