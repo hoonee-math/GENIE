@@ -148,7 +148,9 @@
 
                                 <!-- 제재 -->
                                 <td class="px-4 py-2 text-[#424242]">
-                                    {{ getPrimaryDescription(item)?.keyword || '-' }}
+                                    <div class="truncate max-w-[200px]" :title="getPrimaryDescription(item)?.keyword || '-'">
+                                        {{ getPrimaryDescription(item)?.keyword || '-' }}
+                                    </div>
                                 </td>
 
                                 <!-- 유형 -->
@@ -245,7 +247,9 @@
 
                                     <!-- 자식 제재 -->
                                     <td class="px-4 py-2 text-[#424242]">
-                                        {{ getPrimaryDescription(childItem)?.keyword || '-' }}
+                                        <div class="truncate max-w-[200px]" :title="getPrimaryDescription(childItem)?.keyword || '-'">
+                                            {{ getPrimaryDescription(childItem)?.keyword || '-' }}
+                                        </div>
                                     </td>
 
                                     <!-- 자식 유형 -->
@@ -356,7 +360,9 @@
 
                     <!-- 제재 정보 (있을 때만) -->
                     <div v-if="getPrimaryDescription(item)?.keyword" class="mt-1 text-sm text-gray-500">
-                        제재: {{ getPrimaryDescription(item).keyword }}
+                        <div class="truncate max-w-[250px]" :title="'제재: ' + getPrimaryDescription(item).keyword">
+                            제재: {{ getPrimaryDescription(item).keyword }}
+                        </div>
                     </div>
                 </div>
             </div>
