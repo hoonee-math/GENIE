@@ -159,6 +159,7 @@ const passageContent = ref('')
 const passageTitle = ref('')
 const textLength = ref(0)
 const selectedQuestionExample = ref(null)
+const refPasCode = ref(null) // refPasCode 상태 추가
 const handleQuestionSelected = (questionExample) => {
     selectedQuestionExample.value = questionExample
     // console.log('받은 문항 데이터:', questionExample);
@@ -241,6 +242,7 @@ const resetAll = () => {
     passageContent.value = ''
     passageTitle.value = ''
     textLength.value = 0
+    refPasCode.value = null
     activeTab.value = 'user'
     isQuestionExampleSelectorVisible.value = false
 
@@ -300,6 +302,10 @@ const handleLoadPassage = async (selectPasCode) => {
 
     try {
         isLoading.value = true
+        
+        // selectPasCode 상태 업데이트
+        refPasCode.value = selectPasCode
+        
         await fetchPassage(selectPasCode); // fetchPassage 함수에서 pinia에 passage 데이터를 저장함
 
         // UI 상태 변경
@@ -309,6 +315,7 @@ const handleLoadPassage = async (selectPasCode) => {
     } catch (error) {
         console.error('지문 불러오기 실패:', error);
         errorMessage.value = '지문을 불러오는데 실패했습니다.';
+        refPasCode.value = null; // 에러 발생시 selectPasCode 초기화
         closeLoadPassageModal();
     } finally {
         isLoading.value = false
@@ -332,7 +339,8 @@ const generateQuestion = async (questionData) => {
             passageContent.value,
             selectedQuestionExample.value,
             generateType.value,
-            activeTab.value
+            activeTab.value,
+            refPasCode.value,
         )
         // savedQuestion 데이터를 pinia store에 저장 (이것도 composable에 구현할지 고려해보기, 아직 구현 안함.)
 

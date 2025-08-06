@@ -292,7 +292,7 @@ export function useStorage() {
    */
   const handleItemClick = async (item) => {
     try {
-      const isGeneratedText = item.isGenerated === 1;
+      const isGeneratedText =  !Object.prototype.hasOwnProperty.call(item, 'refPasCode');
 
       if (currentType.value === "recent") {
         // recent: 라우팅 방식

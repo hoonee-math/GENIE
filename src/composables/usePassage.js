@@ -161,6 +161,7 @@ export function usePassage() {
       title: generateTitle(inputTitle, generateType, requestData),
       content: convertNewlinesToParagraphs(apiResponse.generated_passage),
       isGenerated: 1,
+      isUserEntered: 0,
       descriptions: createDescriptions(apiResponse, requestData, generateType),
     };
   };

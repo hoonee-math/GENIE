@@ -221,7 +221,7 @@
                                     <td class="px-4 py-2 text-[#424242] transition-all duration-300">
                                         <div class="flex items-center gap-2 pl-6">
                                         <div class="text-[#303030] truncate cursor-pointer hover:text-brand transition-colors" 
-                                             @click.stop="handleTitleClick(item)">
+                                             @click.stop="handleTitleClick(childItem)">
                                                 <span class="mr-2 text-[#919191]">-</span>{{ childItem.title }}
                                             </div>
                                         </div>
@@ -445,6 +445,7 @@ const toggleRowExpansion = (pasCode) => {
 }
 
 const handleTitleClick = (item) => {
+    console.log("######",item)
     // 작업명 클릭 시 항상 상세 페이지로 이동
     emit('item-click', item)
 }

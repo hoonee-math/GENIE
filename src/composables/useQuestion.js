@@ -56,34 +56,34 @@ export function useQuestion() {
   /**
    * 문항 생성 API 호출, 사용하지 않음
    */
-  const generateQuestion = async (questionData, title, content) => {
-    const requestData = {
-      custom_passage: content,
-      type_question: questionData.pattern,
-      type_question_detail: questionData.type,
-      question_example: questionData.title,
-    };
+  // const generateQuestion = async (questionData, title, content) => {
+  //   const requestData = {
+  //     custom_passage: content,
+  //     type_question: questionData.pattern,
+  //     type_question_detail: questionData.type,
+  //     question_example: questionData.title,
+  //   };
 
-    // FastAPI 호출
-    const response = await generateSinglePassageQuestionAPI(requestData);
+  //   // FastAPI 호출
+  //   const response = await generateSinglePassageQuestionAPI(requestData);
 
-    if (!response.ok) {
-      throw new Error(`문항 생성 실패: ${response.status}`);
-    }
+  //   if (!response.ok) {
+  //     throw new Error(`문항 생성 실패: ${response.status}`);
+  //   }
 
-    const result = await response.json();
+  //   const result = await response.json();
 
-    // 선택지 전처리 (쉼표 제거) - 기존에 잘못된 DB설계로 인해 쉼표 제거 작업을 수행했었음. 백엔드 서버 작업 & DB 설계 변경 및 프론트엔드에서도 해당 코드를 없앤 새로운 generateQuestionWithNewPassage 함수로 대체 예정
-    // 백엔드에서 문항 데이터를 통채로 저장하는 방식 고려
-    const processedOptions = result.generated_option.map((option) =>
-      option.replace(/,/g, "").replace(/^[①②③④⑤]\s*/, "")
-    );
+  //   // 선택지 전처리 (쉼표 제거) - 기존에 잘못된 DB설계로 인해 쉼표 제거 작업을 수행했었음. 백엔드 서버 작업 & DB 설계 변경 및 프론트엔드에서도 해당 코드를 없앤 새로운 generateQuestionWithNewPassage 함수로 대체 예정
+  //   // 백엔드에서 문항 데이터를 통채로 저장하는 방식 고려
+  //   const processedOptions = result.generated_option.map((option) =>
+  //     option.replace(/,/g, "").replace(/^[①②③④⑤]\s*/, "")
+  //   );
 
-    return {
-      ...result,
-      generated_option: processedOptions,
-    };
-  };
+  //   return {
+  //     ...result,
+  //     generated_option: processedOptions,
+  //   };
+  // };
 
   /**
    * 생성된 지문 및 문항 보기 페이지에서 문항 추가하기 요청시 사용하는 api
@@ -157,8 +157,9 @@ export function useQuestion() {
   /**
    * GenerateQuestionForm.vue 에서 '사용자 지문(user)' 탭이나 '자료실 지문(storage)' 탭에서 문항을 갖고있지 않는 지문을 이용해서 처음 문항을 생성할 때 사용하는 API
    * @param {string} custom_passage - 사용자 지문 or 자료실 지문 (python 에서 custom_passage 로 사용중)
+   * @param {string|null} refPasCode - 선택된 지문 코드 (자료실 지문인 경우 refPasCode 에 추가할 데이터)
    */
-  const generateQuestionWithNewPassage = async (title, custom_passage, selectedQuestionExample, generateType, activeTab) => { // params 를 pinia store를 사용할지 추가 고려 필요
+  const generateQuestionWithNewPassage = async (title, custom_passage, selectedQuestionExample, generateType, activeTab, refPasCode = null) => { // params 를 pinia store를 사용할지 추가 고려 필요
     // const validation = validateQuestionData(title, custom_passage);
     // if (!validation.isValid) {
     //   throw new Error(validation.errors.join(" "));
@@ -174,7 +175,7 @@ export function useQuestion() {
       const responseFromPython = await apiFunction(requestToPython);
 
       // 문항 생성 성공시 데이터 저장 API 함수 호출
-      const requestToJava = pythonToJava(responseFromPython, custom_passage);
+      const requestToJava = pythonToJava(responseFromPython, custom_passage, title, refPasCode);
       const responseFromJava = await savePassageWithQuestionsToDatabase(requestToJava);
 
       return responseFromJava;
@@ -346,14 +347,14 @@ export function useQuestion() {
     }
   };
 
-  const pythonToJava = (responseFromPython, custom_passage, title = "Untitled") => {
+  const pythonToJava = (responseFromPython, custom_passage, title = "Untitled", refPasCode = null) => {
     console.log("Python 응답 변환 시작:", responseFromPython);
 
     // 1. 응답 타입 확인 (사용자 입력 vs 자료실)
     const isUserInput = responseFromPython.detail && responseFromPython.question;
     const questionData = isUserInput ? responseFromPython.question : responseFromPython;
     const detailData = isUserInput ? responseFromPython.detail : null;
-
+    const isUserEntered = isUserInput ? 1 : 0;
 
     // 2. descriptions 배열 생성
     const descriptions = [];
@@ -424,6 +425,8 @@ export function useQuestion() {
       title: title,
       content: processedContent,
       isGenerated: 0,
+      isUserEntered: isUserEntered,
+      refPasCode: refPasCode, // refPasCode 추가
       descriptions: descriptions,
       questions: questions,
       mode: "question_generation" // 구분용
@@ -453,7 +456,7 @@ export function useQuestion() {
     updateQuestionInPassageStore,
 
     // API 함수 (개별)
-    generateQuestion,
+    // generateQuestion,
     saveQuestion,
   }
 }
