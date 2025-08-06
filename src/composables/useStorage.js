@@ -237,11 +237,11 @@ export function useStorage() {
    */
   const handleItemClick = async (item) => {
     try {
-      const isGeneratedText =  !Object.prototype.hasOwnProperty.call(item, 'refPasCode');
+      const isPassage =  item.isGenerated === 1 || item.isUserEntered === 1;
 
       if (currentType.value === "recent") {
         // recent: 라우팅 방식
-        if (isGeneratedText) {
+        if (isPassage) {
           await router.push({
             path: `/passage/view/${item.pasCode}`,
             query: { from: route.path },
@@ -254,13 +254,13 @@ export function useStorage() {
         }
       } else {
         // favorites, trash: localStorage 방식 (기존 로직 유지)
-        const endpoint = isGeneratedText
+        const endpoint = isPassage
           ? `/api/pass/select/${item.pasCode}`
           : `/api/pass/ques/select/${item.pasCode}`;
 
         const data = await apiGet(endpoint);
 
-        if (isGeneratedText) {
+        if (isPassage) {
           const passageData = {
             pasCode: data.pasCode,
             title: data.title,
