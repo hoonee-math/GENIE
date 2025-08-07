@@ -66,7 +66,7 @@
 
 
         <!-- 통계 정보 -->
-        <Transition name="slideUp">
+        <Transition name="slideUp" class="hidden">
             <div v-if="loadedPassages.length > 0" class="mt-6 grid grid-cols-2 gap-4 text-center">
                 <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-3 rounded-lg">
                     <div class="text-2xl font-bold text-blue-600">{{ passageCount }}</div>
