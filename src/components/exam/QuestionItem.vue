@@ -2,7 +2,7 @@
   <div
     class="question-item flex items-center bg-white p-3 rounded-lg border border-slate-200 hover:border-blue-500 hover:shadow-sm transition-all group">
     <div class="question-drag-handle cursor-grab text-slate-400 hover:text-slate-600 mr-3">
-      <Icon icon="heroicons:bars-3" class="w-5 h-5" />
+      <Icon icon="heroicons-solid:menu-alt-4" width="20" height="20" />
     </div>
 
     <span class="question-number font-semibold text-slate-600 mr-3">{{ index + 1 }}.</span>
@@ -20,22 +20,8 @@
       </p>
     </div>
 
-    <!-- 액션 버튼들 -->
-    <div class="flex items-center space-x-2 ml-4">
-      <!-- 편집 버튼 -->
-      <button @click="toggleEdit"
-        class="action-btn text-slate-400 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"
-        :class="{ 'opacity-100': isEditing }" title="문제 편집">
-        <Icon :icon="isEditing ? 'heroicons:check' : 'heroicons:pencil'" class="w-4 h-4" />
-      </button>
-
-      <!-- 복사 버튼 -->
-      <button @click="copyQuestion"
-        class="action-btn text-slate-400 hover:text-green-500 opacity-0 group-hover:opacity-100 transition-opacity"
-        title="문제 복사">
-        <Icon icon="heroicons:document-duplicate" class="w-4 h-4" />
-      </button>
-
+    <!-- 액션 버튼 -->
+    <div class="items-center space-x-2 ml-4">
       <!-- 삭제 버튼 -->
       <button @click="handleDelete"
         class="action-btn text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -156,7 +142,6 @@ onMounted(() => {
 }
 
 .action-btn:hover {
-  background-color: rgba(0, 0, 0, 0.05);
   transform: scale(1.1);
 }
 

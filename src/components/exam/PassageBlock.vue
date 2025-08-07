@@ -4,17 +4,17 @@
     <!-- 지문 헤더 -->
     <div class="flex items-center p-4 bg-white border-b border-slate-200">
       <div class="passage-drag-handle cursor-grab text-slate-400 hover:text-slate-600 mr-4">
-        <Icon icon="heroicons:bars-3" class="w-6 h-6" />
+        <Icon icon="heroicons-solid:menu-alt-4" width="24" height="24" />
       </div>
       <div class="flex-grow flex items-center">
         <span class="passage-number text-xl font-bold text-blue-600 mr-4">{{ index + 1 }}</span>
-        <h2 class="text-lg font-semibold text-slate-800">{{ passage.title }}</h2>
-        <span class="ml-auto text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full"
+        <h2 class="text-lg font-semibold truncate w-[230px] text-slate-800">{{ passage.title }}</h2>
+        <span class="ml-auto text-xs text-nowrap font-semibold px-2.5 py-0.5 rounded-full"
           :class="getPassageTypeClass(passage.type)">
           {{ passage.type }}
         </span>
       </div>
-      <button @click="toggleExpanded" class="toggle-button ml-4 text-slate-500 hover:text-slate-800">
+      <button @click="toggleExpanded" class="toggle-button ml-1 text-slate-500 hover:text-slate-800">
         <Icon icon="heroicons:chevron-down" class="w-6 h-6 transition-transform"
           :class="{ 'rotate-180': passage.isExpanded }" />
       </button>
@@ -22,29 +22,31 @@
 
     <!-- 문제 리스트 -->
     <Transition name="expand" appear>
-      <div v-show="passage.isExpanded" class="questions-list bg-slate-50/50 p-2 sm:p-4 space-y-2">
-        <TransitionGroup name="question" tag="div" class="space-y-2">
-          <QuestionItem v-for="(question, qIndex) in passage.questions" :key="question.id" :question="question"
-            :index="qIndex" @delete="$emit('deleteQuestion', question.id)"
-            @update="$emit('updateQuestion', question.id, $event)" />
-        </TransitionGroup>
+      <div v-show="passage.isExpanded">
+        <div class="questions-list bg-slate-50/50 p-2 sm:p-4 space-y-2">
+          <TransitionGroup name="question" tag="div" class="space-y-2">
+            <QuestionItem v-for="(question, qIndex) in passage.questions" :key="question.id" :question="question"
+              :index="qIndex" @delete="$emit('deleteQuestion', question.id)"
+              @update="$emit('updateQuestion', question.id, $event)" />
+          </TransitionGroup>
 
-        <button @click="$emit('addQuestion')"
-          class="w-full text-left text-sm text-slate-500 hover:text-blue-600 hover:bg-slate-200/60 p-3 rounded-lg transition-colors flex items-center">
-          <Icon icon="heroicons:plus" class="w-5 h-5 mr-2" />
-          이 지문에 문제 추가하기
-        </button>
+          <button @click="$emit('addQuestion')"
+            class="w-full text-left text-sm text-slate-500 hover:text-blue-600 hover:bg-slate-200/60 p-3 rounded-lg transition-colors flex items-center">
+            <Icon icon="heroicons:plus" class="w-5 h-5 mr-2" />
+            이 지문에 문제 추가하기
+          </button>
+        </div>
+        <!-- 지문 삭제 버튼 -->
+        <div class="p-2 border-t border-slate-100 bg-slate-50/30">
+          <button @click="$emit('remove')"
+            class="w-full text-sm text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors flex items-center justify-center">
+            <Icon icon="heroicons:trash" class="w-4 h-4 mr-2" />
+            지문 삭제
+          </button>
+        </div>
       </div>
     </Transition>
 
-    <!-- 지문 삭제 버튼 -->
-    <div class="p-2 border-t border-slate-100 bg-slate-50/30">
-      <button @click="$emit('remove')"
-        class="w-full text-sm text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors flex items-center justify-center">
-        <Icon icon="heroicons:trash" class="w-4 h-4 mr-2" />
-        지문 삭제
-      </button>
-    </div>
   </div>
 </template>
 

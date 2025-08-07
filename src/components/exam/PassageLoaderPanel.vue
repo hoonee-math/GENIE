@@ -8,23 +8,28 @@
                 class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
         </div>
 
-        <div v-if="loadedPassages.length === 0"
-            class="mt-8 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-center py-16 hover:border-blue-400 hover:bg-blue-50/20 transition-all">
-
-            <div key="empty" class="text-lg text-gray-500">
-                <Icon icon="heroicons:document-plus" class="w-12 h-12 mx-auto mb-4 text-brand" />
-
-                <p class="mt-3 text-black font-bold">새로운 문제지 만들기</p>
-                <p class="mt-3">만들어 둔 지문을 불러와</p>
-                <p>쉽고 빠르게 문제지를 생성해 보세요.</p>
+        <!-- 통계 정보 -->
+        <Transition name="slideUp" class="hidden">
+            <div v-if="loadedPassages.length > 0" class="mt-6 grid grid-cols-2 gap-4 text-center">
+                <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-3 rounded-lg">
+                    <div class="text-2xl font-bold text-blue-600">{{ passageCount }}</div>
+                    <div class="text-xs text-blue-500">지문</div>
+                </div>
+                <div class="bg-gradient-to-r from-green-50 to-green-100 p-3 rounded-lg">
+                    <div class="text-2xl font-bold text-green-600">{{ totalQuestionCount }}</div>
+                    <div class="text-xs text-green-500">문제</div>
+                </div>
             </div>
+        </Transition>
 
-            <button @click="openPassageModal"
-                class="mt-4 bg-brand text-white px-6 py-2 rounded-md font-semibold hover:bg-blue-700 transition flex items-center gap-2 focus-ring">
-                <Icon icon="heroicons:plus" class="h-5 w-5" />
-                지문 불러오기
-            </button>
-        </div>
+        <!-- 로드된 지문 리스트 영역 -->
+        <TransitionGroup name="passage" tag="div" class="mt-8 space-y-6" id="worksheet-container">
+            <PassageBlock v-for="(passage, index) in loadedPassages" :key="passage.id" :passage="passage" :index="index"
+                @toggle="handleTogglePassage(passage.id)" @addQuestion="handleAddQuestion(passage.id)"
+                @deleteQuestion="handleDeleteQuestion(passage.id, $event)"
+                @updateQuestion="handleUpdateQuestion(passage.id, $event.id, $event)"
+                @remove="handleRemovePassage(passage.id)" @copy="handleCopyQuestion" />
+        </TransitionGroup>
 
         <!-- 에러 메시지 -->
         <Transition name="fade">
@@ -64,29 +69,26 @@
             </div>
         </Transition>
 
+        <!-- 문제지 만들기, 지문 불러오기 버튼() -->
+        <div
+            class="mt-8 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-center hover:border-blue-400 hover:bg-blue-50/20 transition-all"
+            :class="[loadedPassages.length === 0 ? 'py-16 ':'py-4']">
 
-        <!-- 통계 정보 -->
-        <Transition name="slideUp" class="hidden">
-            <div v-if="loadedPassages.length > 0" class="mt-6 grid grid-cols-2 gap-4 text-center">
-                <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-3 rounded-lg">
-                    <div class="text-2xl font-bold text-blue-600">{{ passageCount }}</div>
-                    <div class="text-xs text-blue-500">지문</div>
-                </div>
-                <div class="bg-gradient-to-r from-green-50 to-green-100 p-3 rounded-lg">
-                    <div class="text-2xl font-bold text-green-600">{{ totalQuestionCount }}</div>
-                    <div class="text-xs text-green-500">문제</div>
-                </div>
+            <div v-if="loadedPassages.length === 0" key="empty" class="text-lg text-gray-500">
+                <Icon icon="heroicons:document-plus" class="w-12 h-12 mx-auto mb-4 text-brand" />
+
+                <p class="mt-3 text-black font-bold">새로운 문제지 만들기</p>
+                <p class="mt-3">만들어 둔 지문을 불러와</p>
+                <p>쉽고 빠르게 문제지를 생성해 보세요.</p>
             </div>
-        </Transition>
 
-        <!-- 로드된 지문 리스트 영역 -->
-        <TransitionGroup name="passage" tag="div" class="mt-8 space-y-6" id="worksheet-container">
-            <PassageBlock v-for="(passage, index) in loadedPassages" :key="passage.id" :passage="passage" :index="index"
-                @toggle="handleTogglePassage(passage.id)" @addQuestion="handleAddQuestion(passage.id)"
-                @deleteQuestion="handleDeleteQuestion(passage.id, $event)"
-                @updateQuestion="handleUpdateQuestion(passage.id, $event.id, $event)"
-                @remove="handleRemovePassage(passage.id)" @copy="handleCopyQuestion" />
-        </TransitionGroup>
+            <button @click="openPassageModal"
+                class="my-4 bg-brand text-white px-6 py-2 rounded-md font-semibold hover:bg-blue-700 transition flex items-center gap-2 focus-ring">
+                <Icon icon="heroicons:plus" class="h-5 w-5" />
+                <p v-if="loadedPassages.length === 0">지문 불러오기</p>
+                <p v-if="loadedPassages.length !== 0">지문 추가하기</p>
+            </button>
+        </div>
 
         <!-- Load Passage Modal -->
         <LoadPassageModal :isOpen="showPassageModal" @close="closePassageModal" @selectPasCode="handlePassageLoad" />

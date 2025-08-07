@@ -28,7 +28,7 @@
         </header>
 
         <!-- 메인 콘텐츠 -->
-        <main class="flex-1 max-w-screen-2xl mx-auto w-full p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <main class="flex-1 max-w-screen-2xl lg:w-[1536px] mx-auto w-full p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
 
             <!-- 왼쪽: 지문 불러오기 패널 -->
             <aside class="lg:col-span-1 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
