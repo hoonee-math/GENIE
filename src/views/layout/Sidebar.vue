@@ -97,6 +97,40 @@
                     </svg>
                     문항 생성
                 </router-link>
+                <router-link
+                    to="/exam"
+                    class="flex items-center justify-center gap-2 h-10 px-3 text-base font-semibold no-underline rounded-md transition-all duration-300 hover:bg-gray-100"
+                    :class="{
+                        'bg-brand text-white hover:bg-[#004499] hover:text-white':
+                            isActive('/exam'),
+                    }"
+                    @click="
+                        clearPassageData;
+                        closeSidebar();
+                    "
+                >
+                    <div class="flex items-center gap-2">
+                        <svg
+                            class="w-5 h-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                d="M4.1 0h5.52v5.52c0 .73.29 1.43.81 1.95.52.52 1.22.81 1.95.81h5.52v2.15c-2.6-.94-5.52.3-6.92 2.2-1.4 1.9-1.7 4.4-.6 6.79H4.1c-.73 0-1.43-.29-1.95-.81A2.75 2.75 0 0 1 1.35 15.7V2.81c0-.73.29-1.43.81-1.95C2.68.35 3.38.05 4.1.05ZM17.9 6.33h-5.52a1.1 1.1 0 0 1-1.1-1.1V0h.38c.73 0 1.43.29 1.95.81l3.52 3.52c.52.52.81 1.22.81 1.95v.05Z"
+                                fill="currentColor"
+                            />
+                            <path
+                                d="M16.06 12.93v5.52M13.3 15.69h5.52"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            />
+                        </svg>
+                    </div>
+                    문제지 생성
+                </router-link>
                 <div class="flex flex-col">
                     <div
                         @click="toggleStorageMenu"

@@ -13,6 +13,7 @@ import generationRoutes from "./generation.routes";
 import myPageRoutes from "./mypage.routes";
 import storageRoutes from "./storage.routes";
 import payRoutes from "./payment.routes";
+import examRoutes from "./exam.routes";
 // 개선된 인증 가드 - 토큰 갱신을 먼저 시도
 const requireAuth = async (to, from, next) => {
     const authStore = useAuthStore();
@@ -62,6 +63,7 @@ const router = createRouter({
                 ...myPageRoutes,
                 ...storageRoutes,
                 ...payRoutes,
+                ...examRoutes,
             ],
         },
         // 존재하지 않는 페이지 처리

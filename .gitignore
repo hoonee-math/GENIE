@@ -26,13 +26,16 @@ coverage
 *.njsproj
 *.sln
 *.sw?
-*merged.md
-.gemini
-CLAUDE.md
-.claude/*
 
 *.tsbuildinfo
 
 .env*
 vite.config.js
 tailwind.config.js
+
+# project files
+*merged.md
+.gemini
+CLAUDE.md
+.claude/*
+/src/views/exam/html/*
