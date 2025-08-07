@@ -138,6 +138,7 @@ const {
     addQuestion,
     deleteQuestion,
     reorderQuestions,
+    updateQuestion,
     getPassageTypeClass,
     clearError
 } = useGenerateExam()
@@ -222,7 +223,7 @@ const handleRemovePassage = (passageId) => {
 }
 
 const handleCopyQuestion = (question) => {
-    displaySuccess(`문제 '찄{question.text.substring(0, 20)}...'가 복사되었습니다.`)
+    displaySuccess(`문제 '${question.text.substring(0, 20)}...'가 복사되었습니다.`)
 }
 
 // 드래그 앤 드롭 초기화

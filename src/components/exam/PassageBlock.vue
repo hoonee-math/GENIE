@@ -4,7 +4,7 @@
     <!-- 지문 헤더 -->
     <div class="flex items-center p-4 bg-white border-b border-slate-200">
       <div class="passage-drag-handle cursor-grab text-slate-400 hover:text-slate-600 mr-4">
-        <Icon icon="heroicons-solid:menu-alt-4" width="24" height="24" />
+        <Icon icon="heroicons-solid:menu-alt-4" class="w-6 h-6" />
       </div>
       <div class="flex-grow flex items-center">
         <span class="passage-number text-xl font-bold text-blue-600 mr-4">{{ index + 1 }}</span>

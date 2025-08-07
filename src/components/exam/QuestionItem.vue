@@ -2,7 +2,7 @@
   <div
     class="question-item flex items-center bg-white p-3 rounded-lg border border-slate-200 hover:border-blue-500 hover:shadow-sm transition-all group">
     <div class="question-drag-handle cursor-grab text-slate-400 hover:text-slate-600 mr-3">
-      <Icon icon="heroicons-solid:menu-alt-4" width="20" height="20" />
+      <Icon icon="heroicons-solid:menu-alt-4" class="w-5 h-5" />
     </div>
 
     <span class="question-number font-semibold text-slate-600 mr-3">{{ index + 1 }}.</span>
