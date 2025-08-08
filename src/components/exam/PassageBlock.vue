@@ -121,6 +121,7 @@ const handleHeaderClick = () => {
 const totalQuestions = computed(() => props.passage.questions?.length || 0)
 const selectedQuestionCount = computed(() => {
   if (!props.showCheckbox || totalQuestions.value === 0) return 0
+  if (!Array.isArray(props.selectedQuestions)) return 0
   return props.selectedQuestions.filter(qId =>
     props.passage.questions?.some(q => (q.queCode || q.id) === qId)
   ).length
@@ -150,6 +151,11 @@ watch([isIndeterminate], async () => {
 const handlePassageCheckboxChange = (event) => {
   const checked = event.target.checked
   const queCodes = props.passage.questions?.map(q => q.queCode || q.id) || []
+
+  // 체크박스 클릭 시 지문이 닫혀있으면 자동으로 확장
+  if (checked && !props.passage.isExpanded) {
+    emit('toggle')
+  }
 
   emit('passageCheckboxChange', {
     pasCode: props.passage.pasCode,

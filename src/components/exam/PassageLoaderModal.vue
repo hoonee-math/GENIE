@@ -202,6 +202,7 @@ const handlePassageCheckboxChange = (data) => {
 
     // 반응성을 위해 객체를 새로 생성
     selectedQuestions.value = { ...selectedQuestions.value };
+    console.log('📋 지문 체크박스 변경:', pasCode, checked, selectedQuestions.value[pasCode]);
 };
 
 const handleQuestionCheckboxChange = (data) => {
@@ -225,6 +226,7 @@ const handleQuestionCheckboxChange = (data) => {
 
     // 반응성을 위해 객체를 새로 생성
     selectedQuestions.value = { ...selectedQuestions.value };
+    console.log('📝 문항 체크박스 변경:', pasCode, queCode, checked, selectedQuestions.value[pasCode]);
 };
 
 const handleTogglePassage = (pasCode) => {
