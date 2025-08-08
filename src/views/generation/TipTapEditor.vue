@@ -508,7 +508,7 @@ defineExpose({
 }
 
 :deep(.ProseMirror p) {
-    margin: 0 0 1em 0;
+    margin: 0 0 0 0;
 }
 
 :deep(.ProseMirror:empty:before) {

@@ -42,7 +42,7 @@
                         </button>
                     </div>
                     <!-- 문항의 보기: question.queSubpassage -->
-                    <div v-if="existQueSubpassage" class="border border-black p-4 mb-4">
+                    <div v-if="existQueSubpassage" class="border border-black p-4 mt-4">
                         <TipTapEditor :initialContent="question.queSubpassage" :isEditable="editableQueryAndOption"
                             @content-changed="handleQueSubpassageChange" :addClass="'text-xl leading-10'" />
                     </div>
@@ -50,7 +50,7 @@
                     <div>
                         <!-- question.queOption 영역 -->
                         <TipTapEditor :initialContent="question.queOption" :isEditable="editableQueryAndOption"
-                            @content-changed="handleQueOptionChange" :addClass="'text-xl leading-10'" />
+                            @content-changed="handleQueOptionChange" :addClass="'text-xl mt-4 leading-10'" />
                     </div>
                 </template>
                 <template #right>

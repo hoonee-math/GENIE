@@ -19,21 +19,13 @@
       <span class="question-number font-semibold text-slate-600 mr-3">{{ index + 1 }}.</span>
     </template>
 
-    <!-- 편집 가능한 문제 텍스트 -->
+    <!-- 문제 텍스트 (TipTap Editor) -->
     <div class="flex-grow">
-      <textarea v-if="isEditing && !showCheckbox" v-model="editingText" @blur="saveEdit" @keydown.enter.prevent="saveEdit"
-        @keydown.escape="cancelEdit"
-        class="w-full p-2 text-slate-700 border border-blue-300 rounded-md resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        rows="2" ref="textareaRef" />
-      <p v-else @click="!showCheckbox && startEdit"
-        class="flex-grow text-slate-700 p-2 rounded-md transition-colors"
-        :class="{ 
-          'text-gray-400 italic': question.queQuery === '새로운 문제를 입력하세요',
-          'cursor-pointer hover:bg-gray-50': !showCheckbox,
-          'cursor-default': showCheckbox
-        }">
-        {{ question.queQuery || '새로운 문제를 입력하세요' }}
-      </p>
+      <TipTapEditor 
+        :initialContent="question.queQuery" 
+        :isEditable="false"
+        :addClass="'text-lg m-0'" 
+      />
     </div>
 
     <!-- 액션 버튼 (체크박스 모드가 아닐 때만 표시) -->
@@ -49,8 +41,9 @@
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted } from 'vue'
+import { ref } from 'vue'
 import { Icon } from '@iconify/vue'
+import TipTapEditor from '@/views/generation/TipTapEditor.vue'
 
 // Props
 const props = defineProps({
@@ -75,49 +68,7 @@ const props = defineProps({
 // Emits
 const emit = defineEmits(['delete', 'update', 'copy', 'checkboxChange'])
 
-// 반응형 상태
-const isEditing = ref(false)
-const editingText = ref('')
-const textareaRef = ref(null)
-
-// 편집 모드 시작
-const startEdit = () => {
-  isEditing.value = true
-  editingText.value = props.question.queQuery
-
-  nextTick(() => {
-    if (textareaRef.value) {
-      textareaRef.value.focus()
-      textareaRef.value.select()
-    }
-  })
-}
-
-// 편집 모드 토글
-const toggleEdit = () => {
-  if (isEditing.value) {
-    saveEdit()
-  } else {
-    startEdit()
-  }
-}
-
-// 편집 저장
-const saveEdit = () => {
-  if (editingText.value.trim() !== props.question.queQuery) {
-    emit('update', {
-      ...props.question,
-      queQuery: editingText.value.trim() || '새로운 문제를 입력하세요'
-    })
-  }
-  isEditing.value = false
-}
-
-// 편집 취소
-const cancelEdit = () => {
-  editingText.value = props.question.queQuery
-  isEditing.value = false
-}
+// 편집 기능 제거됨 (TipTap Editor로 대체)
 
 // 문제 삭제
 const handleDelete = () => {
@@ -144,15 +95,7 @@ const handleCheckboxChange = (event) => {
   })
 }
 
-// 컴포넌트 마운트 시 빈 문제인 경우 자동 편집 모드 (체크박스 모드가 아닐 때만)
-onMounted(() => {
-  if (!props.showCheckbox && (props.question.queQuery === '새로운 문제를 입력하세요' || !props.question.queQuery)) {
-    // 잠시 후 편집 모드로 전환 (애니메이션 완료 후)
-    setTimeout(() => {
-      startEdit()
-    }, 300)
-  }
-})
+// 자동 편집 모드 제거됨 (편집 기능 제거로 인해 불필요)
 </script>
 
 <style scoped>
