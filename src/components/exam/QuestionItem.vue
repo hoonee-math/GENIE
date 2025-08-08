@@ -1,27 +1,43 @@
 <template>
   <div
     class="question-item flex items-center bg-white p-3 rounded-lg border border-slate-200 hover:border-blue-500 hover:shadow-sm transition-all group">
-    <div class="question-drag-handle cursor-grab text-slate-400 hover:text-slate-600 mr-3">
-      <Icon icon="heroicons-solid:menu-alt-4" class="w-5 h-5" />
-    </div>
-
-    <span class="question-number font-semibold text-slate-600 mr-3">{{ index + 1 }}.</span>
+    <!-- 체크박스 모드 -->
+    <template v-if="showCheckbox">
+      <input 
+        type="checkbox" 
+        :checked="isChecked" 
+        @change="handleCheckboxChange"
+        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 mr-3"
+      />
+    </template>
+    
+    <!-- 기본 모드 (드래그 핸들 + 번호) -->
+    <template v-else>
+      <div class="question-drag-handle cursor-grab text-slate-400 hover:text-slate-600 mr-3">
+        <Icon icon="heroicons-solid:menu-alt-4" class="w-5 h-5" />
+      </div>
+      <span class="question-number font-semibold text-slate-600 mr-3">{{ index + 1 }}.</span>
+    </template>
 
     <!-- 편집 가능한 문제 텍스트 -->
     <div class="flex-grow">
-      <textarea v-if="isEditing" v-model="editingText" @blur="saveEdit" @keydown.enter.prevent="saveEdit"
+      <textarea v-if="isEditing && !showCheckbox" v-model="editingText" @blur="saveEdit" @keydown.enter.prevent="saveEdit"
         @keydown.escape="cancelEdit"
         class="w-full p-2 text-slate-700 border border-blue-300 rounded-md resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         rows="2" ref="textareaRef" />
-      <p v-else @click="startEdit"
-        class="flex-grow text-slate-700 cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors"
-        :class="{ 'text-gray-400 italic': question.text === '새로운 문제를 입력하세요' }">
+      <p v-else @click="!showCheckbox && startEdit"
+        class="flex-grow text-slate-700 p-2 rounded-md transition-colors"
+        :class="{ 
+          'text-gray-400 italic': question.text === '새로운 문제를 입력하세요',
+          'cursor-pointer hover:bg-gray-50': !showCheckbox,
+          'cursor-default': showCheckbox
+        }">
         {{ question.text || '새로운 문제를 입력하세요' }}
       </p>
     </div>
 
-    <!-- 액션 버튼 -->
-    <div class="items-center space-x-2 ml-4">
+    <!-- 액션 버튼 (체크박스 모드가 아닐 때만 표시) -->
+    <div v-if="!showCheckbox" class="items-center space-x-2 ml-4">
       <!-- 삭제 버튼 -->
       <button @click="handleDelete"
         class="action-btn text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -45,11 +61,19 @@ const props = defineProps({
   index: {
     type: Number,
     required: true
+  },
+  showCheckbox: {
+    type: Boolean,
+    default: false
+  },
+  isChecked: {
+    type: Boolean,
+    default: false
   }
 })
 
 // Emits
-const emit = defineEmits(['delete', 'update', 'copy'])
+const emit = defineEmits(['delete', 'update', 'copy', 'checkboxChange'])
 
 // 반응형 상태
 const isEditing = ref(false)
@@ -112,9 +136,17 @@ const copyQuestion = () => {
   })
 }
 
-// 컴포넌트 마운트 시 빈 문제인 경우 자동 편집 모드
+// 체크박스 변경 핸들러
+const handleCheckboxChange = (event) => {
+  emit('checkboxChange', {
+    questionId: props.question.id,
+    checked: event.target.checked
+  })
+}
+
+// 컴포넌트 마운트 시 빈 문제인 경우 자동 편집 모드 (체크박스 모드가 아닐 때만)
 onMounted(() => {
-  if (props.question.text === '새로운 문제를 입력하세요' || !props.question.text) {
+  if (!props.showCheckbox && (props.question.text === '새로운 문제를 입력하세요' || !props.question.text)) {
     // 잠시 후 편집 모드로 전환 (애니메이션 완료 후)
     setTimeout(() => {
       startEdit()

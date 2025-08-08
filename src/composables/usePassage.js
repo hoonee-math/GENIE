@@ -4,6 +4,7 @@ import {
   getPassageFromDatabase,
   getPrevPassageListInDatabase,
   getPassageWithQuestionsFromDatabase,
+  getPassagesWithQuestionsListFromDatabase,
   savePassageToDatabase,
 } from "@/api/passage";
 import {
@@ -273,6 +274,37 @@ export function usePassage() {
     }
   };
 
+  // 문항이 있는 지문 리스트 조회 (캐시 우선 + API 호출)
+  const fetchPassagesWithQuestionsList = async (options = {}) => {
+    console.log("====== PassageLoaderModal에서 fetchPassagesWithQuestionsList 함수 이용하여 api 호출 ======")
+
+    try {
+      console.log("🌐 문항이 있는 지문 목록 API 호출 시작");
+      
+      const apiResponse = await getPassagesWithQuestionsListFromDatabase()
+      console.log("usePassage에서 fetchPassagesWithQuestionsList 호출, apiResponse (총 ", apiResponse.length,"개) 응답 확인 :", apiResponse)
+      
+      // 단순 파싱 (API → PassageLoaderModal에서 사용할 형식)
+      const parsed = apiResponse.map((item) => ({
+        pasCode: item.pasCode,
+        title: item.title,
+        content: item.content,
+        descriptions: item.descriptions,
+        questions: item.questions || [], // 문항 정보 포함
+        generateType: selectGenerateType(item.descriptions),
+        isFavorite: item.isFavorite,
+        createdAt: item.createdAt,
+        hasQuestions: true, // 문항이 있는 지문들만 조회하므로 true
+      }));
+      
+      console.log("✅ 문항이 있는 지문 목록 API 호출 완료, 개수:", parsed.length);
+      return parsed;
+    } catch (error) {
+      console.error("문항이 있는 지문 목록 조회 실패:", error);
+      throw error;
+    }
+  };
+
   const selectGenerateType = (descriptions) => {
     try{
       // console.log("descriptions.length & descriptions[0].pasType",descriptions.length, descriptions[0].pasType)
@@ -297,6 +329,7 @@ export function usePassage() {
     fetchPassage,
     cacheGeneratedPassage,
     fetchPassageList, // 이름 변경: fetchStorageList -> fetchPassageList
+    fetchPassagesWithQuestionsList, // 문항이 있는 지문 목록 조회
     selectGenerateType, // generateType, typePassage, passageType, passageStructure 를 구분하기 위한 메서드
 
     // Store actions 직접 노출

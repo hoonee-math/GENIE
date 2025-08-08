@@ -32,19 +32,66 @@
             <div class="flex flex-col lg:flex-row gap-4 md:gap-5 flex-1 w-full overflow-hidden">
                 <!-- 지문+문항 목록 -->
                 <div
-                    class="w-full flex-1 h-full rounded-[20px] border border-[#bdbdbd] p-4 md:p-5 flex items-center justify-center overflow-hidden">
-                    <div v-if="loadedPassagesFromStroage.length > 0" class="flex flex-col gap-4 w-full h-full overflow-y-auto">
-                        <!-- 이곳에 체크박스형의 PassageBlock 이 오면 됨. -->
+                    class="w-full flex-1 h-full rounded-[20px] border border-[#bdbdbd] p-4 md:p-5 overflow-hidden">
+                    <div v-if="isLoading" class="flex items-center justify-center h-full">
+                        <div class="flex items-center gap-2 text-gray-500">
+                            <Icon icon="heroicons:arrow-path" class="w-5 h-5 animate-spin" />
+                            지문 목록을 불러오는 중...
+                        </div>
                     </div>
-                    <div v-else class="font-bold text-base md:text-lg leading-[150%] tracking-[-0.02em] text-center">
-                        문항 생성 페이지에서 새로운 문항을 생성해주세요.
+                    <div v-else-if="filteredPassages.length > 0" class="flex flex-col gap-4 w-full h-full overflow-y-auto">
+                        <TransitionGroup name="passage" tag="div" class="space-y-4">
+                            <PassageBlock 
+                                v-for="(passage, index) in filteredPassages" 
+                                :key="passage.pasCode" 
+                                :passage="passage" 
+                                :index="index"
+                                :showCheckbox="true"
+                                :selectedQuestions="selectedQuestions[passage.pasCode] || []"
+                                @passageCheckboxChange="handlePassageCheckboxChange"
+                                @questionCheckboxChange="handleQuestionCheckboxChange"
+                                @toggle="handleTogglePassage(passage.pasCode)" 
+                            />
+                        </TransitionGroup>
+                    </div>
+                    <div v-else class="flex items-center justify-center h-full">
+                        <div class="text-center text-gray-500">
+                            <Icon icon="heroicons:document-text" class="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                            <p class="font-bold text-base md:text-lg leading-[150%] tracking-[-0.02em]">
+                                {{ activeStructure === '전체' ? '문항이 있는 지문이 없습니다.' : `${activeStructure}에 해당하는 지문이 없습니다.` }}
+                            </p>
+                            <p class="text-sm mt-2">문항 생성 페이지에서 새로운 문항을 생성해주세요.</p>
+                        </div>
                     </div>
                 </div>
 
                 <!-- 미리보기 -->
                 <div
-                    class="w-full flex-1 h-full rounded-[20px] border border-[#bdbdbd] p-4 md:p-6 flex flex-col items-start overflow-hidden">
-                    <!-- 이곳에 선택한 문항의 지문을 불러오면 됨. passage.questions 구조이므로 pasCode는 다른 지문, 다른 지문의 문항을 선택할때 변경될 것임. -->
+                    class="w-full flex-1 h-full rounded-[20px] border border-[#bdbdbd] p-4 md:p-6 flex flex-col overflow-hidden">
+                    <div v-if="previewPassage" class="flex flex-col h-full overflow-hidden">
+                        <div class="flex items-center gap-2 mb-4 pb-2 border-b">
+                            <h3 class="font-bold text-lg text-gray-800">{{ previewPassage.title }}</h3>
+                            <span class="text-xs font-semibold px-2 py-1 rounded-full"
+                                :class="getPassageTypeClass(previewPassage.generateType)">
+                                {{ previewPassage.generateType }}
+                            </span>
+                        </div>
+                        
+                        <div class="flex-1 overflow-y-auto prose prose-sm max-w-none" 
+                             v-html="previewPassage.content">
+                        </div>
+                        
+                        <div class="mt-4 pt-2 border-t text-sm text-gray-500">
+                            선택된 문항: {{ getSelectedQuestionCount(previewPassage.pasCode) }} / {{ previewPassage.questions?.length || 0 }}개
+                        </div>
+                    </div>
+                    <div v-else class="flex items-center justify-center h-full text-center text-gray-500">
+                        <div>
+                            <Icon icon="heroicons:eye" class="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                            <p class="font-semibold">미리보기</p>
+                            <p class="text-sm mt-1">지문을 선택하면 내용을 미리볼 수 있습니다.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -53,8 +100,14 @@
                 <div class="flex gap-2.5 w-full sm:w-auto relative">
                     <BaseButton text="닫기" type="type3" height="54px" class="w-full sm:w-auto px-8 text-sm"
                         @click="closeModal" />
-                    <BaseButton text="지문 및 문항 추가하기" type="type1" height="54px" class="w-full sm:w-auto px-8 text-sm"
-                        :disabled="!selectedQuestion" @click.once="handleLoadPassageAndQuestionFromStorage" />
+                    <BaseButton 
+                        :text="`지문 및 문항 추가하기 (${totalSelectedQuestions}개)`" 
+                        type="type1" 
+                        height="54px" 
+                        class="w-full sm:w-auto px-8 text-sm"
+                        :disabled="totalSelectedQuestions === 0" 
+                        @click="handleLoadPassageAndQuestionFromStorage" 
+                    />
                 </div>
             </div>
         </div>
@@ -63,47 +116,229 @@
     <LoadingModal :isOpen="isLoading" :message="loadingMessage" />
 </template>
 <script setup>
-import { ref, computed, watch } from "vue";
-import { useRouter } from "vue-router";
+import { ref, computed, watch, onMounted } from "vue";
+import { Icon } from "@iconify/vue";
 import BaseModal from "@/components/common/BaseModal.vue";
 import BaseButton from "@/components/common/BaseButton.vue";
 import LoadingModal from "@/components/common/LoadingModal.vue";
+import PassageBlock from "@/components/exam/PassageBlock.vue";
+import { usePassage } from "@/composables/usePassage";
 
-const router = useRouter();
-const emit = defineEmits(["close"]);
-const loadedPassagesFromStroage = ref();
-
+// Props & Emits
 const props = defineProps({
     isOpen: Boolean,
 });
 
-// passageStructure 구분은, 
-const activeStructure = ref(null);
+const emit = defineEmits(["close", "loadSelectedData"]);
+
+// Composables
+const { fetchPassagesWithQuestionsList, selectGenerateType } = usePassage();
+
+// 반응형 상태
+const isLoading = ref(false);
+const loadingMessage = ref("지문 목록을 불러오는 중...");
+const allPassages = ref([]);
+const selectedQuestions = ref({}); // { pasCode: [questionId1, questionId2, ...] }
+const previewPassage = ref(null);
+const isProcessing = ref(false);
+
+// 지문 구조 필터
+const activeStructure = ref("전체");
 const passageStructures = ref([
     { id: 1, label: "전체" },
     { id: 2, label: "단일 지문" },
     { id: 3, label: "복합 지문" },
-    { id: 4, label: "독서론 지문" },
+    { id: 4, label: "독서론" },
 ]);
 
+// 계산된 속성
+const filteredPassages = computed(() => {
+    if (activeStructure.value === "전체") {
+        return allPassages.value;
+    }
+    return allPassages.value.filter(passage => 
+        passage.generateType === activeStructure.value
+    );
+});
+
+const totalSelectedQuestions = computed(() => {
+    return Object.values(selectedQuestions.value).reduce((total, questions) => {
+        return total + questions.length;
+    }, 0);
+});
+
+// 메서드
+const loadPassages = async () => {
+    if (isLoading.value) return;
+    
+    isLoading.value = true;
+    try {
+        const passages = await fetchPassagesWithQuestionsList();
+        
+        // PassageBlock에서 사용할 수 있도록 데이터 변환
+        allPassages.value = passages.map(passage => ({
+            id: passage.pasCode, // PassageBlock에서 사용하는 id
+            pasCode: passage.pasCode,
+            title: passage.title,
+            content: passage.content,
+            type: passage.generateType, // PassageBlock에서 사용하는 type
+            generateType: passage.generateType,
+            descriptions: passage.descriptions,
+            questions: passage.questions,
+            isExpanded: false, // 기본적으로 접힌 상태
+            isFavorite: passage.isFavorite,
+            createdAt: passage.createdAt,
+        }));
+        
+        console.log("✅ PassageLoaderModal: 지문 목록 로드 완료", allPassages.value.length, "개");
+    } catch (error) {
+        console.error("❌ PassageLoaderModal: 지문 목록 로드 실패", error);
+        // TODO: 에러 처리 UI 추가
+    } finally {
+        isLoading.value = false;
+    }
+};
+
+const handlePassageCheckboxChange = (data) => {
+    const { passageId, questionIds, checked } = data;
+    
+    if (checked) {
+        // 지문 체크 시 모든 문항 선택
+        selectedQuestions.value[passageId] = [...questionIds];
+    } else {
+        // 지문 체크 해제 시 모든 문항 선택 해제
+        selectedQuestions.value[passageId] = [];
+    }
+    
+    // 미리보기 업데이트 (현재 미리보기 중인 지문이라면)
+    if (previewPassage.value?.pasCode === passageId) {
+        // 미리보기는 그대로 유지
+    }
+};
+
+const handleQuestionCheckboxChange = (data) => {
+    const { passageId, questionId, checked } = data;
+    
+    if (!selectedQuestions.value[passageId]) {
+        selectedQuestions.value[passageId] = [];
+    }
+    
+    if (checked) {
+        // 문항 선택
+        if (!selectedQuestions.value[passageId].includes(questionId)) {
+            selectedQuestions.value[passageId].push(questionId);
+        }
+    } else {
+        // 문항 선택 해제
+        selectedQuestions.value[passageId] = selectedQuestions.value[passageId].filter(
+            id => id !== questionId
+        );
+    }
+};
+
+const handleTogglePassage = (passageId) => {
+    const passage = allPassages.value.find(p => p.pasCode === passageId);
+    if (passage) {
+        passage.isExpanded = !passage.isExpanded;
+        
+        // 펼쳐질 때 미리보기 설정
+        if (passage.isExpanded && !previewPassage.value) {
+            previewPassage.value = passage;
+        }
+    }
+};
+
+const getSelectedQuestionCount = (passageId) => {
+    return selectedQuestions.value[passageId]?.length || 0;
+};
+
+const getPassageTypeClass = (type) => {
+    switch (type) {
+        case '단일 지문':
+            return 'bg-blue-100 text-blue-700';
+        case '복합 지문':
+            return 'bg-purple-100 text-purple-700';
+        case '독서론':
+            return 'bg-green-100 text-green-700';
+        default:
+            return 'bg-gray-100 text-gray-700';
+    }
+};
+
 const closeModal = () => {
+    // 상태 초기화
+    selectedQuestions.value = {};
+    previewPassage.value = null;
+    activeStructure.value = "전체";
+    
     emit("close");
 };
 
 const handleLoadPassageAndQuestionFromStorage = async () => {
-    if (isProcessing.value) return; // 중복 실행 방지
+    if (isProcessing.value || totalSelectedQuestions.value === 0) return;
+    
     isProcessing.value = true;
-
+    loadingMessage.value = "선택한 지문과 문항을 추가하는 중...";
+    isLoading.value = true;
+    
     try {
-        // 체크 박스에 선택한, 지문과 문항 목록 전체를 PassageLoaderPanel 에 전달. 즉, useGenerateExam 의 passages 에 저장하는 로직이 추가되어야 함.
-        // ...
+        // 선택된 지문과 문항 데이터 준비
+        const selectedData = [];
+        
+        for (const [passageId, questionIds] of Object.entries(selectedQuestions.value)) {
+            if (questionIds.length > 0) {
+                const passage = allPassages.value.find(p => p.pasCode === parseInt(passageId));
+                if (passage) {
+                    const selectedQuestionData = passage.questions.filter(q => 
+                        questionIds.includes(q.id)
+                    );
+                    
+                    selectedData.push({
+                        ...passage,
+                        questions: selectedQuestionData
+                    });
+                }
+            }
+        }
+        
+        console.log("📤 PassageLoaderModal: 선택된 데이터 전달", selectedData);
+        
+        // 부모 컴포넌트에 선택된 데이터 전달
+        emit("loadSelectedData", selectedData);
+        
     } catch (error) {
-        alert(`오류가 발생했습니다.`);
+        console.error("❌ 지문 및 문항 추가 실패:", error);
+        alert("오류가 발생했습니다.");
     } finally {
-        emit("close");
+        isProcessing.value = false;
+        isLoading.value = false;
+        closeModal();
     }
 };
 
-// 그 밖에 필요한 함수들 추가 예정
+// 지문 구조 필터링 시 미리보기 업데이트
+watch(activeStructure, (newStructure) => {
+    // 현재 미리보기 중인 지문이 필터링으로 인해 보이지 않게 되면 미리보기 해제
+    if (previewPassage.value && newStructure !== "전체") {
+        const isVisible = filteredPassages.value.some(p => p.pasCode === previewPassage.value.pasCode);
+        if (!isVisible) {
+            previewPassage.value = null;
+        }
+    }
+});
+
+// 모달 열릴 때 데이터 로드
+watch(() => props.isOpen, (isOpen) => {
+    if (isOpen) {
+        loadPassages();
+    }
+});
+
+// 컴포넌트 마운트 시 초기 로드
+onMounted(() => {
+    if (props.isOpen) {
+        loadPassages();
+    }
+});
 
 </script>

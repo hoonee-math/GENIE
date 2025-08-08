@@ -154,3 +154,39 @@ export async function updateQuestionPartial(pasCode, queCode, updates) {
     throw error;
   }
 }
+
+// 문항이 있는 지문 목록 조회 (/api/pass/ques/list/withquestions) 
+// TODO: 백엔드에 새로운 엔드포인트가 필요합니다. 임시로 기존 API들을 조합해서 구현
+export async function getPassagesWithQuestionsListFromDatabase() {
+  try {
+    console.log('📖 [DB GET] 문항이 있는 지문 목록 조회 요청');
+    
+    // TODO: 백엔드에서 문항이 있는 지문만 반환하는 API 구현 필요
+    // 현재는 임시로 모든 지문을 가져와서 프론트에서 필터링
+    const response = await apiGet("/api/pass/select/prevlist");
+    
+    // 각 지문에 대해 문항이 있는지 확인하고 문항 데이터도 함께 조회
+    const passagesWithQuestions = []
+    
+    for (const passage of response) {
+      try {
+        // 각 지문의 문항 조회 시도
+        const passageWithQuestions = await getPassageWithQuestionsFromDatabase(passage.pasCode)
+        
+        // 문항이 있는 지문만 추가
+        if (passageWithQuestions.questions && passageWithQuestions.questions.length > 0) {
+          passagesWithQuestions.push(passageWithQuestions)
+        }
+      } catch (error) {
+        // 문항이 없는 지문은 무시
+        console.warn(`지문 ${passage.pasCode}에 문항이 없거나 조회 실패:`, error.message)
+      }
+    }
+    
+    console.log('📖 [DB GET] 문항이 있는 지문 목록 조회 성공:', passagesWithQuestions.length, '개');
+    return passagesWithQuestions;
+  } catch (error) {
+    console.error("📖 [DB GET] 문항이 있는 지문 목록 조회 실패:", error);
+    throw error;
+  }
+}

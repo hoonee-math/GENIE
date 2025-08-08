@@ -90,15 +90,15 @@
             </button>
         </div>
 
-        <!-- Load Passage Modal -->
-        <LoadPassageModal :isOpen="showPassageModal" @close="closePassageModal" @selectPasCode="handlePassageLoad" />
+        <!-- Passage Loader Modal -->
+        <PassageLoaderModal :isOpen="showPassageModal" @close="closePassageModal" @loadSelectedData="handleLoadSelectedData" />
     </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { Icon } from '@iconify/vue'
-import LoadPassageModal from '@/components/generation/LoadPassageModal.vue'
+import PassageLoaderModal from '@/components/exam/PassageLoaderModal.vue'
 import PassageBlock from './PassageBlock.vue'
 import { useGenerateExam, useDragAndDrop } from '@/composables/useGenerateExam'
 import Sortable from 'sortablejs'
@@ -168,25 +168,70 @@ const closePassageModal = () => {
     showPassageModal.value = false
 }
 
-const handlePassageLoad = async (pasCode) => {
-    console.log('선택된 지문 코드:', pasCode)
+const handleLoadSelectedData = async (selectedData) => {
+    console.log('선택된 지문과 문항 데이터:', selectedData)
 
     try {
-        const success = await loadPassage(pasCode)
-        if (success) {
-            const loadedPassage = loadedPassages.value[loadedPassages.value.length - 1]
-            emit('passageLoaded', loadedPassage)
-            emit('examDataChanged', examData.value)
+        let addedPassageCount = 0
+        let addedQuestionCount = 0
 
-            // 성공 메시지 표시
-            displaySuccess(`'${loadedPassage.title}' 지문이 성공적으로 추가되었습니다.`)
+        for (const passageData of selectedData) {
+            // useGenerateExam의 loadedPassages에 추가할 형식으로 변환
+            const newPassage = {
+                id: Date.now() + Math.random(), // 고유한 ID 생성
+                pasCode: passageData.pasCode,
+                title: passageData.title,
+                content: passageData.content,
+                type: passageData.generateType,
+                isExpanded: true,
+                questions: passageData.questions.map((q, index) => ({
+                    id: q.id || Date.now() + index + Math.random(),
+                    text: q.content || q.text || '문제 내용',
+                    options: q.options || [],
+                    answer: q.answer || '',
+                    explanation: q.explanation || ''
+                })),
+                descriptions: passageData.descriptions
+            }
 
-            // 드래그 앤 드롭 기능 재초기화
-            await nextTick()
-            initializeSortable()
+            // 중복 체크 (같은 pasCode의 지문이 이미 있는지 확인)
+            const existingPassage = loadedPassages.value.find(p => p.pasCode === passageData.pasCode)
+            if (existingPassage) {
+                // 이미 있는 지문의 경우 문항만 추가 (중복되지 않는 문항만)
+                const existingQuestionIds = new Set(existingPassage.questions.map(q => q.id))
+                const newQuestions = newPassage.questions.filter(q => !existingQuestionIds.has(q.id))
+                
+                if (newQuestions.length > 0) {
+                    existingPassage.questions.push(...newQuestions)
+                    addedQuestionCount += newQuestions.length
+                    displaySuccess(`'${existingPassage.title}' 지문에 ${newQuestions.length}개 문항이 추가되었습니다.`)
+                }
+            } else {
+                // 새로운 지문 추가
+                loadedPassages.value.push(newPassage)
+                addedPassageCount++
+                addedQuestionCount += newPassage.questions.length
+            }
+
+            emit('passageLoaded', newPassage)
         }
+
+        emit('examDataChanged', examData.value)
+
+        // 전체 추가 완료 메시지
+        if (addedPassageCount > 0) {
+            displaySuccess(`${addedPassageCount}개 지문과 ${addedQuestionCount}개 문항이 성공적으로 추가되었습니다.`)
+        } else if (addedQuestionCount > 0) {
+            displaySuccess(`${addedQuestionCount}개 문항이 성공적으로 추가되었습니다.`)
+        }
+
+        // 드래그 앤 드롭 기능 재초기화
+        await nextTick()
+        initializeSortable()
+        
     } catch (error) {
-        console.error('지문 로드 실패:', error)
+        console.error('지문 및 문항 로드 실패:', error)
+        alert('지문과 문항을 추가하는 중 오류가 발생했습니다.')
     }
 }
 
