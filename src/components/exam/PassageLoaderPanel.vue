@@ -70,9 +70,8 @@
         </Transition>
 
         <!-- 문제지 만들기, 지문 불러오기 버튼() -->
-        <div
-            class="mt-8 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-center hover:border-blue-400 hover:bg-blue-50/20 transition-all"
-            :class="[loadedPassages.length === 0 ? 'py-16 ':'py-4']">
+        <div class="mt-8 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-center hover:border-blue-400 hover:bg-blue-50/20 transition-all"
+            :class="[loadedPassages.length === 0 ? 'py-16 ' : 'py-4']">
 
             <div v-if="loadedPassages.length === 0" key="empty" class="text-lg text-gray-500">
                 <Icon icon="heroicons:document-plus" class="w-12 h-12 mx-auto mb-4 text-brand" />
@@ -91,7 +90,8 @@
         </div>
 
         <!-- Passage Loader Modal -->
-        <PassageLoaderModal :isOpen="showPassageModal" @close="closePassageModal" @loadSelectedData="handleLoadSelectedData" />
+        <PassageLoaderModal :isOpen="showPassageModal" @close="closePassageModal"
+            @loadSelectedData="handleLoadSelectedData" />
     </div>
 </template>
 
@@ -194,24 +194,10 @@ const handleLoadSelectedData = async (selectedData) => {
                 descriptions: passageData.descriptions
             }
 
-            // 중복 체크 (같은 pasCode의 지문이 이미 있는지 확인)
-            const existingPassage = loadedPassages.value.find(p => p.pasCode === passageData.pasCode)
-            if (existingPassage) {
-                // 이미 있는 지문의 경우 문항만 추가 (중복되지 않는 문항만)
-                const existingQuestionIds = new Set(existingPassage.questions.map(q => q.id))
-                const newQuestions = newPassage.questions.filter(q => !existingQuestionIds.has(q.id))
-                
-                if (newQuestions.length > 0) {
-                    existingPassage.questions.push(...newQuestions)
-                    addedQuestionCount += newQuestions.length
-                    displaySuccess(`'${existingPassage.title}' 지문에 ${newQuestions.length}개 문항이 추가되었습니다.`)
-                }
-            } else {
-                // 새로운 지문 추가
-                loadedPassages.value.push(newPassage)
-                addedPassageCount++
-                addedQuestionCount += newPassage.questions.length
-            }
+            // 새로운 지문 추가
+            loadedPassages.value.push(newPassage)
+            addedPassageCount++
+            addedQuestionCount += newPassage.questions.length
 
             emit('passageLoaded', newPassage)
         }
@@ -228,7 +214,7 @@ const handleLoadSelectedData = async (selectedData) => {
         // 드래그 앤 드롭 기능 재초기화
         await nextTick()
         initializeSortable()
-        
+
     } catch (error) {
         console.error('지문 및 문항 로드 실패:', error)
         alert('지문과 문항을 추가하는 중 오류가 발생했습니다.')
