@@ -40,9 +40,9 @@
       <div v-show="passage.isExpanded">
         <div class="questions-list bg-slate-50/50 p-2 sm:p-4 space-y-2">
           <TransitionGroup name="question" tag="div" class="space-y-2">
-            <QuestionItem v-for="(question, qIndex) in passage.questions" :key="question.id" :question="question"
-              :index="qIndex" :showCheckbox="showCheckbox" :isChecked="selectedQuestions.includes(question.id)"
-              @delete="$emit('deleteQuestion', question.id)" @update="$emit('updateQuestion', question.id, $event)"
+            <QuestionItem v-for="(question, qIndex) in passage.questions" :key="question.queCode || question.id" :question="question"
+              :index="qIndex" :showCheckbox="showCheckbox" :isChecked="selectedQuestions.includes(question.queCode || question.id)"
+              @delete="$emit('deleteQuestion', question.queCode || question.id)" @update="$emit('updateQuestion', question.queCode || question.id, $event)"
               @checkboxChange="handleQuestionCheckboxChange" />
           </TransitionGroup>
 
@@ -112,7 +112,7 @@ const passageCheckboxRef = ref(null)
 // 헤더 영역 클릭 시 (미리보기 변경 + 토글)
 const handleHeaderClick = () => {
   emit('toggle')
-  if(showCheckbox){ // 모달에서만 미리보기 변경반영을 위해 click 을 emit 으로 전달
+  if(props.showCheckbox){ // 모달에서만 미리보기 변경반영을 위해 click 을 emit 으로 전달
     emit('click') // 미리보기 변경을 위한 클릭 이벤트
   }
 }
@@ -122,7 +122,7 @@ const totalQuestions = computed(() => props.passage.questions?.length || 0)
 const selectedQuestionCount = computed(() => {
   if (!props.showCheckbox || totalQuestions.value === 0) return 0
   return props.selectedQuestions.filter(qId =>
-    props.passage.questions?.some(q => q.id === qId)
+    props.passage.questions?.some(q => (q.queCode || q.id) === qId)
   ).length
 })
 
@@ -149,11 +149,11 @@ watch([isIndeterminate], async () => {
 // 지문 체크박스 변경 핸들러
 const handlePassageCheckboxChange = (event) => {
   const checked = event.target.checked
-  const questionIds = props.passage.questions?.map(q => q.id) || []
+  const queCodes = props.passage.questions?.map(q => q.queCode || q.id) || []
 
   emit('passageCheckboxChange', {
-    passageId: props.passage.pasCode,
-    questionIds,
+    pasCode: props.passage.pasCode,
+    queCodes,
     checked
   })
 }
@@ -161,8 +161,8 @@ const handlePassageCheckboxChange = (event) => {
 // 문제 체크박스 변경 핸들러
 const handleQuestionCheckboxChange = (data) => {
   emit('questionCheckboxChange', {
-    passageId: props.passage.pasCode,
-    questionId: data.questionId,
+    pasCode: props.passage.pasCode,
+    queCode: data.queCode,
     checked: data.checked
   })
 }

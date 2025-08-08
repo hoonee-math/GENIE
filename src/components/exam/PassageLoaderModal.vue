@@ -136,7 +136,7 @@ const { fetchPassagesWithQuestionsList, selectGenerateType } = usePassage();
 const isLoading = ref(false);
 const loadingMessage = ref("지문 목록을 불러오는 중...");
 const allPassages = ref([]);
-const selectedQuestions = ref({}); // { pasCode: [questionId1, questionId2, ...] }
+const selectedQuestions = ref({}); // { pasCode: [pasCode1, pasCode2, ...] }
 const previewPassage = ref(null);
 const isProcessing = ref(false);
 
@@ -190,14 +190,14 @@ const loadPassages = async () => {
 };
 
 const handlePassageCheckboxChange = (data) => {
-    const { passageId, questionIds, checked } = data;
+    const { pasCode, queCodes, checked } = data;
 
     if (checked) {
         // 지문 체크 시 모든 문항 선택
-        selectedQuestions.value[passageId] = [...questionIds];
+        selectedQuestions.value[pasCode] = [...queCodes];
     } else {
         // 지문 체크 해제 시 모든 문항 선택 해제
-        selectedQuestions.value[passageId] = [];
+        selectedQuestions.value[pasCode] = [];
     }
 
     // 반응성을 위해 객체를 새로 생성
@@ -205,21 +205,21 @@ const handlePassageCheckboxChange = (data) => {
 };
 
 const handleQuestionCheckboxChange = (data) => {
-    const { passageId, questionId, checked } = data;
+    const { pasCode, queCode, checked } = data;
 
-    if (!selectedQuestions.value[passageId]) {
-        selectedQuestions.value[passageId] = [];
+    if (!selectedQuestions.value[pasCode]) {
+        selectedQuestions.value[pasCode] = [];
     }
 
     if (checked) {
         // 개별 문항 선택 - 해당 문항만 선택
-        if (!selectedQuestions.value[passageId].includes(questionId)) {
-            selectedQuestions.value[passageId] = [...selectedQuestions.value[passageId], questionId];
+        if (!selectedQuestions.value[pasCode].includes(queCode)) {
+            selectedQuestions.value[pasCode] = [...selectedQuestions.value[pasCode], queCode];
         }
     } else {
         // 개별 문항 선택 해제 - 해당 문항만 해제
-        selectedQuestions.value[passageId] = selectedQuestions.value[passageId].filter(
-            id => id !== questionId
+        selectedQuestions.value[pasCode] = selectedQuestions.value[pasCode].filter(
+            id => id !== queCode
         );
     }
 
@@ -227,8 +227,8 @@ const handleQuestionCheckboxChange = (data) => {
     selectedQuestions.value = { ...selectedQuestions.value };
 };
 
-const handleTogglePassage = (passageId) => {
-    const passage = allPassages.value.find(p => p.pasCode === passageId);
+const handleTogglePassage = (pasCode) => {
+    const passage = allPassages.value.find(p => p.pasCode === pasCode);
     if (passage) {
         passage.isExpanded = !passage.isExpanded;
     }
@@ -240,8 +240,8 @@ const handlePassageClick = (passage) => {
     console.log('📖 미리보기 업데이트:', passage.title);
 };
 
-const getSelectedQuestionCount = (passageId) => {
-    return selectedQuestions.value[passageId]?.length || 0;
+const getSelectedQuestionCount = (pasCode) => {
+    return selectedQuestions.value[pasCode]?.length || 0;
 };
 
 const getPassageTypeClass = (type) => {
@@ -277,12 +277,12 @@ const handleLoadPassageAndQuestionFromStorage = async () => {
         // 선택된 지문과 문항 데이터 준비
         const selectedData = [];
 
-        for (const [passageId, questionIds] of Object.entries(selectedQuestions.value)) {
-            if (questionIds.length > 0) {
-                const passage = allPassages.value.find(p => p.pasCode === parseInt(passageId));
+        for (const [pasCode, queCodes] of Object.entries(selectedQuestions.value)) {
+            if (queCodes.length > 0) {
+                const passage = allPassages.value.find(p => p.pasCode === parseInt(pasCode));
                 if (passage) {
                     const selectedQuestionData = passage.questions.filter(q =>
-                        questionIds.includes(q.id)
+                        queCodes.includes(q.queCode || q.id)
                     );
 
                     selectedData.push({
