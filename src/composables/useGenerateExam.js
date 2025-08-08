@@ -28,14 +28,14 @@ export function useGenerateExam() {
     {
       id: 1001, // 고유 ID (같은 지문을 여러번 불러와도 구분 가능)
       pasCode: 123, // 실제 DB의 지문 코드
-      title: '독서 이론 - 텍스트의 의미 구성',
+      title: '<p>독서 이론 - 텍스트의 의미 구성</p>',
       content: '<p>독서는 단순히 글자를 읽는 행위가 아니라...</p>',
       type: '단일 지문',
       isExpanded: true,
       questions: [
         {
           queCode: 2001, // 실제 DB의 문항 코드
-          queQuery: '윗글의 내용 전개 방식으로 적절한 것은?',
+          queQuery: '<p>윗글의 내용 전개 방식으로 적절한 것은?</p>',
           queOption: [],
           queAnswer: '',
           queDescription: '',
@@ -43,7 +43,7 @@ export function useGenerateExam() {
         },
         {
           queCode: 2002,
-          queQuery: '윗글을 바탕으로 [보기]를 이해한 내용으로 적절하지 않은 것은?',
+          queQuery: '<p>윗글을 바탕으로 [보기]를 이해한 내용으로 적절하지 <u>않은</u> 것은?</p>',
           queOption: [],
           queAnswer: '',
           queDescription: '',
@@ -51,7 +51,7 @@ export function useGenerateExam() {
         },
         {
           queCode: 2003,
-          queQuery: '윗글에 나타난 필자의 관점에 대한 설명으로 가장 적절한 것은?',
+          queQuery: '<p>윗글에 나타난 필자의 관점에 대한 설명으로 가장 적절한 것은?</p>',
           queOption: [],
           queAnswer: '',
           queDescription: '',
@@ -70,14 +70,14 @@ export function useGenerateExam() {
     {
       id: 1002,
       pasCode: 456,
-      title: '현대 소설 - 광장 (최인훈)',
+      title: '<p>현대 소설 - 광장 (최인훈)',
       content: '<p>(가) 이명준은 다시 그 모든 것을 생각했다...</p><p>(나) "사람은 누구나 광장을 가져야 해..."</p>',
       type: '복합 지문',
       isExpanded: false, // 접힌 상태로 시작
       questions: [
         {
           queCode: 2004,
-          queQuery: '(가)와 (나)의 공통점으로 가장 적절한 것은?',
+          queQuery: '<p>(가)와 (나)의 공통점으로 가장 적절한 것은?</p>',
           queOption: [],
           queAnswer: '',
           queDescription: '',
@@ -85,7 +85,7 @@ export function useGenerateExam() {
         },
         {
           queCode: 2005,
-          queQuery: '윗글에 나타난 인물의 심리 변화 과정으로 적절한 것은?',
+          queQuery: '<p>윗글에 나타난 인물의 심리 변화 과정으로 적절한 것은?</p>',
           queOption: [],
           queAnswer: '',
           queDescription: '',
@@ -110,14 +110,14 @@ export function useGenerateExam() {
     {
       id: 1003,
       pasCode: 789,
-      title: '화법과 작문 - 토론의 전략',
+      title: '<p>화법과 작문 - 토론의 전략</p>',
       content: '<p>효과적인 토론을 위해서는 논증의 구조를 명확히 해야 한다...</p>',
       type: '단일 지문',
       isExpanded: true,
       questions: [
         {
           queCode: 2006,
-          queQuery: '발표자의 말하기 방식에 대한 설명으로 가장 적절한 것은?',
+          queQuery: '<p>발표자의 말하기 방식에 대한 설명으로 가장 적절한 것은?</p>',
           queOption: [],
           queAnswer: '',
           queDescription: '',
@@ -125,7 +125,7 @@ export function useGenerateExam() {
         },
         {
           queCode: 2007,
-          queQuery: '윗글의 논증 구조를 분석한 내용으로 적절하지 않은 것은?',
+          queQuery: '<p>윗글의 논증 구조를 분석한 내용으로 적절하지 않은 것은?</p>',
           queOption: [],
           queAnswer: '',
           queDescription: '',
@@ -133,7 +133,7 @@ export function useGenerateExam() {
         },
         {
           queCode: 2008,
-          queQuery: '[보기]의 상황에서 가장 효과적인 토론 전략은?',
+          queQuery: '<p>[보기]의 상황에서 가장 효과적인 토론 전략은?</p>',
           queOption: [],
           queAnswer: '',
           queDescription: '',
@@ -141,7 +141,7 @@ export function useGenerateExam() {
         },
         {
           queCode: 2009,
-          queQuery: '토론 과정에서 나타난 의견 조율 방식으로 적절한 것은?',
+          queQuery: '<p>토론 과정에서 나타난 의견 조율 방식으로 적절한 것은?</p>',
           queOption: [],
           queAnswer: '',
           queDescription: '',
