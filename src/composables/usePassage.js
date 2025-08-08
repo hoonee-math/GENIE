@@ -250,17 +250,6 @@ export function usePassage() {
 
     console.log("🌐 리스트 API 호출 시작 (캐시 없음)");
 
-    const selectGenerateType = (descriptions) => {
-      try{
-        // console.log("descriptions.length & descriptions[0].pasType",descriptions.length, descriptions[0].pasType)
-        if (descriptions.length > 1) return "복합 지문";
-        else if (descriptions[0].pasType === "독서론") return "독서론";
-        else return "단일 지문";
-      } catch {
-        return '호출오류';
-      }
-    };
-
     try {
       const apiResponse = await getPrevPassageListInDatabase();
       console.log("usePassage 에서 fetchPassageList 호출, apiResponse (총 ", apiResponse.length,"개) 응답 확인 :", apiResponse)
@@ -284,6 +273,17 @@ export function usePassage() {
     }
   };
 
+  const selectGenerateType = (descriptions) => {
+    try{
+      // console.log("descriptions.length & descriptions[0].pasType",descriptions.length, descriptions[0].pasType)
+      if (descriptions.length > 1) return "복합 지문";
+      else if (descriptions[0].pasType === "독서론") return "독서론";
+      else return "단일 지문";
+    } catch {
+      return '호출오류';
+    }
+  };
+
   return {
     // Store 데이터를 computed로 감싸서 반환
     passage: computed(() => store.passage),
@@ -297,6 +297,7 @@ export function usePassage() {
     fetchPassage,
     cacheGeneratedPassage,
     fetchPassageList, // 이름 변경: fetchStorageList -> fetchPassageList
+    selectGenerateType, // generateType, typePassage, passageType, passageStructure 를 구분하기 위한 메서드
 
     // Store actions 직접 노출
     clearPassage: store.clearPassage,

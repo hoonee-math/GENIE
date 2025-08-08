@@ -16,18 +16,19 @@
                         <BaseButton v-for="structure in passageStructures" :key="structure.id" :text="structure.label" type="type3"
                             :width="structure.width" height="40px" class="transition-all duration-200" :class="{
                                 'bg-[#e6f3ff] border-none text-[#0066cc]':
-                                    activeType === structure.label,
+                                    activeStructure === structure.label,
                                 'bg-white border-[#bdbdbd] text-[#757575] hover:border-[#0086ff] hover:text-[#0086ff]':
-                                    activeType !== structure.label,
-                            }" @click="activeType = structure.label" />
+                                    activeStructure !== structure.label,
+                            }" @click="activeStructure = structure.label" />
                     </div>
                 </div>
             </div>
 
             <!-- 사용자의 저장된 지문+문항 목록, 문항이 있는 지문들만 호출하여 보여줘야 함. 새로운 api 필요.-->
             <!-- 목록은 @/components/exam/PassageBlock.vue 을 재활용하는 것을 고려. but 구조가 다름. PassageBlock 이나 QuesetionItem 에 들어있는 heroicons-solid:menu-alt-4 아이콘과 index 번호를 출력해주는 대신에 체크 박스가 필요함.-->
-            <!-- PassageBlock 이나 QuesetionItem 를 수정하여, 체크박스 형태를 이용하고 싶은 경우를 props로 전달할 수 있게 설정 -->
+            <!-- PassageBlock 이나 QuesetionItem 를 수정하거나 비슷한 구조의 새로운 두 컴포넌트를 만들어 체크박스 형태로 사용. 선택한 지문과 그 지문에 포함된 일부 또는 전체 문항을 PassageLoaderPnael로 전달할 수 있게 설정 -->
             <!-- 해당 체크박스를 이용해서 문제지로 불러올 지문과 문항을 선택. 지문을 체크하면 모든 문항이 체크됨. 일부 문항만 체크하면 지문에 체크된 체크 박스가 부분체크된 상태를 보여주는 형태로 변해야함. -->
+            <!-- 위에서 선택한 지문 구조는 loadedPassagesFromStroage 의 각 passage의 descripton 데이터를 보고 확인할 수 있음. usePassage 의 selectGenerateType 함수를 이용하면 됨. -->
             <div class="flex flex-col lg:flex-row gap-4 md:gap-5 flex-1 w-full overflow-hidden">
                 <!-- 지문+문항 목록 -->
                 <div
@@ -76,6 +77,8 @@ const props = defineProps({
     isOpen: Boolean,
 });
 
+// passageStructure 구분은, 
+const activeStructure = ref(null);
 const passageStructures = ref([
     { id: 1, label: "전체" },
     { id: 2, label: "단일 지문" },
