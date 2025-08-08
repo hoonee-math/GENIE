@@ -5,16 +5,11 @@
     <div class="flex items-center p-4 bg-white border-b border-slate-200">
       <!-- 체크박스 모드 -->
       <template v-if="showCheckbox">
-        <input 
-          type="checkbox" 
-          :checked="isChecked"
-          :indeterminate="isIndeterminate"
-          @change="handlePassageCheckboxChange"
-          ref="passageCheckboxRef"
-          class="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 mr-4"
-        />
+        <input type="checkbox" :checked="isChecked" :indeterminate="isIndeterminate"
+          @change="handlePassageCheckboxChange" ref="passageCheckboxRef"
+          class="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 mr-4" />
       </template>
-      
+
       <!-- 기본 모드 (드래그 핸들 + 번호) -->
       <template v-else>
         <div class="passage-drag-handle cursor-grab text-slate-400 hover:text-slate-600 mr-4">
@@ -24,11 +19,11 @@
           <span class="passage-number text-xl font-bold text-blue-600 mr-4">{{ index + 1 }}</span>
         </div>
       </template>
-      
+
       <!-- 공통 헤더 콘텐츠 -->
       <div class="flex-grow flex items-center" :class="showCheckbox ? '' : 'ml-0'">
-        <h2 class="text-lg font-semibold truncate w-[230px] text-slate-800" 
-          :class="showCheckbox ? 'ml-0' : ''">{{ passage.title }}</h2>
+        <TipTapEditor :initialContent="passage.title" :isEditable="false"
+          :addClass="'text-lg font-semibold lg:w-[230px] text-slate-800'" />
         <span class="ml-auto text-xs text-nowrap font-semibold px-2.5 py-0.5 rounded-full"
           :class="getPassageTypeClass(passage.type)">
           {{ passage.type }}
@@ -45,14 +40,9 @@
       <div v-show="passage.isExpanded">
         <div class="questions-list bg-slate-50/50 p-2 sm:p-4 space-y-2">
           <TransitionGroup name="question" tag="div" class="space-y-2">
-            <QuestionItem v-for="(question, qIndex) in passage.questions" 
-              :key="question.id" 
-              :question="question"
-              :index="qIndex" 
-              :showCheckbox="showCheckbox"
-              :isChecked="selectedQuestions.includes(question.id)"
-              @delete="$emit('deleteQuestion', question.id)"
-              @update="$emit('updateQuestion', question.id, $event)"
+            <QuestionItem v-for="(question, qIndex) in passage.questions" :key="question.id" :question="question"
+              :index="qIndex" :showCheckbox="showCheckbox" :isChecked="selectedQuestions.includes(question.id)"
+              @delete="$emit('deleteQuestion', question.id)" @update="$emit('updateQuestion', question.id, $event)"
               @checkboxChange="handleQuestionCheckboxChange" />
           </TransitionGroup>
 
@@ -63,7 +53,7 @@
             이 지문에 문제 추가하기
           </button>
         </div>
-        
+
         <!-- 지문 삭제 버튼 (체크박스 모드가 아닐 때만) -->
         <div v-if="!showCheckbox" class="p-2 border-t border-slate-100 bg-slate-50/30">
           <button @click="$emit('remove')"
@@ -82,6 +72,7 @@
 import { computed, ref, watch, nextTick } from 'vue'
 import { Icon } from '@iconify/vue'
 import QuestionItem from './QuestionItem.vue'
+import TipTapEditor from '@/views/generation/TipTapEditor.vue'
 
 // Props
 const props = defineProps({
@@ -126,7 +117,7 @@ const toggleExpanded = () => {
 const totalQuestions = computed(() => props.passage.questions?.length || 0)
 const selectedQuestionCount = computed(() => {
   if (!props.showCheckbox || totalQuestions.value === 0) return 0
-  return props.selectedQuestions.filter(qId => 
+  return props.selectedQuestions.filter(qId =>
     props.passage.questions?.some(q => q.id === qId)
   ).length
 })
@@ -155,7 +146,7 @@ watch([isIndeterminate], async () => {
 const handlePassageCheckboxChange = (event) => {
   const checked = event.target.checked
   const questionIds = props.passage.questions?.map(q => q.id) || []
-  
+
   emit('passageCheckboxChange', {
     passageId: props.passage.pasCode,
     questionIds,

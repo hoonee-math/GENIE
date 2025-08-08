@@ -13,8 +13,9 @@
                         지문 구조
                     </span>
                     <div class="flex flex-wrap gap-2 md:gap-4 overflow-x-auto w-full md:w-auto">
-                        <BaseButton v-for="structure in passageStructures" :key="structure.id" :text="structure.label" type="type3"
-                            :width="structure.width" height="40px" class="transition-all duration-200" :class="{
+                        <BaseButton v-for="structure in passageStructures" :key="structure.id" :text="structure.label"
+                            type="type3" :width="structure.width" height="40px" class="transition-all duration-200"
+                            :class="{
                                 'bg-[#e6f3ff] border-none text-[#0066cc]':
                                     activeStructure === structure.label,
                                 'bg-white border-[#bdbdbd] text-[#757575] hover:border-[#0086ff] hover:text-[#0086ff]':
@@ -31,34 +32,30 @@
             <!-- 위에서 선택한 지문 구조는 loadedPassagesFromStroage 의 각 passage의 descripton 데이터를 보고 확인할 수 있음. usePassage 의 selectGenerateType 함수를 이용하면 됨. -->
             <div class="flex flex-col lg:flex-row gap-4 md:gap-5 flex-1 w-full overflow-hidden">
                 <!-- 지문+문항 목록 -->
-                <div
-                    class="w-full flex-1 h-full rounded-[20px] border border-[#bdbdbd] p-4 md:p-5 overflow-hidden">
+                <div class="w-full flex-1 h-full rounded-[20px] border border-[#bdbdbd] p-4 md:p-5 overflow-hidden">
                     <div v-if="isLoading" class="flex items-center justify-center h-full">
                         <div class="flex items-center gap-2 text-gray-500">
                             <Icon icon="heroicons:arrow-path" class="w-5 h-5 animate-spin" />
                             지문 목록을 불러오는 중...
                         </div>
                     </div>
-                    <div v-else-if="filteredPassages.length > 0" class="flex flex-col gap-4 w-full h-full overflow-y-auto">
+                    <div v-else-if="filteredPassages.length > 0"
+                        class="flex flex-col gap-4 w-full h-full overflow-y-auto">
                         <TransitionGroup name="passage" tag="div" class="space-y-4">
-                            <PassageBlock 
-                                v-for="(passage, index) in filteredPassages" 
-                                :key="passage.pasCode" 
-                                :passage="passage" 
-                                :index="index"
-                                :showCheckbox="true"
+                            <PassageBlock v-for="(passage, index) in filteredPassages" :key="passage.pasCode"
+                                :passage="passage" :index="index" :showCheckbox="true"
                                 :selectedQuestions="selectedQuestions[passage.pasCode] || []"
                                 @passageCheckboxChange="handlePassageCheckboxChange"
                                 @questionCheckboxChange="handleQuestionCheckboxChange"
-                                @toggle="handleTogglePassage(passage.pasCode)" 
-                            />
+                                @toggle="handleTogglePassage(passage.pasCode)" />
                         </TransitionGroup>
                     </div>
                     <div v-else class="flex items-center justify-center h-full">
                         <div class="text-center text-gray-500">
                             <Icon icon="heroicons:document-text" class="w-12 h-12 mx-auto mb-4 text-gray-300" />
                             <p class="font-bold text-base md:text-lg leading-[150%] tracking-[-0.02em]">
-                                {{ activeStructure === '전체' ? '문항이 있는 지문이 없습니다.' : `${activeStructure}에 해당하는 지문이 없습니다.` }}
+                                {{ activeStructure === '전체' ? '문항이 있는 지문이 없습니다.' : `${activeStructure}에 해당하는 지문이 없습니다.`
+                                }}
                             </p>
                             <p class="text-sm mt-2">문항 생성 페이지에서 새로운 문항을 생성해주세요.</p>
                         </div>
@@ -69,20 +66,24 @@
                 <div
                     class="w-full flex-1 h-full rounded-[20px] border border-[#bdbdbd] p-4 md:p-6 flex flex-col overflow-hidden">
                     <div v-if="previewPassage" class="flex flex-col h-full overflow-hidden">
-                        <div class="flex items-center gap-2 mb-4 pb-2 border-b">
+                        <div class="flex items-center justify-between gap-2 mb-4 pb-2 border-b">
                             <h3 class="font-bold text-lg text-gray-800">{{ previewPassage.title }}</h3>
                             <span class="text-xs font-semibold px-2 py-1 rounded-full"
                                 :class="getPassageTypeClass(previewPassage.generateType)">
                                 {{ previewPassage.generateType }}
                             </span>
                         </div>
+
+                        <!-- <div class="flex-1 overflow-y-auto prose prose-sm max-w-none" v-html="previewPassage.content">
+                        </div> -->
                         
-                        <div class="flex-1 overflow-y-auto prose prose-sm max-w-none" 
-                             v-html="previewPassage.content">
+                        <div class="flex-1 prose prose-sm max-w-none">
+                            <TipTapEditor :initialContent="previewPassage.content" :isEditable="false" :addClass="'text-lg'" />
                         </div>
-                        
+
                         <div class="mt-4 pt-2 border-t text-sm text-gray-500">
-                            선택된 문항: {{ getSelectedQuestionCount(previewPassage.pasCode) }} / {{ previewPassage.questions?.length || 0 }}개
+                            선택된 문항: {{ getSelectedQuestionCount(previewPassage.pasCode) }} / {{
+                                previewPassage.questions?.length || 0 }}개
                         </div>
                     </div>
                     <div v-else class="flex items-center justify-center h-full text-center text-gray-500">
@@ -100,14 +101,9 @@
                 <div class="flex gap-2.5 w-full sm:w-auto relative">
                     <BaseButton text="닫기" type="type3" height="54px" class="w-full sm:w-auto px-8 text-sm"
                         @click="closeModal" />
-                    <BaseButton 
-                        :text="`지문 및 문항 추가하기 (${totalSelectedQuestions}개)`" 
-                        type="type1" 
-                        height="54px" 
-                        class="w-full sm:w-auto px-8 text-sm"
-                        :disabled="totalSelectedQuestions === 0" 
-                        @click="handleLoadPassageAndQuestionFromStorage" 
-                    />
+                    <BaseButton :text="`지문 및 문항 추가하기 (${totalSelectedQuestions}개)`" type="type1" height="54px"
+                        class="w-full sm:w-auto px-8 text-sm" :disabled="totalSelectedQuestions === 0"
+                        @click="handleLoadPassageAndQuestionFromStorage" />
                 </div>
             </div>
         </div>
@@ -122,6 +118,7 @@ import BaseModal from "@/components/common/BaseModal.vue";
 import BaseButton from "@/components/common/BaseButton.vue";
 import LoadingModal from "@/components/common/LoadingModal.vue";
 import PassageBlock from "@/components/exam/PassageBlock.vue";
+import TipTapEditor from "@/views/generation/TipTapEditor.vue";
 import { usePassage } from "@/composables/usePassage";
 
 // Props & Emits
@@ -156,7 +153,7 @@ const filteredPassages = computed(() => {
     if (activeStructure.value === "전체") {
         return allPassages.value;
     }
-    return allPassages.value.filter(passage => 
+    return allPassages.value.filter(passage =>
         passage.generateType === activeStructure.value
     );
 });
@@ -170,18 +167,18 @@ const totalSelectedQuestions = computed(() => {
 // 메서드
 const loadPassages = async () => {
     if (isLoading.value) return;
-    
+
     isLoading.value = true;
     try {
         const passages = await fetchPassagesWithQuestionsList();
-        
+
         // 원본 데이터 구조 유지하되 PassageBlock에 필요한 필드만 추가
         allPassages.value = passages.map(passage => ({
             ...passage, // 원본 데이터 유지 (pasCode, questions 등)
             type: passage.generateType, // PassageBlock에서 사용하는 type 필드
             isExpanded: false, // 기본적으로 접힌 상태
         }));
-        
+
         console.log("✅ PassageLoaderModal: 지문 목록 로드 완료", allPassages.value.length, "개");
     } catch (error) {
         console.error("❌ PassageLoaderModal: 지문 목록 로드 실패", error);
@@ -193,7 +190,7 @@ const loadPassages = async () => {
 
 const handlePassageCheckboxChange = (data) => {
     const { passageId, questionIds, checked } = data;
-    
+
     if (checked) {
         // 지문 체크 시 모든 문항 선택
         selectedQuestions.value[passageId] = [...questionIds];
@@ -201,18 +198,18 @@ const handlePassageCheckboxChange = (data) => {
         // 지문 체크 해제 시 모든 문항 선택 해제
         selectedQuestions.value[passageId] = [];
     }
-    
+
     // 반응성을 위해 객체를 새로 생성
     selectedQuestions.value = { ...selectedQuestions.value };
 };
 
 const handleQuestionCheckboxChange = (data) => {
     const { passageId, questionId, checked } = data;
-    
+
     if (!selectedQuestions.value[passageId]) {
         selectedQuestions.value[passageId] = [];
     }
-    
+
     if (checked) {
         // 개별 문항 선택 - 해당 문항만 선택
         if (!selectedQuestions.value[passageId].includes(questionId)) {
@@ -224,7 +221,7 @@ const handleQuestionCheckboxChange = (data) => {
             id => id !== questionId
         );
     }
-    
+
     // 반응성을 위해 객체를 새로 생성
     selectedQuestions.value = { ...selectedQuestions.value };
 };
@@ -233,7 +230,7 @@ const handleTogglePassage = (passageId) => {
     const passage = allPassages.value.find(p => p.pasCode === passageId);
     if (passage) {
         passage.isExpanded = !passage.isExpanded;
-        
+
         // 펼쳐질 때 미리보기 설정
         if (passage.isExpanded && !previewPassage.value) {
             previewPassage.value = passage;
@@ -263,29 +260,29 @@ const closeModal = () => {
     selectedQuestions.value = {};
     previewPassage.value = null;
     activeStructure.value = "전체";
-    
+
     emit("close");
 };
 
 const handleLoadPassageAndQuestionFromStorage = async () => {
     if (isProcessing.value || totalSelectedQuestions.value === 0) return;
-    
+
     isProcessing.value = true;
     loadingMessage.value = "선택한 지문과 문항을 추가하는 중...";
     isLoading.value = true;
-    
+
     try {
         // 선택된 지문과 문항 데이터 준비
         const selectedData = [];
-        
+
         for (const [passageId, questionIds] of Object.entries(selectedQuestions.value)) {
             if (questionIds.length > 0) {
                 const passage = allPassages.value.find(p => p.pasCode === parseInt(passageId));
                 if (passage) {
-                    const selectedQuestionData = passage.questions.filter(q => 
+                    const selectedQuestionData = passage.questions.filter(q =>
                         questionIds.includes(q.id)
                     );
-                    
+
                     selectedData.push({
                         ...passage,
                         questions: selectedQuestionData
@@ -293,12 +290,12 @@ const handleLoadPassageAndQuestionFromStorage = async () => {
                 }
             }
         }
-        
+
         console.log("📤 PassageLoaderModal: 선택된 데이터 전달", selectedData);
-        
+
         // 부모 컴포넌트에 선택된 데이터 전달
         emit("loadSelectedData", selectedData);
-        
+
     } catch (error) {
         console.error("❌ 지문 및 문항 추가 실패:", error);
         alert("오류가 발생했습니다.");

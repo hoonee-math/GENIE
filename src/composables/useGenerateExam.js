@@ -28,7 +28,7 @@ export function useGenerateExam() {
     {
       id: 1001, // 고유 ID (같은 지문을 여러번 불러와도 구분 가능)
       pasCode: 123, // 실제 DB의 지문 코드
-      title: '<p>독서 이론 - 텍스트의 의미 구성</p>',
+      title: '<p>독서 이론 - 텍스트의 의미 구성 문장 길이 늘리기</p>',
       content: '<p>독서는 단순히 글자를 읽는 행위가 아니라...</p>',
       type: '단일 지문',
       isExpanded: true,
