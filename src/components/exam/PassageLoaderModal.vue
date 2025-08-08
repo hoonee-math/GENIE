@@ -175,19 +175,11 @@ const loadPassages = async () => {
     try {
         const passages = await fetchPassagesWithQuestionsList();
         
-        // PassageBlock에서 사용할 수 있도록 데이터 변환
+        // 원본 데이터 구조 유지하되 PassageBlock에 필요한 필드만 추가
         allPassages.value = passages.map(passage => ({
-            id: passage.pasCode, // PassageBlock에서 사용하는 id
-            pasCode: passage.pasCode,
-            title: passage.title,
-            content: passage.content,
-            type: passage.generateType, // PassageBlock에서 사용하는 type
-            generateType: passage.generateType,
-            descriptions: passage.descriptions,
-            questions: passage.questions,
+            ...passage, // 원본 데이터 유지 (pasCode, questions 등)
+            type: passage.generateType, // PassageBlock에서 사용하는 type 필드
             isExpanded: false, // 기본적으로 접힌 상태
-            isFavorite: passage.isFavorite,
-            createdAt: passage.createdAt,
         }));
         
         console.log("✅ PassageLoaderModal: 지문 목록 로드 완료", allPassages.value.length, "개");
@@ -210,10 +202,8 @@ const handlePassageCheckboxChange = (data) => {
         selectedQuestions.value[passageId] = [];
     }
     
-    // 미리보기 업데이트 (현재 미리보기 중인 지문이라면)
-    if (previewPassage.value?.pasCode === passageId) {
-        // 미리보기는 그대로 유지
-    }
+    // 반응성을 위해 객체를 새로 생성
+    selectedQuestions.value = { ...selectedQuestions.value };
 };
 
 const handleQuestionCheckboxChange = (data) => {
@@ -224,16 +214,19 @@ const handleQuestionCheckboxChange = (data) => {
     }
     
     if (checked) {
-        // 문항 선택
+        // 개별 문항 선택 - 해당 문항만 선택
         if (!selectedQuestions.value[passageId].includes(questionId)) {
-            selectedQuestions.value[passageId].push(questionId);
+            selectedQuestions.value[passageId] = [...selectedQuestions.value[passageId], questionId];
         }
     } else {
-        // 문항 선택 해제
+        // 개별 문항 선택 해제 - 해당 문항만 해제
         selectedQuestions.value[passageId] = selectedQuestions.value[passageId].filter(
             id => id !== questionId
         );
     }
+    
+    // 반응성을 위해 객체를 새로 생성
+    selectedQuestions.value = { ...selectedQuestions.value };
 };
 
 const handleTogglePassage = (passageId) => {

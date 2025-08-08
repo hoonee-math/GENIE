@@ -178,18 +178,19 @@ const handleLoadSelectedData = async (selectedData) => {
         for (const passageData of selectedData) {
             // useGenerateExam의 loadedPassages에 추가할 형식으로 변환
             const newPassage = {
-                id: Date.now() + Math.random(), // 고유한 ID 생성
-                pasCode: passageData.pasCode,
+                id: Date.now() + Math.random(), // useGenerateExam에서 사용할 고유한 ID 생성
+                pasCode: passageData.pasCode, // 원본 pasCode 유지
                 title: passageData.title,
                 content: passageData.content,
-                type: passageData.generateType,
+                type: passageData.generateType || passageData.type,
                 isExpanded: true,
                 questions: passageData.questions.map((q, index) => ({
-                    id: q.id || Date.now() + index + Math.random(),
-                    text: q.content || q.text || '문제 내용',
-                    options: q.options || [],
-                    answer: q.answer || '',
-                    explanation: q.explanation || ''
+                    id: Date.now() + index + Math.random(), // useGenerateExam에서 사용할 고유한 ID 생성
+                    queQuery: q.queQuery || '문제의 문제문', // 다양한 필드명 지원
+                    queOption: q.options || q.queOption || [],
+                    queAnswer: q.answer || q.queAnswer || '',
+                    queDescription: q.queDescription || '',
+                    queCode: q.queCode // 원본 queCode 유지
                 })),
                 descriptions: passageData.descriptions
             }

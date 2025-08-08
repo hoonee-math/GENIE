@@ -28,11 +28,11 @@
       <p v-else @click="!showCheckbox && startEdit"
         class="flex-grow text-slate-700 p-2 rounded-md transition-colors"
         :class="{ 
-          'text-gray-400 italic': question.text === '새로운 문제를 입력하세요',
+          'text-gray-400 italic': question.queQuery === '새로운 문제를 입력하세요',
           'cursor-pointer hover:bg-gray-50': !showCheckbox,
           'cursor-default': showCheckbox
         }">
-        {{ question.text || '새로운 문제를 입력하세요' }}
+        {{ question.queQuery || '새로운 문제를 입력하세요' }}
       </p>
     </div>
 
@@ -83,7 +83,7 @@ const textareaRef = ref(null)
 // 편집 모드 시작
 const startEdit = () => {
   isEditing.value = true
-  editingText.value = props.question.text
+  editingText.value = props.question.queQuery
 
   nextTick(() => {
     if (textareaRef.value) {
@@ -104,10 +104,10 @@ const toggleEdit = () => {
 
 // 편집 저장
 const saveEdit = () => {
-  if (editingText.value.trim() !== props.question.text) {
+  if (editingText.value.trim() !== props.question.queQuery) {
     emit('update', {
       ...props.question,
-      text: editingText.value.trim() || '새로운 문제를 입력하세요'
+      queQuery: editingText.value.trim() || '새로운 문제를 입력하세요'
     })
   }
   isEditing.value = false
@@ -115,7 +115,7 @@ const saveEdit = () => {
 
 // 편집 취소
 const cancelEdit = () => {
-  editingText.value = props.question.text
+  editingText.value = props.question.queQuery
   isEditing.value = false
 }
 
@@ -128,7 +128,7 @@ const handleDelete = () => {
 
 // 문제 복사
 const copyQuestion = () => {
-  navigator.clipboard.writeText(props.question.text).then(() => {
+  navigator.clipboard.writeText(props.question.queQuery).then(() => {
     // 복사 성공 알림 (부모 컴포넌트에서 처리)
     emit('copy', props.question)
   }).catch(err => {
@@ -146,7 +146,7 @@ const handleCheckboxChange = (event) => {
 
 // 컴포넌트 마운트 시 빈 문제인 경우 자동 편집 모드 (체크박스 모드가 아닐 때만)
 onMounted(() => {
-  if (!props.showCheckbox && (props.question.text === '새로운 문제를 입력하세요' || !props.question.text)) {
+  if (!props.showCheckbox && (props.question.queQuery === '새로운 문제를 입력하세요' || !props.question.queQuery)) {
     // 잠시 후 편집 모드로 전환 (애니메이션 완료 후)
     setTimeout(() => {
       startEdit()

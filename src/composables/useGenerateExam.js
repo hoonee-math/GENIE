@@ -34,25 +34,28 @@ export function useGenerateExam() {
       isExpanded: true,
       questions: [
         {
-          id: 2001,
-          text: '윗글의 내용 전개 방식으로 적절한 것은?',
-          options: [],
-          answer: '',
-          explanation: ''
+          queCode: 2001, // 실제 DB의 문항 코드
+          queQuery: '윗글의 내용 전개 방식으로 적절한 것은?',
+          queOption: [],
+          queAnswer: '',
+          queDescription: '',
+          queSubpassage: ''
         },
         {
-          id: 2002,
-          text: '윗글을 바탕으로 [보기]를 이해한 내용으로 적절하지 않은 것은?',
-          options: [],
-          answer: '',
-          explanation: ''
+          queCode: 2002,
+          queQuery: '윗글을 바탕으로 [보기]를 이해한 내용으로 적절하지 않은 것은?',
+          queOption: [],
+          queAnswer: '',
+          queDescription: '',
+          queSubpassage: ''
         },
         {
-          id: 2003,
-          text: '윗글에 나타난 필자의 관점에 대한 설명으로 가장 적절한 것은?',
-          options: [],
-          answer: '',
-          explanation: ''
+          queCode: 2003,
+          queQuery: '윗글에 나타난 필자의 관점에 대한 설명으로 가장 적절한 것은?',
+          queOption: [],
+          queAnswer: '',
+          queDescription: '',
+          queSubpassage: ''
         }
       ],
       descriptions: [
@@ -73,18 +76,20 @@ export function useGenerateExam() {
       isExpanded: false, // 접힌 상태로 시작
       questions: [
         {
-          id: 2004,
-          text: '(가)와 (나)의 공통점으로 가장 적절한 것은?',
-          options: [],
-          answer: '',
-          explanation: ''
+          queCode: 2004,
+          queQuery: '(가)와 (나)의 공통점으로 가장 적절한 것은?',
+          queOption: [],
+          queAnswer: '',
+          queDescription: '',
+          queSubpassage: ''
         },
         {
-          id: 2005,
-          text: '윗글에 나타난 인물의 심리 변화 과정으로 적절한 것은?',
-          options: [],
-          answer: '',
-          explanation: ''
+          queCode: 2005,
+          queQuery: '윗글에 나타난 인물의 심리 변화 과정으로 적절한 것은?',
+          queOption: [],
+          queAnswer: '',
+          queDescription: '',
+          queSubpassage: ''
         }
       ],
       descriptions: [
@@ -111,32 +116,36 @@ export function useGenerateExam() {
       isExpanded: true,
       questions: [
         {
-          id: 2006,
-          text: '발표자의 말하기 방식에 대한 설명으로 가장 적절한 것은?',
-          options: [],
-          answer: '',
-          explanation: ''
+          queCode: 2006,
+          queQuery: '발표자의 말하기 방식에 대한 설명으로 가장 적절한 것은?',
+          queOption: [],
+          queAnswer: '',
+          queDescription: '',
+          queSubpassage: ''
         },
         {
-          id: 2007,
-          text: '윗글의 논증 구조를 분석한 내용으로 적절하지 않은 것은?',
-          options: [],
-          answer: '',
-          explanation: ''
+          queCode: 2007,
+          queQuery: '윗글의 논증 구조를 분석한 내용으로 적절하지 않은 것은?',
+          queOption: [],
+          queAnswer: '',
+          queDescription: '',
+          queSubpassage: ''
         },
         {
-          id: 2008,
-          text: '[보기]의 상황에서 가장 효과적인 토론 전략은?',
-          options: [],
-          answer: '',
-          explanation: ''
+          queCode: 2008,
+          queQuery: '[보기]의 상황에서 가장 효과적인 토론 전략은?',
+          queOption: [],
+          queAnswer: '',
+          queDescription: '',
+          queSubpassage: ''
         },
         {
-          id: 2009,
-          text: '토론 과정에서 나타난 의견 조율 방식으로 적절한 것은?',
-          options: [],
-          answer: '',
-          explanation: ''
+          queCode: 2009,
+          queQuery: '토론 과정에서 나타난 의견 조율 방식으로 적절한 것은?',
+          queOption: [],
+          queAnswer: '',
+          queDescription: '',
+          queSubpassage: ''
         }
       ],
       descriptions: [

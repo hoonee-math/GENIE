@@ -157,7 +157,7 @@ const handlePassageCheckboxChange = (event) => {
   const questionIds = props.passage.questions?.map(q => q.id) || []
   
   emit('passageCheckboxChange', {
-    passageId: props.passage.id,
+    passageId: props.passage.pasCode,
     questionIds,
     checked
   })
@@ -166,7 +166,7 @@ const handlePassageCheckboxChange = (event) => {
 // 문제 체크박스 변경 핸들러
 const handleQuestionCheckboxChange = (data) => {
   emit('questionCheckboxChange', {
-    passageId: props.passage.id,
+    passageId: props.passage.pasCode,
     questionId: data.questionId,
     checked: data.checked
   })
