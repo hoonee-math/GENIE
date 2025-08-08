@@ -47,7 +47,8 @@
                                 :selectedQuestions="selectedQuestions[passage.pasCode] || []"
                                 @passageCheckboxChange="handlePassageCheckboxChange"
                                 @questionCheckboxChange="handleQuestionCheckboxChange"
-                                @toggle="handleTogglePassage(passage.pasCode)" />
+                                @toggle="handleTogglePassage(passage.pasCode)" 
+                                @click="handlePassageClick(passage)" />
                         </TransitionGroup>
                     </div>
                     <div v-else class="flex items-center justify-center h-full">
@@ -230,12 +231,13 @@ const handleTogglePassage = (passageId) => {
     const passage = allPassages.value.find(p => p.pasCode === passageId);
     if (passage) {
         passage.isExpanded = !passage.isExpanded;
-
-        // 펼쳐질 때 미리보기 설정
-        if (passage.isExpanded && !previewPassage.value) {
-            previewPassage.value = passage;
-        }
     }
+};
+
+// PassageBlock 클릭 시 미리보기 업데이트
+const handlePassageClick = (passage) => {
+    previewPassage.value = passage;
+    console.log('📖 미리보기 업데이트:', passage.title);
 };
 
 const getSelectedQuestionCount = (passageId) => {

@@ -2,11 +2,11 @@
   <div
     class="passage-block bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden hover:shadow-lg transition-all duration-200">
     <!-- 지문 헤더 -->
-    <div class="flex items-center p-4 bg-white border-b border-slate-200">
+    <div class="flex items-center p-4 bg-white border-b border-slate-200" @click="handleHeaderClick" >
       <!-- 체크박스 모드 -->
       <template v-if="showCheckbox">
         <input type="checkbox" :checked="isChecked" :indeterminate="isIndeterminate"
-          @change="handlePassageCheckboxChange" ref="passageCheckboxRef"
+          @change="handlePassageCheckboxChange" @click.stop ref="passageCheckboxRef"
           class="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 mr-4" />
       </template>
 
@@ -29,7 +29,7 @@
           {{ passage.type }}
         </span>
       </div>
-      <button @click="toggleExpanded" class="toggle-button ml-1 text-slate-500 hover:text-slate-800">
+      <button @click.stop="toggleExpanded" class="toggle-button ml-1 text-slate-500 hover:text-slate-800">
         <Icon icon="heroicons:chevron-down" class="w-6 h-6 transition-transform"
           :class="{ 'rotate-180': passage.isExpanded }" />
       </button>
@@ -102,15 +102,19 @@ const emit = defineEmits([
   'updateQuestion',
   'remove',
   'passageCheckboxChange',
-  'questionCheckboxChange'
+  'questionCheckboxChange',
+  'click'
 ])
 
 // 반응형 상태
 const passageCheckboxRef = ref(null)
 
-// 지문 접기/펴기 토글
-const toggleExpanded = () => {
+// 헤더 영역 클릭 시 (미리보기 변경 + 토글)
+const handleHeaderClick = () => {
   emit('toggle')
+  if(showCheckbox){ // 모달에서만 미리보기 변경반영을 위해 click 을 emit 으로 전달
+    emit('click') // 미리보기 변경을 위한 클릭 이벤트
+  }
 }
 
 // 체크박스 관련 계산된 속성
