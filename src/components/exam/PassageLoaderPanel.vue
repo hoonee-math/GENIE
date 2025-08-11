@@ -28,7 +28,9 @@
                 @toggle="handleTogglePassage(passage.id)"
                 @addQuestion="handleAddQuestion(passage.id)"
                 @deleteQuestion="handleDeleteQuestion(passage.id, $event)"
-                @remove="handleRemovePassage(passage.id)" />
+                @remove="handleRemovePassage(passage.id)"
+                @reorderQuestions="(oldIndex, newIndex) => reorderQuestions(passage.id, oldIndex, newIndex)" />
+                <!-- ↑ PassageBlock에서 문항 드래그(UI 변경: PassageBlock에서 Sortable이 DOM 순서를 변경) 완료 시 useGenerateExam의 loadedPassages 배열도 같은 순서로 변경 -->
         </TransitionGroup>
 
         <!-- 에러 메시지 -->
@@ -138,12 +140,9 @@ const {
     clearError
 } = useGenerateExam()
 
-const { startDrag, endDrag, canDrop } = useDragAndDrop()
-
 // 반응형 상태
 const showPassageModal = ref(false)
 const passageSortable = ref(null)
-const questionSortables = ref([])
 
 // 문제지 이름을 examData와 동기화
 const testName = computed({
@@ -218,13 +217,11 @@ const handleLoadSelectedData = async (selectedData) => {
 // 지문 관련 함수들 (기존 로직을 useGenerateExam composable에서 가져옴)
 const handleTogglePassage = (passageId) => {
     togglePassage(passageId)
-    emit('examDataChanged', examData.value)
 }
 
 // 지문 추가 함수 (작동 방식 변경 예정. 기존 pasCode에 종속된 문항들 중에서 추가되지 않은 문항들만 추가로 다시 호출할 수 있는 기능으로 변경 예정)
 const handleAddQuestion = async (passageId) => {
     addQuestion(passageId) // 현재 작동 방식: addQuestion = (passageId, questionText = '새로운 문제를 입력하세요') 에 의해서 빈 문항 데이터가 해당지문의 passage.questions 에 추가됨
-    emit('examDataChanged', examData.value)
 
     displaySuccess('새로운 문제가 추가되었습니다.')
 
@@ -235,24 +232,18 @@ const handleAddQuestion = async (passageId) => {
 
 const handleDeleteQuestion = (passageId, questionId) => {
     deleteQuestion(passageId, questionId)
-    emit('examDataChanged', examData.value)
 }
 
 const handleRemovePassage = (passageId) => {
     removePassage(passageId)
-    emit('examDataChanged', examData.value)
 }
 
-// 드래그 앤 드롭 초기화
+// 지문 드래그 앤 드롭 초기화
 const initializeSortable = () => {
-    // 기존 인스턴스 정리
+    // 기존 지문 드래그 인스턴스 정리
     if (passageSortable.value) {
         passageSortable.value.destroy()
     }
-    questionSortables.value.forEach(sortable => {
-        if (sortable) sortable.destroy()
-    })
-    questionSortables.value = []
 
     // 지문 드래그 앤 드롭 설정
     const worksheetContainer = document.getElementById('worksheet-container')
@@ -267,25 +258,6 @@ const initializeSortable = () => {
             }
         })
     }
-
-    // 문제 드래그 앤 드롭 설정
-    const questionLists = document.querySelectorAll('.questions-list')
-    questionLists.forEach((list, index) => {
-        const passageId = loadedPassages.value[index]?.id
-        if (passageId) {
-            const sortable = Sortable.create(list, {
-                animation: 150,
-                handle: '.question-drag-handle',
-                draggable: '.question-item',
-                filter: 'button',
-                ghostClass: 'ghost-class',
-                onEnd: (evt) => {
-                    reorderQuestions(passageId, evt.oldIndex, evt.newIndex)
-                }
-            })
-            questionSortables.value.push(sortable)
-        }
-    })
 }
 
 // 컴포넌트 마운트 시 초기화

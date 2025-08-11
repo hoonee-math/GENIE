@@ -31,7 +31,7 @@ export function useGenerateExam() {
       title: '<p>독서 이론 - 텍스트의 의미 구성 문장 길이 늘리기</p>',
       content: '<p>독서는 단순히 글자를 읽는 행위가 아니라...</p>',
       type: '단일 지문',
-      isExpanded: true,
+      isExpanded: false,
       questions: [
         {
           queCode: 2001, // 실제 DB의 문항 코드
@@ -113,7 +113,7 @@ export function useGenerateExam() {
       title: '<p>화법과 작문 - 토론의 전략</p>',
       content: '<p>효과적인 토론을 위해서는 논증의 구조를 명확히 해야 한다...</p>',
       type: '단일 지문',
-      isExpanded: true,
+      isExpanded: false,
       questions: [
         {
           queCode: 2006,

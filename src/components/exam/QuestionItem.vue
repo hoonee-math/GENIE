@@ -19,12 +19,11 @@
       <span class="question-number font-semibold text-slate-600 mr-3">{{ index + 1 }}.</span>
     </template>
 
-    <!-- 문제 텍스트 (TipTap Editor) -->
+    <!-- 문제 텍스트 (HTML 렌더링) -->
     <div class="flex-grow">
-      <TipTapEditor 
-        :initialContent="question.queQuery" 
-        :isEditable="false"
-        :addClass="'text-lg m-0'" 
+      <div 
+        class="prose prose-sm text-lg m-0 text-[#303030]" 
+        v-html="getFormattedQuery(question.queQuery)"
       />
     </div>
 
@@ -43,7 +42,6 @@
 <script setup>
 import { ref } from 'vue'
 import { Icon } from '@iconify/vue'
-import TipTapEditor from '@/views/generation/TipTapEditor.vue'
 
 // Props
 const props = defineProps({
@@ -95,7 +93,21 @@ const handleCheckboxChange = (event) => {
   })
 }
 
-// 자동 편집 모드 제거됨 (편집 기능 제거로 인해 불필요)
+// queQuery HTML 포맷팅 함수
+const getFormattedQuery = (queQuery) => {
+  // HTML 태그가 없으면 <p> 태그로 감싸기
+  if (!queQuery) return '<p>문제를 입력하세요</p>'
+  
+  const trimmed = queQuery.trim()
+  
+  // 이미 HTML 태그가 있으면 그대로 반환
+  if (trimmed.startsWith('<') && trimmed.includes('>')) {
+    return trimmed
+  }
+  
+  // HTML 태그가 없으면 <p> 태그로 감싸기
+  return `<p>${trimmed}</p>`
+}
 </script>
 
 <style scoped>

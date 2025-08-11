@@ -38,13 +38,12 @@
     <!-- 문제 리스트 -->
     <Transition name="expand" appear>
       <div v-show="passage.isExpanded">
-        <div class="questions-list bg-slate-50/50 p-2 sm:p-4 space-y-2">
-          <TransitionGroup name="question" tag="div" class="space-y-2">
-            <QuestionItem v-for="(question, qIndex) in passage.questions" :key="question.queCode" :question="question"
-              :index="qIndex" :showCheckbox="showCheckbox" :isChecked="selectedQuestions.includes(question.queCode)"
-              @delete="$emit('deleteQuestion', question.queCode)" 
-              @checkboxChange="handleQuestionCheckboxChange" />
-          </TransitionGroup>
+        <div class="questions-list bg-slate-50/50 p-2 sm:p-4" ref="questionsListRef">
+          <!-- TransitionGroup & wrapper div 제거: Sortable이 직접적인 자식 요소들을 인식하도록-->
+          <QuestionItem v-for="(question, qIndex) in passage.questions" :key="question.queCode" :question="question"
+            :index="qIndex" :showCheckbox="showCheckbox" :isChecked="selectedQuestions.includes(question.queCode)"
+            @delete="$emit('deleteQuestion', question.queCode)" 
+            @checkboxChange="handleQuestionCheckboxChange" />
 
           <!-- 문제 추가 버튼 (체크박스 모드가 아닐 때만) -->
           <button v-if="!showCheckbox" @click="$emit('addQuestion')"
@@ -69,10 +68,11 @@
 </template>
 
 <script setup>
-import { computed, ref, watch, nextTick } from 'vue'
+import { computed, ref, watch, nextTick, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import QuestionItem from './QuestionItem.vue'
 import TipTapEditor from '@/views/generation/TipTapEditor.vue'
+import Sortable from 'sortablejs'
 
 // Props
 const props = defineProps({
@@ -102,11 +102,14 @@ const emit = defineEmits([
   'remove',
   'passageCheckboxChange',
   'questionCheckboxChange',
-  'click'
+  'click',
+  'reorderQuestions'
 ])
 
 // 반응형 상태
 const passageCheckboxRef = ref(null)
+const questionsListRef = ref(null)
+const questionSortable = ref(null)
 
 // 헤더 영역 클릭 시 (미리보기 변경 + 토글)
 const handleHeaderClick = () => {
@@ -185,9 +188,57 @@ const getPassageTypeClass = (type) => {
       return 'bg-gray-100 text-gray-700'
   }
 }
+
+// 문항 드래그앤드롭 초기화
+const initializeQuestionSortable = async () => {
+  await nextTick()
+  
+  if (props.showCheckbox) return // 체크박스 모드에서는 드래그 비활성화
+  
+  const questionsList = questionsListRef.value
+  if (!questionsList) return
+  
+  // 기존 인스턴스 정리
+  if (questionSortable.value) {
+    questionSortable.value.destroy()
+  }
+  
+  // 문항 드래그앤드롭 Sortable 생성
+  questionSortable.value = Sortable.create(questionsList, {
+    animation: 150,
+    handle: '.question-drag-handle',
+    draggable: '.question-item',
+    group: `passage-${props.passage.id}`,
+    onStart: (evt) => {
+      evt.item.style.opacity = '0.6'
+    },
+    onEnd: (evt) => {
+      evt.item.style.opacity = '1'
+      if (evt.oldIndex !== evt.newIndex) {
+        emit('reorderQuestions', evt.oldIndex, evt.newIndex)
+      }
+    }
+  })
+}
+
+// 지문 펼침/접힘 변경 시 드래그 재초기화
+watch(() => props.passage.isExpanded, (expanded) => {
+  if (expanded && !props.showCheckbox) {
+    setTimeout(() => {
+      initializeQuestionSortable()
+    }, 100) // DOM 업데이트 대기
+  }
+})
+
+// 컴포넌트 마운트 시 초기화
+onMounted(() => {
+  if (props.passage.isExpanded && !props.showCheckbox) {
+    initializeQuestionSortable()
+  }
+})
 </script>
 
-<style scoped>
+<style>
 /* 지문 접기/펴기 애니메이션 */
 .expand-enter-active,
 .expand-leave-active {
