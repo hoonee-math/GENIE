@@ -22,8 +22,10 @@
 
       <!-- 공통 헤더 콘텐츠 -->
       <div class="flex-grow flex items-center" :class="showCheckbox ? '' : 'ml-0'">
-        <TipTapEditor :initialContent="passage.title" :isEditable="false"
-          :addClass="'text-lg font-semibold lg:w-[230px] text-slate-800'" />
+        <div 
+          class="text-lg font-semibold lg:w-[230px] text-slate-800" 
+          v-html="getFormattedTitle(passage.title)"
+        />
         <span class="ml-auto text-xs text-nowrap font-semibold px-2.5 py-0.5 rounded-full"
           :class="getPassageTypeClass(passage.type)">
           {{ passage.type }}
@@ -42,8 +44,10 @@
           <!-- TransitionGroup & wrapper div 제거: Sortable이 직접적인 자식 요소들을 인식하도록-->
           <QuestionItem v-for="(question, qIndex) in passage.questions" :key="question.queCode" :question="question"
             :index="qIndex" :showCheckbox="showCheckbox" :isChecked="selectedQuestions.includes(question.queCode)"
+            :class="[qIndex < passage.questions.length - 1 ? 'mb-3' : '']"
             @delete="$emit('deleteQuestion', question.queCode)" 
-            @checkboxChange="handleQuestionCheckboxChange" />
+            @checkboxChange="handleQuestionCheckboxChange"
+ />
 
           <!-- 문제 추가 버튼 (체크박스 모드가 아닐 때만) -->
           <button v-if="!showCheckbox" @click="$emit('addQuestion')"
@@ -71,7 +75,6 @@
 import { computed, ref, watch, nextTick, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
 import QuestionItem from './QuestionItem.vue'
-import TipTapEditor from '@/views/generation/TipTapEditor.vue'
 import Sortable from 'sortablejs'
 
 // Props
@@ -229,6 +232,21 @@ watch(() => props.passage.isExpanded, (expanded) => {
     }, 100) // DOM 업데이트 대기
   }
 })
+
+// passage.title HTML 포맷팅 함수
+const getFormattedTitle = (title) => {
+  if (!title) return '<p>지문 제목을 입력하세요</p>'
+  
+  const trimmed = title.trim()
+  
+  // 이미 HTML 태그가 있으면 그대로 반환
+  if (trimmed.startsWith('<') && trimmed.includes('>')) {
+    return trimmed
+  }
+  
+  // HTML 태그가 없으면 <p> 태그로 감싸기
+  return `<p>${trimmed}</p>`
+}
 
 // 컴포넌트 마운트 시 초기화
 onMounted(() => {

@@ -22,7 +22,7 @@
     <!-- 문제 텍스트 (HTML 렌더링) -->
     <div class="flex-grow">
       <div 
-        class="prose prose-sm text-lg m-0 text-[#303030]" 
+        class="prose prose-sm text-lg m-0 text-[#303030] text-left" 
         v-html="getFormattedQuery(question.queQuery)"
       />
     </div>
