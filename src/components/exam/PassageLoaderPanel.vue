@@ -137,7 +137,8 @@ const {
     addQuestion,
     deleteQuestion,
     reorderQuestions,
-    clearError
+    clearError,
+    addPassagesToLoaded
 } = useGenerateExam()
 
 // 반응형 상태
@@ -165,37 +166,15 @@ const handleLoadSelectedData = async (selectedData) => {
     console.log('선택된 지문과 문항 데이터:', selectedData)
 
     try {
-        let addedPassageCount = 0
-        let addedQuestionCount = 0
+        // useGenerateExam의 addPassagesToLoaded 함수 사용
+        const addedPassages = addPassagesToLoaded(selectedData, { isExpanded: true })
+        
+        const addedPassageCount = addedPassages.length
+        const addedQuestionCount = addedPassages.reduce((total, passage) => 
+            total + passage.questions.length, 0
+        )
 
-        for (const passageData of selectedData) {
-            // useGenerateExam의 loadedPassages에 추가할 형식으로 변환
-            const newPassage = {
-                id: Date.now() + Math.random(), // useGenerateExam에서 사용할 고유한 ID 생성
-                pasCode: passageData.pasCode, // 원본 pasCode 유지
-                title: passageData.title,
-                content: passageData.content,
-                type: passageData.generateType || passageData.type,
-                isExpanded: true,
-                questions: passageData.questions.map(q => ({
-                    // id: Date.now() + index + Math.random(), // useGenerateExam에서 사용할 고유한 ID 생성
-                    queCode: q.queCode,
-                    queQuery: q.queQuery || '문제의 문제문',
-                    queOption: q.queOption || q.options || [],
-                    queAnswer: q.queAnswer || q.answer || '',
-                    queDescription: q.queDescription || '',
-                    queSubpassage: q.queSubpassage || ''
-                })),
-                descriptions: passageData.descriptions
-            }
-
-            // 새로운 지문 추가
-            loadedPassages.value.push(newPassage)
-            addedPassageCount++
-            addedQuestionCount += newPassage.questions.length
-        }
-
-        console.log("업로드된 지문데이터들: ",loadedPassages.value)
+        console.log("업로드된 지문데이터들: ", loadedPassages.value)
 
         // 전체 추가 완료 메시지
         if (addedPassageCount > 0) {

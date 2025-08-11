@@ -23,7 +23,7 @@
     <div class="flex-grow">
       <div 
         class="prose prose-sm text-lg m-0 text-[#303030] text-left" 
-        v-html="getFormattedQuery(question.queQuery)"
+        v-html="question.queQuery"
       />
     </div>
 
@@ -93,21 +93,6 @@ const handleCheckboxChange = (event) => {
   })
 }
 
-// queQuery HTML 포맷팅 함수
-const getFormattedQuery = (queQuery) => {
-  // HTML 태그가 없으면 <p> 태그로 감싸기
-  if (!queQuery) return '<p>문제를 입력하세요</p>'
-  
-  const trimmed = queQuery.trim()
-  
-  // 이미 HTML 태그가 있으면 그대로 반환
-  if (trimmed.startsWith('<') && trimmed.includes('>')) {
-    return trimmed
-  }
-  
-  // HTML 태그가 없으면 <p> 태그로 감싸기
-  return `<p>${trimmed}</p>`
-}
 </script>
 
 <style scoped>

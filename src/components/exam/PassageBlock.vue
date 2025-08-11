@@ -24,7 +24,7 @@
       <div class="flex-grow flex items-center" :class="showCheckbox ? '' : 'ml-0'">
         <div 
           class="text-lg font-semibold lg:w-[230px] text-slate-800" 
-          v-html="getFormattedTitle(passage.title)"
+          v-html="passage.title"
         />
         <span class="ml-auto text-xs text-nowrap font-semibold px-2.5 py-0.5 rounded-full"
           :class="getPassageTypeClass(passage.type)">
@@ -233,20 +233,6 @@ watch(() => props.passage.isExpanded, (expanded) => {
   }
 })
 
-// passage.title HTML 포맷팅 함수
-const getFormattedTitle = (title) => {
-  if (!title) return '<p>지문 제목을 입력하세요</p>'
-  
-  const trimmed = title.trim()
-  
-  // 이미 HTML 태그가 있으면 그대로 반환
-  if (trimmed.startsWith('<') && trimmed.includes('>')) {
-    return trimmed
-  }
-  
-  // HTML 태그가 없으면 <p> 태그로 감싸기
-  return `<p>${trimmed}</p>`
-}
 
 // 컴포넌트 마운트 시 초기화
 onMounted(() => {

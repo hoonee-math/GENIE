@@ -161,13 +161,87 @@ export function useGenerateExam() {
   const isLoading = ref(false)
   const error = ref(null)
 
+  // ========== HTML 포맷팅 유틸리티 ==========
+  
+  /**
+   * HTML 콘텐츠 포맷팅 함수
+   * @param {string} content - 포맷팅할 콘텐츠
+   * @param {string} defaultText - 기본 텍스트
+   */
+  const formatHtmlContent = (content, defaultText = '내용을 입력하세요') => {
+    if (!content) return `<p>${defaultText}</p>`
+    
+    const trimmed = content.trim()
+    
+    // 이미 HTML 태그가 있으면 그대로 반환
+    if (trimmed.startsWith('<') && trimmed.includes('>')) {
+      return trimmed
+    }
+    
+    // HTML 태그가 없으면 <p> 태그로 감싸기
+    return `<p>${trimmed}</p>`
+  }
+
+  /**
+   * 지문 데이터를 loadedPassages 형식으로 변환
+   * @param {Object} passageData - 원본 지문 데이터
+   * @param {Object} options - 옵션 { isExpanded: boolean }
+   */
+  const createNewPassage = (passageData, options = {}) => {
+    const { isExpanded = true } = options
+    
+    return {
+      id: (passageData.pasCode || Date.now()) + '-' + Date.now() + Math.random(), // 고유한 ID 생성
+      pasCode: passageData.pasCode,
+      title: formatHtmlContent(passageData.title, '지문 제목을 입력하세요'),
+      content: formatHtmlContent(passageData.content, '지문 내용을 입력하세요'),
+      type: passageData.generateType || passageData.type || determinePassageType(passageData.descriptions),
+      isExpanded,
+      questions: (passageData.questions || []).map(q => ({
+        queCode: q.queCode,
+        queQuery: formatHtmlContent(
+          q.content || q.text || q.queQuery || '문제의 문제문', 
+          '문제를 입력하세요'
+        ),
+        queOption: q.options || q.queOption || [],
+        queAnswer: q.answer || q.queAnswer || '',
+        queDescription: q.explanation || q.queDescription || '',
+        queSubpassage: q.queSubpassage || ''
+      })),
+      descriptions: passageData.descriptions || []
+    }
+  }
+
   // ========== 지문 관리 ==========
 
   /**
-   * 지문을 로드하고 문제지에 추가
-   * @param {number} pasCode - 지문 코드
+   * 지문을 loadedPassages에 추가
+   * @param {Object|Array} passageDataOrArray - 지문 데이터 또는 지문 배열
+   * @param {Object} options - 옵션 { isExpanded: boolean }
    */
-  const loadPassage = async (pasCode) => {
+  const addPassagesToLoaded = (passageDataOrArray, options = {}) => {
+    const passagesArray = Array.isArray(passageDataOrArray) 
+      ? passageDataOrArray 
+      : [passageDataOrArray]
+    
+    const addedPassages = []
+    
+    passagesArray.forEach(passageData => {
+      const newPassage = createNewPassage(passageData, options)
+      loadedPassages.value.push(newPassage)
+      addedPassages.push(newPassage)
+    })
+    
+    return addedPassages
+  }
+
+  /**
+   * 사용하지 않는 함수!!
+   * 지문을 로드하고 문제지에 추가 (API 호출)
+   * @param {number} pasCode - 지문 코드
+   * @param {Object} options - 옵션 { isExpanded: boolean }
+   */
+  const loadPassage = async (pasCode, options = {}) => {
     if (isLoading.value) return false
 
     isLoading.value = true
@@ -183,27 +257,8 @@ export function useGenerateExam() {
         throw new Error('지문 데이터를 찾을 수 없습니다.')
       }
 
-      // 새 지문 객체 생성
-      const newPassage = {
-        id: passageData.pasCode+'-'+Date.now(), // 임시 ID (실제로는 pasCode 사용)
-        pasCode: passageData.pasCode,
-        title: passageData.title,
-        content: passageData.content,
-        type: determinePassageType(passageData.descriptions),
-        isExpanded: true,
-        questions: passageData.questions?.map((q, index) => ({
-          // id: q.queCode+'-'+Date.now() || Date.now() + index, // 문제지 생성 후 각 문제를 수정할 경우 필요해질 수 있지만, 그렇다고 하더라도 id값을 생성한 지문에 각 문항이 종속되어 큰 문제가 없음.
-          queCode: q.queCode,
-          text: q.content || q.text || '문제 내용',
-          options: q.options || [],
-          answer: q.answer || '',
-          explanation: q.explanation || ''
-        })) || [],
-        descriptions: passageData.descriptions || []
-      }
-
-      // 지문 리스트에 추가
-      loadedPassages.value.push(newPassage)
+      // 지문을 loadedPassages에 추가
+      const [newPassage] = addPassagesToLoaded(passageData, options)
 
       console.log('지문 로드 완료:', newPassage.title)
       return true
@@ -264,10 +319,11 @@ export function useGenerateExam() {
     if (passage) {
       const newQuestion = {
         queCode: Date.now(), // 새 문항의 임시 queCode (실제로는 서버에서 할당)
-        queQuery: questionText,
+        queQuery: formatHtmlContent(questionText, '문제를 입력하세요'),
         queOption: [],
         queAnswer: '',
-        queDescription: ''
+        queDescription: '',
+        queSubpassage: ''
       }
       passage.questions.push(newQuestion)
     }
@@ -452,6 +508,9 @@ export function useGenerateExam() {
     reorderQuestions,
 
     // 유틸리티
+    formatHtmlContent,
+    createNewPassage,
+    addPassagesToLoaded,
     getPassageTypeClass,
     resetExam,
     exportExamData,
