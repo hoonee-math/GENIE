@@ -44,7 +44,7 @@
           <!-- TransitionGroup & wrapper div 제거: Sortable이 직접적인 자식 요소들을 인식하도록-->
           <QuestionItem v-for="(question, qIndex) in passage.questions" :key="question.queCode" :question="question"
             :index="qIndex" :showCheckbox="showCheckbox" :isChecked="selectedQuestions.includes(question.queCode)"
-            :class="[qIndex < passage.questions.length - 1 ? 'mb-3' : '']"
+            :class="['mb-3']"
             @delete="$emit('deleteQuestion', question.queCode)" 
             @checkboxChange="handleQuestionCheckboxChange"
  />

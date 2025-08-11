@@ -1,6 +1,6 @@
 <template>
   <div
-    class="question-item flex items-center bg-white p-3 rounded-lg border border-slate-200 hover:border-blue-500 hover:shadow-sm transition-all group">
+    class="question-item flex items-center bg-white p-3 rounded-lg border border-slate-200 hover:shadow-sm transition-all group">
     <!-- 체크박스 모드 -->
     <template v-if="showCheckbox">
       <input 
