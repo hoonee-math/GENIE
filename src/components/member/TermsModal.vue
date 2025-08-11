@@ -34,7 +34,7 @@ const props = defineProps({
 });
 
 const termsText = ref("");
-const files = import.meta.glob("@/assets/policy/*.txt", { as: "raw" });
+const files = import.meta.glob('@/assets/policy/*.txt', { query: '?raw', import: 'default' })
 
 onMounted(async () => {
   try {

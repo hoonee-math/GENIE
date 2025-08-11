@@ -13,7 +13,7 @@
 import { ref, onMounted } from "vue";
 
 const privacyText = ref("");
-const files = import.meta.glob("@/assets/policy/*.txt", { as: "raw" });
+const files = import.meta.glob('@/assets/policy/*.txt', { query: '?raw', import: 'default' })
 
 onMounted(async () => {
   try {
