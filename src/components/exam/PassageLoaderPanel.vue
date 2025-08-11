@@ -25,10 +25,10 @@
         <!-- 로드된 지문 리스트 영역 -->
         <TransitionGroup name="passage" tag="div" class="mt-8 space-y-6" id="worksheet-container">
             <PassageBlock v-for="(passage, index) in loadedPassages" :key="passage.id" :passage="passage" :index="index"
-                @toggle="handleTogglePassage(passage.id)" @addQuestion="handleAddQuestion(passage.id)"
+                @toggle="handleTogglePassage(passage.id)"
+                @addQuestion="handleAddQuestion(passage.id)"
                 @deleteQuestion="handleDeleteQuestion(passage.id, $event)"
-                @updateQuestion="handleUpdateQuestion(passage.id, $event.id, $event)"
-                @remove="handleRemovePassage(passage.id)" @copy="handleCopyQuestion" />
+                @remove="handleRemovePassage(passage.id)" />
         </TransitionGroup>
 
         <!-- 에러 메시지 -->
@@ -131,15 +131,12 @@ const {
     error,
     totalQuestionCount,
     passageCount,
-    loadPassage,
     removePassage,
     reorderPassages,
     togglePassage,
     addQuestion,
     deleteQuestion,
     reorderQuestions,
-    updateQuestion,
-    getPassageTypeClass,
     clearError
 } = useGenerateExam()
 
@@ -184,13 +181,14 @@ const handleLoadSelectedData = async (selectedData) => {
                 content: passageData.content,
                 type: passageData.generateType || passageData.type,
                 isExpanded: true,
-                questions: passageData.questions.map((q, index) => ({
-                    id: Date.now() + index + Math.random(), // useGenerateExam에서 사용할 고유한 ID 생성
-                    queQuery: q.queQuery || '문제의 문제문', // 다양한 필드명 지원
-                    queOption: q.options || q.queOption || [],
-                    queAnswer: q.answer || q.queAnswer || '',
+                questions: passageData.questions.map(q => ({
+                    // id: Date.now() + index + Math.random(), // useGenerateExam에서 사용할 고유한 ID 생성
+                    queCode: q.queCode,
+                    queQuery: q.queQuery || '문제의 문제문',
+                    queOption: q.queOption || q.options || [],
+                    queAnswer: q.queAnswer || q.answer || '',
                     queDescription: q.queDescription || '',
-                    queCode: q.queCode // 원본 queCode 유지
+                    queSubpassage: q.queSubpassage || ''
                 })),
                 descriptions: passageData.descriptions
             }
@@ -228,8 +226,9 @@ const handleTogglePassage = (passageId) => {
     emit('examDataChanged', examData.value)
 }
 
+// 지문 추가 함수 (작동 방식 변경 예정. 기존 pasCode에 종속된 문항들 중에서 추가되지 않은 문항들만 추가로 다시 호출할 수 있는 기능으로 변경 예정)
 const handleAddQuestion = async (passageId) => {
-    addQuestion(passageId)
+    addQuestion(passageId) // 현재 작동 방식: addQuestion = (passageId, questionText = '새로운 문제를 입력하세요') 에 의해서 빈 문항 데이터가 해당지문의 passage.questions 에 추가됨
     emit('examDataChanged', examData.value)
 
     displaySuccess('새로운 문제가 추가되었습니다.')
@@ -244,18 +243,9 @@ const handleDeleteQuestion = (passageId, questionId) => {
     emit('examDataChanged', examData.value)
 }
 
-const handleUpdateQuestion = (passageId, questionId, updates) => {
-    updateQuestion(passageId, questionId, updates)
-    emit('examDataChanged', examData.value)
-}
-
 const handleRemovePassage = (passageId) => {
     removePassage(passageId)
     emit('examDataChanged', examData.value)
-}
-
-const handleCopyQuestion = (question) => {
-    displaySuccess(`문제 '${question.text.substring(0, 20)}...'가 복사되었습니다.`)
 }
 
 // 드래그 앤 드롭 초기화

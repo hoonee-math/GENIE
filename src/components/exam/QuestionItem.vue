@@ -90,7 +90,7 @@ const copyQuestion = () => {
 // 체크박스 변경 핸들러
 const handleCheckboxChange = (event) => {
   emit('checkboxChange', {
-    queCode: props.question.queCode || props.question.id,
+    queCode: props.question.queCode,
     checked: event.target.checked
   })
 }

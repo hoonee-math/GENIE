@@ -284,7 +284,7 @@ const handleLoadPassageAndQuestionFromStorage = async () => {
                 const passage = allPassages.value.find(p => p.pasCode === parseInt(pasCode));
                 if (passage) {
                     const selectedQuestionData = passage.questions.filter(q =>
-                        queCodes.includes(q.queCode || q.id)
+                        queCodes.includes(q.queCode)
                     );
 
                     selectedData.push({

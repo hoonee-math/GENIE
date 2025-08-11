@@ -29,7 +29,7 @@
           {{ passage.type }}
         </span>
       </div>
-      <button @click.stop="toggleExpanded" class="toggle-button ml-1 text-slate-500 hover:text-slate-800">
+      <button class="toggle-button ml-1 text-slate-500 hover:text-slate-800">
         <Icon icon="heroicons:chevron-down" class="w-6 h-6 transition-transform"
           :class="{ 'rotate-180': passage.isExpanded }" />
       </button>
@@ -40,9 +40,9 @@
       <div v-show="passage.isExpanded">
         <div class="questions-list bg-slate-50/50 p-2 sm:p-4 space-y-2">
           <TransitionGroup name="question" tag="div" class="space-y-2">
-            <QuestionItem v-for="(question, qIndex) in passage.questions" :key="question.queCode || question.id" :question="question"
-              :index="qIndex" :showCheckbox="showCheckbox" :isChecked="selectedQuestions.includes(question.queCode || question.id)"
-              @delete="$emit('deleteQuestion', question.queCode || question.id)" @update="$emit('updateQuestion', question.queCode || question.id, $event)"
+            <QuestionItem v-for="(question, qIndex) in passage.questions" :key="question.queCode" :question="question"
+              :index="qIndex" :showCheckbox="showCheckbox" :isChecked="selectedQuestions.includes(question.queCode)"
+              @delete="$emit('deleteQuestion', question.queCode)" 
               @checkboxChange="handleQuestionCheckboxChange" />
           </TransitionGroup>
 
@@ -99,7 +99,6 @@ const emit = defineEmits([
   'toggle',
   'addQuestion',
   'deleteQuestion',
-  'updateQuestion',
   'remove',
   'passageCheckboxChange',
   'questionCheckboxChange',
@@ -122,8 +121,8 @@ const totalQuestions = computed(() => props.passage.questions?.length || 0)
 const selectedQuestionCount = computed(() => {
   if (!props.showCheckbox || totalQuestions.value === 0) return 0
   if (!Array.isArray(props.selectedQuestions)) return 0
-  return props.selectedQuestions.filter(qId =>
-    props.passage.questions?.some(q => (q.queCode || q.id) === qId)
+  return props.selectedQuestions.filter(queCode =>
+    props.passage.questions?.some(q => q.queCode === queCode)
   ).length
 })
 
@@ -150,7 +149,7 @@ watch([isIndeterminate], async () => {
 // 지문 체크박스 변경 핸들러
 const handlePassageCheckboxChange = (event) => {
   const checked = event.target.checked
-  const queCodes = props.passage.questions?.map(q => q.queCode || q.id) || []
+  const queCodes = props.passage.questions?.map(q => q.queCode) || []
 
   // 체크박스 클릭 시 지문이 닫혀있으면 자동으로 확장
   if (checked && !props.passage.isExpanded) {

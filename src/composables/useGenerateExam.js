@@ -185,14 +185,15 @@ export function useGenerateExam() {
 
       // 새 지문 객체 생성
       const newPassage = {
-        id: Date.now(), // 임시 ID (실제로는 pasCode 사용)
+        id: passageData.pasCode+'-'+Date.now(), // 임시 ID (실제로는 pasCode 사용)
         pasCode: passageData.pasCode,
         title: passageData.title,
         content: passageData.content,
         type: determinePassageType(passageData.descriptions),
         isExpanded: true,
         questions: passageData.questions?.map((q, index) => ({
-          id: q.id || Date.now() + index,
+          // id: q.queCode+'-'+Date.now() || Date.now() + index, // 문제지 생성 후 각 문제를 수정할 경우 필요해질 수 있지만, 그렇다고 하더라도 id값을 생성한 지문에 각 문항이 종속되어 큰 문제가 없음.
+          queCode: q.queCode,
           text: q.content || q.text || '문제 내용',
           options: q.options || [],
           answer: q.answer || '',
@@ -262,11 +263,11 @@ export function useGenerateExam() {
     const passage = loadedPassages.value.find(p => p.id === passageId)
     if (passage) {
       const newQuestion = {
-        id: Date.now(),
-        text: questionText,
-        options: [],
-        answer: '',
-        explanation: ''
+        queCode: Date.now(), // 새 문항의 임시 queCode (실제로는 서버에서 할당)
+        queQuery: questionText,
+        queOption: [],
+        queAnswer: '',
+        queDescription: ''
       }
       passage.questions.push(newQuestion)
     }
@@ -280,7 +281,7 @@ export function useGenerateExam() {
   const deleteQuestion = (passageId, questionId) => {
     const passage = loadedPassages.value.find(p => p.id === passageId)
     if (passage) {
-      passage.questions = passage.questions.filter(q => q.id !== questionId)
+      passage.questions = passage.questions.filter(q => q.queCode !== questionId)
     }
   }
 
@@ -297,22 +298,6 @@ export function useGenerateExam() {
       const [removed] = questions.splice(oldIndex, 1)
       questions.splice(newIndex, 0, removed)
       passage.questions = questions
-    }
-  }
-
-  /**
-   * 문제 수정
-   * @param {number} passageId - 지문 ID
-   * @param {number} questionId - 문제 ID
-   * @param {Object} updates - 업데이트할 필드들
-   */
-  const updateQuestion = (passageId, questionId, updates) => {
-    const passage = loadedPassages.value.find(p => p.id === passageId)
-    if (passage) {
-      const question = passage.questions.find(q => q.id === questionId)
-      if (question) {
-        Object.assign(question, updates)
-      }
     }
   }
 
@@ -465,7 +450,6 @@ export function useGenerateExam() {
     addQuestion,
     deleteQuestion,
     reorderQuestions,
-    updateQuestion,
 
     // 유틸리티
     getPassageTypeClass,
