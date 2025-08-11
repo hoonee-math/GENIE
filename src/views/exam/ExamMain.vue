@@ -32,7 +32,7 @@
 
             <!-- 왼쪽: 지문 불러오기 패널 -->
             <aside class="lg:col-span-1 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                <PassageLoaderPanel @passageLoaded="handlePassageLoaded" @examDataChanged="handleExamDataChanged" />
+                <PassageLoaderPanel />
             </aside>
 
             <!-- 오른쪽: 문제지 미리보기 (A4 비율 적용) -->
@@ -49,25 +49,15 @@
 import { ref } from 'vue'
 import PassageLoaderPanel from '@/components/exam/PassageLoaderPanel.vue'
 import ExamTextEditor from '@/components/exam/ExamTextEditor.vue'
+import { useGenerateExam } from '@/composables/useGenerateExam'
 
-// 문제지 상태 관리
-const examData = ref({
-    title: '',
-    passages: []
-})
-
-// 지문 로드 핸들러
-const handlePassageLoaded = (passage) => {
-    console.log('지문이 로드되었습니다:', passage)
-    // 오른쪽 미리보기 영역 업데이트 로직
-}
-
-// 문제지 데이터 변경 핸들러
-const handleExamDataChanged = (newExamData) => {
-    console.log('문제지 데이터가 변경되었습니다:', newExamData)
-    examData.value = { ...newExamData }
-    // 미리보기 영역 실시간 업데이트
-}
+// useGenerateExam composable 사용
+const {
+    examData,
+    loadedPassages,
+    totalQuestionCount,
+    passageCount
+} = useGenerateExam()
 
 </script>
 <style></style>

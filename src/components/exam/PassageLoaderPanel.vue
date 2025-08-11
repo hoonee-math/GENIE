@@ -108,8 +108,6 @@ const props = defineProps({
     // 필요한 props 정의
 })
 
-const emit = defineEmits(['passageLoaded', 'examDataChanged'])
-
 // 성공 메시지 상태
 const successMessage = ref('')
 const showSuccess = ref(false)
@@ -152,7 +150,6 @@ const testName = computed({
     get: () => examData.value.title,
     set: (value) => {
         examData.value.title = value
-        emit('examDataChanged', examData.value)
     }
 })
 
@@ -197,11 +194,9 @@ const handleLoadSelectedData = async (selectedData) => {
             loadedPassages.value.push(newPassage)
             addedPassageCount++
             addedQuestionCount += newPassage.questions.length
-
-            emit('passageLoaded', newPassage)
         }
 
-        emit('examDataChanged', examData.value)
+        console.log("업로드된 지문데이터들: ",loadedPassages.value)
 
         // 전체 추가 완료 메시지
         if (addedPassageCount > 0) {
@@ -269,7 +264,6 @@ const initializeSortable = () => {
             ghostClass: 'ghost-class',
             onEnd: (evt) => {
                 reorderPassages(evt.oldIndex, evt.newIndex)
-                emit('examDataChanged', examData.value)
             }
         })
     }
@@ -287,7 +281,6 @@ const initializeSortable = () => {
                 ghostClass: 'ghost-class',
                 onEnd: (evt) => {
                     reorderQuestions(passageId, evt.oldIndex, evt.newIndex)
-                    emit('examDataChanged', examData.value)
                 }
             })
             questionSortables.value.push(sortable)
