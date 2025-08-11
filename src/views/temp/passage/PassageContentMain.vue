@@ -59,7 +59,7 @@
     </div>
 </template>
 <script setup>
-import { ref, defineExpose, defineEmits, watch, onMounted } from "vue";
+import { ref, defineExpose, watch, onMounted } from "vue";
 import PlainTooltip from "@/components/common/PlainTooltip.vue";
 
 const savePassageData = JSON.parse(localStorage.getItem("saveResponse")) || {};

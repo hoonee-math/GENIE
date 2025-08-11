@@ -84,7 +84,6 @@ import {
     nextTick,
     onMounted,
     defineProps,
-    defineEmits,
     defineExpose,
 } from "vue";
 import BaseButton from "@/components/common/BaseButton.vue";

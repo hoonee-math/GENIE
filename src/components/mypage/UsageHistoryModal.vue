@@ -112,7 +112,7 @@
   </BaseModal>
 </template>
 <script setup>
-import { ref, computed, defineEmits, watch } from "vue";
+import { ref, computed, watch } from "vue";
 import BaseModal from "@/components/common/BaseModal.vue";
 import BaseButton from "@/components/common/BaseButton.vue";
 import { useRouter, useRoute } from "vue-router";
