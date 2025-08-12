@@ -47,6 +47,7 @@
             :class="['mb-3']"
             @delete="$emit('deleteQuestion', question.queCode)" 
             @checkboxChange="handleQuestionCheckboxChange"
+            @click="handleQuestionClick"
  />
 
           <!-- 문제 추가 버튼 (체크박스 모드가 아닐 때만) -->
@@ -106,6 +107,7 @@ const emit = defineEmits([
   'passageCheckboxChange',
   'questionCheckboxChange',
   'click',
+  'questionClick',
   'reorderQuestions'
 ])
 
@@ -175,6 +177,14 @@ const handleQuestionCheckboxChange = (data) => {
     pasCode: props.passage.pasCode,
     queCode: data.queCode,
     checked: data.checked
+  })
+}
+
+// 문항 클릭 핸들러 (미리보기용)
+const handleQuestionClick = (question) => {
+  emit('questionClick', {
+    passage: props.passage,
+    question: question
   })
 }
 

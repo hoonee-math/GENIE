@@ -20,9 +20,9 @@
     </template>
 
     <!-- 문제 텍스트 (HTML 렌더링) -->
-    <div class="flex-grow">
+    <div class="flex-grow" @click="handleQuestionClick">
       <div 
-        class="prose prose-sm text-lg m-0 text-[#303030] text-left" 
+        class="prose prose-sm text-lg m-0 text-[#303030] text-left cursor-pointer hover:bg-slate-50 p-2 rounded transition-colors" 
         v-html="question.queQuery"
       />
     </div>
@@ -64,7 +64,7 @@ const props = defineProps({
 })
 
 // Emits
-const emit = defineEmits(['delete', 'update', 'copy', 'checkboxChange'])
+const emit = defineEmits(['delete', 'update', 'copy', 'checkboxChange', 'click'])
 
 // 편집 기능 제거됨 (TipTap Editor로 대체)
 
@@ -91,6 +91,13 @@ const handleCheckboxChange = (event) => {
     queCode: props.question.queCode,
     checked: event.target.checked
   })
+}
+
+// 문항 클릭 이벤트 (미리보기용)
+const handleQuestionClick = () => {
+  if (props.showCheckbox) {
+    emit('click', props.question)
+  }
 }
 
 </script>

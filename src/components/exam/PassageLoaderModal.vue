@@ -48,7 +48,8 @@
                                 @passageCheckboxChange="handlePassageCheckboxChange"
                                 @questionCheckboxChange="handleQuestionCheckboxChange"
                                 @toggle="handleTogglePassage(passage.pasCode)" 
-                                @click="handlePassageClick(passage)" />
+                                @click="handlePassageClick(passage)"
+                                @questionClick="handleQuestionClick" />
                         </TransitionGroup>
                     </div>
                     <div v-else class="flex items-center justify-center h-full">
@@ -75,14 +76,72 @@
                             </span>
                         </div>
 
-                        <div class="flex-1 overflow-y-auto prose prose-sm max-w-none text-left text-lg scrollbar-hide" v-html="previewPassage.content">
+                        <!-- 지문 미리보기 (기본) -->
+                        <div v-if="!previewQuestion" class="flex-1 overflow-hidden flex flex-col">
+                            <div class="flex-1 overflow-y-auto prose prose-sm max-w-none text-left text-lg scrollbar-hide" v-html="previewPassage.content">
+                            </div>
+                            <div class="mt-4 pt-2 border-t text-sm text-gray-500">
+                                선택된 문항: {{ getSelectedQuestionCount(previewPassage.pasCode) }} / {{
+                                    previewPassage.questions?.length || 0 }}개
+                            </div>
                         </div>
 
-                        <div class="mt-4 pt-2 border-t text-sm text-gray-500">
-                            선택된 문항: {{ getSelectedQuestionCount(previewPassage.pasCode) }} / {{
-                                previewPassage.questions?.length || 0 }}개
+                        <!-- 문항 미리보기 -->
+                        <div v-else class="flex-1 overflow-hidden flex flex-col">
+                            <!-- 문항 헤더 -->
+                            <div class="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="font-semibold text-blue-800">선택된 문항</h4>
+                                    <button @click="previewQuestion = null" class="text-blue-600 hover:text-blue-800">
+                                        <Icon icon="heroicons:x-mark" class="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- 문항 내용 -->
+                            <div class="flex-1 overflow-y-auto space-y-4 scrollbar-hide">
+                                <!-- 문제 -->
+                                <div class="bg-white p-4 rounded-lg border">
+                                    <h5 class="font-semibold text-gray-700 mb-2">문제</h5>
+                                    <div class="prose prose-sm max-w-none text-left break-words whitespace-pre-wrap" v-html="previewQuestion.queQuery"></div>
+                                </div>
+                                
+                                <!-- 보기 subPassage (있는 경우) -->
+                                <div v-if="previewQuestion.queSubpassage" class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                                    <h5 class="font-semibold text-yellow-700 mb-2">부분지문</h5>
+                                    <div class="prose prose-sm max-w-none text-left break-words whitespace-pre-wrap" v-html="previewQuestion.queSubpassage"></div>
+                                </div>
+
+                                <!-- 선택지 (있는 경우) -->
+                                <div v-if="previewQuestion.queOption" class="bg-white p-4 rounded-lg border">
+                                    <h5 class="font-semibold text-gray-700 mb-2">선택지</h5>
+                                    <div class="prose prose-sm max-w-none text-left break-words whitespace-pre-wrap" v-html="previewQuestion.queOption"></div>
+                                </div>
+
+                                <!-- 정답 -->
+                                <div v-if="previewQuestion.queAnswer" class="bg-green-50 p-4 rounded-lg border border-green-200">
+                                    <h5 class="font-semibold text-green-700 mb-2">정답</h5>
+                                    <div class="prose prose-sm max-w-none text-left break-words whitespace-pre-wrap" v-html="previewQuestion.queAnswer"></div>
+                                </div>
+
+                                <!-- 해설 (있는 경우) -->
+                                <div v-if="previewQuestion.queDescription" class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h5 class="font-semibold text-gray-700 mb-2">해설</h5>
+                                    <div class="prose prose-sm max-w-none text-left break-words whitespace-pre-wrap" v-html="previewQuestion.queDescription"></div>
+                                </div>
+
+                            </div>
+
+                            <div class="mt-4 pt-2 border-t text-sm text-gray-500">
+                                선택된 문항: {{ getSelectedQuestionCount(previewPassage.pasCode) }} / {{
+                                    previewPassage.questions?.length || 0 }}개
+                            </div>
                         </div>
                     </div>
+                    <!-- v-else-if 추가: previewPassage 이외의 변수가 필요할 수 있음. v-if 위치랑 변경해야할 수 있음.
+                     * PassageBlock 에서 현재는 click 이라는 emit 을 통해서 handlePassageClick에 passage 정보를 가져오고 있는 것 같음. 이 정보를 previewPassage 에 담아주고있는 것 같음.
+                     * 여기에 추가 기능을 넣을 생각. 지금은 지문 header를 선택할때만 미리보기 영역이 바뀌지만, 문항 데이터를 선택하면 지문+문항 정보를 출력해주고싶음..
+                     * passageBlock 내부의 QuestionItem 을 click 하게 되면 해당 클릭된 문항 정보를 미리보기에 표시.. -->
                     <div v-else class="flex items-center justify-center h-full text-center text-gray-500">
                         <div>
                             <Icon icon="heroicons:eye" class="w-12 h-12 mx-auto mb-4 text-gray-300" />
@@ -134,6 +193,7 @@ const loadingMessage = ref("지문 목록을 불러오는 중...");
 const allPassages = ref([]);
 const selectedQuestions = ref({}); // { pasCode: [pasCode1, pasCode2, ...] }
 const previewPassage = ref(null);
+const previewQuestion = ref(null);
 const isProcessing = ref(false);
 
 // 지문 구조 필터
@@ -235,7 +295,16 @@ const handleTogglePassage = (pasCode) => {
 // PassageBlock 클릭 시 미리보기 업데이트
 const handlePassageClick = (passage) => {
     previewPassage.value = passage;
+    previewQuestion.value = null; // 지문 클릭 시 문항 미리보기 초기화
     console.log('📖 미리보기 업데이트:', passage.title);
+};
+
+// QuestionItem 클릭 시 문항 미리보기 업데이트
+const handleQuestionClick = (data) => {
+    const { passage, question } = data;
+    previewPassage.value = passage;
+    previewQuestion.value = question;
+    console.log('📝 문항 미리보기 업데이트:', question.queQuery.substring(0, 50) + '...');
 };
 
 const getSelectedQuestionCount = (pasCode) => {
