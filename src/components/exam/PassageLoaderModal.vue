@@ -80,7 +80,7 @@
                         <div v-if="!previewQuestion" class="flex-1 overflow-hidden flex flex-col">
                             <div class="flex-1 overflow-y-auto prose prose-sm max-w-none text-left text-lg scrollbar-hide" v-html="previewPassage.content">
                             </div>
-                            <div class="mt-4 pt-2 border-t text-sm text-gray-500">
+                            <div class="mt-4 pt-2 border-t text-sm text-gray-500 hidden lg:block">
                                 선택된 문항: {{ getSelectedQuestionCount(previewPassage.pasCode) }} / {{
                                     previewPassage.questions?.length || 0 }}개
                             </div>
@@ -89,50 +89,45 @@
                         <!-- 문항 미리보기 -->
                         <div v-else class="flex-1 overflow-hidden flex flex-col">
                             <!-- 문항 헤더 -->
-                            <div class="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                                <div class="flex items-center justify-between">
-                                    <h4 class="font-semibold text-blue-800">선택된 문항</h4>
+                            <!-- <div class="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                <div class="flex items-start justify-between">
+                                    <div class="prose prose-sm max-w-none text-left break-words whitespace-pre-wrap" v-html="previewQuestion.queQuery"/>
+                                    
                                     <button @click="previewQuestion = null" class="text-blue-600 hover:text-blue-800">
                                         <Icon icon="heroicons:x-mark" class="w-4 h-4" />
                                     </button>
                                 </div>
-                            </div>
+                            </div> -->
 
                             <!-- 문항 내용 -->
                             <div class="flex-1 overflow-y-auto space-y-4 scrollbar-hide">
                                 <!-- 문제 -->
-                                <div class="bg-white p-4 rounded-lg border">
-                                    <h5 class="font-semibold text-gray-700 mb-2">문제</h5>
-                                    <div class="prose prose-sm max-w-none text-left break-words whitespace-pre-wrap" v-html="previewQuestion.queQuery"></div>
+                                <div class="flex items-start justify-between bg-white rounded-lg">
+                                    <div class="prose prose-sm max-w-none text-left break-words whitespace-pre-wrap" v-html="previewQuestion.queQuery"/>
+                                    
+                                    <button @click="previewQuestion = null" class="text-blue-600 hover:text-blue-800">
+                                        <Icon icon="heroicons:x-mark" class="w-4 h-4" />
+                                    </button>
                                 </div>
-                                
+
                                 <!-- 보기 subPassage (있는 경우) -->
-                                <div v-if="previewQuestion.queSubpassage" class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                                    <h5 class="font-semibold text-yellow-700 mb-2">부분지문</h5>
-                                    <div class="prose prose-sm max-w-none text-left break-words whitespace-pre-wrap" v-html="previewQuestion.queSubpassage"></div>
-                                </div>
+                                <SubPassageBox v-if="previewQuestion.queSubpassage" :subPassage="previewQuestion.queSubpassage"/>
 
                                 <!-- 선택지 (있는 경우) -->
-                                <div v-if="previewQuestion.queOption" class="bg-white p-4 rounded-lg border">
-                                    <h5 class="font-semibold text-gray-700 mb-2">선택지</h5>
-                                    <div class="prose prose-sm max-w-none text-left break-words whitespace-pre-wrap" v-html="previewQuestion.queOption"></div>
-                                </div>
+                                <div v-if="previewQuestion.queOption" class="prose prose-sm max-w-none text-left break-words whitespace-pre-wrap" v-html="previewQuestion.queOption"></div>
 
-                                <!-- 정답 -->
-                                <div v-if="previewQuestion.queAnswer" class="bg-green-50 p-4 rounded-lg border border-green-200">
-                                    <h5 class="font-semibold text-green-700 mb-2">정답</h5>
-                                    <div class="prose prose-sm max-w-none text-left break-words whitespace-pre-wrap" v-html="previewQuestion.queAnswer"></div>
-                                </div>
-
-                                <!-- 해설 (있는 경우) -->
-                                <div v-if="previewQuestion.queDescription" class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h5 class="font-semibold text-gray-700 mb-2">해설</h5>
-                                    <div class="prose prose-sm max-w-none text-left break-words whitespace-pre-wrap" v-html="previewQuestion.queDescription"></div>
+                                <!-- 정답 및 해설 (있는 경우) -->
+                                <div v-if="previewQuestion.queAnswer" class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                    <div class="flex">
+                                        <div class="font-semibold text-brand mr-2">정답</div>
+                                        <div class="prose prose-sm max-w-none text-left break-words whitespace-pre-wrap" v-html="previewQuestion.queAnswer"></div>
+                                    </div>
+                                    <div v-if="previewQuestion.queDescription" class="prose prose-sm max-w-none mt-2 text-left break-words whitespace-pre-wrap" v-html="previewQuestion.queDescription"></div>
                                 </div>
 
                             </div>
 
-                            <div class="mt-4 pt-2 border-t text-sm text-gray-500">
+                            <div class="mt-4 pt-2 border-t text-sm text-gray-500 hidden lg:block">
                                 선택된 문항: {{ getSelectedQuestionCount(previewPassage.pasCode) }} / {{
                                     previewPassage.questions?.length || 0 }}개
                             </div>
@@ -174,8 +169,8 @@ import BaseModal from "@/components/common/BaseModal.vue";
 import BaseButton from "@/components/common/BaseButton.vue";
 import LoadingModal from "@/components/common/LoadingModal.vue";
 import PassageBlock from "@/components/exam/PassageBlock.vue";
-import TipTapEditor from "@/views/generation/TipTapEditor.vue";
 import { usePassage } from "@/composables/usePassage";
+import SubPassageBox from "@/components/exam/SubPassageBox.vue";
 
 // Props & Emits
 const props = defineProps({
