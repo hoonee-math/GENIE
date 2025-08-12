@@ -117,15 +117,4 @@ watch(corePointTabs, (newTabs) => {
 </script>
 
 <style scoped>
-.scrollbar-hide {
-    scrollbar-width: none;
-    /* Firefox */
-    -ms-overflow-style: none;
-    /* IE 10+ */
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-    display: none;
-    /* Chrome, Safari */
-}
 </style>

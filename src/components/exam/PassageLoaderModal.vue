@@ -40,7 +40,7 @@
                         </div>
                     </div>
                     <div v-else-if="filteredPassages.length > 0"
-                        class="flex flex-col gap-4 w-full h-full overflow-y-auto">
+                        class="flex flex-col gap-4 w-full h-full overflow-y-auto scrollbar-hide">
                         <TransitionGroup name="passage" tag="div" class="space-y-4">
                             <PassageBlock v-for="(passage, index) in filteredPassages" :key="passage.pasCode"
                                 :passage="passage" :index="index" :showCheckbox="true"
@@ -75,11 +75,7 @@
                             </span>
                         </div>
 
-                        <!-- <div class="flex-1 overflow-y-auto prose prose-sm max-w-none" v-html="previewPassage.content">
-                        </div> -->
-                        
-                        <div class="flex-1 prose prose-sm max-w-none">
-                            <TipTapEditor :initialContent="previewPassage.content" :isEditable="false" :addClass="'text-lg'" />
+                        <div class="flex-1 overflow-y-auto prose prose-sm max-w-none text-left text-lg scrollbar-hide" v-html="previewPassage.content">
                         </div>
 
                         <div class="mt-4 pt-2 border-t text-sm text-gray-500">

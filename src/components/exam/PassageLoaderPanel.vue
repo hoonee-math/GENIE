@@ -253,32 +253,6 @@ onMounted(() => {
 
 <style scoped>
 /* 지문 접기/펴기 애니메이션 */
-/* ===== 전역 유틸리티 ===== */
-
-/* 스크롤 개선 */
-.scrollbar-thin {
-    scrollbar-width: thin;
-    scrollbar-color: #cbd5e1 #f1f5f9;
-}
-
-.scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-track {
-    background: #f1f5f9;
-    border-radius: 3px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 3px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
-}
-
 /* 선택 비활성화 */
 .user-select-none {
     user-select: none;

@@ -975,16 +975,4 @@ const selectField = (field) => {
 .slide-up-leave-to {
     transform: translateY(100%);
 }
-
-.scrollbar-hide {
-    -ms-overflow-style: none;
-    /* IE and Edge */
-    scrollbar-width: none;
-    /* Firefox */
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-    display: none;
-    /* Chrome, Safari and Opera */
-}
 </style>
