@@ -86,7 +86,7 @@ export function useGenerateExam() {
         {
           queCode: 2001, // 실제 DB의 문항 코드
           queQuery: '<p>윗글의 내용 전개 방식으로 적절한 것은?</p>',
-          queOption: ['<p>① 우주의 나이는 빛의 속도에 따라 결정되겠군.</p><p>② 입자 지평선은 우주가 팽창하여 생겨난 경계이겠군.</p><p>③ 관측 가능한 우주 바깥에는 우리와 다른 물리 법칙이 존재하겠군.</p><p>④ 우주 급팽창 이론은 우주가 무한하다는 것을 입증하는 이론이겠군.</p><p>⑤ 우주의 평균 밀도가 임계 밀도보다 높다고 밝혀진다면, 전체 우주의 크기는 유한하다고 결론 내릴 수 있겠군.</p>'],
+          queOption: '<p>① 우주의 나이는 빛의 속도에 따라 결정되겠군.</p><p>② 입자 지평선은 우주가 팽창하여 생겨난 경계이겠군.</p><p>③ 관측 가능한 우주 바깥에는 우리와 다른 물리 법칙이 존재하겠군.</p><p>④ 우주 급팽창 이론은 우주가 무한하다는 것을 입증하는 이론이겠군.</p><p>⑤ 우주의 평균 밀도가 임계 밀도보다 높다고 밝혀진다면, 전체 우주의 크기는 유한하다고 결론 내릴 수 있겠군.</p>',
           queAnswer: '②',
           queDescription: '<p>[정답해설]</p><p>4문단에서 우주의 평균 밀도가 특정 임계 밀도보다 높으면 우주는 양(+)의 곡률을 가지며 닫힌 구의 표면처럼 유한한 크기를 갖게 된다고 설명하고 있다. 따라서 우주의 평균 밀도가 임계 밀도보다 높다는 사실이 밝혀진다면, 이를 근거로 전체 우주의 크기가 유한하다고 결론 내릴 수 있다는 반응은 적절하다.</p><p>[오답피하기]</p><p>① 2문단에 따르면, 우주의 유한한 나이와 빛의 유한한 속도는 우리가 관측할 수 있는 거리의 한계를 설정하는 요인이다.</p><p>② 2문단에 따르면, 입자 지평선은 우주의 유한한 나이로 인해 빛이 우리에게 도달할 시간이 충분하지 않아 생기는 경계이다.  우주가 무한하다는 것을 ‘입증’하는 이론이라는 반응은 적절하지 않다.</p>',
           queSubpassage: '<p>현대의 문화 콘텐츠는 한 개인의 사상이나 감정의 순수한 발현물이라기보다는, 정교한 기획과 자본, 기술이 결합된 총체적 산물이다. 콘텐츠의 가치는 창작 행위 자체뿐만 아니라, 그것을 둘러싼 전략적 브랜딩, 플랫폼 활용, 그리고 다양한 전문가들의 협업을 통해 창출된다.</p><p>따라서 창작의 기여도를 평가할 때는 단순히 최종 결과물을 만들어 낸 행위자를 넘어, 콘텐츠의 성공을 가능하게 한 시스템 전반의 역할을 종합적으로 고려해야 한다.</p>'
@@ -94,7 +94,7 @@ export function useGenerateExam() {
         {
           queCode: 2002,
           queQuery: '<p>윗글을 바탕으로 [보기]를 이해한 내용으로 적절하지 <u>않은</u> 것은?</p>',
-          queOption: ['<p>① 선지1 5개의 예시 선지를 보여줍니다.</p><p>② 선지2, 쉼표를 포함한 예</p><p>③ 선지3 <u>태그</u>를 포함한 예</p><p>④ 선지4 줄바꿈 기호를 포함한 예</p><p>⑤ 선지5, <u>전부</u> 포함한 예</p>'],
+          queOption: '<p>① 선지1 5개의 예시 선지를 보여줍니다.</p><p>② 선지2, 쉼표를 포함한 예</p><p>③ 선지3 <u>태그</u>를 포함한 예</p><p>④ 선지4 줄바꿈 기호를 포함한 예</p><p>⑤ 선지5, <u>전부</u> 포함한 예</p>',
           queAnswer: '②',
           queDescription: '<p>[정답해설]</p><p>2문단에 따르면~~.</p><p>[오답피하기]</p><p>① 2문단에 따르면, 우주의 유한한 나이와 빛의 유한한 속도는 우리가 관측할 수 있는 거리의 한계를 설정하는 요인이다. 우주의 나이가 빛의 속도에 따라 결정된다는 내용은 확인할 수 없다.</p>',
           queSubpassage: ''
@@ -102,7 +102,7 @@ export function useGenerateExam() {
         {
           queCode: 2003,
           queQuery: '<p>윗글에 나타난 필자의 관점에 대한 설명으로 가장 적절한 것은?</p>', // 태그가 없을 수 있음.. 그런때는 useGenerateExam 의 formatHtmlContent 함수를 이용하면 됨!
-          queOption: ['<p>① 1번선택지.</p><p>② 2번선택지</p><p>③ 3번선택지</p><p>④ 4번선택지</p><p>⑤ 5번선택지</p>'],
+          queOption: '<p>① 1번선택지.</p><p>② 2번선택지</p><p>③ 3번선택지</p><p>④ 4번선택지</p><p>⑤ 5번선택지</p>',
           queAnswer: '②',
           queDescription: '[정답해설]2문단에 따르면~~.[오답피하기]이런식으로 태그가 없는 경우가 발생할 수도있음. 이걸 주의해야함.',
           queSubpassage: ''
@@ -128,7 +128,7 @@ export function useGenerateExam() {
         {
           queCode: 2004,
           queQuery: '<p>(가)와 (나)의 공통점으로 가장 적절한 것은?</p>',
-          queOption: [],
+          queOption: '',
           queAnswer: '',
           queDescription: '',
           queSubpassage: ''
@@ -136,7 +136,7 @@ export function useGenerateExam() {
         {
           queCode: 2005,
           queQuery: '<p>윗글에 나타난 인물의 심리 변화 과정으로 적절한 것은?</p>',
-          queOption: [],
+          queOption: '',
           queAnswer: '',
           queDescription: '',
           queSubpassage: ''
@@ -168,7 +168,7 @@ export function useGenerateExam() {
         {
           queCode: 2006,
           queQuery: '<p>발표자의 말하기 방식에 대한 설명으로 가장 적절한 것은?</p>',
-          queOption: [],
+          queOption: '',
           queAnswer: '',
           queDescription: '',
           queSubpassage: ''
@@ -176,7 +176,7 @@ export function useGenerateExam() {
         {
           queCode: 2007,
           queQuery: '<p>윗글의 논증 구조를 분석한 내용으로 적절하지 않은 것은?</p>',
-          queOption: [],
+          queOption: '',
           queAnswer: '',
           queDescription: '',
           queSubpassage: ''
@@ -184,7 +184,7 @@ export function useGenerateExam() {
         {
           queCode: 2008,
           queQuery: '<p>[보기]의 상황에서 가장 효과적인 토론 전략은?</p>',
-          queOption: [],
+          queOption: '',
           queAnswer: '',
           queDescription: '',
           queSubpassage: ''
@@ -192,7 +192,7 @@ export function useGenerateExam() {
         {
           queCode: 2009,
           queQuery: '<p>토론 과정에서 나타난 의견 조율 방식으로 적절한 것은?</p>',
-          queOption: [],
+          queOption: '',
           queAnswer: '',
           queDescription: '',
           queSubpassage: ''
@@ -370,7 +370,7 @@ export function useGenerateExam() {
       const newQuestion = {
         queCode: Date.now(), // 새 문항의 임시 queCode (실제로는 서버에서 할당)
         queQuery: formatHtmlContent(questionText, '문제를 입력하세요'),
-        queOption: [],
+        queOption: '',
         queAnswer: '',
         queDescription: '',
         queSubpassage: ''

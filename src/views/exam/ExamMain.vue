@@ -46,18 +46,23 @@
     <!-- ... 모달 및 스크립트는 이전과 동일 ... -->
 </template>
 <script setup>
-import { ref } from 'vue'
+import { ref, provide } from 'vue'
 import PassageLoaderPanel from '@/components/exam/PassageLoaderPanel.vue'
 import ExamTextEditor from '@/components/exam/ExamTextEditor.vue'
 import { useGenerateExam } from '@/composables/useGenerateExam'
 
-// useGenerateExam composable 사용
+// useGenerateExam composable 사용 (부모 컴포넌트에서 단일 인스턴스 생성)
+const generateExamComposable = useGenerateExam()
+
+// 하위 컴포넌트들이 같은 인스턴스를 사용할 수 있도록 provide
+provide('generateExam', generateExamComposable)
+
 const {
     examData,
     loadedPassages,
     totalQuestionCount,
     passageCount
-} = useGenerateExam()
+} = generateExamComposable
 
 </script>
 <style></style>

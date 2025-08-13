@@ -98,11 +98,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick, inject } from 'vue'
 import { Icon } from '@iconify/vue'
 import PassageLoaderModal from '@/components/exam/PassageLoaderModal.vue'
 import PassageBlock from './PassageBlock.vue'
-import { useGenerateExam, useDragAndDrop } from '@/composables/useGenerateExam'
+import { useDragAndDrop } from '@/composables/useGenerateExam'
 import Sortable from 'sortablejs'
 
 // Props와 Emits
@@ -123,7 +123,7 @@ const displaySuccess = (message) => {
     }, 3000)
 }
 
-// Composables 사용
+// 부모 컴포넌트에서 제공하는 공유 composable 인스턴스 사용
 const {
     examData,
     loadedPassages,
@@ -139,7 +139,7 @@ const {
     reorderQuestions,
     clearError,
     addPassagesToLoaded
-} = useGenerateExam()
+} = inject('generateExam')
 
 // 반응형 상태
 const showPassageModal = ref(false)

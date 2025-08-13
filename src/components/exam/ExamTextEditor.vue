@@ -57,79 +57,92 @@
         </div>
     </div>
 
-    <!-- Paged.js 미리보기 영역 -->
-    <div class="flex-1 overflow-auto bg-gray-100 p-6" ref="previewContainer">
-        <!-- 원본 콘텐츠 (Paged.js가 이를 페이지로 변환) -->
-        <div id="content-for-pagedjs" ref="contentForPagedjs" class="hidden">
-            <header class="pagedjs-ignore" v-html="getRenderedHeader()"></header>
-            <main :class="columnMode === 1 ? 'one-column' : 'two-column'">
-                <!-- 문제지 제목 영역 -->
-                <div v-if="examData.title" class="exam-title mb-4">
-                    <p class="text-center font-bold text-lg">{{ examData.title }}</p>
-                </div>
-
-                <!-- 지문 및 문항 렌더링 -->
-                <div v-if="loadedPassages.length > 0" class="passages-container">
-                    <template v-for="(passage, passageIndex) in loadedPassages" :key="passage.id">
-                        <!-- 지문 범위 표시 -->
-                        <div class="passage-range text-[9.5pt] font-medium mb-2">
-                            [{{ getPassageQuestionRange(passageIndex) }}] 다음 글을 읽고 물음에 답하시오.
-                        </div>
-                        
-                        <!-- 지문 내용 -->
-                        <div class="passage-block-preview">
-                            <div v-html="passage.content"></div>
-                        </div>
-
-                        <!-- 문항들 -->
-                        <template v-for="(question, questionIndex) in passage.questions" :key="question.queCode">
-                            <div class="question-block">
-                                <p><span class="font-bold">{{ getQuestionNumber(passageIndex, questionIndex) }}.</span> <span v-html="question.queQuery"></span></p>
-                                
-                                <!-- 보기 박스 (queSubpassage가 있는 경우) -->
-                                <div v-if="question.queSubpassage" class="보기-box">
-                                    <div class="보기-title">&lt;보 기&gt;</div>
-                                    <div v-html="question.queSubpassage"></div>
-                                </div>
-                                
-                                <!-- 선택지 -->
-                                <div v-if="question.queOption && question.queOption.length > 0" class="choices">
-                                    <div v-for="option in question.queOption" :key="option" v-html="option"></div>
-                                </div>
-
-                                <!-- 답안지 포함 시 정답 및 해설 -->
-                                <div v-if="includeAnswers && (question.queAnswer || question.queDescription)" class="answer-section mt-3 p-2 bg-gray-50 border-l-4 border-blue-500">
-                                    <div v-if="question.queAnswer" class="answer mb-2">
-                                        <span class="font-bold">정답:</span> {{ question.queAnswer }}
-                                    </div>
-                                    <div v-if="question.queDescription" class="description" v-html="question.queDescription"></div>
-                                </div>
-                            </div>
-                        </template>
-                    </template>
-                </div>
-
-                <!-- 빈 상태 -->
-                <div v-else class="empty-state text-center py-20 text-gray-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-16 w-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-                    </svg>
-                    <p class="text-base">왼쪽에서 지문을 불러오면</p>
-                    <p class="text-base">여기에 문제가 표시됩니다.</p>
-                </div>
-            </main>
-            <footer v-if="getRenderedFooter()" v-html="getRenderedFooter()"></footer>
+    <!-- CSS 기반 A4 미리보기 영역 -->
+    <div class="flex-1 overflow-auto bg-gray-100 p-6">
+        <!-- 로딩 상태 표시 -->
+        <div v-if="isRendering" class="text-center py-20">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <p class="mt-2 text-gray-600">문제지를 업데이트하는 중...</p>
         </div>
+        
+        <!-- Vue 템플릿 기반 A4 페이지 렌더링 -->
+        <div v-else class="css-pages-container" :key="forceUpdateKey">
+            <div class="css-page">
+                <!-- 헤더 -->
+                <header v-html="getRenderedHeader()"></header>
+                
+                <!-- 메인 콘텐츠 -->
+                <main :class="columnMode === 1 ? 'one-column' : 'two-column'">
+                    <!-- 문제지 제목 -->
+                    <div v-if="examData.title" class="exam-title mb-4">
+                        <p class="text-center font-bold text-lg">{{ examData.title }}</p>
+                    </div>
 
-        <!-- Paged.js가 렌더링한 페이지들이 여기에 표시됨 -->
-        <div id="pagedjs-pages-container"></div>
+                    <!-- 지문 및 문항 렌더링 -->
+                    <div v-if="loadedPassages.length > 0" class="passages-container">
+                        <template v-for="(passage, passageIndex) in loadedPassages" :key="passage.id">
+                            <!-- 지문 범위 표시 -->
+                            <div class="passage-range text-[9.5pt] font-medium">
+                                [{{ getPassageQuestionRange(passageIndex) }}] 다음 글을 읽고 물음에 답하시오.
+                            </div>
+                            
+                            <!-- 지문 내용 -->
+                            <div class="passage-block-preview">
+                                <div v-html="passage.content"></div>
+                            </div>
+
+                            <!-- 문항들 -->
+                            <template v-for="(question, questionIndex) in passage.questions" :key="question.queCode">
+                                <div class="question-block">
+                                    <p>
+                                        <span class="font-bold">{{ getQuestionNumber(passageIndex, questionIndex) }}.</span> 
+                                        <span v-html="question.queQuery"></span>
+                                    </p>
+                                    
+                                    <!-- 보기 박스 (queSubpassage가 있는 경우) -->
+                                    <div v-if="question.queSubpassage" class="보기-box">
+                                        <div class="보기-title">&lt;보 기&gt;</div>
+                                        <div v-html="question.queSubpassage"></div>
+                                    </div>
+                                    
+                                    <!-- 선택지 -->
+                                    <div v-if="question.queOption" class="choices">
+                                        <div v-html="question.queOption"></div>
+                                    </div>
+
+                                    <!-- 답안지 포함 시 정답 및 해설 -->
+                                    <div v-if="includeAnswers && (question.queAnswer || question.queDescription)" 
+                                         class="answer-section mt-3 p-2 bg-gray-50 border-l-4 border-blue-500">
+                                        <div v-if="question.queAnswer" class="answer mb-2">
+                                            <span class="font-bold">정답:</span> {{ question.queAnswer }}
+                                        </div>
+                                        <div v-if="question.queDescription" class="description" v-html="question.queDescription"></div>
+                                    </div>
+                                </div>
+                            </template>
+                        </template>
+                    </div>
+
+                    <!-- 빈 상태 -->
+                    <div v-else class="empty-state text-center py-20 text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-16 w-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                        </svg>
+                        <p class="text-base">왼쪽에서 지문을 불러오면</p>
+                        <p class="text-base">여기에 문제가 표시됩니다.</p>
+                    </div>
+                </main>
+                
+                <!-- 푸터 -->
+                <footer v-if="getRenderedFooter()" v-html="getRenderedFooter()"></footer>
+            </div>
+        </div>
     </div>
 </template>
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
-import { useGenerateExam } from '@/composables/useGenerateExam'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick, inject } from 'vue'
 
-// useGenerateExam composable 사용
+// 부모 컴포넌트에서 제공하는 공유 composable 인스턴스 사용
 const {
   examData,
   loadedPassages,
@@ -139,19 +152,13 @@ const {
   changeLayout,
   getRenderedHeader,
   getRenderedFooter
-} = useGenerateExam()
+} = inject('generateExam')
 
 // 컴포넌트 상태
 const includeAnswers = ref(false) // 답안지 포함 여부
 const columnMode = ref(2) // 1단 또는 2단 컬럼
-const isRendering = ref(false) // Paged.js 렌더링 상태
-
-// DOM 참조
-const previewContainer = ref(null)
-const contentForPagedjs = ref(null)
-
-// Paged.js 관련
-let pagedPreviewer = null
+const isRendering = ref(false) // 렌더링 상태 (템플릿에서 사용)
+const forceUpdateKey = ref(0) // 강제 업데이트를 위한 키
 
 // 문항 번호 계산
 const getQuestionNumber = (passageIndex, questionIndex) => {
@@ -176,41 +183,24 @@ const getPassageQuestionRange = (passageIndex) => {
 // 레이아웃 변경 핸들러
 const handleLayoutChange = () => {
   changeLayout(selectedLayoutId.value)
-  renderWithPagedJs()
+  // Vue의 반응성에 의해 자동으로 업데이트됨
 }
 
 // 컬럼 모드 변경
 const setColumnMode = (mode) => {
   columnMode.value = mode
-  renderWithPagedJs()
+  // Vue의 반응성에 의해 자동으로 업데이트됨
 }
 
-// Debounce 타이머
-let renderDebounceTimer = null
-
-// CSS 기반 렌더링 (debounced)
-const renderWithPagedJs = async () => {
-  if (isRendering.value) return
-  
-  // 기존 타이머 클리어
-  if (renderDebounceTimer) {
-    clearTimeout(renderDebounceTimer)
-  }
-  
-  // 300ms 지연 후 실행 (빠른 연속 변경 시 불필요한 렌더링 방지)
-  renderDebounceTimer = setTimeout(async () => {
-    await renderWithCssPagedMedia()
-  }, 300)
-}
-
-// 미리보기 새로고침 (즉시 실행)
-const refreshPreview = () => {
-  // debounce 타이머를 무시하고 즉시 렌더링
-  if (renderDebounceTimer) {
-    clearTimeout(renderDebounceTimer)
-    renderDebounceTimer = null
-  }
-  renderWithCssPagedMedia()
+// 미리보기 새로고침 (강제 리렌더링)
+const refreshPreview = async () => {
+  console.log('미리보기 강제 새로고침')
+  forceUpdateKey.value++
+  isRendering.value = true
+  await nextTick()
+  setTimeout(() => {
+    isRendering.value = false
+  }, 100)
 }
 
 // 인쇄/PDF 내보내기
@@ -218,14 +208,28 @@ const printExam = () => {
   window.print()
 }
 
-// 반응형 업데이트 - loadedPassages 변경 감지
-watch(loadedPassages, () => {
-  renderWithPagedJs()
+// Vue 3의 반응성 시스템이 자동으로 처리하지만, 일부 강제 업데이트 필요
+watch(loadedPassages, async () => {
+  console.log('loadedPassages changed - Vue will auto-update')
+  // 강제 업데이트 트리거
+  forceUpdateKey.value++
+  isRendering.value = true
+  await nextTick()
+  setTimeout(() => {
+    isRendering.value = false
+  }, 100)
 }, { deep: true })
 
-// 답안지 포함 옵션 변경 시 재렌더링
 watch(includeAnswers, () => {
-  renderWithPagedJs()
+  console.log('includeAnswers changed - Vue will auto-update')
+})
+
+watch(selectedLayoutId, () => {
+  console.log('selectedLayoutId changed - Vue will auto-update')
+})
+
+watch(() => examData.title, () => {
+  console.log('examData.title changed - Vue will auto-update')
 })
 
 // 동적으로 Google Fonts 로드
@@ -264,93 +268,14 @@ const loadGoogleFonts = () => {
   })
 }
 
-// CSS 기반 A4 페이지네이션 (Paged.js 대신 사용)
-const renderWithCssPagedMedia = async () => {
-  if (isRendering.value) return
-  
-  isRendering.value = true
-  
-  try {
-    // 기존 페이지들 제거
-    const existingPages = document.querySelectorAll('.css-page')
-    existingPages.forEach(el => el.remove())
-    
-    await nextTick()
-    
-    if (!contentForPagedjs.value || !previewContainer.value) {
-      console.warn('Content element not found')
-      return
-    }
-    
-    // 콘텐츠를 A4 페이지로 분할하여 표시
-    const content = contentForPagedjs.value.innerHTML.trim()
-    if (!content) {
-      console.log('No content to render')
-      return
-    }
-    
-    // A4 페이지 크기로 분할하여 표시
-    const pageContainer = document.createElement('div')
-    pageContainer.className = 'css-pages-container'
-    
-    // 컬럼 모드 클래스 적용
-    const columnClass = columnMode.value === 1 ? 'one-column' : 'two-column'
-    const updatedContent = content.replace(
-      /<main[^>]*>/g, 
-      `<main class="${columnClass}">`
-    )
-    
-    pageContainer.innerHTML = `
-      <div class="css-page">
-        ${updatedContent}
-      </div>
-    `
-    
-    previewContainer.value.appendChild(pageContainer)
-    
-    console.log('CSS-based pagination complete')
-    
-  } catch (error) {
-    console.error('CSS pagination error:', error)
-  } finally {
-    isRendering.value = false
-  }
-}
-
-// 컴포넌트 마운트 시 필요한 외부 라이브러리들 로드
+// 컴포넌트 마운트 시 Google Fonts 로드
 onMounted(async () => {
   try {
-    // Google Fonts만 로드 (Paged.js는 사용하지 않음)
     await loadGoogleFonts()
-
-    // DOM 업데이트 대기
-    await nextTick()
-    
-    // 약간의 지연 후 CSS 기반 렌더링
-    setTimeout(() => {
-      renderWithCssPagedMedia()
-    }, 300)
-    
+    console.log('ExamTextEditor mounted with Google Fonts loaded')
   } catch (error) {
-    console.error('Failed to load external dependencies:', error)
-    // 실패해도 기본 렌더링은 시도
-    setTimeout(() => {
-      renderWithCssPagedMedia()
-    }, 300)
+    console.error('Failed to load Google Fonts:', error)
   }
-})
-
-// 컴포넌트 언마운트 시 정리
-onUnmounted(() => {
-  // debounce 타이머 정리
-  if (renderDebounceTimer) {
-    clearTimeout(renderDebounceTimer)
-    renderDebounceTimer = null
-  }
-
-  // CSS 페이지 요소들 정리
-  const cssPages = document.querySelectorAll('.css-page, .css-pages-container')
-  cssPages.forEach(el => el.remove())
 })
 </script>
 <style>
@@ -379,10 +304,7 @@ onUnmounted(() => {
   page-break-after: always;
 }
 
-/* 문제지 콘텐츠 영역 스타일 (숨김) */
-#content-for-pagedjs {
-  display: none;
-}
+/* (원본 콘텐츠 영역은 더 이상 사용하지 않음) */
 
 /* 2단 컬럼 설정 */
 .css-page main.two-column {
@@ -414,7 +336,6 @@ onUnmounted(() => {
 
 .css-page .passage-range {
   font-weight: 500;
-  margin-bottom: 8px;
 }
 
 .css-page .question-block p:first-child {
@@ -479,20 +400,45 @@ onUnmounted(() => {
 
 /* 인쇄 시 스타일 */
 @media print {
-  body > *:not(.css-pages-container) {
-    display: none !important;
+  /* 다른 모든 요소 숨기기 */
+  body * {
+    visibility: hidden;
+  }
+  
+  /* CSS 페이지와 하위 요소들만 보이기 */
+  .css-pages-container,
+  .css-pages-container *,
+  .css-page,
+  .css-page * {
+    visibility: visible;
+  }
+  
+  /* CSS 페이지 컨테이너를 전체 페이지로 확장 */
+  .css-pages-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
   
   .css-page {
+    width: 100% !important;
+    height: 100vh !important;
     margin: 0 !important;
+    padding: 20mm !important;
     box-shadow: none !important;
-    break-after: page;
+    page-break-after: always;
+    display: block;
   }
   
   /* 답안지 영역 인쇄 시 배경색 제거 */
   .css-page .answer-section {
     background-color: transparent !important;
-    border-left-color: #666 !important;
+    border-left: 2px solid #666 !important;
   }
 }
 
