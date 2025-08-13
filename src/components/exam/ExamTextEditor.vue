@@ -188,7 +188,7 @@ const setColumnMode = (mode) => {
 // Debounce 타이머
 let renderDebounceTimer = null
 
-// Paged.js 렌더링 (debounced)
+// CSS 기반 렌더링 (debounced)
 const renderWithPagedJs = async () => {
   if (isRendering.value) return
   
@@ -199,60 +199,8 @@ const renderWithPagedJs = async () => {
   
   // 300ms 지연 후 실행 (빠른 연속 변경 시 불필요한 렌더링 방지)
   renderDebounceTimer = setTimeout(async () => {
-    await executeRender()
+    await renderWithCssPagedMedia()
   }, 300)
-}
-
-// 실제 렌더링 실행
-const executeRender = async () => {
-  if (isRendering.value) return
-  
-  isRendering.value = true
-  
-  try {
-    // 기존 페이지들 제거
-    const existingPages = document.querySelectorAll('.pagedjs_page, .pagedjs_pages, .pagedjs_interface')
-    existingPages.forEach(el => el.remove())
-    
-    // DOM 업데이트 대기
-    await nextTick()
-    
-    if (!contentForPagedjs.value) {
-      console.warn('Content element not found')
-      return
-    }
-    
-    // Paged.js 로드 확인
-    if (!window.Paged) {
-      console.error('Paged.js not loaded. Please check if the CDN is properly loaded.')
-      return
-    }
-    
-    // 콘텐츠가 비어있는지 확인
-    const content = contentForPagedjs.value.innerHTML.trim()
-    if (!content) {
-      console.log('No content to render')
-      return
-    }
-    
-    pagedPreviewer = new window.Paged.Previewer()
-    
-    // 콘텐츠 렌더링
-    await pagedPreviewer.preview(
-      content,
-      [], // stylesheets
-      previewContainer.value
-    )
-    
-    console.log('Paged.js rendering complete')
-    
-  } catch (error) {
-    console.error('Paged.js rendering error:', error)
-    // 사용자에게 오류 표시 (선택사항)
-    // alert('문제지 미리보기를 생성하는 중 오류가 발생했습니다.')
-  } finally {
-    isRendering.value = false
-  }
 }
 
 // 미리보기 새로고침 (즉시 실행)
@@ -262,7 +210,7 @@ const refreshPreview = () => {
     clearTimeout(renderDebounceTimer)
     renderDebounceTimer = null
   }
-  executeRender()
+  renderWithCssPagedMedia()
 }
 
 // 인쇄/PDF 내보내기
@@ -280,14 +228,116 @@ watch(includeAnswers, () => {
   renderWithPagedJs()
 })
 
-// 컴포넌트 마운트 시 Paged.js 초기화
+// 동적으로 Google Fonts 로드
+const loadGoogleFonts = () => {
+  // 이미 로드되어 있는지 확인
+  if (document.querySelector('link[href*="fonts.googleapis.com"][href*="Noto+Serif+KR"]')) {
+    return Promise.resolve()
+  }
+
+  return new Promise((resolve) => {
+    // preconnect 링크들 추가
+    const preconnect1 = document.createElement('link')
+    preconnect1.rel = 'preconnect'
+    preconnect1.href = 'https://fonts.googleapis.com'
+    document.head.appendChild(preconnect1)
+
+    const preconnect2 = document.createElement('link')
+    preconnect2.rel = 'preconnect'
+    preconnect2.href = 'https://fonts.gstatic.com'
+    preconnect2.crossOrigin = 'anonymous'
+    document.head.appendChild(preconnect2)
+
+    // 폰트 스타일시트 로드
+    const fontLink = document.createElement('link')
+    fontLink.rel = 'stylesheet'
+    fontLink.href = 'https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;600;700&display=swap'
+    fontLink.onload = () => {
+      console.log('Google Fonts loaded for ExamTextEditor')
+      resolve()
+    }
+    fontLink.onerror = () => {
+      console.warn('Failed to load Google Fonts, using fallback')
+      resolve() // 실패해도 계속 진행
+    }
+    document.head.appendChild(fontLink)
+  })
+}
+
+// CSS 기반 A4 페이지네이션 (Paged.js 대신 사용)
+const renderWithCssPagedMedia = async () => {
+  if (isRendering.value) return
+  
+  isRendering.value = true
+  
+  try {
+    // 기존 페이지들 제거
+    const existingPages = document.querySelectorAll('.css-page')
+    existingPages.forEach(el => el.remove())
+    
+    await nextTick()
+    
+    if (!contentForPagedjs.value || !previewContainer.value) {
+      console.warn('Content element not found')
+      return
+    }
+    
+    // 콘텐츠를 A4 페이지로 분할하여 표시
+    const content = contentForPagedjs.value.innerHTML.trim()
+    if (!content) {
+      console.log('No content to render')
+      return
+    }
+    
+    // A4 페이지 크기로 분할하여 표시
+    const pageContainer = document.createElement('div')
+    pageContainer.className = 'css-pages-container'
+    
+    // 컬럼 모드 클래스 적용
+    const columnClass = columnMode.value === 1 ? 'one-column' : 'two-column'
+    const updatedContent = content.replace(
+      /<main[^>]*>/g, 
+      `<main class="${columnClass}">`
+    )
+    
+    pageContainer.innerHTML = `
+      <div class="css-page">
+        ${updatedContent}
+      </div>
+    `
+    
+    previewContainer.value.appendChild(pageContainer)
+    
+    console.log('CSS-based pagination complete')
+    
+  } catch (error) {
+    console.error('CSS pagination error:', error)
+  } finally {
+    isRendering.value = false
+  }
+}
+
+// 컴포넌트 마운트 시 필요한 외부 라이브러리들 로드
 onMounted(async () => {
-  // Paged.js는 index.html에서 이미 로드됨
-  // DOM이 완전히 준비될 때까지 약간의 지연 후 렌더링
-  await nextTick()
-  setTimeout(() => {
-    renderWithPagedJs()
-  }, 200)
+  try {
+    // Google Fonts만 로드 (Paged.js는 사용하지 않음)
+    await loadGoogleFonts()
+
+    // DOM 업데이트 대기
+    await nextTick()
+    
+    // 약간의 지연 후 CSS 기반 렌더링
+    setTimeout(() => {
+      renderWithCssPagedMedia()
+    }, 300)
+    
+  } catch (error) {
+    console.error('Failed to load external dependencies:', error)
+    // 실패해도 기본 렌더링은 시도
+    setTimeout(() => {
+      renderWithCssPagedMedia()
+    }, 300)
+  }
 })
 
 // 컴포넌트 언마운트 시 정리
@@ -297,97 +347,95 @@ onUnmounted(() => {
     clearTimeout(renderDebounceTimer)
     renderDebounceTimer = null
   }
-  
-  // Paged.js 인스턴스 정리
-  if (pagedPreviewer) {
-    pagedPreviewer = null
-  }
+
+  // CSS 페이지 요소들 정리
+  const cssPages = document.querySelectorAll('.css-page, .css-pages-container')
+  cssPages.forEach(el => el.remove())
 })
 </script>
 <style>
-/* Paged.js 페이지 스타일 */
-.pagedjs_page {
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  margin-bottom: 20px;
-  background-color: white;
+/* CSS 기반 A4 페이지 스타일 */
+.css-pages-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
 }
 
-/* 문제지 콘텐츠 영역 스타일 */
-#content-for-pagedjs {
-  font-family: 'Noto Serif KR', serif;
+.css-page {
+  width: 210mm;
+  min-height: 297mm;
+  max-width: 794px; /* A4 width in pixels at 96dpi */
+  background-color: white;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  padding: 15mm 18mm;
+  margin-bottom: 20px;
+  font-family: 'Noto Serif KR', '나눔명조', 'Nanum Myeongjo', 'Times New Roman', serif;
   color: black;
   font-size: 9.5pt;
   line-height: 1.5;
+  position: relative;
+  page-break-after: always;
 }
 
-/* CSS Paged Media 규칙 */
-@page {
-  size: A4;
-  margin-top: 15mm;
-  margin-bottom: 15mm;
-  margin-left: 18mm;
-  margin-right: 18mm;
-
-  /* 페이지 번호 */
-  @bottom-center {
-    content: "페이지 " counter(page) " / " counter(pages);
-    font-size: 9pt;
-    color: #555;
-  }
+/* 문제지 콘텐츠 영역 스타일 (숨김) */
+#content-for-pagedjs {
+  display: none;
 }
 
 /* 2단 컬럼 설정 */
-#content-for-pagedjs main.two-column {
+.css-page main.two-column {
   column-count: 2;
   column-gap: 8mm;
   column-rule: 0.5px solid #ccc;
 }
 
 /* 1단 컬럼 설정 */
-#content-for-pagedjs main.one-column {
+.css-page main.one-column {
   column-count: 1;
   column-rule: none;
 }
 
 /* 문제지 내 특정 요소 스타일 */
-.passage-block-preview, .question-block {
+.css-page .passage-block-preview, 
+.css-page .question-block {
   break-inside: avoid-column;
-  break-inside: avoid-page;
   margin-bottom: 10px;
   text-align: justify;
   font-size: 9.5pt;
 }
 
-.passage-block-preview {
+.css-page .passage-block-preview {
   border: 1px solid black;
   padding: 7px;
   line-height: 1.5;
 }
 
-.passage-range {
+.css-page .passage-range {
   font-weight: 500;
   margin-bottom: 8px;
 }
 
-.question-block p:first-child {
+.css-page .question-block p:first-child {
   margin-bottom: 4px;
 }
 
-.question-block .choices {
+.css-page .question-block .choices {
   padding-left: 12px;
   line-height: 1.45;
 }
 
-.question-block .choices p {
+.css-page .question-block .choices p {
   margin-bottom: 2px;
 }
 
-.question-block .choices div {
+.css-page .question-block .choices div {
   margin-bottom: 2px;
 }
 
 /* 보기 박스 스타일 */
-.question-block .보기-box {
+.css-page .question-block .보기-box {
   border: 1px solid black;
   padding: 6px;
   margin-top: 5px;
@@ -396,54 +444,53 @@ onUnmounted(() => {
   line-height: 1.45;
 }
 
-.question-block .보기-box .보기-title {
+.css-page .question-block .보기-box .보기-title {
   text-align: center;
   font-weight: 600;
   margin-bottom: 3px;
 }
 
 /* 답안지 영역 스타일 */
-.answer-section {
+.css-page .answer-section {
   font-size: 8.5pt;
   break-inside: avoid;
 }
 
-.answer-section .answer {
+.css-page .answer-section .answer {
   font-weight: 500;
 }
 
-.answer-section .description {
+.css-page .answer-section .description {
   font-size: 8pt;
   line-height: 1.4;
 }
 
 /* 빈 상태 스타일 */
-.empty-state {
-  break-inside: avoid-page;
+.css-page .empty-state {
   break-inside: avoid-column;
 }
 
 /* 문제지 제목 */
-.exam-title {
+.css-page .exam-title {
   text-align: center;
   font-size: 14pt;
   margin-bottom: 15px;
-  break-after: avoid;
 }
 
 /* 인쇄 시 스타일 */
 @media print {
-  body > *:not(.pagedjs_pages) {
+  body > *:not(.css-pages-container) {
     display: none !important;
   }
   
-  .pagedjs_page {
+  .css-page {
     margin: 0 !important;
     box-shadow: none !important;
+    break-after: page;
   }
   
   /* 답안지 영역 인쇄 시 배경색 제거 */
-  .answer-section {
+  .css-page .answer-section {
     background-color: transparent !important;
     border-left-color: #666 !important;
   }
@@ -451,7 +498,13 @@ onUnmounted(() => {
 
 /* 반응형 스타일 */
 @media (max-width: 768px) {
-  #content-for-pagedjs main.two-column {
+  .css-page {
+    max-width: 95vw;
+    width: auto;
+    padding: 10mm;
+  }
+  
+  .css-page main.two-column {
     column-count: 1;
     column-rule: none;
   }
@@ -483,25 +536,16 @@ input[type="checkbox"]:focus {
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
 }
 
-/* Paged.js 컨테이너 스타일 */
-#pagedjs-pages-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-  padding: 20px;
-}
-
 /* 지문 및 문항 간격 조정 */
-.passages-container > *:not(:last-child) {
+.css-page .passages-container > *:not(:last-child) {
   margin-bottom: 15px;
 }
 
-.passage-block-preview + .question-block {
+.css-page .passage-block-preview + .question-block {
   margin-top: 8px;
 }
 
-.question-block + .question-block {
+.css-page .question-block + .question-block {
   margin-top: 6px;
 }
 </style>
