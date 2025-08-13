@@ -185,8 +185,26 @@ const setColumnMode = (mode) => {
   renderWithPagedJs()
 }
 
-// Paged.js 렌더링
+// Debounce 타이머
+let renderDebounceTimer = null
+
+// Paged.js 렌더링 (debounced)
 const renderWithPagedJs = async () => {
+  if (isRendering.value) return
+  
+  // 기존 타이머 클리어
+  if (renderDebounceTimer) {
+    clearTimeout(renderDebounceTimer)
+  }
+  
+  // 300ms 지연 후 실행 (빠른 연속 변경 시 불필요한 렌더링 방지)
+  renderDebounceTimer = setTimeout(async () => {
+    await executeRender()
+  }, 300)
+}
+
+// 실제 렌더링 실행
+const executeRender = async () => {
   if (isRendering.value) return
   
   isRendering.value = true
@@ -199,11 +217,21 @@ const renderWithPagedJs = async () => {
     // DOM 업데이트 대기
     await nextTick()
     
-    if (!contentForPagedjs.value) return
+    if (!contentForPagedjs.value) {
+      console.warn('Content element not found')
+      return
+    }
     
-    // Paged.js Previewer 인스턴스 생성
+    // Paged.js 로드 확인
     if (!window.Paged) {
-      console.warn('Paged.js not loaded yet')
+      console.error('Paged.js not loaded. Please check if the CDN is properly loaded.')
+      return
+    }
+    
+    // 콘텐츠가 비어있는지 확인
+    const content = contentForPagedjs.value.innerHTML.trim()
+    if (!content) {
+      console.log('No content to render')
       return
     }
     
@@ -211,7 +239,7 @@ const renderWithPagedJs = async () => {
     
     // 콘텐츠 렌더링
     await pagedPreviewer.preview(
-      contentForPagedjs.value.innerHTML,
+      content,
       [], // stylesheets
       previewContainer.value
     )
@@ -220,14 +248,21 @@ const renderWithPagedJs = async () => {
     
   } catch (error) {
     console.error('Paged.js rendering error:', error)
+    // 사용자에게 오류 표시 (선택사항)
+    // alert('문제지 미리보기를 생성하는 중 오류가 발생했습니다.')
   } finally {
     isRendering.value = false
   }
 }
 
-// 미리보기 새로고침
+// 미리보기 새로고침 (즉시 실행)
 const refreshPreview = () => {
-  renderWithPagedJs()
+  // debounce 타이머를 무시하고 즉시 렌더링
+  if (renderDebounceTimer) {
+    clearTimeout(renderDebounceTimer)
+    renderDebounceTimer = null
+  }
+  executeRender()
 }
 
 // 인쇄/PDF 내보내기
@@ -247,28 +282,23 @@ watch(includeAnswers, () => {
 
 // 컴포넌트 마운트 시 Paged.js 초기화
 onMounted(async () => {
-  // Paged.js 로드 대기
-  if (!window.Paged) {
-    const script = document.createElement('script')
-    script.src = 'https://unpkg.com/pagedjs/dist/paged.polyfill.js'
-    script.onload = () => {
-      console.log('Paged.js loaded')
-      // DOM이 완전히 준비될 때까지 약간의 지연
-      setTimeout(() => {
-        renderWithPagedJs()
-      }, 100)
-    }
-    document.head.appendChild(script)
-  } else {
-    // 이미 로드된 경우
-    setTimeout(() => {
-      renderWithPagedJs()
-    }, 100)
-  }
+  // Paged.js는 index.html에서 이미 로드됨
+  // DOM이 완전히 준비될 때까지 약간의 지연 후 렌더링
+  await nextTick()
+  setTimeout(() => {
+    renderWithPagedJs()
+  }, 200)
 })
 
 // 컴포넌트 언마운트 시 정리
 onUnmounted(() => {
+  // debounce 타이머 정리
+  if (renderDebounceTimer) {
+    clearTimeout(renderDebounceTimer)
+    renderDebounceTimer = null
+  }
+  
+  // Paged.js 인스턴스 정리
   if (pagedPreviewer) {
     pagedPreviewer = null
   }
