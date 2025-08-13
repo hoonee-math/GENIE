@@ -57,7 +57,7 @@
         </div>
     </div>
 
-    <!-- CSS 기반 A4 미리보기 영역 -->
+    <!-- A4 미리보기 영역 (CSS 기반) -->
     <div class="flex-1 overflow-auto bg-gray-100 p-6">
         <!-- 로딩 상태 표시 -->
         <div v-if="isRendering" class="text-center py-20">
@@ -65,24 +65,24 @@
             <p class="mt-2 text-gray-600">문제지를 업데이트하는 중...</p>
         </div>
         
-        <!-- Vue 템플릿 기반 A4 페이지 렌더링 -->
-        <div v-else class="css-pages-container" :key="forceUpdateKey">
-            <div class="css-page">
+        <!-- A4 페이지 컨테이너 -->
+        <div v-else class="a4-pages-container" :key="forceUpdateKey">
+            <div class="a4-page">
                 <!-- 헤더 -->
                 <header v-html="getRenderedHeader()"></header>
                 
                 <!-- 메인 콘텐츠 -->
-                <main :class="columnMode === 1 ? 'one-column' : 'two-column'">
+                <main class="page-content" :class="columnMode === 1 ? 'single-column' : 'dual-column'">
                     <!-- 문제지 제목 -->
-                    <div v-if="examData.title" class="exam-title mb-4">
+                    <div v-if="examData.title" class="exam-title">
                         <p class="text-center font-bold text-lg">{{ examData.title }}</p>
                     </div>
 
                     <!-- 지문 및 문항 렌더링 -->
-                    <div v-if="loadedPassages.length > 0" class="passages-container">
+                    <div v-if="loadedPassages.length > 0" class="passages-content">
                         <template v-for="(passage, passageIndex) in loadedPassages" :key="passage.id">
                             <!-- 지문 범위 표시 -->
-                            <div class="passage-range text-[9.5pt] font-medium">
+                            <div class="passage-range">
                                 [{{ getPassageQuestionRange(passageIndex) }}] 다음 글을 읽고 물음에 답하시오.
                             </div>
                             
@@ -112,8 +112,8 @@
 
                                     <!-- 답안지 포함 시 정답 및 해설 -->
                                     <div v-if="includeAnswers && (question.queAnswer || question.queDescription)" 
-                                         class="answer-section mt-3 p-2 bg-gray-50 border-l-4 border-blue-500">
-                                        <div v-if="question.queAnswer" class="answer mb-2">
+                                         class="answer-section">
+                                        <div v-if="question.queAnswer" class="answer">
                                             <span class="font-bold">정답:</span> {{ question.queAnswer }}
                                         </div>
                                         <div v-if="question.queDescription" class="description" v-html="question.queDescription"></div>
@@ -192,7 +192,7 @@ const setColumnMode = (mode) => {
   // Vue의 반응성에 의해 자동으로 업데이트됨
 }
 
-// 미리보기 새로고침 (강제 리렌더링)
+// 미리보기 새로고침
 const refreshPreview = async () => {
   console.log('미리보기 강제 새로고침')
   forceUpdateKey.value++
@@ -208,28 +208,26 @@ const printExam = () => {
   window.print()
 }
 
-// Vue 3의 반응성 시스템이 자동으로 처리하지만, 일부 강제 업데이트 필요
-watch(loadedPassages, async () => {
-  console.log('loadedPassages changed - Vue will auto-update')
-  // 강제 업데이트 트리거
+// 반응형 데이터 변경 감지
+watch(loadedPassages, () => {
+  console.log('loadedPassages changed - updating preview')
   forceUpdateKey.value++
-  isRendering.value = true
-  await nextTick()
-  setTimeout(() => {
-    isRendering.value = false
-  }, 100)
 }, { deep: true })
 
 watch(includeAnswers, () => {
-  console.log('includeAnswers changed - Vue will auto-update')
+  console.log('includeAnswers changed - updating preview')
 })
 
 watch(selectedLayoutId, () => {
-  console.log('selectedLayoutId changed - Vue will auto-update')
+  console.log('selectedLayoutId changed - updating preview')
 })
 
-watch(() => examData.title, () => {
-  console.log('examData.title changed - Vue will auto-update')
+watch(() => examData.value.title, () => {
+  console.log('examData.title changed - updating preview')
+})
+
+watch(columnMode, () => {
+  console.log('columnMode changed - updating preview')
 })
 
 // 동적으로 Google Fonts 로드
@@ -268,153 +266,204 @@ const loadGoogleFonts = () => {
   })
 }
 
-// 컴포넌트 마운트 시 Google Fonts 로드
+// 컴포넌트 마운트 시 초기화
 onMounted(async () => {
   try {
     await loadGoogleFonts()
-    console.log('ExamTextEditor mounted with Google Fonts loaded')
+    console.log('ExamTextEditor mounted successfully')
   } catch (error) {
-    console.error('Failed to load Google Fonts:', error)
+    console.error('Failed to initialize ExamTextEditor:', error)
   }
 })
 </script>
 <style>
-/* CSS 기반 A4 페이지 스타일 */
-.css-pages-container {
+/* A4 페이지 컨테이너 */
+.a4-pages-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 4px; /* 페이지 간격 4px */
   padding: 20px;
 }
 
-.css-page {
+/* A4 페이지 스타일 */
+.a4-page {
   width: 210mm;
   min-height: 297mm;
   max-width: 794px; /* A4 width in pixels at 96dpi */
   background-color: white;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
   padding: 15mm 18mm;
-  margin-bottom: 20px;
   font-family: 'Noto Serif KR', '나눔명조', 'Nanum Myeongjo', 'Times New Roman', serif;
   color: black;
   font-size: 9.5pt;
   line-height: 1.5;
   position: relative;
-  page-break-after: always;
 }
 
-/* (원본 콘텐츠 영역은 더 이상 사용하지 않음) */
+/* 헤더 스타일 */
+.a4-page header {
+  margin-bottom: 12px;
+}
+
+/* 푸터 스타일 */
+.a4-page footer {
+  margin-top: 12px;
+}
+
+/* 페이지 콘텐츠 영역 */
+.page-content {
+  text-align: justify;
+}
 
 /* 2단 컬럼 설정 */
-.css-page main.two-column {
+.page-content.dual-column {
   column-count: 2;
   column-gap: 8mm;
   column-rule: 0.5px solid #ccc;
 }
 
 /* 1단 컬럼 설정 */
-.css-page main.one-column {
+.page-content.single-column {
   column-count: 1;
   column-rule: none;
 }
 
-/* 문제지 내 특정 요소 스타일 */
-.css-page .passage-block-preview, 
-.css-page .question-block {
-  break-inside: avoid-column;
-  margin-bottom: 10px;
-  text-align: justify;
-  font-size: 9.5pt;
+/* 문제지 제목 */
+.exam-title {
+  text-align: center;
+  font-size: 14pt;
+  margin-bottom: 15px;
+  column-span: all; /* 컬럼을 가로질러 표시 */
 }
 
-.css-page .passage-block-preview {
+/* 지문 콘텐츠 영역 */
+.passages-content {
+  /* 컬럼 내에서 자연스럽게 배치 */
+}
+
+/* 지문 범위 표시 */
+.passage-range {
+  font-weight: 500;
+  margin-bottom: 8px;
+  font-size: 9.5pt;
+  break-inside: avoid-column;
+}
+
+/* 지문 내용 박스 */
+.passage-block-preview {
   border: 1px solid black;
   padding: 7px;
   line-height: 1.5;
+  margin-bottom: 10px;
+  text-align: justify;
+  break-inside: avoid-column;
 }
 
-.css-page .passage-range {
-  font-weight: 500;
+/* 문항 블록 */
+.question-block {
+  margin-bottom: 10px;
+  text-align: justify;
+  font-size: 9.5pt;
+  break-inside: avoid-column;
 }
 
-.css-page .question-block p:first-child {
+.question-block p:first-child {
   margin-bottom: 4px;
 }
 
-.css-page .question-block .choices {
+/* 선택지 스타일 */
+.question-block .choices {
   padding-left: 12px;
   line-height: 1.45;
 }
 
-.css-page .question-block .choices p {
+.question-block .choices p {
   margin-bottom: 2px;
 }
 
-.css-page .question-block .choices div {
+.question-block .choices div {
   margin-bottom: 2px;
 }
 
 /* 보기 박스 스타일 */
-.css-page .question-block .보기-box {
+.question-block .보기-box {
   border: 1px solid black;
   padding: 6px;
   margin-top: 5px;
   margin-bottom: 5px;
   font-size: 9pt;
   line-height: 1.45;
+  break-inside: avoid-column;
 }
 
-.css-page .question-block .보기-box .보기-title {
+.question-block .보기-box .보기-title {
   text-align: center;
   font-weight: 600;
   margin-bottom: 3px;
 }
 
 /* 답안지 영역 스타일 */
-.css-page .answer-section {
+.answer-section {
   font-size: 8.5pt;
-  break-inside: avoid;
+  margin-top: 8px;
+  padding: 6px;
+  background-color: #f8f9fa;
+  border-left: 4px solid #3b82f6;
+  break-inside: avoid-column;
 }
 
-.css-page .answer-section .answer {
+.answer-section .answer {
   font-weight: 500;
+  margin-bottom: 4px;
 }
 
-.css-page .answer-section .description {
+.answer-section .description {
   font-size: 8pt;
   line-height: 1.4;
 }
 
 /* 빈 상태 스타일 */
-.css-page .empty-state {
+.empty-state {
   break-inside: avoid-column;
+  column-span: all; /* 컬럼을 가로질러 표시 */
 }
 
-/* 문제지 제목 */
-.css-page .exam-title {
-  text-align: center;
-  font-size: 14pt;
+/* 지문 및 문항 간격 조정 */
+.passages-content > *:not(:last-child) {
   margin-bottom: 15px;
+}
+
+.passage-block-preview + .question-block {
+  margin-top: 8px;
+}
+
+.question-block + .question-block {
+  margin-top: 6px;
 }
 
 /* 인쇄 시 스타일 */
 @media print {
+  @page {
+    size: A4;
+    margin: 15mm 18mm;
+  }
+  
   /* 다른 모든 요소 숨기기 */
   body * {
     visibility: hidden;
   }
   
-  /* CSS 페이지와 하위 요소들만 보이기 */
-  .css-pages-container,
-  .css-pages-container *,
-  .css-page,
-  .css-page * {
+  /* A4 페이지와 하위 요소들만 보이기 */
+  .a4-pages-container,
+  .a4-pages-container *,
+  .a4-page,
+  .a4-page * {
     visibility: visible;
   }
   
-  /* CSS 페이지 컨테이너를 전체 페이지로 확장 */
-  .css-pages-container {
+  /* A4 페이지 컨테이너를 전체 페이지로 확장 */
+  .a4-pages-container {
     position: absolute;
     left: 0;
     top: 0;
@@ -423,9 +472,10 @@ onMounted(async () => {
     display: block !important;
     padding: 0 !important;
     margin: 0 !important;
+    gap: 0 !important;
   }
   
-  .css-page {
+  .a4-page {
     width: 100% !important;
     height: 100vh !important;
     margin: 0 !important;
@@ -436,7 +486,7 @@ onMounted(async () => {
   }
   
   /* 답안지 영역 인쇄 시 배경색 제거 */
-  .css-page .answer-section {
+  .answer-section {
     background-color: transparent !important;
     border-left: 2px solid #666 !important;
   }
@@ -444,15 +494,19 @@ onMounted(async () => {
 
 /* 반응형 스타일 */
 @media (max-width: 768px) {
-  .css-page {
+  .a4-page {
     max-width: 95vw;
     width: auto;
     padding: 10mm;
   }
   
-  .css-page main.two-column {
+  .page-content.dual-column {
     column-count: 1;
     column-rule: none;
+  }
+  
+  .a4-pages-container {
+    padding: 10px;
   }
 }
 
@@ -482,16 +536,10 @@ input[type="checkbox"]:focus {
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
 }
 
-/* 지문 및 문항 간격 조정 */
-.css-page .passages-container > *:not(:last-child) {
-  margin-bottom: 15px;
-}
-
-.css-page .passage-block-preview + .question-block {
-  margin-top: 8px;
-}
-
-.css-page .question-block + .question-block {
-  margin-top: 6px;
+/* 컬럼 브레이크 방지 */
+.passage-range,
+.question-block,
+.보기-box {
+  break-inside: avoid-column;
 }
 </style>
