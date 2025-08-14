@@ -80,16 +80,16 @@
             <p class="mt-2 text-gray-600">문제지를 업데이트하는 중...</p>
         </div>
         
-        <!-- A4 페이지 컨테이너 -->
-        <div v-else class="a4-pages-container" :key="forceUpdateKey" :style="printStyles">
+        <!-- 동적 페이지 컨테이너 (A4, B3, Letter, A3 등 다양한 형식 지원) -->
+        <div v-else class="exam-pages-container" :key="forceUpdateKey" :style="printStyles">
             <!-- 페이지 정보 표시 -->
             <div v-if="paginatedContent.length > 1" class="page-info text-center mb-4 text-sm text-gray-600">
                 총 {{ paginatedContent.length }}페이지 | {{ currentPageFormat.displayName }} | {{ columnMode }}단 레이아웃
             </div>
 
-            <!-- 다중 페이지 렌더링 -->
+            <!-- 다중 페이지 렌더링 (페이지 형식에 따라 동적 크기 적용) -->
             <template v-for="(page, pageIndex) in paginatedContent" :key="`page-${page.pageNumber}`">
-                <div class="a4-page" :style="pageStyles">
+                <div class="exam-page" :style="pageStyles">
                     <!-- 헤더 -->
                     <header v-html="getRenderedHeader()"></header>
                     
@@ -328,7 +328,7 @@ const measureContentHeight = async () => {
   let totalHeight = 0
   
   // 헤더 높이 측정
-  const headerElement = document.querySelector('.a4-page header')
+  const headerElement = document.querySelector('.exam-page header')
   if (headerElement) {
     totalHeight += measureElementHeight(headerElement)
   }
@@ -346,7 +346,7 @@ const measureContentHeight = async () => {
   }
   
   // 푸터 높이 측정
-  const footerElement = document.querySelector('.a4-page footer')
+  const footerElement = document.querySelector('.exam-page footer')
   if (footerElement) {
     totalHeight += measureElementHeight(footerElement)
   }
@@ -547,8 +547,8 @@ onMounted(async () => {
 })
 </script>
 <style>
-/* A4 페이지 컨테이너 */
-.a4-pages-container {
+/* 동적 페이지 컨테이너 (모든 페이지 형식 지원) */
+.exam-pages-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -556,8 +556,8 @@ onMounted(async () => {
   padding: 20px;
 }
 
-/* A4 페이지 스타일 (크기와 여백은 동적으로 설정됨) */
-.a4-page {
+/* 동적 페이지 스타일 (크기와 여백은 페이지 형식에 따라 동적 설정됨) */
+.exam-page {
   background-color: white;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
   font-family: 'Noto Serif KR', '나눔명조', 'Nanum Myeongjo', 'Times New Roman', serif;
@@ -565,16 +565,16 @@ onMounted(async () => {
   font-size: 9.5pt;
   line-height: 1.5;
   position: relative;
-  /* width, height, padding은 :style로 동적 바인딩됨 */
+  /* width, height, padding은 선택된 페이지 형식에 따라 :style로 동적 바인딩됨 */
 }
 
 /* 헤더 스타일 */
-.a4-page header {
+.exam-page header {
   margin-bottom: 12px;
 }
 
 /* 푸터 스타일 */
-.a4-page footer {
+.exam-page footer {
   margin-top: 12px;
 }
 
@@ -738,16 +738,16 @@ onMounted(async () => {
     visibility: hidden;
   }
   
-  /* A4 페이지와 하위 요소들만 보이기 */
-  .a4-pages-container,
-  .a4-pages-container *,
-  .a4-page,
-  .a4-page * {
+  /* 동적 페이지와 하위 요소들만 보이기 */
+  .exam-pages-container,
+  .exam-pages-container *,
+  .exam-page,
+  .exam-page * {
     visibility: visible;
   }
   
-  /* A4 페이지 컨테이너를 전체 페이지로 확장 */
-  .a4-pages-container {
+  /* 동적 페이지 컨테이너를 전체 페이지로 확장 */
+  .exam-pages-container {
     position: absolute;
     left: 0;
     top: 0;
@@ -759,7 +759,7 @@ onMounted(async () => {
     gap: 0 !important;
   }
   
-  .a4-page {
+  .exam-page {
     width: 100% !important;
     height: 100vh !important;
     margin: 0 !important;
@@ -779,7 +779,7 @@ onMounted(async () => {
 
 /* 반응형 스타일 */
 @media (max-width: 768px) {
-  .a4-page {
+  .exam-page {
     max-width: 95vw !important;
     width: auto !important;
     padding: 10mm !important;
@@ -791,7 +791,7 @@ onMounted(async () => {
     column-rule: none !important;
   }
   
-  .a4-pages-container {
+  .exam-pages-container {
     padding: 10px;
   }
 }
