@@ -89,14 +89,18 @@
 
             <!-- 다중 페이지 렌더링 (페이지 형식에 따라 동적 크기 적용) -->
             <template v-for="(page, pageIndex) in paginatedContent" :key="`page-${page.pageNumber}`">
-                <div class="exam-page" :style="pageStyles">
+                <div class="exam-page" :style="previewPageStyles">
                     <!-- 헤더 -->
                     <header v-html="getRenderedHeader()"></header>
                     
                     <!-- 메인 콘텐츠 -->
-                    <main class="page-content" :class="{
-                        'single-column': columnMode === 1,
-                        'dual-column': columnMode === 2
+                    <main class="page-content" :style="{
+                        columnCount: columnStyles.columnCount,
+                        columnWidth: columnStyles.columnWidth,
+                        columnGap: columnStyles.columnGap,
+                        columnRule: columnStyles.columnRule,
+                        height: pageContentHeight,
+                        minHeight: pageContentHeight
                     }">
                         <!-- 문제지 제목 (첫 페이지에만) -->
                         <div v-if="examData.title && pageIndex === 0" class="exam-title">
@@ -106,14 +110,17 @@
                         <!-- 페이지별 지문 및 문항 렌더링 -->
                         <div v-if="page.passages.length > 0" class="passages-content">
                             <template v-for="(passage, passageIndex) in page.passages" :key="passage.id">
-                                <!-- 지문 범위 표시 -->
-                                <div class="passage-range">
-                                    [{{ getPassageQuestionRangeForPage(passage, pageIndex) }}] 다음 글을 읽고 물음에 답하시오.
-                                </div>
-                                
-                                <!-- 지문 내용 -->
-                                <div class="passage-block-preview">
-                                    <div v-html="passage.content"></div>
+                                <!-- 지문 전체 컨테이너 (범위 + 내용을 함께 묶어서 분리 방지) -->
+                                <div class="passage-container">
+                                    <!-- 지문 범위 표시 -->
+                                    <div class="passage-range">
+                                        [{{ getPassageQuestionRangeForPage(passage, pageIndex) }}] 다음 글을 읽고 물음에 답하시오.
+                                    </div>
+                                    
+                                    <!-- 지문 내용 -->
+                                    <div class="passage-block-preview">
+                                        <div v-html="passage.content"></div>
+                                    </div>
                                 </div>
 
                                 <!-- 문항들 -->
@@ -200,6 +207,115 @@ const includeAnswers = ref(false) // 답안지 포함 여부
 const columnMode = ref(2) // 1단 또는 2단 컬럼
 const isRendering = ref(false) // 렌더링 상태 (템플릿에서 사용)
 const forceUpdateKey = ref(0) // 강제 업데이트를 위한 키
+
+// 미리보기 영역에 맞춘 페이지 스타일 (정확한 크기 → w-full 스케일링)
+const previewPageStyles = computed(() => {
+  const format = currentPageFormat.value
+  const margins = currentMargins.value
+  
+  console.log('🔥 previewPageStyles 계산:', {
+    pageFormat: format.id,
+    widthPx: format.widthPx,
+    heightPx: format.heightPx,
+    margins
+  })
+  
+  const result = {
+    // 정확한 페이지 크기 설정 (픽셀 기준)
+    width: `${format.widthPx}px`,
+    height: `${format.heightPx}px`,
+    // 여백 설정  
+    padding: `${margins.top} ${margins.right} ${margins.bottom} ${margins.left}`,
+    // 흰색 배경
+    backgroundColor: 'white',
+    // 스케일링을 위한 CSS 변수
+    '--page-width-px': format.widthPx,
+    '--page-height-px': format.heightPx
+  }
+  
+  console.log('🔥 최종 previewPageStyles:', result)
+  
+  return result
+})
+
+// 다단 레이아웃 계산
+const columnStyles = computed(() => {
+  const format = currentPageFormat.value
+  const margins = currentMargins.value
+  const columnCount = columnMode.value
+  
+  // mm를 px로 변환 (1mm = 3.7795px at 96dpi)
+  const mmToPx = (mm) => parseFloat(mm.replace('mm', '')) * 3.7795
+  
+  // 실제 콘텐츠 영역 너비 계산 (페이지 너비에서 좌우 여백 제거)
+  const leftMarginPx = mmToPx(margins.left)
+  const rightMarginPx = mmToPx(margins.right)
+  const contentAreaWidthPx = format.widthPx - leftMarginPx - rightMarginPx
+  
+  // 2단인 경우 컬럼 간격을 고려한 각 컬럼 너비 계산
+  const columnGapPx = columnCount === 2 ? mmToPx('8mm') : 0 // 8mm 간격
+  const totalGapPx = (columnCount - 1) * columnGapPx
+  const columnWidthPx = (contentAreaWidthPx - totalGapPx) / columnCount
+  
+  console.log('🔥 columnStyles 계산:', {
+    pageFormat: format.id,
+    columnCount,
+    contentAreaWidthPx,
+    columnGapPx,
+    columnWidthPx: Math.round(columnWidthPx)
+  })
+  
+  if (columnCount === 1) {
+    // 1단: 컬럼 설정 없음 (기본 블록 레이아웃)
+    return {
+      columnCount: 'auto',
+      columnWidth: 'auto',
+      columnGap: '0',
+      columnRule: 'none'
+    }
+  } else {
+    // 2단: 컬럼 개수와 간격만 설정 (너비는 브라우저가 자동 계산)
+    return {
+      columnCount: 2,
+      columnWidth: 'auto',
+      columnGap: '8mm',
+      columnRule: '0.5px solid #ccc'
+    }
+  }
+})
+
+// 페이지 콘텐츠 영역 고정 높이 계산
+const pageContentHeight = computed(() => {
+  const margins = currentMargins.value
+  
+  // mm를 px로 변환
+  const mmToPx = (mm) => parseFloat(mm.replace('mm', '')) * 3.7795
+  
+  // 실제 사용 가능한 콘텐츠 높이 (헤더, 푸터 영역 제외)
+  const availableHeight = contentAreaHeight.value
+  
+  // 헤더 영역 대략 높이 (수능형 레이아웃 기준)
+  const headerHeightPx = 80
+  
+  // 푸터 영역 대략 높이  
+  const footerHeightPx = 30
+  
+  // 제목 영역 높이 (있는 경우)
+  const titleHeightPx = examData.value.title ? 40 : 0
+  
+  // 실제 본문 콘텐츠 영역 높이
+  const mainContentHeight = availableHeight - headerHeightPx - footerHeightPx - titleHeightPx
+  
+  console.log('🔥 pageContentHeight 계산:', {
+    availableHeight,
+    headerHeightPx,
+    footerHeightPx,
+    titleHeightPx,
+    mainContentHeight: Math.round(mainContentHeight)
+  })
+  
+  return `${Math.round(mainContentHeight)}px`
+})
 
 // 문항 번호 계산
 const getQuestionNumber = (passageIndex, questionIndex) => {
@@ -530,11 +646,20 @@ const loadGoogleFonts = () => {
   })
 }
 
+// 창 크기 변경 시 스타일 재계산
+const handleResize = () => {
+  // adaptivePageStyles가 자동으로 재계산됨 (computed)
+  forceUpdateKey.value++
+}
+
 // 컴포넌트 마운트 시 초기화
 onMounted(async () => {
   try {
     await loadGoogleFonts()
     console.log('ExamTextEditor mounted successfully')
+    
+    // 창 크기 변경 이벤트 리스너 등록
+    window.addEventListener('resize', handleResize)
     
     // 초기 페이지 분할 실행
     setTimeout(async () => {
@@ -545,6 +670,11 @@ onMounted(async () => {
     console.error('Failed to initialize ExamTextEditor:', error)
   }
 })
+
+// 컴포넌트 언마운트 시 정리
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
+})
 </script>
 <style>
 /* 동적 페이지 컨테이너 (모든 페이지 형식 지원) */
@@ -554,6 +684,17 @@ onMounted(async () => {
   align-items: center;
   gap: 4px; /* 페이지 간격 4px */
   padding: 20px;
+  /* 미리보기 영역에 맞게 전체 스케일링 */
+  width: fit-content;
+  max-width: 100%;
+  transform-origin: top center;
+}
+
+/* 페이지 컨테이너 스케일링 (미리보기 영역 너비에 맞춤) */
+.exam-pages-container .exam-page {
+  /* CSS로 동적 스케일링: 컨테이너 너비가 페이지 너비보다 작으면 축소 */
+  transform: scale(min(1, calc((100vw - 200px) / var(--page-width-px, 794))));
+  transform-origin: top center;
 }
 
 /* 동적 페이지 스타일 (크기와 여백은 페이지 형식에 따라 동적 설정됨) */
@@ -598,18 +739,7 @@ onMounted(async () => {
   text-align: justify;
 }
 
-/* 1단 컬럼 설정 */
-.page-content.single-column {
-  column-count: 1;
-  column-rule: none;
-}
-
-/* 2단 컬럼 설정 */
-.page-content.dual-column {
-  column-count: 2;
-  column-gap: 8mm;
-  column-rule: 0.5px solid #ccc;
-}
+/* 컬럼 설정은 이제 JavaScript에서 동적으로 계산된 값을 사용 */
 
 
 /* 문제지 제목 */
@@ -625,12 +755,19 @@ onMounted(async () => {
   /* 컬럼 내에서 자연스럽게 배치 */
 }
 
+/* 지문 전체 컨테이너 (범위 + 내용을 하나로 묶음) */
+.passage-container {
+  margin-bottom: 15px;
+  /* 지문 범위와 내용이 분리되지 않도록 설정 */
+  /* break-inside: avoid-column; */
+}
+
 /* 지문 범위 표시 */
 .passage-range {
   font-weight: 500;
   margin-bottom: 8px;
   font-size: 9.5pt;
-  break-inside: avoid-column;
+  /* break-inside 제거 - 부모 컨테이너에서 관리 */
 }
 
 /* 지문 내용 박스 */
@@ -640,7 +777,7 @@ onMounted(async () => {
   line-height: 1.5;
   margin-bottom: 10px;
   text-align: justify;
-  break-inside: avoid-column;
+  /* break-inside 제거 - 부모 컨테이너에서 관리 */
 }
 
 /* 문항 블록 */
@@ -648,7 +785,7 @@ onMounted(async () => {
   margin-bottom: 10px;
   text-align: justify;
   font-size: 9.5pt;
-  break-inside: avoid-column;
+  /* break-inside: avoid-column; */
 }
 
 .question-block p:first-child {
@@ -677,7 +814,7 @@ onMounted(async () => {
   margin-bottom: 5px;
   font-size: 9pt;
   line-height: 1.45;
-  break-inside: avoid-column;
+  /* break-inside: avoid-column; */
 }
 
 .question-block .보기-box .보기-title {
@@ -693,7 +830,7 @@ onMounted(async () => {
   padding: 6px;
   background-color: #f8f9fa;
   border-left: 4px solid #3b82f6;
-  break-inside: avoid-column;
+  /* break-inside: avoid-column; */
 }
 
 .answer-section .answer {
@@ -708,7 +845,7 @@ onMounted(async () => {
 
 /* 빈 상태 스타일 */
 .empty-state {
-  break-inside: avoid-column;
+  /* break-inside: avoid-column; */
   column-span: all; /* 컬럼을 가로질러 표시 */
 }
 
@@ -777,23 +914,19 @@ onMounted(async () => {
   }
 }
 
-/* 반응형 스타일 */
+/* 반응형 스타일 - 미리보기 영역에 맞춰 크기만 조정, 컬럼 변경 없음 */
 @media (max-width: 768px) {
-  .exam-page {
-    max-width: 95vw !important;
-    width: auto !important;
-    padding: 10mm !important;
-  }
-  
-  /* 모바일에서는 모든 컬럼을 1단으로 */
-  .page-content.dual-column {
-    column-count: 1 !important;
-    column-rule: none !important;
-  }
-  
+  /* 미리보기 영역 패딩 조정 */
   .exam-pages-container {
     padding: 10px;
   }
+  
+  /* 폰트 크기 최소값 보장으로 가독성 유지 */
+  .exam-page {
+    font-size: max(9.5pt, 0.75rem);
+  }
+  
+  /* 컬럼은 사용자가 선택한 그대로 유지 - 모바일에서도 강제 변경 없음 */
 }
 
 /* 로딩 애니메이션 */
@@ -823,9 +956,9 @@ input[type="checkbox"]:focus {
 }
 
 /* 컬럼 브레이크 방지 */
-.passage-range,
+.passage-container,
 .question-block,
 .보기-box {
-  break-inside: avoid-column;
+  /* break-inside: avoid-column; */
 }
 </style>
