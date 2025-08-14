@@ -737,6 +737,10 @@ onUnmounted(() => {
 /* 페이지 콘텐츠 영역 */
 .page-content {
   text-align: justify;
+  overflow: hidden; /* 페이지 영역을 벗어나지 않도록 */
+  column-fill: auto;
+  /* 페이지 브레이크 추가 */
+  page-break-inside: avoid;
 }
 
 /* 컬럼 설정은 이제 JavaScript에서 동적으로 계산된 값을 사용 */
@@ -759,7 +763,7 @@ onUnmounted(() => {
 .passage-container {
   margin-bottom: 15px;
   /* 지문 범위와 내용이 분리되지 않도록 설정 */
-  /* break-inside: avoid-column; */
+  break-inside: avoid-column;
 }
 
 /* 지문 범위 표시 */
@@ -785,7 +789,7 @@ onUnmounted(() => {
   margin-bottom: 10px;
   text-align: justify;
   font-size: 9.5pt;
-  /* break-inside: avoid-column; */
+  break-inside: avoid-column;
 }
 
 .question-block p:first-child {
@@ -814,7 +818,7 @@ onUnmounted(() => {
   margin-bottom: 5px;
   font-size: 9pt;
   line-height: 1.45;
-  /* break-inside: avoid-column; */
+  break-inside: avoid-column;
 }
 
 .question-block .보기-box .보기-title {
@@ -830,7 +834,7 @@ onUnmounted(() => {
   padding: 6px;
   background-color: #f8f9fa;
   border-left: 4px solid #3b82f6;
-  /* break-inside: avoid-column; */
+  break-inside: avoid-column;
 }
 
 .answer-section .answer {
@@ -845,7 +849,7 @@ onUnmounted(() => {
 
 /* 빈 상태 스타일 */
 .empty-state {
-  /* break-inside: avoid-column; */
+  break-inside: avoid-column;
   column-span: all; /* 컬럼을 가로질러 표시 */
 }
 
@@ -959,6 +963,6 @@ input[type="checkbox"]:focus {
 .passage-container,
 .question-block,
 .보기-box {
-  /* break-inside: avoid-column; */
+  break-inside: avoid-column;
 }
 </style>
