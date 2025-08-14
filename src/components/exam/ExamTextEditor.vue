@@ -14,6 +14,21 @@
                 </select>
             </div>
 
+            <!-- 페이지 형식 선택 드롭다운 -->
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-gray-700">페이지:</label>
+                <select v-model="selectedPageFormat" @change="handlePageFormatChange"
+                    class="px-3 py-1.5 text-sm border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option v-for="format in pageFormats" :key="format.id" :value="format.id">
+                        {{ format.displayName }}
+                    </option>
+                </select>
+                <!-- 현재 페이지 정보 표시 -->
+                <span class="text-xs text-gray-500" :title="currentPageFormat.name">
+                    {{ currentPageFormat.width }} × {{ currentPageFormat.height }}
+                </span>
+            </div>
+
             <!-- 답안지 포함 체크박스 -->
             <div class="flex items-center gap-2">
                 <input type="checkbox" id="include-answers" v-model="includeAnswers"
@@ -25,15 +40,15 @@
         <!-- 오른쪽: 컬럼 및 액션 버튼들 -->
         <div class="flex items-center gap-3">
             <!-- 컬럼 토글 버튼 -->
-            <div class="flex items-center gap-1 border border-gray-300 rounded-md">
+            <div class="flex items-center border border-gray-300 rounded-md">
                 <button @click="setColumnMode(1)" 
                     :class="columnMode === 1 ? 'bg-blue-600 text-white' : 'bg-white text-gray-600'"
-                    class="px-3 py-1.5 text-sm font-medium rounded-l-md hover:bg-blue-50 transition">
+                    class="px-3 py-1.5 text-sm font-medium rounded-l-md transition">
                     1단
                 </button>
                 <button @click="setColumnMode(2)"
                     :class="columnMode === 2 ? 'bg-blue-600 text-white' : 'bg-white text-gray-600'"
-                    class="px-3 py-1.5 text-sm font-medium rounded-r-md hover:bg-blue-50 transition">
+                    class="px-3 py-1.5 text-sm font-medium rounded-r-md transition">
                     2단
                 </button>
             </div>
@@ -66,76 +81,92 @@
         </div>
         
         <!-- A4 페이지 컨테이너 -->
-        <div v-else class="a4-pages-container" :key="forceUpdateKey">
-            <div class="a4-page">
-                <!-- 헤더 -->
-                <header v-html="getRenderedHeader()"></header>
-                
-                <!-- 메인 콘텐츠 -->
-                <main class="page-content" :class="columnMode === 1 ? 'single-column' : 'dual-column'">
-                    <!-- 문제지 제목 -->
-                    <div v-if="examData.title" class="exam-title">
-                        <p class="text-center font-bold text-lg">{{ examData.title }}</p>
-                    </div>
-
-                    <!-- 지문 및 문항 렌더링 -->
-                    <div v-if="loadedPassages.length > 0" class="passages-content">
-                        <template v-for="(passage, passageIndex) in loadedPassages" :key="passage.id">
-                            <!-- 지문 범위 표시 -->
-                            <div class="passage-range">
-                                [{{ getPassageQuestionRange(passageIndex) }}] 다음 글을 읽고 물음에 답하시오.
-                            </div>
-                            
-                            <!-- 지문 내용 -->
-                            <div class="passage-block-preview">
-                                <div v-html="passage.content"></div>
-                            </div>
-
-                            <!-- 문항들 -->
-                            <template v-for="(question, questionIndex) in passage.questions" :key="question.queCode">
-                                <div class="question-block">
-                                    <p>
-                                        <span class="font-bold">{{ getQuestionNumber(passageIndex, questionIndex) }}.</span> 
-                                        <span v-html="question.queQuery"></span>
-                                    </p>
-                                    
-                                    <!-- 보기 박스 (queSubpassage가 있는 경우) -->
-                                    <div v-if="question.queSubpassage" class="보기-box">
-                                        <div class="보기-title">&lt;보 기&gt;</div>
-                                        <div v-html="question.queSubpassage"></div>
-                                    </div>
-                                    
-                                    <!-- 선택지 -->
-                                    <div v-if="question.queOption" class="choices">
-                                        <div v-html="question.queOption"></div>
-                                    </div>
-
-                                    <!-- 답안지 포함 시 정답 및 해설 -->
-                                    <div v-if="includeAnswers && (question.queAnswer || question.queDescription)" 
-                                         class="answer-section">
-                                        <div v-if="question.queAnswer" class="answer">
-                                            <span class="font-bold">정답:</span> {{ question.queAnswer }}
-                                        </div>
-                                        <div v-if="question.queDescription" class="description" v-html="question.queDescription"></div>
-                                    </div>
-                                </div>
-                            </template>
-                        </template>
-                    </div>
-
-                    <!-- 빈 상태 -->
-                    <div v-else class="empty-state text-center py-20 text-gray-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-16 w-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-                        </svg>
-                        <p class="text-base">왼쪽에서 지문을 불러오면</p>
-                        <p class="text-base">여기에 문제가 표시됩니다.</p>
-                    </div>
-                </main>
-                
-                <!-- 푸터 -->
-                <footer v-if="getRenderedFooter()" v-html="getRenderedFooter()"></footer>
+        <div v-else class="a4-pages-container" :key="forceUpdateKey" :style="printStyles">
+            <!-- 페이지 정보 표시 -->
+            <div v-if="paginatedContent.length > 1" class="page-info text-center mb-4 text-sm text-gray-600">
+                총 {{ paginatedContent.length }}페이지 | {{ currentPageFormat.displayName }} | {{ columnMode }}단 레이아웃
             </div>
+
+            <!-- 다중 페이지 렌더링 -->
+            <template v-for="(page, pageIndex) in paginatedContent" :key="`page-${page.pageNumber}`">
+                <div class="a4-page" :style="pageStyles">
+                    <!-- 헤더 -->
+                    <header v-html="getRenderedHeader()"></header>
+                    
+                    <!-- 메인 콘텐츠 -->
+                    <main class="page-content" :class="{
+                        'single-column': columnMode === 1,
+                        'dual-column': columnMode === 2
+                    }">
+                        <!-- 문제지 제목 (첫 페이지에만) -->
+                        <div v-if="examData.title && pageIndex === 0" class="exam-title">
+                            <p class="text-center font-bold text-lg">{{ examData.title }}</p>
+                        </div>
+
+                        <!-- 페이지별 지문 및 문항 렌더링 -->
+                        <div v-if="page.passages.length > 0" class="passages-content">
+                            <template v-for="(passage, passageIndex) in page.passages" :key="passage.id">
+                                <!-- 지문 범위 표시 -->
+                                <div class="passage-range">
+                                    [{{ getPassageQuestionRangeForPage(passage, pageIndex) }}] 다음 글을 읽고 물음에 답하시오.
+                                </div>
+                                
+                                <!-- 지문 내용 -->
+                                <div class="passage-block-preview">
+                                    <div v-html="passage.content"></div>
+                                </div>
+
+                                <!-- 문항들 -->
+                                <template v-for="(question, questionIndex) in passage.questions" :key="question.queCode">
+                                    <div class="question-block">
+                                        <p>
+                                            <span class="font-bold">{{ getQuestionNumberForPage(passage, questionIndex) }}.</span> 
+                                            <span v-html="question.queQuery"></span>
+                                        </p>
+                                        
+                                        <!-- 보기 박스 (queSubpassage가 있는 경우) -->
+                                        <div v-if="question.queSubpassage" class="보기-box">
+                                            <div class="보기-title">&lt;보 기&gt;</div>
+                                            <div v-html="question.queSubpassage"></div>
+                                        </div>
+                                        
+                                        <!-- 선택지 -->
+                                        <div v-if="question.queOption" class="choices">
+                                            <div v-html="question.queOption"></div>
+                                        </div>
+
+                                        <!-- 답안지 포함 시 정답 및 해설 -->
+                                        <div v-if="includeAnswers && (question.queAnswer || question.queDescription)" 
+                                             class="answer-section">
+                                            <div v-if="question.queAnswer" class="answer">
+                                                <span class="font-bold">정답:</span> {{ question.queAnswer }}
+                                            </div>
+                                            <div v-if="question.queDescription" class="description" v-html="question.queDescription"></div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </template>
+                        </div>
+
+                        <!-- 빈 상태 (모든 페이지가 비어있을 때만) -->
+                        <div v-else-if="paginatedContent.length === 1" class="empty-state text-center py-20 text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-16 w-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                            </svg>
+                            <p class="text-base">왼쪽에서 지문을 불러오면</p>
+                            <p class="text-base">여기에 문제가 표시됩니다.</p>
+                        </div>
+                    </main>
+                    
+                    <!-- 푸터 (페이지 번호 포함) -->
+                    <footer class="page-footer">
+                        <div v-if="getRenderedFooter()" v-html="getRenderedFooter()"></div>
+                        <div v-if="paginatedContent.length > 1" class="page-number text-center text-xs text-gray-500 mt-2">
+                            - {{ page.pageNumber }} -
+                        </div>
+                    </footer>
+                </div>
+            </template>
         </div>
     </div>
 </template>
@@ -151,7 +182,17 @@ const {
   selectedLayout,
   changeLayout,
   getRenderedHeader,
-  getRenderedFooter
+  getRenderedFooter,
+  // 페이지 형식 관련
+  pageFormats,
+  selectedPageFormat,
+  currentPageFormat,
+  currentMargins,
+  pageStyles,
+  printStyles,
+  changePageFormat,
+  getDefaultColumnCount,
+  contentAreaHeight
 } = inject('generateExam')
 
 // 컴포넌트 상태
@@ -180,10 +221,34 @@ const getPassageQuestionRange = (passageIndex) => {
   return `${startNumber}~${endNumber}`
 }
 
+// 페이지별 지문 문항 범위 표시
+const getPassageQuestionRangeForPage = (passage) => {
+  // 전체 loadedPassages에서 해당 passage의 인덱스 찾기
+  const passageIndex = loadedPassages.value.findIndex(p => p.id === passage.id)
+  if (passageIndex === -1) return '1'
+  
+  return getPassageQuestionRange(passageIndex)
+}
+
+// 페이지별 문항 번호 계산
+const getQuestionNumberForPage = (passage, questionIndex) => {
+  // 전체 loadedPassages에서 해당 passage의 인덱스 찾기
+  const passageIndex = loadedPassages.value.findIndex(p => p.id === passage.id)
+  if (passageIndex === -1) return questionIndex + 1
+  
+  return getQuestionNumber(passageIndex, questionIndex)
+}
+
 // 레이아웃 변경 핸들러
 const handleLayoutChange = () => {
   changeLayout(selectedLayoutId.value)
   // Vue의 반응성에 의해 자동으로 업데이트됨
+}
+
+// 페이지 형식 변경 핸들러
+const handlePageFormatChange = () => {
+  changePageFormat(selectedPageFormat.value)
+  console.log('페이지 형식 변경됨:', selectedPageFormat.value)
 }
 
 // 컬럼 모드 변경
@@ -192,12 +257,16 @@ const setColumnMode = (mode) => {
   // Vue의 반응성에 의해 자동으로 업데이트됨
 }
 
+
 // 미리보기 새로고침
 const refreshPreview = async () => {
   console.log('미리보기 강제 새로고침')
-  forceUpdateKey.value++
   isRendering.value = true
+  forceUpdateKey.value++
+  
   await nextTick()
+  await paginateContent()
+  
   setTimeout(() => {
     isRendering.value = false
   }, 100)
@@ -208,26 +277,221 @@ const printExam = () => {
   window.print()
 }
 
-// 반응형 데이터 변경 감지
-watch(loadedPassages, () => {
-  console.log('loadedPassages changed - updating preview')
+// ========== 콘텐츠 높이 측정 및 페이지 분할 ==========
+
+// 측정용 임시 컨테이너 요소
+const measureContainer = ref(null)
+
+// 현재 콘텐츠 높이
+const currentContentHeight = ref(0)
+
+// 필요한 페이지 수
+const requiredPages = computed(() => {
+  if (currentContentHeight.value === 0) return 1
+  return Math.ceil(currentContentHeight.value / contentAreaHeight.value)
+})
+
+// 페이지별로 분할된 콘텐츠 (초기값: 빈 페이지 1개)
+const paginatedContent = ref([{
+  pageNumber: 1,
+  passages: []
+}])
+
+/**
+ * DOM 요소의 실제 높이 측정
+ * @param {HTMLElement} element - 측정할 요소
+ * @returns {number} 높이 (픽셀)
+ */
+const measureElementHeight = (element) => {
+  if (!element) return 0
+  
+  const rect = element.getBoundingClientRect()
+  const styles = window.getComputedStyle(element)
+  const marginTop = parseFloat(styles.marginTop) || 0
+  const marginBottom = parseFloat(styles.marginBottom) || 0
+  
+  return rect.height + marginTop + marginBottom
+}
+
+/**
+ * 콘텐츠 전체 높이 측정
+ */
+const measureContentHeight = async () => {
+  await nextTick()
+  
+  const contentElement = document.querySelector('.passages-content')
+  if (!contentElement) {
+    currentContentHeight.value = 0
+    return
+  }
+  
+  let totalHeight = 0
+  
+  // 헤더 높이 측정
+  const headerElement = document.querySelector('.a4-page header')
+  if (headerElement) {
+    totalHeight += measureElementHeight(headerElement)
+  }
+  
+  // 제목 높이 측정
+  const titleElement = document.querySelector('.exam-title')
+  if (titleElement) {
+    totalHeight += measureElementHeight(titleElement)
+  }
+  
+  // 모든 지문과 문항 높이 측정
+  const passages = contentElement.children
+  for (let i = 0; i < passages.length; i++) {
+    totalHeight += measureElementHeight(passages[i])
+  }
+  
+  // 푸터 높이 측정
+  const footerElement = document.querySelector('.a4-page footer')
+  if (footerElement) {
+    totalHeight += measureElementHeight(footerElement)
+  }
+  
+  currentContentHeight.value = totalHeight
+  console.log(`전체 콘텐츠 높이: ${totalHeight}px, 페이지당: ${contentAreaHeight.value}px, 필요 페이지: ${requiredPages.value}`)
+}
+
+/**
+ * 콘텐츠를 페이지별로 분할
+ */
+const paginateContent = async () => {
+  await measureContentHeight()
+  
+  if (requiredPages.value <= 1) {
+    // 단일 페이지인 경우
+    paginatedContent.value = [{
+      pageNumber: 1,
+      passages: loadedPassages.value
+    }]
+    return
+  }
+  
+  // 다중 페이지인 경우 분할 로직
+  const pages = []
+  let currentPageHeight = 0
+  let currentPagePassages = []
+  let pageNumber = 1
+  
+  // 헤더와 제목 높이 계산
+  const fixedHeaderHeight = 100 // 대략적인 헤더 높이
+  const pageCapacity = contentAreaHeight.value - fixedHeaderHeight
+  
+  for (const passage of loadedPassages.value) {
+    // 지문 요소의 예상 높이 계산 (대략적)
+    const estimatedPassageHeight = estimatePassageHeight(passage)
+    
+    // 현재 페이지에 추가할 수 있는지 확인
+    if (currentPageHeight + estimatedPassageHeight > pageCapacity && currentPagePassages.length > 0) {
+      // 새 페이지 시작
+      pages.push({
+        pageNumber: pageNumber++,
+        passages: [...currentPagePassages]
+      })
+      currentPagePassages = [passage]
+      currentPageHeight = estimatedPassageHeight
+    } else {
+      // 현재 페이지에 추가
+      currentPagePassages.push(passage)
+      currentPageHeight += estimatedPassageHeight
+    }
+  }
+  
+  // 마지막 페이지 추가
+  if (currentPagePassages.length > 0) {
+    pages.push({
+      pageNumber: pageNumber,
+      passages: currentPagePassages
+    })
+  }
+  
+  paginatedContent.value = pages
+  console.log(`${pages.length}개 페이지로 분할 완료`)
+}
+
+/**
+ * 지문의 예상 높이 계산 (HTML 콘텐츠 기반)
+ * @param {Object} passage - 지문 객체
+ * @returns {number} 예상 높이 (픽셀)
+ */
+const estimatePassageHeight = (passage) => {
+  let height = 0
+  
+  // 지문 범위 표시 (~20px)
+  height += 25
+  
+  // 지문 내용 (글자 수 기반 대략 계산)
+  const contentLength = passage.content.replace(/<[^>]*>/g, '').length
+  height += Math.ceil(contentLength / 100) * 20 // 대략 100자당 20px
+  
+  // 문항들
+  passage.questions.forEach(question => {
+    height += 30 // 문항 제목
+    
+    if (question.queSubpassage) {
+      const subLength = question.queSubpassage.replace(/<[^>]*>/g, '').length
+      height += Math.ceil(subLength / 80) * 18 + 40 // 보기 박스
+    }
+    
+    if (question.queOption) {
+      const optionLength = question.queOption.replace(/<[^>]*>/g, '').length
+      height += Math.ceil(optionLength / 60) * 16 // 선택지
+    }
+    
+    if (includeAnswers.value && (question.queAnswer || question.queDescription)) {
+      height += 50 // 답안 영역
+    }
+  })
+  
+  return height
+}
+
+// 반응형 데이터 변경 감지 및 자동 페이지 분할
+watch(loadedPassages, async () => {
+  console.log('loadedPassages changed - updating preview and paginating')
   forceUpdateKey.value++
+  await nextTick()
+  await paginateContent()
 }, { deep: true })
 
-watch(includeAnswers, () => {
-  console.log('includeAnswers changed - updating preview')
+watch(includeAnswers, async () => {
+  console.log('includeAnswers changed - re-paginating')
+  await nextTick()
+  await paginateContent()
 })
 
-watch(selectedLayoutId, () => {
+watch(selectedLayoutId, async () => {
   console.log('selectedLayoutId changed - updating preview')
+  await nextTick()
+  await paginateContent()
 })
 
-watch(() => examData.value.title, () => {
+watch(() => examData.value?.title, async () => {
   console.log('examData.title changed - updating preview')
+  await nextTick()
+  await paginateContent()
 })
 
-watch(columnMode, () => {
-  console.log('columnMode changed - updating preview')
+watch(columnMode, async () => {
+  console.log('columnMode changed - re-paginating')
+  await nextTick()
+  await paginateContent()
+})
+
+watch(selectedPageFormat, async () => {
+  console.log('pageFormat changed - re-paginating')
+  await nextTick()
+  await paginateContent()
+})
+
+// 페이지 형식이나 여백이 변경될 때도 재분할
+watch(contentAreaHeight, async () => {
+  console.log('contentAreaHeight changed - re-paginating')
+  await nextTick()
+  await paginateContent()
 })
 
 // 동적으로 Google Fonts 로드
@@ -271,6 +535,12 @@ onMounted(async () => {
   try {
     await loadGoogleFonts()
     console.log('ExamTextEditor mounted successfully')
+    
+    // 초기 페이지 분할 실행
+    setTimeout(async () => {
+      await paginateContent()
+    }, 500) // 폰트 로딩 후 약간의 지연
+    
   } catch (error) {
     console.error('Failed to initialize ExamTextEditor:', error)
   }
@@ -286,19 +556,16 @@ onMounted(async () => {
   padding: 20px;
 }
 
-/* A4 페이지 스타일 */
+/* A4 페이지 스타일 (크기와 여백은 동적으로 설정됨) */
 .a4-page {
-  width: 210mm;
-  min-height: 297mm;
-  max-width: 794px; /* A4 width in pixels at 96dpi */
   background-color: white;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  padding: 15mm 18mm;
   font-family: 'Noto Serif KR', '나눔명조', 'Nanum Myeongjo', 'Times New Roman', serif;
   color: black;
   font-size: 9.5pt;
   line-height: 1.5;
   position: relative;
+  /* width, height, padding은 :style로 동적 바인딩됨 */
 }
 
 /* 헤더 스타일 */
@@ -311,9 +578,30 @@ onMounted(async () => {
   margin-top: 12px;
 }
 
+/* 페이지 번호 스타일 */
+.page-number {
+  font-family: 'Times New Roman', serif;
+  margin-top: 8px;
+}
+
+/* 페이지 정보 스타일 */
+.page-info {
+  background-color: rgba(59, 130, 246, 0.1);
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  font-weight: 500;
+}
+
 /* 페이지 콘텐츠 영역 */
 .page-content {
   text-align: justify;
+}
+
+/* 1단 컬럼 설정 */
+.page-content.single-column {
+  column-count: 1;
+  column-rule: none;
 }
 
 /* 2단 컬럼 설정 */
@@ -323,11 +611,6 @@ onMounted(async () => {
   column-rule: 0.5px solid #ccc;
 }
 
-/* 1단 컬럼 설정 */
-.page-content.single-column {
-  column-count: 1;
-  column-rule: none;
-}
 
 /* 문제지 제목 */
 .exam-title {
@@ -442,11 +725,12 @@ onMounted(async () => {
   margin-top: 6px;
 }
 
-/* 인쇄 시 스타일 */
+/* 인쇄 시 스타일 (동적 CSS 변수 사용) */
 @media print {
   @page {
-    size: A4;
-    margin: 15mm 18mm;
+    size: var(--page-width, A4) var(--page-height, 297mm);
+    margin: var(--page-margin-top, 15mm) var(--page-margin-right, 18mm) 
+            var(--page-margin-bottom, 15mm) var(--page-margin-left, 18mm);
   }
   
   /* 다른 모든 요소 숨기기 */
@@ -479,7 +763,8 @@ onMounted(async () => {
     width: 100% !important;
     height: 100vh !important;
     margin: 0 !important;
-    padding: 20mm !important;
+    padding: var(--page-margin-top, 20mm) var(--page-margin-right, 20mm) 
+             var(--page-margin-bottom, 20mm) var(--page-margin-left, 20mm) !important;
     box-shadow: none !important;
     page-break-after: always;
     display: block;
@@ -495,14 +780,15 @@ onMounted(async () => {
 /* 반응형 스타일 */
 @media (max-width: 768px) {
   .a4-page {
-    max-width: 95vw;
-    width: auto;
-    padding: 10mm;
+    max-width: 95vw !important;
+    width: auto !important;
+    padding: 10mm !important;
   }
   
+  /* 모바일에서는 모든 컬럼을 1단으로 */
   .page-content.dual-column {
-    column-count: 1;
-    column-rule: none;
+    column-count: 1 !important;
+    column-rule: none !important;
   }
   
   .a4-pages-container {

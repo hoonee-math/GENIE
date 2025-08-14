@@ -73,6 +73,76 @@ export function useGenerateExam() {
   // 선택된 레이아웃 ID
   const selectedLayoutId = ref('suneung-style')
 
+  // ========== 페이지 형식 설정 시스템 ==========
+  const pageFormats = ref([
+    {
+      id: 'a4',
+      name: 'A4 (210×297mm)',
+      displayName: 'A4',
+      width: '210mm',
+      height: '297mm',
+      widthPx: 794, // A4 width in pixels at 96dpi (210mm = 794px)
+      heightPx: 1123, // A4 height in pixels at 96dpi (297mm = 1123px)
+      defaultMargins: { 
+        top: '15mm', 
+        right: '18mm', 
+        bottom: '15mm', 
+        left: '18mm' 
+      }
+    },
+    {
+      id: 'b3',
+      name: 'B3 (353×500mm)',
+      displayName: 'B3',
+      width: '353mm',
+      height: '500mm',
+      widthPx: 1335, // B3 width in pixels at 96dpi
+      heightPx: 1890, // B3 height in pixels at 96dpi
+      defaultMargins: { 
+        top: '20mm', 
+        right: '25mm', 
+        bottom: '20mm', 
+        left: '25mm' 
+      }
+    },
+    {
+      id: 'letter',
+      name: 'Letter (216×279mm)',
+      displayName: 'Letter',
+      width: '216mm',
+      height: '279mm',
+      widthPx: 816, // Letter width in pixels at 96dpi
+      heightPx: 1056, // Letter height in pixels at 96dpi
+      defaultMargins: { 
+        top: '25.4mm', 
+        right: '25.4mm', 
+        bottom: '25.4mm', 
+        left: '25.4mm' 
+      }
+    },
+    {
+      id: 'a3',
+      name: 'A3 (297×420mm)',
+      displayName: 'A3',
+      width: '297mm',
+      height: '420mm',
+      widthPx: 1123, // A3 width in pixels at 96dpi
+      heightPx: 1587, // A3 height in pixels at 96dpi
+      defaultMargins: { 
+        top: '20mm', 
+        right: '20mm', 
+        bottom: '20mm', 
+        left: '20mm' 
+      }
+    }
+  ])
+
+  // 선택된 페이지 형식 ID
+  const selectedPageFormat = ref('a4')
+  
+  // 사용자 커스텀 여백 (null이면 기본값 사용)
+  const customMargins = ref(null)
+
   const loadedPassages = ref([
     // 더미 데이터 - 지문 3세트
     {
@@ -479,6 +549,59 @@ export function useGenerateExam() {
     return paperLayouts.value.find(layout => layout.id === selectedLayoutId.value) || paperLayouts.value[0]
   })
 
+  /**
+   * 현재 선택된 페이지 형식 객체
+   */
+  const currentPageFormat = computed(() => {
+    return pageFormats.value.find(f => f.id === selectedPageFormat.value) || pageFormats.value[0]
+  })
+
+  /**
+   * 현재 사용할 여백 설정 (커스텀이 있으면 커스텀, 없으면 기본값)
+   */
+  const currentMargins = computed(() => {
+    return customMargins.value || currentPageFormat.value.defaultMargins
+  })
+
+  /**
+   * 동적 페이지 스타일 객체 (CSS 바인딩용)
+   */
+  const pageStyles = computed(() => ({
+    width: currentPageFormat.value.width,
+    minHeight: currentPageFormat.value.height,
+    maxWidth: `${currentPageFormat.value.widthPx}px`, // 픽셀 기준 최대 너비
+    padding: `${currentMargins.value.top} ${currentMargins.value.right} ${currentMargins.value.bottom} ${currentMargins.value.left}`
+  }))
+
+  /**
+   * 실제 콘텐츠 영역 높이 (페이지 높이에서 여백 제외)
+   */
+  const contentAreaHeight = computed(() => {
+    const format = currentPageFormat.value
+    const margins = currentMargins.value
+    
+    // mm 단위를 픽셀로 변환 (1mm = 3.7795px at 96dpi)
+    const mmToPx = (mm) => parseFloat(mm.replace('mm', '')) * 3.7795
+    
+    const pageHeightPx = format.heightPx
+    const topMarginPx = mmToPx(margins.top)
+    const bottomMarginPx = mmToPx(margins.bottom)
+    
+    return pageHeightPx - topMarginPx - bottomMarginPx
+  })
+
+  /**
+   * 인쇄용 CSS 변수 (동적 @page 스타일용)
+   */
+  const printStyles = computed(() => ({
+    '--page-width': currentPageFormat.value.width,
+    '--page-height': currentPageFormat.value.height,
+    '--page-margin-top': currentMargins.value.top,
+    '--page-margin-right': currentMargins.value.right,
+    '--page-margin-bottom': currentMargins.value.bottom,
+    '--page-margin-left': currentMargins.value.left
+  }))
+
   // ========== 유틸리티 함수 ==========
 
   /**
@@ -506,6 +629,46 @@ export function useGenerateExam() {
     if (paperLayouts.value.find(layout => layout.id === layoutId)) {
       selectedLayoutId.value = layoutId
     }
+  }
+
+  /**
+   * 페이지 형식 변경
+   * @param {string} formatId - 페이지 형식 ID
+   */
+  const changePageFormat = (formatId) => {
+    if (pageFormats.value.find(format => format.id === formatId)) {
+      selectedPageFormat.value = formatId
+      // 페이지 형식이 변경되면 커스텀 여백을 초기화
+      customMargins.value = null
+    }
+  }
+
+  /**
+   * 커스텀 여백 설정
+   * @param {Object} margins - 여백 객체 { top, right, bottom, left }
+   */
+  const setCustomMargins = (margins) => {
+    customMargins.value = { ...margins }
+  }
+
+  /**
+   * 커스텀 여백 초기화 (기본값으로 복원)
+   */
+  const resetMargins = () => {
+    customMargins.value = null
+  }
+
+  /**
+   * 페이지 형식에 따른 기본 컬럼 수 (1단 또는 2단만)
+   * @param {string} formatId - 페이지 형식 ID
+   */
+  const getDefaultColumnCount = (formatId = selectedPageFormat.value) => {
+    const format = pageFormats.value.find(f => f.id === formatId)
+    if (!format) return 2
+    
+    // 너비에 따른 기본 컬럼 수 (1단 또는 2단만)
+    if (format.widthPx >= 800) return 2   // A4, Letter, A3, B3 등은 2단
+    return 1 // 작은 페이지는 1단
   }
 
   /**
@@ -591,6 +754,16 @@ export function useGenerateExam() {
     selectedLayoutId,
     selectedLayout,
 
+    // 페이지 형식 관련
+    pageFormats,
+    selectedPageFormat,
+    customMargins,
+    currentPageFormat,
+    currentMargins,
+    pageStyles,
+    contentAreaHeight,
+    printStyles,
+
     // 계산된 속성
     totalQuestionCount,
     passageCount,
@@ -622,7 +795,13 @@ export function useGenerateExam() {
     changeLayout,
     renderTemplate,
     getRenderedHeader,
-    getRenderedFooter
+    getRenderedFooter,
+
+    // 페이지 형식 관리
+    changePageFormat,
+    setCustomMargins,
+    resetMargins,
+    getDefaultColumnCount
   }
 }
 
