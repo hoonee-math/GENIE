@@ -30,14 +30,17 @@ export function useGenerateExam() {
           <p class="text-[24pt] font-bold leading-none mt-[2px] mb-[3px]">국 어 영 역</p>
         </div>
         <div class="text-right">
-          <p class="font-bold text-[18pt] leading-none">1</p>
+          <p class="font-bold text-[18pt] leading-none">{{pageNumber}}</p>
           <span class="inline-block bg-black text-white px-[5px] py-[1px] text-[8.5pt] font-semibold tracking-wider mt-[2px]">홀수형</span>
         </div>
       </div>
       <hr class="border-black border-t-[1.2px] mt-[4px] mb-[1px]">
       <hr class="border-black border-t-[0.6px] mb-4">`,
-      top: '', // @page @top-* 영역용
-      footer: ''
+      top: `
+      <p class="font-bold text-[18pt] leading-none">{{pageNumber}}</p>
+      <hr class="border-black border-t-[1.2px] mt-[4px] mb-[1px]">
+      <hr class="border-black border-t-[0.6px] mb-4">`, // @page @top-* 영역용
+      footer: `<div class="text-center"><p>페이지 {{pageNumber}}/{{totalPages}}</p></div>`
     },
     {
       id: 'simple-style',
@@ -48,7 +51,7 @@ export function useGenerateExam() {
         <p class="text-sm text-gray-600">{{title}}</p>
       </div>`,
       top: '',
-      footer: ''
+      footer: '<p>{{pageNumber}}/{{totalPages}}</p>'
     },
     {
       id: 'modern-style',
@@ -706,6 +709,11 @@ export function useGenerateExam() {
     })
   }
 
+  const getRenderedTop = () => {
+    return renderTemplate(selectedLayout.value.top, {
+      title: examData.value.title
+    })
+  }
   /**
    * 문제지 데이터 초기화
    */
@@ -796,6 +804,7 @@ export function useGenerateExam() {
     renderTemplate,
     getRenderedHeader,
     getRenderedFooter,
+    getRenderedTop,
 
     // 페이지 형식 관리
     changePageFormat,

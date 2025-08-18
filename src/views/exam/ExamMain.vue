@@ -37,7 +37,7 @@
 
             <!-- 오른쪽: 문제지 미리보기 (A4 비율 적용) -->
             <div class="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col">
-                <ExamTextEditor/>
+                <ExamPreview/>
             </div>
 
         </main>
@@ -48,7 +48,7 @@
 <script setup>
 import { ref, provide } from 'vue'
 import PassageLoaderPanel from '@/components/exam/PassageLoaderPanel.vue'
-import ExamTextEditor from '@/components/exam/ExamTextEditor.vue'
+import ExamPreview from '@/components/exam/ExamPreview.vue'
 import { useGenerateExam } from '@/composables/useGenerateExam'
 
 // useGenerateExam composable 사용 (부모 컴포넌트에서 단일 인스턴스 생성)
