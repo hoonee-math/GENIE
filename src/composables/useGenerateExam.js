@@ -14,149 +14,125 @@ export function useGenerateExam() {
 
   // ========== 반응형 상태 ==========
   const examData = ref({
-    title: '',
-    headerLeft: '',
-    headerCenter: '',
-    headerRight: '',
-    footerLeft: '',
-    footerCenter: '',
-    footerRight: ''
+    title: '' // 문제지 제목만 유지, 헤더/푸터는 paperLayout으로 대체
   })
 
-  const loadedPassages = ref([
-    // 더미 데이터 - 지문 3세트
+  // ========== 문제지 레이아웃 템플릿 시스템 ==========
+  const paperLayouts = ref([
     {
-      id: 1001, // 고유 ID (같은 지문을 여러번 불러와도 구분 가능)
-      pasCode: 123, // 실제 DB의 지문 코드
-      title: '<p>독서 이론 - 텍스트의 의미 구성 문장 길이 늘리기</p>',
-      content: '<p>독서는 단순히 글자를 읽는 행위가 아니라...</p>',
-      type: '단일 지문',
-      isExpanded: false,
-      questions: [
-        {
-          queCode: 2001, // 실제 DB의 문항 코드
-          queQuery: '<p>윗글의 내용 전개 방식으로 적절한 것은?</p>',
-          queOption: [],
-          queAnswer: '',
-          queDescription: '',
-          queSubpassage: ''
-        },
-        {
-          queCode: 2002,
-          queQuery: '<p>윗글을 바탕으로 [보기]를 이해한 내용으로 적절하지 <u>않은</u> 것은?</p>',
-          queOption: [],
-          queAnswer: '',
-          queDescription: '',
-          queSubpassage: ''
-        },
-        {
-          queCode: 2003,
-          queQuery: '<p>윗글에 나타난 필자의 관점에 대한 설명으로 가장 적절한 것은?</p>',
-          queOption: [],
-          queAnswer: '',
-          queDescription: '',
-          queSubpassage: ''
-        }
-      ],
-      descriptions: [
-        {
-          pasType: '독서론',
-          keyword: '텍스트 이해',
-          gist: '독서의 의미 구성 과정',
-          order: 1
-        }
-      ]
+      id: 'suneung-style',
+      name: '수능형 레이아웃',
+      description: '대학수학능력시험 모의평가 스타일',
+      header: `<div class="flex justify-between items-start mb-[6px]">
+        <span class="border border-black rounded-full px-[7px] py-[1.5px] text-[9.5pt] mt-[2px]">제 <span class="font-bold">1</span> 교시</span>
+        <div class="text-center">
+          <p class="text-[10pt] font-[600] tracking-tight">2025학년도 대학수학능력시험 모의평가 문제지</p>
+          <p class="text-[24pt] font-bold leading-none mt-[2px] mb-[3px]">국 어 영 역</p>
+        </div>
+        <div class="text-right">
+          <p class="font-bold text-[18pt] leading-none">{{pageNumber}}</p>
+          <span class="inline-block bg-black text-white px-[5px] py-[1px] text-[8.5pt] font-semibold tracking-wider mt-[2px]">홀수형</span>
+        </div>
+      </div>
+      <hr class="border-black border-t-[1.2px] mt-[4px] mb-[1px]">
+      <hr class="border-black border-t-[0.6px] mb-4">`,
+      top: `
+      <p class="font-bold text-[18pt] leading-none">{{pageNumber}}</p>
+      <hr class="border-black border-t-[1.2px] mt-[4px] mb-[1px]">
+      <hr class="border-black border-t-[0.6px] mb-4">`, // @page @top-* 영역용
+      footer: `<div class="text-center"><p>페이지 {{pageNumber}}/{{totalPages}}</p></div>`
     },
     {
-      id: 1002,
-      pasCode: 456,
-      title: '<p>현대 소설 - 광장 (최인훈)',
-      content: '<p>(가) 이명준은 다시 그 모든 것을 생각했다...</p><p>(나) "사람은 누구나 광장을 가져야 해..."</p>',
-      type: '복합 지문',
-      isExpanded: false, // 접힌 상태로 시작
-      questions: [
-        {
-          queCode: 2004,
-          queQuery: '<p>(가)와 (나)의 공통점으로 가장 적절한 것은?</p>',
-          queOption: [],
-          queAnswer: '',
-          queDescription: '',
-          queSubpassage: ''
-        },
-        {
-          queCode: 2005,
-          queQuery: '<p>윗글에 나타난 인물의 심리 변화 과정으로 적절한 것은?</p>',
-          queOption: [],
-          queAnswer: '',
-          queDescription: '',
-          queSubpassage: ''
-        }
-      ],
-      descriptions: [
-        {
-          pasType: '현대 소설',
-          keyword: '실존 의식',
-          gist: '개인과 사회의 갈등',
-          order: 1
-        },
-        {
-          pasType: '현대 소설',
-          keyword: '광장과 밀실',
-          gist: '공적 영역과 사적 영역',
-          order: 2
-        }
-      ]
+      id: 'simple-style',
+      name: '심플 레이아웃',
+      description: '깔끔하고 단순한 스타일',
+      header: `<div class="text-center mb-4 border-b-2 border-gray-800 pb-3">
+        <h1 class="text-2xl font-bold text-gray-900 mb-1">문제지</h1>
+        <p class="text-sm text-gray-600">{{title}}</p>
+      </div>`,
+      top: '',
+      footer: '<p>{{pageNumber}}/{{totalPages}}</p>'
     },
     {
-      id: 1003,
-      pasCode: 789,
-      title: '<p>화법과 작문 - 토론의 전략</p>',
-      content: '<p>효과적인 토론을 위해서는 논증의 구조를 명확히 해야 한다...</p>',
-      type: '단일 지문',
-      isExpanded: false,
-      questions: [
-        {
-          queCode: 2006,
-          queQuery: '<p>발표자의 말하기 방식에 대한 설명으로 가장 적절한 것은?</p>',
-          queOption: [],
-          queAnswer: '',
-          queDescription: '',
-          queSubpassage: ''
-        },
-        {
-          queCode: 2007,
-          queQuery: '<p>윗글의 논증 구조를 분석한 내용으로 적절하지 않은 것은?</p>',
-          queOption: [],
-          queAnswer: '',
-          queDescription: '',
-          queSubpassage: ''
-        },
-        {
-          queCode: 2008,
-          queQuery: '<p>[보기]의 상황에서 가장 효과적인 토론 전략은?</p>',
-          queOption: [],
-          queAnswer: '',
-          queDescription: '',
-          queSubpassage: ''
-        },
-        {
-          queCode: 2009,
-          queQuery: '<p>토론 과정에서 나타난 의견 조율 방식으로 적절한 것은?</p>',
-          queOption: [],
-          queAnswer: '',
-          queDescription: '',
-          queSubpassage: ''
-        }
-      ],
-      descriptions: [
-        {
-          pasType: '화법',
-          keyword: '토론 전략',
-          gist: '효과적인 논증 방법',
-          order: 1
-        }
-      ]
+      id: 'modern-style',
+      name: '모던 레이아웃',
+      description: '현대적이고 세련된 스타일',
+      header: `<div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 mb-6 -mx-4 -mt-4">
+        <div class="flex justify-between items-center">
+          <div>
+            <h1 class="text-xl font-bold">{{title}}</h1>
+            <p class="text-blue-100 text-sm mt-1">EXAM PAPER</p>
+          </div>
+          <div class="text-right">
+            <p class="text-2xl font-bold">PAGE 1</p>
+          </div>
+        </div>
+      </div>`,
+      top: '',
+      footer: '<div class="text-center text-xs text-gray-500 mt-6 pt-2 border-t border-gray-200">© 2025 GENIE PLATFORM</div>'
     }
+  ])
+
+  // 선택된 레이아웃 ID
+  const selectedLayoutId = ref('suneung-style')
+
+  // ========== 페이지 형식 설정 시스템 ==========
+  const pageFormats = ref([
+    {
+      id: 'a4',
+      name: 'A4 (210×297mm)',
+      displayName: 'A4',
+      width: '210mm',
+      height: '297mm',
+      widthPx: 794, // A4 width in pixels at 96dpi (210mm = 794px)
+      heightPx: 1123, // A4 height in pixels at 96dpi (297mm = 1123px)
+      defaultMargins: { 
+        top: '15mm', 
+        right: '18mm', 
+        bottom: '15mm', 
+        left: '18mm' 
+      }
+    },
+    {
+      id: 'b3',
+      name: 'B3 (353×500mm)',
+      displayName: 'B3',
+      width: '353mm',
+      height: '500mm',
+      widthPx: 1335, // B3 width in pixels at 96dpi
+      heightPx: 1890, // B3 height in pixels at 96dpi
+      defaultMargins: { 
+        top: '20mm', 
+        right: '25mm', 
+        bottom: '20mm', 
+        left: '25mm' 
+      }
+    },
+    {
+      id: 'a3',
+      name: 'A3 (297×420mm)',
+      displayName: 'A3',
+      width: '297mm',
+      height: '420mm',
+      widthPx: 1123, // A3 width in pixels at 96dpi
+      heightPx: 1587, // A3 height in pixels at 96dpi
+      defaultMargins: { 
+        top: '20mm', 
+        right: '20mm', 
+        bottom: '20mm', 
+        left: '20mm' 
+      }
+    }
+  ])
+
+  // 선택된 페이지 형식 ID
+  const selectedPageFormat = ref('a4')
+  
+  // 사용자 커스텀 여백 (null이면 기본값 사용)
+  const customMargins = ref(null)
+
+  const loadedPassages = ref([
+  
   ])
   const isLoading = ref(false)
   const error = ref(null)
@@ -320,7 +296,7 @@ export function useGenerateExam() {
       const newQuestion = {
         queCode: Date.now(), // 새 문항의 임시 queCode (실제로는 서버에서 할당)
         queQuery: formatHtmlContent(questionText, '문제를 입력하세요'),
-        queOption: [],
+        queOption: '',
         queAnswer: '',
         queDescription: '',
         queSubpassage: ''
@@ -422,6 +398,66 @@ export function useGenerateExam() {
     return examData.value.title.trim() !== '' && loadedPassages.value.length > 0
   })
 
+  /**
+   * 선택된 레이아웃 객체
+   */
+  const selectedLayout = computed(() => {
+    return paperLayouts.value.find(layout => layout.id === selectedLayoutId.value) || paperLayouts.value[0]
+  })
+
+  /**
+   * 현재 선택된 페이지 형식 객체
+   */
+  const currentPageFormat = computed(() => {
+    return pageFormats.value.find(f => f.id === selectedPageFormat.value) || pageFormats.value[0]
+  })
+
+  /**
+   * 현재 사용할 여백 설정 (커스텀이 있으면 커스텀, 없으면 기본값)
+   */
+  const currentMargins = computed(() => {
+    return customMargins.value || currentPageFormat.value.defaultMargins
+  })
+
+  /**
+   * 동적 페이지 스타일 객체 (CSS 바인딩용)
+   */
+  const pageStyles = computed(() => ({
+    width: currentPageFormat.value.width,
+    minHeight: currentPageFormat.value.height,
+    maxWidth: `${currentPageFormat.value.widthPx}px`, // 픽셀 기준 최대 너비
+    padding: `${currentMargins.value.top} ${currentMargins.value.right} ${currentMargins.value.bottom} ${currentMargins.value.left}`
+  }))
+
+  /**
+   * 실제 콘텐츠 영역 높이 (페이지 높이에서 여백 제외)
+   */
+  const contentAreaHeight = computed(() => {
+    const format = currentPageFormat.value
+    const margins = currentMargins.value
+    
+    // mm 단위를 픽셀로 변환 (1mm = 3.7795px at 96dpi)
+    const mmToPx = (mm) => parseFloat(mm.replace('mm', '')) * 3.7795
+    
+    const pageHeightPx = format.heightPx
+    const topMarginPx = mmToPx(margins.top)
+    const bottomMarginPx = mmToPx(margins.bottom)
+    
+    return pageHeightPx - topMarginPx - bottomMarginPx
+  })
+
+  /**
+   * 인쇄용 CSS 변수 (동적 @page 스타일용)
+   */
+  const printStyles = computed(() => ({
+    '--page-width': currentPageFormat.value.width,
+    '--page-height': currentPageFormat.value.height,
+    '--page-margin-top': currentMargins.value.top,
+    '--page-margin-right': currentMargins.value.right,
+    '--page-margin-bottom': currentMargins.value.bottom,
+    '--page-margin-left': currentMargins.value.left
+  }))
+
   // ========== 유틸리티 함수 ==========
 
   /**
@@ -442,19 +478,104 @@ export function useGenerateExam() {
   }
 
   /**
+   * paperLayout 레이아웃 변경
+   * @param {string} layoutId - 레이아웃 ID
+   */
+  const changeLayout = (layoutId) => {
+    if (paperLayouts.value.find(layout => layout.id === layoutId)) {
+      selectedLayoutId.value = layoutId
+    }
+  }
+
+  /**
+   * 페이지 형식 변경
+   * @param {string} formatId - 페이지 형식 ID
+   */
+  const changePageFormat = (formatId) => {
+    if (pageFormats.value.find(format => format.id === formatId)) {
+      selectedPageFormat.value = formatId
+      // 페이지 형식이 변경되면 커스텀 여백을 초기화
+      customMargins.value = null
+    }
+  }
+
+  /**
+   * 커스텀 여백 설정
+   * @param {Object} margins - 여백 객체 { top, right, bottom, left }
+   */
+  const setCustomMargins = (margins) => {
+    customMargins.value = { ...margins }
+  }
+
+  /**
+   * 커스텀 여백 초기화 (기본값으로 복원)
+   */
+  const resetMargins = () => {
+    customMargins.value = null
+  }
+
+  /**
+   * 페이지 형식에 따른 기본 컬럼 수 (1단 또는 2단만)
+   * @param {string} formatId - 페이지 형식 ID
+   */
+  const getDefaultColumnCount = (formatId = selectedPageFormat.value) => {
+    const format = pageFormats.value.find(f => f.id === formatId)
+    if (!format) return 2
+    
+    // 너비에 따른 기본 컬럼 수 (1단 또는 2단만)
+    if (format.widthPx >= 800) return 2   // A4, Letter, A3, B3 등은 2단
+    return 1 // 작은 페이지는 1단
+  }
+
+  /**
+   * 템플릿의 변수 치환 ({{title}} 등)
+   * @param {string} template - 템플릿 문자열
+   * @param {Object} variables - 치환할 변수들
+   */
+  const renderTemplate = (template, variables = {}) => {
+    let rendered = template
+    
+    // {{title}} 같은 변수를 실제 값으로 치환
+    Object.keys(variables).forEach(key => {
+      const regex = new RegExp(`\\{\\{${key}\\}\\}`, 'g')
+      rendered = rendered.replace(regex, variables[key] || '')
+    })
+    
+    return rendered
+  }
+
+  /**
+   * 현재 선택된 레이아웃의 헤더 HTML 반환 (변수 치환 적용)
+   */
+  const getRenderedHeader = () => {
+    return renderTemplate(selectedLayout.value.header, {
+      title: examData.value.title
+    })
+  }
+
+  /**
+   * 현재 선택된 레이아웃의 푸터 HTML 반환 (변수 치환 적용)
+   */
+  const getRenderedFooter = () => {
+    return renderTemplate(selectedLayout.value.footer, {
+      title: examData.value.title
+    })
+  }
+
+  const getRenderedTop = () => {
+    return renderTemplate(selectedLayout.value.top, {
+      title: examData.value.title
+    })
+  }
+  /**
    * 문제지 데이터 초기화
    */
   const resetExam = () => {
     examData.value = {
-      title: '',
-      headerLeft: '',
-      headerCenter: '',
-      headerRight: '',
-      footerLeft: '',
-      footerCenter: '',
-      footerRight: ''
+      title: ''
     }
     loadedPassages.value = []
+    selectedLayoutId.value = 'suneung-style' // 기본 레이아웃으로 초기화
     error.value = null
   }
 
@@ -489,6 +610,21 @@ export function useGenerateExam() {
     isLoading,
     error,
 
+    // paperLayout 관련
+    paperLayouts,
+    selectedLayoutId,
+    selectedLayout,
+
+    // 페이지 형식 관련
+    pageFormats,
+    selectedPageFormat,
+    customMargins,
+    currentPageFormat,
+    currentMargins,
+    pageStyles,
+    contentAreaHeight,
+    printStyles,
+
     // 계산된 속성
     totalQuestionCount,
     passageCount,
@@ -514,7 +650,20 @@ export function useGenerateExam() {
     getPassageTypeClass,
     resetExam,
     exportExamData,
-    clearError
+    clearError,
+
+    // paperLayout 관리
+    changeLayout,
+    renderTemplate,
+    getRenderedHeader,
+    getRenderedFooter,
+    getRenderedTop,
+
+    // 페이지 형식 관리
+    changePageFormat,
+    setCustomMargins,
+    resetMargins,
+    getDefaultColumnCount
   }
 }
 
