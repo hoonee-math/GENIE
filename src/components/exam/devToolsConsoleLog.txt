@@ -1,0 +1,53 @@
+📏 정밀 높이 측정: 82.9453125px + margins: 0px = 98.9453125px → 24.74mm
+vue-print-preview.es.js:260 📏 정밀 높이 측정: 47.953125px + margins: 0px = 63.953125px → 15.99mm
+vue-print-preview.es.js:260 📏 정밀 높이 측정: 30.984375px + margins: 0px = 30.984375px → 7.75mm
+vue-print-preview.es.js:314 📊 헤더/푸터 높이 캐시 업데이트: Proxy(Object) {header: 24.736328125, pageTop: 15.98828125, footer: 7.74609375}
+vue-print-preview.es.js:271 📐 사용 가능한 콘텐츠 높이: 281mm - 24.736328125mm(헤더) - 7.74609375mm(푸터) = 248.517578125mm
+vue-print-preview.es.js:271 📐 사용 가능한 콘텐츠 높이 (px): 939.2790354442247px
+vue-print-preview.es.js:271 📐 사용 가능한 콘텐츠 높이: 281mm - 15.98828125mm(헤더) - 7.74609375mm(푸터) = 257.265625mm
+vue-print-preview.es.js:271 📐 사용 가능한 콘텐츠 높이 (px): 972.3425196965859px
+vue-print-preview.es.js:200 📄 페이지 분할 계산: DOM준비=false, 콘텐츠길이=9382
+vue-print-preview.es.js:390 📐 페이지 1 높이: 248.517578125mm (첫페이지)
+vue-print-preview.es.js:390 📐 페이지 1 높이: 248.517578125mm (첫페이지)
+vue-print-preview.es.js:200 📄 페이지 분할 계산: DOM준비=true, 콘텐츠길이=9382
+vue-print-preview.es.js:168 컬럼 설정 적용: 2단, 간격 8mm, 구분선 추가, 왼쪽부터 채우기
+vue-print-preview.es.js:179 전체 높이: 4312px, 첫 페이지 한계: 939.2721865234375px, 나머지 페이지 한계: 972.3354296875px
+vue-print-preview.es.js:149 🔍 parseHtmlToBlocks: 총 10개 블록 파싱 완료
+vue-print-preview.es.js:182 총 10개 블록 발견
+vue-print-preview.es.js:156 📏 컬럼 보정: 원래 높이 1243px → 컬럼 보정 높이 621.5px (2단)
+vue-print-preview.es.js:187 블록 1 (passage-container mb-4): 블록 높이 621.5px, 현재 페이지 누적 0px, 첫 페이지 한계 939.2721865234375px
+vue-print-preview.es.js:187 ✅ 블록 1 현재 페이지에 추가, 누적 높이: 621.5px
+vue-print-preview.es.js:156 📏 컬럼 보정: 원래 높이 265px → 컬럼 보정 높이 132.5px (2단)
+vue-print-preview.es.js:187 블록 2 (question-item mb-[10px] text-justify): 블록 높이 132.5px, 현재 페이지 누적 621.5px, 첫 페이지 한계 939.2721865234375px
+vue-print-preview.es.js:187 ✅ 블록 2 현재 페이지에 추가, 누적 높이: 754px
+vue-print-preview.es.js:156 📏 컬럼 보정: 원래 높이 166px → 컬럼 보정 높이 83px (2단)
+vue-print-preview.es.js:187 블록 3 (question-item mb-[10px] text-justify): 블록 높이 83px, 현재 페이지 누적 754px, 첫 페이지 한계 939.2721865234375px
+vue-print-preview.es.js:187 ✅ 블록 3 현재 페이지에 추가, 누적 높이: 837px
+vue-print-preview.es.js:156 📏 컬럼 보정: 원래 높이 241px → 컬럼 보정 높이 120.5px (2단)
+vue-print-preview.es.js:187 블록 4 (question-item mb-[10px] text-justify): 블록 높이 120.5px, 현재 페이지 누적 837px, 첫 페이지 한계 939.2721865234375px
+vue-print-preview.es.js:187 📄 페이지 1 완료 (첫 페이지), 최종 높이: 837px
+vue-print-preview.es.js:187 📄 페이지 2 시작: 4번째 블록부터, 초기 높이: 120.5px
+vue-print-preview.es.js:156 📏 컬럼 보정: 원래 높이 241px → 컬럼 보정 높이 120.5px (2단)
+vue-print-preview.es.js:187 블록 5 (question-item mb-[10px] text-justify): 블록 높이 120.5px, 현재 페이지 누적 120.5px, 나머지 페이지 한계 972.3354296875px
+vue-print-preview.es.js:187 ✅ 블록 5 현재 페이지에 추가, 누적 높이: 241px
+vue-print-preview.es.js:156 📏 컬럼 보정: 원래 높이 1243px → 컬럼 보정 높이 621.5px (2단)
+vue-print-preview.es.js:187 블록 6 (passage-container mb-4): 블록 높이 621.5px, 현재 페이지 누적 241px, 나머지 페이지 한계 972.3354296875px
+vue-print-preview.es.js:187 ✅ 블록 6 현재 페이지에 추가, 누적 높이: 862.5px
+vue-print-preview.es.js:156 📏 컬럼 보정: 원래 높이 265px → 컬럼 보정 높이 132.5px (2단)
+vue-print-preview.es.js:187 블록 7 (question-item mb-[10px] text-justify): 블록 높이 132.5px, 현재 페이지 누적 862.5px, 나머지 페이지 한계 972.3354296875px
+vue-print-preview.es.js:187 📄 페이지 2 완료 (나머지 페이지), 최종 높이: 862.5px
+vue-print-preview.es.js:187 📄 페이지 3 시작: 7번째 블록부터, 초기 높이: 132.5px
+vue-print-preview.es.js:156 📏 컬럼 보정: 원래 높이 166px → 컬럼 보정 높이 83px (2단)
+vue-print-preview.es.js:187 블록 8 (question-item mb-[10px] text-justify): 블록 높이 83px, 현재 페이지 누적 132.5px, 나머지 페이지 한계 972.3354296875px
+vue-print-preview.es.js:187 ✅ 블록 8 현재 페이지에 추가, 누적 높이: 215.5px
+vue-print-preview.es.js:156 📏 컬럼 보정: 원래 높이 241px → 컬럼 보정 높이 120.5px (2단)
+vue-print-preview.es.js:187 블록 9 (question-item mb-[10px] text-justify): 블록 높이 120.5px, 현재 페이지 누적 215.5px, 나머지 페이지 한계 972.3354296875px
+vue-print-preview.es.js:187 ✅ 블록 9 현재 페이지에 추가, 누적 높이: 336px
+vue-print-preview.es.js:156 📏 컬럼 보정: 원래 높이 241px → 컬럼 보정 높이 120.5px (2단)
+vue-print-preview.es.js:187 블록 10 (question-item mb-[10px] text-justify): 블록 높이 120.5px, 현재 페이지 누적 336px, 나머지 페이지 한계 972.3354296875px
+vue-print-preview.es.js:187 ✅ 블록 10 현재 페이지에 추가, 누적 높이: 456.5px
+vue-print-preview.es.js:189 📄 마지막 페이지 추가
+vue-print-preview.es.js:189 ✅ 총 3페이지 생성, 총 10개 블록
+vue-print-preview.es.js:390 📐 페이지 1 높이: 248.517578125mm (첫페이지)
+vue-print-preview.es.js:390 📐 페이지 2 높이: 257.265625mm (나머지페이지)
+vue-print-preview.es.js:390 📐 페이지 3 높이: 257.265625mm (나머지페이지)

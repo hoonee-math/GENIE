@@ -196,7 +196,7 @@ const passagesHtmlContent = computed(() => {
   // 각 지문 및 문항 렌더링
   loadedPassages.value.forEach((passage, passageIndex) => {
     // 지문 전체 컨테이너 (범위 + 내용을 함께 묶어서 분리 방지)
-    html += `<div class="passage-container mb-4" style="break-inside: avoid; page-break-inside: avoid;">
+    html += `<div class="passage-container mb-4" style="page-break-inside: avoid;">
       <!-- 지문 범위 표시 -->
       <div class="passage-range mb-2 font-medium">
         [${getPassageQuestionRange(passageIndex)}] 다음 글을 읽고 물음에 답하시오.
@@ -369,4 +369,5 @@ input[type="checkbox"]:focus {
   outline: none;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
 }
+
 </style>
