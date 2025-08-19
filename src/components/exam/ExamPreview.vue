@@ -209,7 +209,7 @@ const passagesHtmlContent = computed(() => {
     </div>`
 
     // 문항들을 그룹으로 묶기
-    html += `<div class="questions-group" style="break-inside: avoid; page-break-inside: avoid;">`
+    html += `<div class="questions-group">`
     passage.questions.forEach((question, questionIndex) => {
       html += generateQuestionHtml(passage, question, questionIndex, passageIndex)
     })
