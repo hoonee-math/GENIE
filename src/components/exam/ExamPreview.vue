@@ -201,14 +201,7 @@ const passagesHtmlContent = computed(() => {
   }
   
   // 디버깅 정보 추가
-  html += `<div style="background: #e3f2fd; padding: 8px; margin: 10px 0; border-radius: 4px;">
-    <p style="font-size: 12px; color: #1976d2; margin: 0;">
-      📊 디버깅: ${columnMode.value}단 컬럼 | 페이지: ${getPresetFromFormat()}
-    </p>
-    <p style="font-size: 10px; color: #666; margin: 2px 0 0 0;">
-      customMargins: columns=${customMarginsConfig.value.columns}, gap=${customMarginsConfig.value.columnGap}mm
-    </p>
-  </div>`
+  html += ``
   
   // 각 지문 및 문항 렌더링
   loadedPassages.value.forEach((passage, passageIndex) => {
