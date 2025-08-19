@@ -152,34 +152,35 @@ const getPassageQuestionRange = (passageIndex) => {
 const generateQuestionHtml = (passage, question, questionIndex, passageIndex) => {
   const questionNumber = getQuestionNumber(passageIndex, questionIndex)
   
-  let html = `<div class="question-block mb-[10px] text-justify" style="break-inside: avoid;">
-    <div class="question-block flex mb-[10px]">
-      <span class="mr-1">${questionNumber}.</span> ${question.queQuery}
+  let html = `<div class="question-item mb-[10px] text-justify" style="break-inside: avoid; page-break-inside: avoid;">
+    <div class="question-header flex mb-[10px]">
+      <span class="question-number mr-1 font-medium">${questionNumber}.</span> 
+      <div class="question-text">${question.queQuery}</div>
     </div>`
   
   // 보기 박스 (queSubpassage가 있는 경우)
   if (question.queSubpassage) {
-    html += `<div class="border border-gray-600 p-2 mb-2">
-      <div class="text-center">&lt;보 기&gt;</div>
-      <div>${question.queSubpassage}</div>
+    html += `<div class="question-subpassage border border-gray-600 p-2 mb-2">
+      <div class="text-center font-medium">&lt;보 기&gt;</div>
+      <div class="subpassage-content">${question.queSubpassage}</div>
     </div>`
   }
   
   // 선택지
   if (question.queOption) {
-    html += `<div class="choices pl-0.5 mb-4" style="line-height: 1.45;">
-      <div>${question.queOption}</div>
+    html += `<div class="question-choices pl-0.5 mb-4" style="line-height: 1.45;">
+      <div class="choices-content">${question.queOption}</div>
     </div>`
   }
 
   // 답안지 포함 시 정답 및 해설
   if (includeAnswers.value && (question.queAnswer || question.queDescription)) {
-    html += `<div class="answer-section">`
+    html += `<div class="answer-section bg-gray-50 p-2 mt-2 rounded" style="break-inside: avoid;">`
     if (question.queAnswer) {
-      html += `<div class="answer"><span class="font-bold">정답:</span> ${question.queAnswer}</div>`
+      html += `<div class="answer mb-1"><span class="font-bold text-blue-600">정답:</span> ${question.queAnswer}</div>`
     }
     if (question.queDescription) {
-      html += `<div class="description">${question.queDescription}</div>`
+      html += `<div class="description text-sm text-gray-700">${question.queDescription}</div>`
     }
     html += `</div>`
   }
@@ -195,22 +196,24 @@ const passagesHtmlContent = computed(() => {
   // 각 지문 및 문항 렌더링
   loadedPassages.value.forEach((passage, passageIndex) => {
     // 지문 전체 컨테이너 (범위 + 내용을 함께 묶어서 분리 방지)
-    html += `<div class="mb-2" style="break-inside: avoid;">
+    html += `<div class="passage-container mb-4" style="break-inside: avoid; page-break-inside: avoid;">
       <!-- 지문 범위 표시 -->
-      <div class="mb-2">
+      <div class="passage-range mb-2 font-medium">
         [${getPassageQuestionRange(passageIndex)}] 다음 글을 읽고 물음에 답하시오.
       </div>
       
       <!-- 지문 내용 -->
-      <div class="border border-gray-600 p-2 text-justify">
+      <div class="passage-content border border-gray-600 p-2 text-justify mb-3">
         <div>${passage.content}</div>
       </div>
     </div>`
 
-    // 문항들
+    // 문항들을 그룹으로 묶기
+    html += `<div class="questions-group" style="break-inside: avoid; page-break-inside: avoid;">`
     passage.questions.forEach((question, questionIndex) => {
       html += generateQuestionHtml(passage, question, questionIndex, passageIndex)
     })
+    html += `</div>`
   })
 
   console.log("=======================================")
