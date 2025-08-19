@@ -40,7 +40,7 @@ export function useGenerateExam() {
       <p class="font-bold text-[18pt] leading-none">{{pageNumber}}</p>
       <hr class="border-black border-t-[1.2px] mt-[4px] mb-[1px]">
       <hr class="border-black border-t-[0.6px] mb-4">`, // @page @top-* 영역용
-      footer: `<div class="text-center"><p>페이지 {{pageNumber}}/{{totalPages}}</p></div>`
+      footer: `<div class="text-center text-[10px]"><p class="mt-4">페이지 {{pageNumber}}/{{totalPages}}</p></div>`
     },
     {
       id: 'simple-style',

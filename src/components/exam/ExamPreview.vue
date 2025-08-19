@@ -152,23 +152,22 @@ const getPassageQuestionRange = (passageIndex) => {
 const generateQuestionHtml = (passage, question, questionIndex, passageIndex) => {
   const questionNumber = getQuestionNumber(passageIndex, questionIndex)
   
-  let html = `<div class="question-block">
-    <p>
-      <span class="font-bold">${questionNumber}.</span> 
-      <span>${question.queQuery}</span>
-    </p>`
+  let html = `<div class="question-block mb-[10px] text-justify" style="break-inside: avoid;">
+    <div class="question-block flex mb-[10px]">
+      <span class="mr-1">${questionNumber}.</span> ${question.queQuery}
+    </div>`
   
   // 보기 박스 (queSubpassage가 있는 경우)
   if (question.queSubpassage) {
-    html += `<div class="보기-box">
-      <div class="보기-title">&lt;보 기&gt;</div>
+    html += `<div class="border border-gray-600 p-2 mb-2">
+      <div class="text-center">&lt;보 기&gt;</div>
       <div>${question.queSubpassage}</div>
     </div>`
   }
   
   // 선택지
   if (question.queOption) {
-    html += `<div class="choices">
+    html += `<div class="choices pl-0.5 mb-4" style="line-height: 1.45;">
       <div>${question.queOption}</div>
     </div>`
   }
@@ -193,27 +192,17 @@ const generateQuestionHtml = (passage, question, questionIndex, passageIndex) =>
 const passagesHtmlContent = computed(() => {
   let html = ''
   
-  // 문제지 제목 (있는 경우)
-  if (examData.value.title) {
-    html += `<div class="exam-title">
-      <p class="text-center font-bold text-lg">${examData.value.title}</p>
-    </div>`
-  }
-  
-  // 디버깅 정보 추가
-  html += ``
-  
   // 각 지문 및 문항 렌더링
   loadedPassages.value.forEach((passage, passageIndex) => {
     // 지문 전체 컨테이너 (범위 + 내용을 함께 묶어서 분리 방지)
-    html += `<div class="passage-container">
+    html += `<div class="mb-2" style="break-inside: avoid;">
       <!-- 지문 범위 표시 -->
-      <div class="passage-range">
+      <div class="mb-2">
         [${getPassageQuestionRange(passageIndex)}] 다음 글을 읽고 물음에 답하시오.
       </div>
       
       <!-- 지문 내용 -->
-      <div class="passage-block-preview">
+      <div class="border border-gray-600 p-2 text-justify">
         <div>${passage.content}</div>
       </div>
     </div>`
@@ -223,6 +212,12 @@ const passagesHtmlContent = computed(() => {
       html += generateQuestionHtml(passage, question, questionIndex, passageIndex)
     })
   })
+
+  console.log("=======================================")
+  console.log("=======================================")
+  console.log(html)
+  console.log("=======================================")
+  console.log("=======================================")
   
   return html
 })
@@ -248,10 +243,10 @@ const customMarginsConfig = computed(() => {
   }
   
   return {
-    top: parseMargin(margins.top),
-    right: parseMargin(margins.right),
-    bottom: parseMargin(margins.bottom),
-    left: parseMargin(margins.left),
+    top: 8,//parseMargin(margins.top),
+    right: 8,//parseMargin(margins.right),
+    bottom: 8,//parseMargin(margins.bottom),
+    left: 8,//parseMargin(margins.left),
     columns: columnMode.value,
     columnGap: 8 // mm
   }
@@ -330,56 +325,6 @@ watch(customMarginsConfig, (newConfig) => {
 </script>
 
 <style>
-/* 기본 페이지 스타일 - 컬럼 설정은 vue-print-preview에서 자동 처리 */
-.passages-content {
-  font-family: 'Noto Serif KR', '나눔명조', 'Nanum Myeongjo', 'Times New Roman', serif;
-  color: black;
-  font-size: 9.5pt;
-  line-height: 1.5;
-  text-align: justify;
-}
-
-/* 문제지 제목 */
-.exam-title {
-  text-align: center;
-  font-size: 14pt;
-  margin-bottom: 15px;
-}
-
-/* 지문 전체 컨테이너 (범위 + 내용을 하나로 묶음) */
-.passage-container {
-  margin-bottom: 15px;
-  break-inside: avoid;
-}
-
-/* 지문 범위 표시 */
-.passage-range {
-  font-weight: 500;
-  margin-bottom: 8px;
-  font-size: 9.5pt;
-}
-
-/* 지문 내용 박스 */
-.passage-block-preview {
-  border: 1px solid black;
-  padding: 7px;
-  line-height: 1.5;
-  margin-bottom: 10px;
-  text-align: justify;
-}
-
-/* 문항 블록 */
-.question-block {
-  margin-bottom: 10px;
-  text-align: justify;
-  font-size: 9.5pt;
-  break-inside: avoid;
-}
-
-.question-block p:first-child {
-  margin-bottom: 4px;
-}
-
 /* 선택지 스타일 */
 .question-block .choices {
   padding-left: 12px;
@@ -388,27 +333,6 @@ watch(customMarginsConfig, (newConfig) => {
 
 .question-block .choices p {
   margin-bottom: 2px;
-}
-
-.question-block .choices div {
-  margin-bottom: 2px;
-}
-
-/* 보기 박스 스타일 */
-.question-block .보기-box {
-  border: 1px solid black;
-  padding: 6px;
-  margin-top: 5px;
-  margin-bottom: 5px;
-  font-size: 9pt;
-  line-height: 1.45;
-  break-inside: avoid;
-}
-
-.question-block .보기-box .보기-title {
-  text-align: center;
-  font-weight: 600;
-  margin-bottom: 3px;
 }
 
 /* 답안지 영역 스타일 */
@@ -429,13 +353,6 @@ watch(customMarginsConfig, (newConfig) => {
 .answer-section .description {
   font-size: 8pt;
   line-height: 1.4;
-}
-
-/* 페이지 브레이크 방지 (라이브러리가 컬럼은 자동 관리) */
-.passage-container,
-.question-block,
-.보기-box {
-  break-inside: avoid;
 }
 
 /* 컨트롤 버튼 스타일 개선 */
