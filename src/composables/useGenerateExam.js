@@ -333,6 +333,36 @@ export function useGenerateExam() {
     }
   }
 
+  /**
+   * 기존 지문에 새로운 문항들을 추가 (add 모드용)
+   * @param {string} passageId - 대상 지문의 ID
+   * @param {Array} newQuestions - 추가할 새로운 문항 데이터 배열
+   */
+  const updatePassageQuestions = (passageId, newQuestions) => {
+    const passage = loadedPassages.value.find(p => p.id === passageId)
+    if (passage && newQuestions.length > 0) {
+      // 기존 문항들의 queCode 목록
+      const existingQueCodes = passage.questions.map(q => q.queCode)
+      
+      // 새로운 문항들만 필터링 (중복 방지)
+      const questionsToAdd = newQuestions.filter(q => !existingQueCodes.includes(q.queCode))
+      
+      // 새로운 문항들을 기존 문항 뒤에 추가
+      passage.questions.push(...questionsToAdd.map(q => ({
+        queCode: q.queCode,
+        queQuery: formatHtmlContent(q.queQuery || q.content || q.text, '문제를 입력하세요'),
+        queOption: q.queOption || '',
+        queAnswer: q.queAnswer || '',
+        queDescription: q.queDescription || '',
+        queSubpassage: q.queSubpassage || ''
+      })))
+      
+      console.log(`✅ ${passage.title}에 ${questionsToAdd.length}개 문항 추가 완료`)
+      return questionsToAdd.length
+    }
+    return 0
+  }
+
   // ========== 접기/펴기 관리 ==========
 
   /**
@@ -642,6 +672,7 @@ export function useGenerateExam() {
     addQuestion,
     deleteQuestion,
     reorderQuestions,
+    updatePassageQuestions,
 
     // 유틸리티
     formatHtmlContent,
