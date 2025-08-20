@@ -92,7 +92,13 @@
         </div>
 
         <!-- Passage Loader Modal -->
-        <PassageLoaderModal :isOpen="showPassageModal" @close="closePassageModal"
+        <PassageLoaderModal 
+            :isOpen="showPassageModal" 
+            :mode="modalMode"
+            :targetPassageId="modalTargetPassageId"
+            :targetPasCode="modalTargetPasCode"
+            :existingQueCodes="modalExistingQueCodes"
+            @close="closePassageModal"
             @loadSelectedData="handleLoadSelectedData" />
     </div>
 </template>
@@ -138,12 +144,17 @@ const {
     deleteQuestion,
     reorderQuestions,
     clearError,
-    addPassagesToLoaded
+    addPassagesToLoaded,
+    updatePassageQuestions
 } = inject('generateExam')
 
 // 반응형 상태
 const showPassageModal = ref(false)
 const passageSortable = ref(null)
+const modalMode = ref('all') // 'all' 또는 'add'
+const modalTargetPassageId = ref(null)
+const modalTargetPasCode = ref(null)
+const modalExistingQueCodes = ref([])
 
 // 문제지 이름을 examData와 동기화
 const testName = computed({
@@ -155,32 +166,55 @@ const testName = computed({
 
 // 지문 불러오기 모달 관련
 const openPassageModal = () => {
+    // 전체 지문 선택 모드로 설정
+    modalMode.value = 'all'
+    modalTargetPassageId.value = null
+    modalTargetPasCode.value = null
+    modalExistingQueCodes.value = []
+    
     showPassageModal.value = true
 }
 
 const closePassageModal = () => {
     showPassageModal.value = false
+    // 모달 상태 초기화
+    modalMode.value = 'all'
+    modalTargetPassageId.value = null
+    modalTargetPasCode.value = null
+    modalExistingQueCodes.value = []
 }
 
 const handleLoadSelectedData = async (selectedData) => {
     console.log('선택된 지문과 문항 데이터:', selectedData)
 
     try {
-        // useGenerateExam의 addPassagesToLoaded 함수 사용
-        const addedPassages = addPassagesToLoaded(selectedData, { isExpanded: true })
-        
-        const addedPassageCount = addedPassages.length
-        const addedQuestionCount = addedPassages.reduce((total, passage) => 
-            total + passage.questions.length, 0
-        )
+        if (modalMode.value === 'add' && selectedData.length > 0) {
+            // add 모드: 기존 지문에 문항 추가
+            const passageData = selectedData[0] // add 모드에서는 항상 하나의 지문만
+            const addedCount = updatePassageQuestions(modalTargetPassageId.value, passageData.questions)
+            
+            if (addedCount > 0) {
+                displaySuccess(`${addedCount}개 문항이 성공적으로 추가되었습니다.`)
+            } else {
+                displaySuccess('선택한 문항이 이미 모두 추가되어 있습니다.')
+            }
+        } else {
+            // 기존 방식: 전체 지문 추가
+            const addedPassages = addPassagesToLoaded(selectedData, { isExpanded: true })
+            
+            const addedPassageCount = addedPassages.length
+            const addedQuestionCount = addedPassages.reduce((total, passage) => 
+                total + passage.questions.length, 0
+            )
 
-        console.log("업로드된 지문데이터들: ", loadedPassages.value)
+            console.log("업로드된 지문데이터들: ", loadedPassages.value)
 
-        // 전체 추가 완료 메시지
-        if (addedPassageCount > 0) {
-            displaySuccess(`${addedPassageCount}개 지문과 ${addedQuestionCount}개 문항이 성공적으로 추가되었습니다.`)
-        } else if (addedQuestionCount > 0) {
-            displaySuccess(`${addedQuestionCount}개 문항이 성공적으로 추가되었습니다.`)
+            // 전체 추가 완료 메시지
+            if (addedPassageCount > 0) {
+                displaySuccess(`${addedPassageCount}개 지문과 ${addedQuestionCount}개 문항이 성공적으로 추가되었습니다.`)
+            } else if (addedQuestionCount > 0) {
+                displaySuccess(`${addedQuestionCount}개 문항이 성공적으로 추가되었습니다.`)
+            }
         }
 
         // 드래그 앤 드롭 기능 재초기화
@@ -198,15 +232,32 @@ const handleTogglePassage = (passageId) => {
     togglePassage(passageId)
 }
 
-// 지문 추가 함수 (작동 방식 변경 예정. 기존 pasCode에 종속된 문항들 중에서 추가되지 않은 문항들만 추가로 다시 호출할 수 있는 기능으로 변경 예정)
+// 지문 추가 함수 (작동 방식 변경: 모달을 통한 문항 선택)
 const handleAddQuestion = async (passageId) => {
-    addQuestion(passageId) // 현재 작동 방식: addQuestion = (passageId, questionText = '새로운 문제를 입력하세요') 에 의해서 빈 문항 데이터가 해당지문의 passage.questions 에 추가됨
-
-    displaySuccess('새로운 문제가 추가되었습니다.')
-
-    // 새 문제 추가 후 드래그 앤 드롭 기능 재초기화
-    await nextTick()
-    initializeSortable()
+    // 대상 지문 찾기
+    const targetPassage = loadedPassages.value.find(p => p.id === passageId)
+    if (!targetPassage) {
+        console.error('대상 지문을 찾을 수 없습니다:', passageId)
+        return
+    }
+    
+    // 기존 보유 문항의 queCode 목록
+    const existingQueCodes = targetPassage.questions.map(q => q.queCode)
+    
+    // 모달 설정
+    modalMode.value = 'add'
+    modalTargetPassageId.value = passageId
+    modalTargetPasCode.value = targetPassage.pasCode
+    modalExistingQueCodes.value = existingQueCodes
+    
+    console.log('🔄 문항 추가 모달 열기:', {
+        passageId,
+        pasCode: targetPassage.pasCode,
+        existingQueCodes
+    })
+    
+    // 모달 열기
+    showPassageModal.value = true
 }
 
 const handleDeleteQuestion = (passageId, questionId) => {
