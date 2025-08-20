@@ -3,7 +3,7 @@
         <div class="w-full h-full flex flex-col items-start gap-4 box-border max-w-[1232px] max-h-[968px]">
             <h1
                 class="w-full font-pretendard font-bold text-lg md:text-xl leading-[150%] tracking-[-0.02em] text-[#303030]">
-                지문 및 문항 불러오기
+                {{ props.mode === 'add' ? '지문에 문항 추가하기' : '지문 및 문항 불러오기' }}
             </h1>
 
             <div class="flex flex-col gap-3 w-full">
@@ -45,6 +45,8 @@
                             <PassageBlock v-for="(passage, index) in filteredPassages" :key="passage.pasCode"
                                 :passage="passage" :index="index" :showCheckbox="true"
                                 :selectedQuestions="selectedQuestions[passage.pasCode] || []"
+                                :existingQueCodes="props.mode === 'add' ? props.existingQueCodes : []"
+                                :mode="props.mode"
                                 @passageCheckboxChange="handlePassageCheckboxChange"
                                 @questionCheckboxChange="handleQuestionCheckboxChange"
                                 @toggle="handleTogglePassage(passage.pasCode)" 
@@ -152,8 +154,8 @@
                 <div class="flex gap-2.5 w-full sm:w-auto relative">
                     <BaseButton text="닫기" type="type3" height="54px" class="w-full sm:w-auto px-8 text-sm"
                         @click="closeModal" />
-                    <BaseButton :text="`지문 및 문항 추가하기 (${totalSelectedQuestions}개)`" type="type1" height="54px"
-                        class="w-full sm:w-auto px-8 text-sm" :disabled="totalSelectedQuestions === 0"
+                    <BaseButton :text="props.mode === 'add' ? `문항 추가하기 (${newQuestionCount}개)` : `지문 및 문항 추가하기 (${totalSelectedQuestions}개)`" type="type1" height="54px"
+                        class="w-full sm:w-auto px-8 text-sm" :disabled="props.mode === 'add' ? newQuestionCount === 0 : totalSelectedQuestions === 0"
                         @click="handleLoadPassageAndQuestionFromStorage" />
                 </div>
             </div>
@@ -175,12 +177,28 @@ import SubPassageBox from "@/components/exam/SubPassageBox.vue";
 // Props & Emits
 const props = defineProps({
     isOpen: Boolean,
+    mode: {
+        type: String,
+        default: 'all', // 'all': 전체 지문 선택, 'add': 기존 지문에 문항 추가
+    },
+    targetPassageId: {
+        type: String,
+        default: null, // 'add' 모드일 때 대상 지문의 ID
+    },
+    targetPasCode: {
+        type: Number,
+        default: null, // 'add' 모드일 때 대상 지문의 pasCode
+    },
+    existingQueCodes: {
+        type: Array,
+        default: () => [], // 'add' 모드일 때 이미 보유한 queCode 목록
+    },
 });
 
 const emit = defineEmits(["close", "loadSelectedData"]);
 
 // Composables
-const { fetchPassagesWithQuestionsList, selectGenerateType } = usePassage();
+const { fetchPassagesWithQuestionsList, fetchPassage, selectGenerateType } = usePassage();
 
 // 반응형 상태
 const isLoading = ref(false);
@@ -216,22 +234,48 @@ const totalSelectedQuestions = computed(() => {
     }, 0);
 });
 
+// add 모드에서 새로 추가할 문항 수 (기존 보유 문항 제외)
+const newQuestionCount = computed(() => {
+    if (props.mode !== 'add') return 0;
+    
+    return Object.values(selectedQuestions.value).reduce((total, questions) => {
+        const newQuestions = questions.filter(queCode => !props.existingQueCodes.includes(queCode));
+        return total + newQuestions.length;
+    }, 0);
+});
+
 // 메서드
 const loadPassages = async () => {
     if (isLoading.value) return;
 
     isLoading.value = true;
     try {
-        const passages = await fetchPassagesWithQuestionsList();
+        let passages;
+        
+        if (props.mode === 'add' && props.targetPasCode) {
+            // 특정 지문의 데이터만 로드
+            console.log("🔍 특정 지문 로드 모드:", props.targetPasCode);
+            const passageData = await fetchPassage(props.targetPasCode, { includeQuestions: true });
+            passages = passageData ? [passageData] : [];
+        } else {
+            // 전체 지문 목록 로드 (기존 방식)
+            console.log("📚 전체 지문 로드 모드");
+            passages = await fetchPassagesWithQuestionsList();
+        }
 
         // 원본 데이터 구조 유지하되 PassageBlock에 필요한 필드만 추가
         allPassages.value = passages.map(passage => ({
             ...passage, // 원본 데이터 유지 (pasCode, questions 등)
             type: passage.generateType, // PassageBlock에서 사용하는 type 필드
-            isExpanded: false, // 기본적으로 접힌 상태
+            isExpanded: props.mode === 'add', // add 모드일 때는 펼친 상태로 시작
         }));
 
-        console.log("✅ PassageLoaderModal: 지문 목록 로드 완료", allPassages.value.length, "개");
+        // add 모드일 때 기존 보유 문항들을 미리 선택 상태로 설정
+        if (props.mode === 'add' && props.existingQueCodes.length > 0) {
+            initializeExistingSelections();
+        }
+
+        console.log(`✅ PassageLoaderModal: 지문 목록 로드 완료 (${props.mode} 모드)`, allPassages.value.length, "개");
     } catch (error) {
         console.error("❌ PassageLoaderModal: 지문 목록 로드 실패", error);
         // TODO: 에러 처리 UI 추가
@@ -343,13 +387,25 @@ const handleLoadPassageAndQuestionFromStorage = async () => {
             if (queCodes.length > 0) {
                 const passage = allPassages.value.find(p => p.pasCode === parseInt(pasCode));
                 if (passage) {
-                    const selectedQuestionData = passage.questions.filter(q =>
-                        queCodes.includes(q.queCode)
-                    );
+                    let selectedQuestionData;
+                    
+                    if (props.mode === 'add') {
+                        // add 모드: 새로 추가할 문항만 필터링 (기존 보유 문항 제외)
+                        selectedQuestionData = passage.questions.filter(q =>
+                            queCodes.includes(q.queCode) && !props.existingQueCodes.includes(q.queCode)
+                        );
+                    } else {
+                        // 기존 방식: 선택된 모든 문항
+                        selectedQuestionData = passage.questions.filter(q =>
+                            queCodes.includes(q.queCode)
+                        );
+                    }
 
                     selectedData.push({
                         ...passage,
-                        questions: selectedQuestionData
+                        questions: selectedQuestionData,
+                        targetPassageId: props.targetPassageId, // add 모드일 때 대상 지문 ID 포함
+                        mode: props.mode
                     });
                 }
             }
@@ -368,6 +424,20 @@ const handleLoadPassageAndQuestionFromStorage = async () => {
         isLoading.value = false;
         closeModal();
     }
+};
+
+// add 모드일 때 기존 보유 문항들을 선택 상태로 초기화
+const initializeExistingSelections = () => {
+    const passage = allPassages.value[0]; // add 모드에서는 항상 하나의 지문만 로드됨
+    if (passage && props.existingQueCodes.length > 0) {
+        selectedQuestions.value[passage.pasCode] = [...props.existingQueCodes];
+        console.log('🔄 기존 보유 문항 선택 상태 초기화:', props.existingQueCodes);
+    }
+};
+
+// 기존 보유 문항인지 확인하는 함수
+const isExistingQuestion = (queCode) => {
+    return props.mode === 'add' && props.existingQueCodes.includes(queCode);
 };
 
 // 지문 구조 필터링 시 미리보기 업데이트
