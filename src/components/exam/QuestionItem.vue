@@ -32,9 +32,6 @@
         ]" 
         v-html="question.queQuery"
       />
-      <div v-if="isExisting" class="text-xs text-gray-400 mt-1">
-        이미 추가된 문항
-      </div>
     </div>
 
     <!-- 액션 버튼 (체크박스 모드가 아닐 때만 표시) -->
@@ -115,7 +112,7 @@ const handleCheckboxChange = (event) => {
 
 // 문항 클릭 이벤트 (미리보기용)
 const handleQuestionClick = () => {
-  if (props.showCheckbox && !props.isExisting) {
+  if (props.showCheckbox) {
     emit('click', props.question)
   }
 }
