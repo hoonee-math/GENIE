@@ -6,8 +6,12 @@
       <input 
         type="checkbox" 
         :checked="isChecked" 
+        :disabled="isExisting"
         @change="handleCheckboxChange"
-        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 mr-3"
+        :class="[
+          'w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 mr-3',
+          { 'opacity-50 cursor-not-allowed': isExisting }
+        ]"
       />
     </template>
     
@@ -22,9 +26,15 @@
     <!-- 문제 텍스트 (HTML 렌더링) -->
     <div class="flex-grow" @click="handleQuestionClick">
       <div 
-        class="prose prose-sm text-lg m-0 text-[#303030] text-left cursor-pointer hover:bg-slate-50 p-2 rounded transition-colors" 
+        :class="[
+          'prose prose-sm text-lg m-0 text-left p-2 rounded transition-colors',
+          isExisting ? 'text-gray-400 cursor-default' : 'text-[#303030] cursor-pointer hover:bg-slate-50'
+        ]" 
         v-html="question.queQuery"
       />
+      <div v-if="isExisting" class="text-xs text-gray-400 mt-1">
+        이미 추가된 문항
+      </div>
     </div>
 
     <!-- 액션 버튼 (체크박스 모드가 아닐 때만 표시) -->
@@ -60,6 +70,10 @@ const props = defineProps({
   isChecked: {
     type: Boolean,
     default: false
+  },
+  isExisting: {
+    type: Boolean,
+    default: false // add 모드에서 기존 보유 문항인 경우 true
   }
 })
 
@@ -87,6 +101,12 @@ const copyQuestion = () => {
 
 // 체크박스 변경 핸들러
 const handleCheckboxChange = (event) => {
+  // 기존 문항이면 변경 방지
+  if (props.isExisting) {
+    event.preventDefault()
+    return
+  }
+  
   emit('checkboxChange', {
     queCode: props.question.queCode,
     checked: event.target.checked
@@ -95,7 +115,7 @@ const handleCheckboxChange = (event) => {
 
 // 문항 클릭 이벤트 (미리보기용)
 const handleQuestionClick = () => {
-  if (props.showCheckbox) {
+  if (props.showCheckbox && !props.isExisting) {
     emit('click', props.question)
   }
 }

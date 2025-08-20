@@ -44,6 +44,7 @@
           <!-- TransitionGroup & wrapper div 제거: Sortable이 직접적인 자식 요소들을 인식하도록-->
           <QuestionItem v-for="(question, qIndex) in passage.questions" :key="question.queCode" :question="question"
             :index="qIndex" :showCheckbox="showCheckbox" :isChecked="selectedQuestions.includes(question.queCode)"
+            :isExisting="props.mode === 'add' && props.existingQueCodes.includes(question.queCode)"
             :class="['mb-3']"
             @delete="$emit('deleteQuestion', question.queCode)" 
             @checkboxChange="handleQuestionCheckboxChange"
@@ -95,6 +96,14 @@ const props = defineProps({
   selectedQuestions: {
     type: Array,
     default: () => []
+  },
+  existingQueCodes: {
+    type: Array,
+    default: () => [] // add 모드에서 기존 보유 문항들
+  },
+  mode: {
+    type: String,
+    default: 'all' // 'all' 또는 'add'
   }
 })
 
