@@ -55,7 +55,7 @@
           <button v-if="!showCheckbox" @click="$emit('addQuestion')"
             class="w-full text-left text-sm text-slate-500 hover:text-blue-600 hover:bg-slate-200/60 p-3 rounded-lg transition-colors flex items-center">
             <Icon icon="heroicons:plus" class="w-5 h-5 mr-2" />
-            이 지문에 문제 추가하기
+            저장된 문항에서 추가하기
           </button>
         </div>
 
@@ -316,8 +316,8 @@ onMounted(() => {
 }
 
 .passage-block:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  /* transform: translateY(-2px); */
+  /* box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12); */
 }
 
 /* 아이콘 회전 애니메이션 */
