@@ -214,15 +214,26 @@ export function useStorage() {
       });
 
       // 로컬 데이터 즉시 업데이트
+      // 먼저 부모 항목에서 찾기
       const itemIndex = currentData.value.findIndex(dataItem => dataItem.pasCode === item.pasCode);
       if (itemIndex !== -1) {
-        if (response.isFavorite !== undefined) {
-          currentData.value[itemIndex].isFavorite = response.isFavorite === 1;
-        } else {
-          // API 응답에 isFavorite가 없으면 토글
-          currentData.value[itemIndex].isFavorite = !item.isFavorite;
+        const newFavoriteState = response.isFavorite !== undefined ? response.isFavorite === 1 : !item.isFavorite;
+        currentData.value[itemIndex].isFavorite = newFavoriteState;
+        console.log('🌟 부모 즐겨찾기 업데이트 완료:', newFavoriteState);
+      } else {
+        // 부모에서 찾지 못했다면 자식 항목에서 찾기
+        for (let i = 0; i < currentData.value.length; i++) {
+          const parentItem = currentData.value[i];
+          if (parentItem.childPassages && parentItem.childPassages.length > 0) {
+            const childIndex = parentItem.childPassages.findIndex(child => child.pasCode === item.pasCode);
+            if (childIndex !== -1) {
+              const newFavoriteState = response.isFavorite !== undefined ? response.isFavorite === 1 : !item.isFavorite;
+              parentItem.childPassages[childIndex].isFavorite = newFavoriteState;
+              console.log('🌟 자식 즐겨찾기 업데이트 완료:', newFavoriteState);
+              break;
+            }
+          }
         }
-        console.log('🌟 즐겨찾기 업데이트 완료:', currentData.value[itemIndex].isFavorite);
       }
 
       // Store 업데이트 (선택사항 - 필요에 따라)

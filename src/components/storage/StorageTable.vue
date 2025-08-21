@@ -67,10 +67,10 @@
                             </th>
 
                             <!-- 유형 -->
-                            <!-- <th
+                            <th
                                 class="px-4 py-3 w-[9%] min-w-[80px] max-w-[120px] hover:bg-blue-50 transition-colors text-base sm:text-lg text-center">
                                 유형
-                            </th> -->
+                            </th>
 
                             <!-- 최종 작업일 -->
                             <th
@@ -94,7 +94,7 @@
                     <tbody class="divide-y text-[14px] sm:text-[16px]">
                         <template v-for="(item, index) in items" :key="item.pasCode">
                             <!-- 부모 행 -->
-                            <tr class="group hover:bg-[#eeeeee] cursor-pointer"
+                            <tr class="group hover:bg-[#eeeeee]"
                                 :class="{ 'bg-[#0086ff1c]': selectedItems.has(item.pasCode) }"
                                 @click="handleRowClick(item, $event)"
                                 @contextmenu="handleContextMenu(item, index, $event)">
@@ -123,7 +123,7 @@
                                     <div v-else class="flex items-center gap-2">
                                         <!-- 확장 표시기 (childPassages가 있을 때만) -->
                                         <div v-if="item.childPassages && item.childPassages.length > 0"
-                                            class="flex-shrink-0 w-4 h-4 flex items-center justify-center">
+                                            class="flex-shrink-0 w-4 h-4 flex items-center justify-center cursor-pointer">
                                             <svg class="w-3 h-3 transition-transform duration-200"
                                                 :class="{ 'rotate-90': expandedRows.has(item.pasCode) }" fill="none"
                                                 stroke="currentColor" viewBox="0 0 24 24">
@@ -167,13 +167,13 @@
 
                                 <!-- 즉, item.isGenerated === 1 || item.isUserEntered === 1 인 경우는 무조건 지문임 -->
 
-                                <!-- <td class="px-4 py-2 text-center">
+                                <td class="px-4 py-2 text-center">
                                     <span :class="[
                                         item.isGenerated === 1 || item.isUserEntered === 1 ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
                                         ]" class="px-2 py-0.5 rounded text-sm">
                                         {{ getTypeLabel(item.isGenerated === 1 || item.isUserEntered === 1) }}
                                     </span>
-                                </td> -->
+                                </td>
 
                                 <!-- 최종 작업일 -->
                                 <td class="px-4 py-2 text-[#424242] text-center">
@@ -214,7 +214,8 @@
                             <template v-if="expandedRows.has(item.pasCode) && item.childPassages">
                                 <tr v-for="(childItem, childIndex) in item.childPassages"
                                     :key="`${item.pasCode}_child_${childIndex}`"
-                                    class="bg-gray-50 hover:bg-gray-100 border-l-4 border-blue-200">
+                                    @click.stop="handleTitleClick(childItem)"
+                                    class="bg-gray-50 hover:bg-gray-100 border-l-4 border-blue-20 cursor-pointer">
                                     <!-- 선택 체크박스 (선택 모드일 때만) -->
                                     <td v-if="isSelectionMode" class="px-4 py-2 text-center transition-all duration-300"
                                         @click.stop>
@@ -248,9 +249,7 @@
                                                 </div>
                                             </div>
                                             <!-- 일반 모드일 때 -->
-                                            <div v-else class="text-[#303030] truncate cursor-pointer hover:text-brand transition-colors" 
-                                                 @click.stop="handleTitleClick(childItem)"
-                                                 >
+                                            <div v-else class="text-[#303030] truncate cursor-pointer hover:text-brand transition-colors">
                                                 <span class="mr-2 text-[#919191]">-</span>{{ childItem.title }}
                                             </div>
                                         </div>
@@ -269,11 +268,11 @@
                                     </td>
 
                                     <!-- 자식 유형 -->
-                                    <!-- <td class="px-4 py-2 text-center">
+                                    <td class="px-4 py-2 text-center">
                                         <span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-sm">
                                             {{ childItem.type || '지문+문항' }}
                                         </span>
-                                    </td> -->
+                                    </td>
 
                                     <!-- 자식 최종 작업일 -->
                                     <td class="px-4 py-2 text-[#424242] text-center">
