@@ -232,7 +232,8 @@
                                     </td>
 
                                     <!-- 자식 작업명 (들여쓰기) -->
-                                    <td class="px-4 py-2 text-[#424242] transition-all duration-300">
+                                    <td class="px-4 py-2 text-[#424242] transition-all duration-300"
+                                        @contextmenu="handleChildContextMenu(childItem, index, childIndex, $event)">
                                         <div class="flex items-center gap-2 pl-6">
                                             <!-- 수정 모드일 때 -->
                                             <div v-if="editingIndex === `${index}_child_${childIndex}`" @click.stop>
@@ -249,7 +250,7 @@
                                             <!-- 일반 모드일 때 -->
                                             <div v-else class="text-[#303030] truncate cursor-pointer hover:text-brand transition-colors" 
                                                  @click.stop="handleTitleClick(childItem)"
-                                                 @contextmenu="handleChildContextMenu(childItem, index, childIndex, $event)">
+                                                 >
                                                 <span class="mr-2 text-[#919191]">-</span>{{ childItem.title }}
                                             </div>
                                         </div>
