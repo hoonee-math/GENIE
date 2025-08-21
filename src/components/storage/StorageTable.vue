@@ -44,7 +44,7 @@
                             <!-- 선택 체크박스 (선택 모드일 때만) -->
                             <th v-if="isSelectionMode"
                                 class="px-4 py-3 hover:bg-blue-50 transition-all duration-300 text-base sm:text-lg text-center"
-                                :class="isSelectionMode ? 'w-[7%] min-w-[60px] max-w-[80px]' : 'w-0 min-w-0 max-w-0 overflow-hidden'">
+                                :class="isSelectionMode ? 'w-[5%] min-w-[60px] max-w-[80px]' : 'w-0 min-w-0 max-w-0 overflow-hidden'">
                                 선택
                             </th>
 
@@ -62,15 +62,15 @@
 
                             <!-- 제재 -->
                             <th
-                                class="px-4 py-3 w-[12%] min-w-[120px] max-w-[200px] hover:bg-blue-50 transition-colors text-base sm:text-lg">
+                                class="px-4 py-3 w-[20%] min-w-[120px] max-w-[200px] hover:bg-blue-50 transition-colors text-base sm:text-lg">
                                 제재
                             </th>
 
                             <!-- 유형 -->
-                            <th
+                            <!-- <th
                                 class="px-4 py-3 w-[9%] min-w-[80px] max-w-[120px] hover:bg-blue-50 transition-colors text-base sm:text-lg text-center">
                                 유형
-                            </th>
+                            </th> -->
 
                             <!-- 최종 작업일 -->
                             <th
@@ -79,10 +79,10 @@
                             </th>
 
                             <!-- 다운로드 -->
-                            <th
+                            <!-- <th
                                 class="px-4 py-3 w-[10%] min-w-[90px] max-w-[120px] hover:bg-blue-50 transition-colors text-base sm:text-lg text-center">
                                 다운로드
-                            </th>
+                            </th> -->
 
                             <!-- 즐겨찾기 -->
                             <th
@@ -167,13 +167,13 @@
 
                                 <!-- 즉, item.isGenerated === 1 || item.isUserEntered === 1 인 경우는 무조건 지문임 -->
 
-                                <td class="px-4 py-2 text-center">
+                                <!-- <td class="px-4 py-2 text-center">
                                     <span :class="[
                                         item.isGenerated === 1 || item.isUserEntered === 1 ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
                                         ]" class="px-2 py-0.5 rounded text-sm">
                                         {{ getTypeLabel(item.isGenerated === 1 || item.isUserEntered === 1) }}
                                     </span>
-                                </td>
+                                </td> -->
 
                                 <!-- 최종 작업일 -->
                                 <td class="px-4 py-2 text-[#424242] text-center">
@@ -181,7 +181,7 @@
                                 </td>
 
                                 <!-- 다운로드 -->
-                                <td class="px-4 py-2 text-center" @click.stop>
+                                <!-- <td class="px-4 py-2 text-center" @click.stop>
                                     <div
                                         class="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition">
                                         <button @click="$emit('download', item)" title="다운로드"
@@ -193,7 +193,7 @@
                                             </svg>
                                         </button>
                                     </div>
-                                </td>
+                                </td> -->
 
                                 <!-- 즐겨찾기 -->
                                 <td class="px-4 py-2 text-center">
@@ -234,7 +234,7 @@
                                     <!-- 자식 작업명 (들여쓰기) -->
                                     <td class="px-4 py-2 text-[#424242] transition-all duration-300">
                                         <div class="flex items-center gap-2 pl-6">
-                                        <div class="text-[#303030] truncate cursor-pointer hover:text-brand transition-colors" 
+                                            <div class="text-[#303030] truncate cursor-pointer hover:text-brand transition-colors" 
                                              @click.stop="handleTitleClick(childItem)">
                                                 <span class="mr-2 text-[#919191]">-</span>{{ childItem.title }}
                                             </div>
@@ -254,11 +254,11 @@
                                     </td>
 
                                     <!-- 자식 유형 -->
-                                    <td class="px-4 py-2 text-center">
+                                    <!-- <td class="px-4 py-2 text-center">
                                         <span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-sm">
                                             {{ childItem.type || '지문+문항' }}
                                         </span>
-                                    </td>
+                                    </td> -->
 
                                     <!-- 자식 최종 작업일 -->
                                     <td class="px-4 py-2 text-[#424242] text-center">
@@ -266,7 +266,7 @@
                                     </td>
 
                                     <!-- 자식 다운로드 -->
-                                    <td class="px-4 py-2 text-center" @click.stop>
+                                    <!-- <td class="px-4 py-2 text-center" @click.stop>
                                         <div
                                             class="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition">
                                             <button @click="$emit('download', childItem)" title="다운로드"
@@ -278,7 +278,7 @@
                                                 </svg>
                                             </button>
                                         </div>
-                                    </td>
+                                    </td> -->
 
                                     <!-- 자식 즐겨찾기 -->
                                     <td class="px-4 py-2 text-center">
