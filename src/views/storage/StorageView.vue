@@ -190,9 +190,22 @@ const handleUpdateTitle = async ({ pasCode, title }) => {
             })
 
         // Store 데이터 업데이트 (로컬에서 즉시 반영)
+        // 먼저 부모 항목에서 찾기
         const itemIndex = currentData.value.findIndex(item => item.pasCode === pasCode)
         if (itemIndex !== -1) {
             currentData.value[itemIndex].title = title
+        } else {
+            // 부모에서 찾지 못했다면 자식 항목에서 찾기
+            for (let i = 0; i < currentData.value.length; i++) {
+                const parentItem = currentData.value[i]
+                if (parentItem.childPassages && parentItem.childPassages.length > 0) {
+                    const childIndex = parentItem.childPassages.findIndex(child => child.pasCode === pasCode)
+                    if (childIndex !== -1) {
+                        parentItem.childPassages[childIndex].title = title
+                        break
+                    }
+                }
+            }
         }
 
         console.log('✅ 제목 수정 완료')

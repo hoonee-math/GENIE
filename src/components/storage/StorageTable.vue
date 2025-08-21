@@ -234,8 +234,22 @@
                                     <!-- 자식 작업명 (들여쓰기) -->
                                     <td class="px-4 py-2 text-[#424242] transition-all duration-300">
                                         <div class="flex items-center gap-2 pl-6">
-                                            <div class="text-[#303030] truncate cursor-pointer hover:text-brand transition-colors" 
-                                             @click.stop="handleTitleClick(childItem)">
+                                            <!-- 수정 모드일 때 -->
+                                            <div v-if="editingIndex === `${index}_child_${childIndex}`" @click.stop>
+                                                <div class="flex items-center">
+                                                    <span class="mr-2 text-[#919191]">-</span>
+                                                    <input type="text" v-model="editingTitle" 
+                                                           @blur="finishEditing"
+                                                           @keyup.enter="finishEditing" 
+                                                           @keyup.esc="cancelEditing" 
+                                                           ref="editInput"
+                                                           class="w-full p-2.5 border border-black rounded outline-none focus:ring-2 focus:ring-blue-200" />
+                                                </div>
+                                            </div>
+                                            <!-- 일반 모드일 때 -->
+                                            <div v-else class="text-[#303030] truncate cursor-pointer hover:text-brand transition-colors" 
+                                                 @click.stop="handleTitleClick(childItem)"
+                                                 @contextmenu="handleChildContextMenu(childItem, index, childIndex, $event)">
                                                 <span class="mr-2 text-[#919191]">-</span>{{ childItem.title }}
                                             </div>
                                         </div>
@@ -370,7 +384,7 @@
         </div>
 
         <!-- ===== 컨텍스트 메뉴 (데스크톱만) ===== -->
-        <div v-if="showContextMenu" class="fixed bg-white border border-[#ccc] rounded shadow-lg z-50 min-w-[120px]"
+        <div v-if="showContextMenu" class="context-menu fixed bg-white border border-[#ccc] rounded shadow-lg z-50 min-w-[120px]"
             :style="{
                 top: contextMenuPosition.y + 'px',
                 left: contextMenuPosition.x + 'px',
@@ -469,6 +483,12 @@ const handleTitleClick = (item) => {
     emit('item-click', item)
 }
 
+// 자식 작업명도 동일한 컨텍스트 메뉴 함수 사용 (pasCode가 고유하므로 구분 불필요)
+const handleChildContextMenu = (childItem, parentIndex, childIndex, event) => {
+    // 부모와 동일한 함수 재사용, 단지 index를 찾는 방식만 다름
+    handleContextMenu(childItem, `${parentIndex}_child_${childIndex}`, event)
+}
+
 const handleContextMenu = (item, index, event) => {
     event.preventDefault()
 
@@ -492,13 +512,25 @@ const toggleSelection = (pasCode) => {
     emit('selection-change')
 }
 
-// 자료실 - 제목 수정 api - 2 - 제목/작업명 수정 활성화
+// 자료실 - 제목 수정 api - 2 - 제목/작업명 수정 활성화 (부모/자식 통합)
 const startEditing = () => {
-    if (contextMenuIndex.value === -1) return
+    if (contextMenuIndex.value === -1 && typeof contextMenuIndex.value !== 'string') return
 
-    const item = props.items[contextMenuIndex.value]
+    let item, title
+    
+    if (typeof contextMenuIndex.value === 'string') {
+        // 자식 항목인 경우 (예: "0_child_1")
+        const [parentIndex, , childIndex] = contextMenuIndex.value.split('_')
+        item = props.items[parseInt(parentIndex)].childPassages[parseInt(childIndex)]
+        title = item.title
+    } else {
+        // 부모 항목인 경우
+        item = props.items[contextMenuIndex.value]
+        title = item.title
+    }
+    
     editingIndex.value = contextMenuIndex.value
-    editingTitle.value = item.title
+    editingTitle.value = title
     showContextMenu.value = false
 
     nextTick(() => {
@@ -508,12 +540,24 @@ const startEditing = () => {
     })
 }
 
-// 자료실 - 제목 수정 api - 4 - 수정 완료 후 emit 으로 수정한 제목/작업명 전달 및 api 요청 실행
+// 자료실 - 제목 수정 api - 4 - 수정 완료 후 emit 으로 수정한 제목/작업명 전달 및 api 요청 실행 (부모/자식 통합)
 const finishEditing = () => {
-    if (editingIndex.value === -1) return
+    if (editingIndex.value === -1 && typeof editingIndex.value !== 'string') return
 
-    const item = props.items[editingIndex.value]
-    if (editingTitle.value.trim() && editingTitle.value !== item.title) {
+    let item, originalTitle
+    
+    if (typeof editingIndex.value === 'string') {
+        // 자식 항목인 경우
+        const [parentIndex, , childIndex] = editingIndex.value.split('_')
+        item = props.items[parseInt(parentIndex)].childPassages[parseInt(childIndex)]
+        originalTitle = item.title
+    } else {
+        // 부모 항목인 경우
+        item = props.items[editingIndex.value]
+        originalTitle = item.title
+    }
+    
+    if (editingTitle.value.trim() && editingTitle.value !== originalTitle) {
         emit('update-title', {
             pasCode: item.pasCode,
             title: editingTitle.value.trim()
