@@ -113,7 +113,7 @@
                                 </td>
 
                                 <!-- 작업명 -->
-                                <td class="px-4 py-2 text-[#424242] transition-all duration-300">
+                                <td class="px-4 py-2 text-[#424242] transition-all duration-300 relative">
                                     <div v-if="editingIndex === index" @click.stop>
                                         <!-- 자료실 - 제목 수정 api - 3 - 수정할 제목/작업명을 입력 -->
                                         <input type="text" v-model="editingTitle" @blur="finishEditing"
@@ -131,13 +131,29 @@
                                                     d="M9 5l7 7-7 7" />
                                             </svg>
                                         </div>
-                                        <div class="text-[#303030] truncate cursor-pointer hover:text-brand transition-colors" 
-                                             @click.stop="handleTitleClick(item)">
+                                        <div class="text-[#303030] truncate cursor-pointer hover:text-brand transition-colors flex-1" @click.stop="handleTitleClick(item)">
                                             {{ item.title }}
                                             <span v-if="item.childPassages && item.childPassages.length > 0"
                                                 class="text-sm text-gray-500 ml-1">
                                                 ({{ item.childPassages.length }}개)
                                             </span>
+                                        </div>
+                                        
+                                        <!-- 열기 버튼 (자식이 있는 경우에만, 호버 시 표시) -->
+                                        <div v-if="item.childPassages && item.childPassages.length > 0"
+                                             class="flex w-full pr-3 absolute top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                                             >
+                                            <div class="flex flex-1"></div>
+                                            <button class="flex p-1 bg-white border border-gray-300 rounded-md shadow-sm hover:border-gray-400 transition-all duration-200 hover:transform hover:scale-105"
+                                                    title="지문 상세보기"
+                                                    @click.stop="handleTitleClick(item)">
+                                                <div class="flex items-center hover:bg-gray-200">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-600">
+                                                        <path d="M9 18l6-6-6-6"/>
+                                                    </svg>
+                                                    <span class="text-xs">열기</span>
+                                                </div>
+                                            </button>
                                         </div>
                                     </div>
                                 </td>
@@ -638,5 +654,9 @@ defineExpose({
 
 tr.bg {
     background-color: rgba(0, 134, 255, 0.1);
+}
+
+button:hover:not(:disabled) {
+    transform: translateY(0) !important;
 }
 </style>
