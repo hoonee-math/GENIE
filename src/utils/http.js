@@ -88,7 +88,24 @@ export async function apiRequest(url, options = {}) {
  * GET 요청
  */
 export async function apiGet(url, options = {}) {
-  const response = await apiRequest(url, {
+  // params가 있으면 URL에 쿼리 스트링으로 추가
+  let requestUrl = url;
+  if (options.params) {
+    const searchParams = new URLSearchParams();
+    Object.keys(options.params).forEach(key => {
+      if (options.params[key] !== undefined && options.params[key] !== null) {
+        searchParams.append(key, options.params[key]);
+      }
+    });
+    const queryString = searchParams.toString();
+    if (queryString) {
+      requestUrl += (url.includes('?') ? '&' : '?') + queryString;
+    }
+    // params를 options에서 제거 (fetch에 전달되지 않도록)
+    delete options.params;
+  }
+
+  const response = await apiRequest(requestUrl, {
     method: "GET",
     ...options,
   });

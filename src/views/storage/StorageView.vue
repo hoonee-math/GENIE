@@ -437,7 +437,7 @@ watch([currentType, currentPage, currentFilters], async ([newType, newPage, newF
     }
     isSelectionMode.value = false
 
-    await fetchData()
+    await fetchData(newType, newPage, newFilters)
 }, { immediate: true })
 
 /**
