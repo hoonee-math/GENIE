@@ -10,9 +10,13 @@
         <!-- ===== 테이블 컴포넌트 ===== -->
         <StorageTable :items="currentData" :type="currentType" :loading="isLoading" :error="error"
             :empty-message="getEmptyMessage()" :is-selection-mode="isSelectionMode"
-            @item-click="handleItemClick" @toggle-favorite="toggleFavorite"
-            @download="handleDownload" @update-title="handleUpdateTitle" @delete-items="handleDeleteItems"
-            @selection-change="handleSelectionChange" @retry="handleRetry" ref="storageTable" />
+            @item-click="handleItemClick" 
+            @toggle-favorite="toggleFavorite"
+            @download="handleDownload" 
+            @update-title="handleUpdateTitle"
+            @delete-items="handleDeleteItems"
+            @selection-change="handleSelectionChange" 
+            @retry="handleRetry" ref="storageTable" />
 
         <!-- ===== 페이지네이션 컴포넌트 ===== -->
         <StoragePagination :pagination="pagination" :max-visible-pages="5" @change-page="changePage" />
@@ -59,6 +63,7 @@ import StoragePagination from '@/components/storage/temp/StoragePagination.vue'
 import FileSelectModal from '@/components/common/FileSelectModal.vue'
 import WarningModalComponent from '@/components/common/WarningModalComponent.vue'
 import { apiPut } from '@/utils/http'
+import { updatePassagePartial } from '@/api/passage'
 
 // ===== Composable 사용 =====
 const {
@@ -174,29 +179,15 @@ const handleFileSelection = async (fileType) => {
 }
 
 /**
- * 제목 수정 처리
+ * 자료실 - 제목 수정 api - 5 - emit 으로 수정한 제목/작업명 전달 받아 api 요청 실행
  */
 const handleUpdateTitle = async ({ pasCode, title }) => {
     try {
         console.log('✏️ 제목 수정 요청:', { pasCode, title })
 
-        // API 호출 (기존 로직 유지)
-        const response = await fetch('/api/pass/update/title', {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify({
-                pasCode,
-                title,
-                content: "" // 기존 API 요구사항
+        await updatePassagePartial(pasCode, {
+                'title': title
             })
-        })
-
-        if (!response.ok) {
-            throw new Error('제목 수정에 실패했습니다.')
-        }
 
         // Store 데이터 업데이트 (로컬에서 즉시 반영)
         const itemIndex = currentData.value.findIndex(item => item.pasCode === pasCode)

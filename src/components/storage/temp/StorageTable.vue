@@ -115,6 +115,7 @@
                                 <!-- 작업명 -->
                                 <td class="px-4 py-2 text-[#424242] transition-all duration-300">
                                     <div v-if="editingIndex === index" @click.stop>
+                                        <!-- 자료실 - 제목 수정 api - 3 - 수정할 제목/작업명을 입력 -->
                                         <input type="text" v-model="editingTitle" @blur="finishEditing"
                                             @keyup.enter="finishEditing" @keyup.esc="cancelEditing" ref="editInput"
                                             class="w-full p-2.5 border border-black rounded outline-none focus:ring-2 focus:ring-blue-200" />
@@ -374,6 +375,7 @@
                 top: contextMenuPosition.y + 'px',
                 left: contextMenuPosition.x + 'px',
             }">
+            <!-- 자료실 - 제목 수정 api - 1 - 버튼 클릭 -->
             <div class="px-4 py-2.5 text-sm cursor-pointer hover:bg-[#f5f5f5] transition-all duration-200 hover:transform hover:translate-y-[-1px] active:transform active:translate-y-0"
                 @click="startEditing">
                 이름 변경
@@ -490,6 +492,7 @@ const toggleSelection = (pasCode) => {
     emit('selection-change')
 }
 
+// 자료실 - 제목 수정 api - 2 - 제목/작업명 수정 활성화
 const startEditing = () => {
     if (contextMenuIndex.value === -1) return
 
@@ -505,6 +508,7 @@ const startEditing = () => {
     })
 }
 
+// 자료실 - 제목 수정 api - 4 - 수정 완료 후 emit 으로 수정한 제목/작업명 전달 및 api 요청 실행
 const finishEditing = () => {
     if (editingIndex.value === -1) return
 
