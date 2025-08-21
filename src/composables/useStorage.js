@@ -97,6 +97,11 @@ export function useStorage() {
         response.totalPages || 0,
         page
       );
+      console.log("==================")
+      console.log("==================")
+      console.log("==================")
+      
+      console.log("총 "+response.totalCount+`개의 지문 중 ${type} 데이터 `+response.items?.length+"개 지문 로드 완료")
 
       console.log(
         `✅ ${type} 데이터 로드 완료:`,

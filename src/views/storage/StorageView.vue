@@ -57,9 +57,9 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useStorage } from '@/composables/useStorage'
 
 // 컴포넌트 imports
-import StorageHeader from '@/components/storage/temp/StorageHeader.vue'
-import StorageTable from '@/components/storage/temp/StorageTable.vue'
-import StoragePagination from '@/components/storage/temp/StoragePagination.vue'
+import StorageHeader from '@/components/storage/StorageHeader.vue'
+import StorageTable from '@/components/storage/StorageTable.vue'
+import StoragePagination from '@/components/storage/StoragePagination.vue'
 import FileSelectModal from '@/components/common/FileSelectModal.vue'
 import WarningModalComponent from '@/components/common/WarningModalComponent.vue'
 import { apiPut } from '@/utils/http'

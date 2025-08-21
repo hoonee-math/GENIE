@@ -1,7 +1,7 @@
 // import LikeMain from "@/views/storage/LikeMain.vue";
 import WorkListMain from "@/views/temp/stroage/WorkListMain.vue";
 // import TrashMain from "@/views/storage/TrashMain.vue";
-import StorageView from "@/components/storage/temp/StorageView.vue";
+import StorageView from "@/views/storage/StorageView.vue";
 
 const storageRoutes = [
     {
