@@ -9,7 +9,7 @@
 </template>
 
 <script setup>
-import StorageList from '@/components/storage/StorageList.vue';
+import StorageList from './StorageList.vue';
 </script>
 
 <style scoped>

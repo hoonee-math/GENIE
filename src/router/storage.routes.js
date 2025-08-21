@@ -1,5 +1,5 @@
 // import LikeMain from "@/views/storage/LikeMain.vue";
-import WorkListMain from "@/views/storage/WorkListMain.vue";
+import WorkListMain from "@/views/temp/stroage/WorkListMain.vue";
 // import TrashMain from "@/views/storage/TrashMain.vue";
 import StorageView from "@/components/storage/temp/StorageView.vue";
 
@@ -9,6 +9,7 @@ const storageRoutes = [
         name: 'storage',
         children: [
             {
+                // /storage/:type
                 path: ':type',  // type: recent|favorites|trash
                 name: 'storageView',
                 component: StorageView,
@@ -16,6 +17,7 @@ const storageRoutes = [
             },
 
             // Storage 컴포넌트 분리 및 개선 작업 전 상태 확인용 임시 라우터
+            // /storage/old
             { path : 'old', name:'worklistMain', component: WorkListMain},
             // { path : 'favorites', name:'likelistMain', component: LikeMain},
             // { path : 'trash', name:'deletedMain', component: TrashMain},
