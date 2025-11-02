@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문제지 생성 UI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 기본 폰트를 시스템 UI 폰트로 설정합니다 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        }
+        /* 커스텀 스크롤바 (선택 사항) */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #aaa;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <div class="min-h-screen flex flex-col">
+        <!-- 상단 헤더 -->
+        <header class="bg-white border-b sticky top-0 z-10">
+            <div class="max-w-screen-2xl mx-auto px-6 py-3 flex justify-between items-center">
+                <h1 class="text-xl font-bold text-gray-800">문제지 생성</h1>
+                <div class="flex items-center gap-3">
+                    <button class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-semibold hover:bg-gray-50 flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                        지문 추가
+                    </button>
+                    <button class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-blue-700 flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        저장하기
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 메인 콘텐츠 -->
+        <main class="flex-1 max-w-screen-2xl mx-auto w-full p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- 왼쪽: 문제 편집 패널 -->
+            <aside class="lg:col-span-1 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <div>
+                    <label for="test-name" class="block text-base font-bold text-gray-800 mb-2">문제지 이름 <span class="text-red-500">*</span></label>
+                    <input type="text" id="test-name" placeholder="작업이름을 입력해 주세요." class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+                
+                <div class="mt-6 space-y-2">
+                    <!-- 1. 공감적 읽기 (열림) -->
+                    <div class="border border-gray-200 rounded-lg">
+                        <div class="p-3 flex items-center justify-between cursor-pointer bg-gray-50/50 rounded-t-lg">
+                            <div class="flex items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                                <span class="font-bold text-blue-600">1</span>
+                                <span class="font-semibold text-gray-800">공감적 읽기</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-sm font-medium text-purple-700 bg-purple-100 px-2.5 py-0.5 rounded-full">4문제</span>
+                                <span class="text-sm font-medium text-purple-700 bg-purple-100 px-2.5 py-0.5 rounded-full">인문</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
+                            </div>
+                        </div>
+                        <div class="p-4 pl-8 space-y-3">
+                            <div class="text-gray-700 text-sm">1. 윗글의 내용 전개 방식으로 적절한 것은?</div>
+                            <div class="text-gray-700 text-sm">2. 윗글을 바탕으로 [보기]를 이해한 내용으로 적절하지 않은 것은?</div>
+                            <button class="text-blue-600 hover:text-blue-800 text-sm mt-2 flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                                이 지문에 문제 추가하기
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 2. 유가 법가 사상의 비교 (닫힘) -->
+                    <div class="border border-gray-200 rounded-lg">
+                        <div class="p-3 flex items-center justify-between cursor-pointer">
+                            <div class="flex items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                                <span class="font-bold text-blue-600">2</span>
+                                <span class="font-semibold text-gray-800">유가 법가 사상의 비교</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-sm font-medium text-purple-700 bg-purple-100 px-2.5 py-0.5 rounded-full">2문제</span>
+                                <span class="text-sm font-medium text-purple-700 bg-purple-100 px-2.5 py-0.5 rounded-full">복합 지문</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. 수레의 원리 (닫힘) -->
+                    <div class="border border-gray-200 rounded-lg">
+                        <div class="p-3 flex items-center justify-between cursor-pointer">
+                            <div class="flex items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                                <span class="font-bold text-blue-600">3</span>
+                                <span class="font-semibold text-gray-800">수레의 원리</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-sm font-medium text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full">단일 지문</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. 아방가르드 문화와 르네상스 (닫힘) -->
+                    <div class="border border-gray-200 rounded-lg">
+                         <div class="p-3 flex items-center justify-between cursor-pointer">
+                            <div class="flex items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                                <span class="font-bold text-blue-600">4</span>
+                                <span class="font-semibold text-gray-800">아방가르드 문화와 르네상스</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-sm font-medium text-purple-700 bg-purple-100 px-2.5 py-0.5 rounded-full">복합 지문</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                     <!-- 5. 머신러닝과 딥러닝 (닫힘) -->
+                     <div class="border border-gray-200 rounded-lg">
+                        <div class="p-3 flex items-center justify-between cursor-pointer">
+                            <div class="flex items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                                <span class="font-bold text-blue-600">5</span>
+                                <span class="font-semibold text-gray-800">머신러닝과 딥러닝</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-sm font-medium text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full">단일 지문</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- 오른쪽: 문제지 미리보기 -->
+            <div class="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col">
+                <div class="p-2 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between text-gray-600">
+                    <div class="flex items-center gap-2">
+                        <button class="p-1.5 hover:bg-gray-200 rounded"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5zM12 11a1 1 0 11-2 0 1 1 0 012 0z" /></svg></button>
+                        <div class="w-px h-5 bg-gray-300"></div>
+                        <button class="p-1.5 hover:bg-gray-200 rounded">A+</button>
+                        <button class="p-1.5 hover:bg-gray-200 rounded">A-</button>
+                        <div class="w-px h-5 bg-gray-300"></div>
+                        <button class="p-1.5 hover:bg-gray-200 rounded font-bold">B</button>
+                        <button class="p-1.5 hover:bg-gray-200 rounded italic">I</button>
+                        <button class="p-1.5 hover:bg-gray-200 rounded underline">U</button>
+                        <button class="p-1.5 hover:bg-gray-200 rounded line-through">S</button>
+                    </div>
+                    <div class="flex items-center gap-4 text-xs">
+                        <label class="flex items-center gap-1 cursor-pointer"><span class="text-gray-500">문제지 제목 표시</span></label>
+                        <label class="flex items-center gap-1 cursor-pointer"><span class="text-gray-500">정답 및 해설 표시</span></label>
+                    </div>
+                </div>
+                
+                <div class="flex-1 p-8 overflow-y-auto custom-scrollbar bg-gray-100/50">
+                    <div class="max-w-4xl mx-auto bg-white p-10 shadow-lg min-h-full">
+                        <!-- 시험지 헤더 -->
+                        <div class="flex justify-between items-end border-b-2 border-black pb-2">
+                            <div>
+                                <span class="border border-black px-4 py-1 text-sm font-semibold">제 1 교시</span>
+                            </div>
+                            <h2 class="text-4xl font-extrabold" style="font-family: 'Malgun Gothic', sans-serif;">국어 영역</h2>
+                            <div class="flex items-center gap-4">
+                                <span class="bg-black text-white px-2 py-0.5 text-xs font-bold">홀수형</span>
+                                <span class="text-lg font-bold">1</span>
+                            </div>
+                        </div>
+                        <p class="text-center font-bold text-lg mt-2">2025학년도 대학수학능력시험 모의평가 문제지</p>
+
+                        <!-- 문제 영역 -->
+                        <div class="mt-8">
+                            <div class="border-b border-black pb-2 mb-4">
+                                <p class="text-sm font-semibold">[1~70] 다음 글을 읽고 물음에 답하시오.</p>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-x-8 text-sm leading-relaxed">
+                                <!-- 왼쪽 지문 -->
+                                <div class="space-y-6">
+                                    <div class="border border-gray-400 p-4">
+                                        <p class="font-bold mb-2">독서 지문 (매우 긴 내용) 이곳에 매우 긴 지문 내용을 반복하거나 다양한 길이의 문단들을 삽입합니다.</p>
+                                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                                        <p class="text-gray-500 mt-2">(위 문단을 수십 번 반복)</p>
+                                    </div>
+                                    <div class="space-y-4">
+                                        <p><span class="font-bold">1.</span> 문제 1번 입니다. 이 문제는 여러 줄로 구성될 수 있으며, 컬럼 및 페이지 분배를 테스트합니다. 충분한 테스트가 있어야 정확한 테스트가 가능합니다. 이 문항은 특히 컬럼 레이아웃에서 어떻게 배치되는지 확인하기 위함입니다.</p>
+                                        <div class="pl-4 space-y-1">
+                                            <p>① 선택지 내용 1 - 첫 번째 옵션입니다.</p>
+                                            <p>② 선택지 내용 2 - 두 번째 옵션입니다. 다소 길어질 수 있습니다.</p>
+                                            <p>③ 선택지 내용 3 - (길이가 다양한 선택지) 중간 길이의 선택지입니다.</p>
+                                            <p>④ 선택지 내용 4 - 네 번째 옵션은 비교적 짧습니다.</p>
+                                            <p>⑤ 선택지 내용 5 - 마지막 선택지이며, 역시 길이를 다양하게 할 수 있습니다. 테스트 목적상 조금 더 길게 작성합니다.</p>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-4">
+                                       <p><span class="font-bold">2.</span> 문제 2번 입니다. 이 문제는 여러 줄로 구성될 수 있으며, 컬럼 및 페이지 분배를 테스트합니다. ...</p>
+                                    </div>
+                                     <div class="space-y-4">
+                                       <p><span class="font-bold">3.</span> 문제 3번 입니다. 이 문제는 여러 줄로 구성될 수 있으며, 컬럼 및 페이지 분배를 테스트합니다. ...</p>
+                                    </div>
+                                </div>
+
+                                <!-- 오른쪽 문제 -->
+                                <div class="space-y-6">
+                                     <div class="space-y-4">
+                                        <p><span class="font-bold">4.</span> 문제 4번 입니다. 이 문제는 여러 줄로 구성될 수 있으며, 컬럼 및 페이지 분배를 테스트합니다. 충분한 테스트가 있어야 정확한 테스트가 가능합니다. 이 문항은 특히 컬럼 레이아웃에서 어떻게 배치되는지 확인하기 위함입니다.</p>
+                                        <div class="pl-4 space-y-1">
+                                            <p>① 선택지 내용 1 - 첫 번째 옵션입니다.</p>
+                                            <p>② 선택지 내용 2 - 두 번째 옵션입니다. 다소 길어질 수 있습니다.</p>
+                                            <p>③ 선택지 내용 3 - (길이가 다양한 선택지) 중간 길이의 선택지입니다.</p>
+                                            <p>④ 선택지 내용 4 - 네 번째 옵션은 비교적 짧습니다.</p>
+                                            <p>⑤ 선택지 내용 5 - 마지막 선택지이며, 역시 길이를 다양하게 할 수 있습니다. 테스트 목적상 조금 더 길게 작성합니다.</p>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-4">
+                                        <p><span class="font-bold">5.</span> 문제 5번 입니다. 이 문제는 여러 줄로 구성될 수 있으며, 컬럼 및 페이지 분배를 테스트합니다. ...</p>
+                                    </div>
+                                    <div class="space-y-4">
+                                       <p><span class="font-bold">6.</span> 문제 6번 입니다. 이 문제는 여러 줄로 구성될 수 있으며, 컬럼 및 페이지 분배를 테스트합니다. 충분한 테스트가 있어야 정확한 테스트가 가능합니다. 이 문항은 특히 컬럼 레이아웃에서 어떻게 배치되는지 확인하기 위함입니다.</p>
+                                        <div class="pl-4 space-y-1">
+                                            <p>① 선택지 내용 1 - 첫 번째 옵션입니다.</p>
+                                            <p>② 선택지 내용 2 - 두 번째 옵션입니다. 다소 길어질 수 있습니다.</p>
+                                            <p>③ 선택지 내용 3 - (길이가 다양한 선택지) 중간 길이의 선택지입니다.</p>
+                                            <p>④ 선택지 내용 4 - 네 번째 옵션은 비교적 짧습니다.</p>
+                                            <p>⑤ 선택지 내용 5 - 마지막 선택지이며, 역시 길이를 다양하게 할 수 있습니다. 테스트 목적상 조금 더 길게 작성합니다.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 페이지 번호 -->
+                        <footer class="text-center mt-12">
+                            <p>1/5</p>
+                        </footer>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+</body>
+</html>

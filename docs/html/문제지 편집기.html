@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문제지 편집기 UI</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Heroicons for modern icons -->
+    <script src="https://unpkg.com/heroicons@2.1.3/24/outline/index.js"></script>
+    <!-- SortableJS CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .ghost-class {
+            opacity: 0.5;
+            background: #c8ebfb;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="container mx-auto max-w-5xl p-4 sm:p-8">
+        
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-900">문제지 편집기</h1>
+                <p class="text-slate-500 mt-1">지문과 문제의 순서를 변경하고, 수정, 추가, 삭제할 수 있습니다.</p>
+            </div>
+            <div class="flex space-x-2 mt-4 sm:mt-0">
+                <button class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold py-2 px-4 rounded-lg flex items-center shadow-sm transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    지문 추가
+                </button>
+                 <button class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg flex items-center shadow-sm transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                    </svg>
+                    저장하기
+                </button>
+            </div>
+        </header>
+
+        <div id="worksheet-container" class="space-y-6">
+
+            <!-- 지문 1번 블록 -->
+            <div class="passage-block bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
+                <div class="flex items-center p-4 bg-white border-b border-slate-200">
+                    <div class="passage-drag-handle cursor-grab text-slate-400 hover:text-slate-600 mr-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" />
+                        </svg>
+                    </div>
+                    <div class="flex-grow flex items-center">
+                        <span class="passage-number text-xl font-bold text-blue-600 mr-4">1</span>
+                        <h2 class="text-lg font-semibold text-slate-800">독서 이론</h2>
+                        <span class="ml-auto bg-blue-100 text-blue-700 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">단일 지문</span>
+                    </div>
+                    <button class="toggle-button ml-4 text-slate-500 hover:text-slate-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="questions-list bg-slate-50/50 p-2 sm:p-4 space-y-2">
+                    <div class="question-item flex items-center bg-white p-3 rounded-lg border border-slate-200 hover:border-blue-500 hover:shadow-sm transition-all group">
+                        <div class="question-drag-handle cursor-grab text-slate-400 hover:text-slate-600 mr-3">
+                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" />
+                           </svg>
+                        </div>
+                        <span class="question-number font-semibold text-slate-600 mr-3">1.</span>
+                        <p class="flex-grow text-slate-700">윗글의 내용 전개 방식으로 적절한 것은?</p>
+                        <button class="delete-btn text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity ml-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.067-2.09 1.02-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
+                        </button>
+                    </div>
+                    <div class="question-item flex items-center bg-white p-3 rounded-lg border border-slate-200 hover:border-blue-500 hover:shadow-sm transition-all group">
+                        <div class="question-drag-handle cursor-grab text-slate-400 hover:text-slate-600 mr-3"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" /></svg></div>
+                        <span class="question-number font-semibold text-slate-600 mr-3">2.</span>
+                        <p class="flex-grow text-slate-700">윗글을 바탕으로 [보기]를 이해한 내용으로 적절하지 않은 것은?</p>
+                        <button class="delete-btn text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity ml-4"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.067-2.09 1.02-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg></button>
+                    </div>
+                    <button class="w-full text-left text-sm text-slate-500 hover:text-blue-600 hover:bg-slate-200/60 p-3 rounded-lg transition-colors flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        이 지문에 문제 추가하기
+                    </button>
+                </div>
+            </div>
+
+            <!-- 지문 2번 블록 -->
+            <div class="passage-block bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
+                <div class="flex items-center p-4 bg-white border-b border-slate-200">
+                    <div class="passage-drag-handle cursor-grab text-slate-400 hover:text-slate-600 mr-4"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" /></svg></div>
+                    <div class="flex-grow flex items-center">
+                        <span class="passage-number text-xl font-bold text-blue-600 mr-4">2</span>
+                        <h2 class="text-lg font-semibold text-slate-800">현대 소설 - 광장</h2>
+                        <span class="ml-auto bg-purple-100 text-purple-700 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">복합 지문</span>
+                    </div>
+                    <button class="toggle-button ml-4 text-slate-500 hover:text-slate-800">
+                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 transform rotate-180">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="questions-list bg-slate-50/50 p-4 space-y-2 hidden">
+                     <div class="question-item flex items-center bg-white p-3 rounded-lg border border-slate-200 hover:border-blue-500 hover:shadow-sm transition-all group">
+                        <div class="question-drag-handle cursor-grab text-slate-400 hover:text-slate-600 mr-3"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" /></svg></div>
+                        <span class="question-number font-semibold text-slate-600 mr-3">1.</span>
+                        <p class="flex-grow text-slate-700">(가)와 (나)의 공통점으로 가장 적절한 것은?</p>
+                        <button class="delete-btn text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity ml-4"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.067-2.09 1.02-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg></button>
+                    </div>
+                     <button class="w-full text-left text-sm text-slate-500 hover:text-blue-600 hover:bg-slate-200/60 p-3 rounded-lg transition-colors flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        이 지문에 문제 추가하기
+                    </button>
+                </div>
+            </div>
+
+            <!-- 지문 3번 블록 (독서론, 단일 지문, 접힌 상태) -->
+            <div class="passage-block bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
+                <div class="flex items-center p-4 bg-white border-b border-slate-200">
+                    <div class="passage-drag-handle cursor-grab text-slate-400 hover:text-slate-600 mr-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" />
+                        </svg>
+                    </div>
+                    <div class="flex-grow flex items-center">
+                        <span class="passage-number text-xl font-bold text-blue-600 mr-4">3</span>
+                        <h2 class="text-lg font-semibold text-slate-800">독서 - 정보의 조직 방식</h2>
+                        <span class="ml-auto bg-blue-100 text-blue-700 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">단일 지문</span>
+                    </div>
+                    <button class="toggle-button ml-4 text-slate-500 hover:text-slate-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 transform rotate-180">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="questions-list bg-slate-50/50 p-2 sm:p-4 space-y-2 hidden">
+                    <div class="question-item flex items-center bg-white p-3 rounded-lg border border-slate-200 hover:border-blue-500 hover:shadow-sm transition-all group">
+                        <div class="question-drag-handle cursor-grab text-slate-400 hover:text-slate-600 mr-3">
+                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" /></svg>
+                        </div>
+                        <span class="question-number font-semibold text-slate-600 mr-3">1.</span>
+                        <p class="flex-grow text-slate-700">윗글에서 설명하는 정보 조직 방식에 해당하지 않는 것은?</p>
+                        <button class="delete-btn text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity ml-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.067-2.09 1.02-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
+                        </button>
+                    </div>
+                    <button class="w-full text-left text-sm text-slate-500 hover:text-blue-600 hover:bg-slate-200/60 p-3 rounded-lg transition-colors flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        이 지문에 문제 추가하기
+                    </button>
+                </div>
+            </div>
+
+            <!-- 지문 4번 블록 (복합 지문, 접힌 상태) -->
+            <div class="passage-block bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
+                <div class="flex items-center p-4 bg-white border-b border-slate-200">
+                    <div class="passage-drag-handle cursor-grab text-slate-400 hover:text-slate-600 mr-4"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" /></svg></div>
+                    <div class="flex-grow flex items-center">
+                        <span class="passage-number text-xl font-bold text-blue-600 mr-4">4</span>
+                        <h2 class="text-lg font-semibold text-slate-800">문학 (복합) - 고전시가 + 수필</h2>
+                        <span class="ml-auto bg-purple-100 text-purple-700 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">복합 지문</span>
+                    </div>
+                    <button class="toggle-button ml-4 text-slate-500 hover:text-slate-800">
+                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 transform rotate-180">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="questions-list bg-slate-50/50 p-4 space-y-2 hidden">
+                     <div class="question-item flex items-center bg-white p-3 rounded-lg border border-slate-200 hover:border-blue-500 hover:shadow-sm transition-all group">
+                        <div class="question-drag-handle cursor-grab text-slate-400 hover:text-slate-600 mr-3"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" /></svg></div>
+                        <span class="question-number font-semibold text-slate-600 mr-3">1.</span>
+                        <p class="flex-grow text-slate-700">(가)의 표현상 특징으로 적절하지 않은 것은?</p>
+                        <button class="delete-btn text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity ml-4"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.067-2.09 1.02-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg></button>
+                    </div>
+                     <button class="w-full text-left text-sm text-slate-500 hover:text-blue-600 hover:bg-slate-200/60 p-3 rounded-lg transition-colors flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        이 지문에 문제 추가하기
+                    </button>
+                </div>
+            </div>
+
+            <!-- 지문 5번 블록 (단일 지문, 접힌 상태) -->
+            <div class="passage-block bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
+                <div class="flex items-center p-4 bg-white border-b border-slate-200">
+                    <div class="passage-drag-handle cursor-grab text-slate-400 hover:text-slate-600 mr-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" />
+                        </svg>
+                    </div>
+                    <div class="flex-grow flex items-center">
+                        <span class="passage-number text-xl font-bold text-blue-600 mr-4">5</span>
+                        <h2 class="text-lg font-semibold text-slate-800">화법과 작문 - 발표</h2>
+                        <span class="ml-auto bg-blue-100 text-blue-700 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">단일 지문</span>
+                    </div>
+                    <button class="toggle-button ml-4 text-slate-500 hover:text-slate-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 transform rotate-180">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="questions-list bg-slate-50/50 p-2 sm:p-4 space-y-2 hidden">
+                    <div class="question-item flex items-center bg-white p-3 rounded-lg border border-slate-200 hover:border-blue-500 hover:shadow-sm transition-all group">
+                        <div class="question-drag-handle cursor-grab text-slate-400 hover:text-slate-600 mr-3">
+                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" /></svg>
+                        </div>
+                        <span class="question-number font-semibold text-slate-600 mr-3">1.</span>
+                        <p class="flex-grow text-slate-700">발표자의 말하기 방식에 대한 설명으로 가장 적절한 것은?</p>
+                        <button class="delete-btn text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity ml-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.067-2.09 1.02-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
+                        </button>
+                    </div>
+                    <button class="w-full text-left text-sm text-slate-500 hover:text-blue-600 hover:bg-slate-200/60 p-3 rounded-lg transition-colors flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        이 지문에 문제 추가하기
+                    </button>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const worksheetContainer = document.getElementById('worksheet-container');
+
+            // 접기/펴기 버튼 기능 (이벤트 위임으로 개선 가능하지만, 현재 구조도 동작)
+            function initializeToggleButtons() {
+                const toggleButtons = document.querySelectorAll('.toggle-button');
+                toggleButtons.forEach(button => {
+                    // 이미 이벤트 리스너가 부착된 버튼은 건너뛰기 (동적 추가 시 중복 방지)
+                    if (button.dataset.listenerAttached) return;
+
+                    button.addEventListener('click', () => {
+                        const passageBlock = button.closest('.passage-block');
+                        const questionList = passageBlock.querySelector('.questions-list');
+                        const icon = button.querySelector('svg');
+                        
+                        questionList.classList.toggle('hidden');
+                        icon.classList.toggle('rotate-180');
+                    });
+                    button.dataset.listenerAttached = 'true';
+                });
+            }
+
+            function updatePassageNumbers() {
+                const passageBlocks = worksheetContainer.querySelectorAll('.passage-block');
+                passageBlocks.forEach((block, index) => {
+                    const numberSpan = block.querySelector('.passage-number');
+                    if (numberSpan) {
+                        numberSpan.textContent = index + 1;
+                    }
+                });
+            }
+
+            function updateQuestionNumbers(questionListElement) {
+                const questionItems = questionListElement.querySelectorAll('.question-item');
+                questionItems.forEach((item, index) => {
+                    const numberSpan = item.querySelector('.question-number');
+                    if (numberSpan) {
+                        numberSpan.textContent = `${index + 1}.`;
+                    }
+                });
+            }
+            
+            worksheetContainer.addEventListener('click', function(e) {
+                const deleteButton = e.target.closest('.delete-btn');
+                if (deleteButton) {
+                    const questionItem = deleteButton.closest('.question-item');
+                    if (questionItem) {
+                        const questionList = questionItem.parentElement;
+                        questionItem.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                        questionItem.style.opacity = '0';
+                        questionItem.style.transform = 'translateX(20px)';
+                        setTimeout(() => {
+                            questionItem.remove();
+                            if (questionList.classList.contains('questions-list')) {
+                                updateQuestionNumbers(questionList);
+                            }
+                        }, 300);
+                    }
+                }
+            });
+
+            new Sortable(worksheetContainer, {
+                animation: 150,
+                handle: '.passage-drag-handle',
+                draggable: '.passage-block',
+                ghostClass: 'ghost-class',
+                onEnd: function (evt) {
+                    updatePassageNumbers();
+                }
+            });
+
+            function initializeSortableForQuestionLists() {
+                const questionLists = document.querySelectorAll('.questions-list');
+                questionLists.forEach(list => {
+                    // 이미 Sortable이 적용된 리스트는 건너뛰기
+                    if (list.dataset.sortableInitialized) return;
+
+                    new Sortable(list, {
+                        animation: 150,
+                        handle: '.question-drag-handle',
+                        draggable: '.question-item',
+                        filter: 'button', 
+                        ghostClass: 'ghost-class',
+                        onEnd: function (evt) {
+                            updateQuestionNumbers(list);
+                        }
+                    });
+                    list.dataset.sortableInitialized = 'true';
+                });
+            }
+
+            // 초기 로드 시 기능 초기화
+            initializeToggleButtons();
+            initializeSortableForQuestionLists();
+            updatePassageNumbers(); // 초기 지문 번호 설정
+            document.querySelectorAll('.questions-list').forEach(list => { // 초기 문제 번호 설정
+                if (!list.classList.contains('hidden') || list.querySelectorAll('.question-item').length > 0) {
+                     updateQuestionNumbers(list);
+                }
+            });
+
+            // 여기에 지문 추가 로직을 구현한다면, 추가 후
+            // initializeToggleButtons(); 와 initializeSortableForQuestionLists(); 를
+            // 새로 추가된 요소에 대해 다시 호출하거나, 이벤트 위임 방식으로 리팩토링해야 합니다.
+            // 현재는 정적으로 HTML에 추가했으므로 초기화 한 번으로 충분합니다.
+        });
+    </script>
+
+</body>
+</html>

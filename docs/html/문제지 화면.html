@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문제지 미리보기 UI (Paged.js 적용)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Paged.js CSS & JS -->
+    <!-- <link href="https://unpkg.com/pagedjs/dist/css/pagedjs.css" rel="stylesheet" type="text/css"/> -->
+    <script src="https://unpkg.com/pagedjs/dist/paged.polyfill.js"></script>
+
+    <style>
+        /* 기본 UI 폰트 */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f1f5f9; /* bg-slate-100 */
+        }
+
+        /* Paged.js가 생성하는 페이지의 기본 스타일 */
+        /* 이 스타일은 @page 규칙으로 덮어쓰거나 보강할 수 있습니다. */
+        .pagedjs_page {
+            /* Paged.js가 자동으로 A4 크기 등을 설정하지만, 명시적으로 지정 가능 */
+            /* 기본적으로 Paged.js는 @page 규칙을 따릅니다. */
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px; /* 페이지 간 간격 */
+            background-color: white; /* 페이지 배경색 */
+        }
+        
+        /* 문제지 콘텐츠 영역 스타일 (Paged.js가 이 내부를 페이지로 나눔) */
+        #content-for-pagedjs {
+            font-family: 'Noto Serif KR', serif;
+            color: black;
+        }
+
+        /* --- CSS Paged Media 규칙 --- */
+        @page {
+            size: A4; /* 페이지 크기 */
+            margin-top: 15mm;
+            margin-bottom: 15mm;
+            margin-left: 18mm;
+            margin-right: 18mm;
+
+            /* 페이지 번호 등을 위한 공간 (예시) */
+            @bottom-center {
+                content: "페이지 " counter(page) " / " counter(pages);
+                font-size: 9pt;
+                color: #555;
+            }
+        }
+        
+        /* 2단 컬럼 설정 (기본값) */
+        #content-for-pagedjs main {
+            column-count: 2;
+            column-gap: 8mm;
+            column-rule: 0.5px solid #ccc; /* 컬럼 사이 선 */
+        }
+        /* 1단 컬럼을 위한 클래스 (JavaScript로 토글) */
+        #content-for-pagedjs main.one-column {
+            column-count: 1;
+            column-rule: none;
+        }
+
+        /* 문제지 헤더/푸터는 Paged.js의 @top-*, @bottom-* 규칙으로 처리하거나,
+           각 페이지 시작/끝에 고정된 HTML 요소를 넣고 싶다면 더 복잡한 CSS 필요.
+           여기서는 페이지 번호만 @bottom-center로 간단히 처리. */
+        
+        /* 문제지 내 특정 요소 스타일 */
+        .passage-block-preview, .question-block {
+            break-inside: avoid-column; /* 컬럼 내에서 잘림 방지 */
+            break-inside: avoid-page;  /* 페이지 내에서 잘림 방지 (Paged.js가 인식) */
+            margin-bottom: 10px; /* 요소 간 간격 */
+            text-align: justify; /* 양쪽 정렬 */
+            font-size: 9.5pt;
+        }
+        .passage-block-preview {
+            border: 1px solid black;
+            padding: 7px;
+            line-height: 1.5;
+        }
+        .question-block p:first-child { /* 문제 번호와 지문 */
+            margin-bottom: 4px;
+        }
+        .question-block .choices { /* 선택지 */
+            padding-left: 12px;
+            line-height: 1.45;
+        }
+        .question-block .choices p {
+            margin-bottom: 2px;
+        }
+        .question-block .보기-box {
+             border: 1px solid black; 
+             padding: 6px; 
+             margin-top: 5px;
+             margin-bottom: 5px;
+             font-size: 9pt;
+             line-height: 1.45;
+        }
+        .question-block .보기-box .보기-title {
+            text-align: center;
+            font-weight: 600; /* semibold */
+            margin-bottom: 3px;
+        }
+
+
+        /* 툴바 스타일 */
+        .no-print { /* 인쇄 시 숨김 */
+            /* ... (이전 코드의 툴바 스타일 참조) ... */
+        }
+
+        /* 인쇄 시 Paged.js가 생성한 페이지 외 불필요한 요소 숨김 */
+        @media print {
+            body > *:not(.pagedjs_pages) { /* .pagedjs_pages는 Paged.js가 페이지들을 담는 컨테이너 */
+                display: none !important;
+            }
+            .pagedjs_page {
+                margin: 0 !important;
+                box-shadow: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 flex flex-col items-center py-8 px-4">
+    <!-- Paged.js가 렌더링할 원본 콘텐츠 -->
+    <!-- Paged.js는 이 div 내부의 <main>을 페이지로 나눕니다. -->
+    <div id="content-for-pagedjs"> 
+        <header class="pagedjs-ignore"> <!-- Paged.js가 무시하도록 클래스 추가 가능 (또는 CSS로 display:none) -->
+            <!-- 이 헤더는 각 페이지 상단에 반복되지 않음. 
+                 반복되는 헤더는 @page 규칙의 @top-* 슬롯이나 running elements 사용 -->
+            <div class="flex justify-between items-start mb-[6px]">
+                <span class="border border-black rounded-full px-[7px] py-[1.5px] text-[9.5pt] mt-[2px]">제 <span class="font-bold">1</span> 교시</span>
+                <div class="text-center">
+                    <p class="text-[10pt] font-[600] tracking-tight">2025학년도 대학수학능력시험 모의평가 문제지</p>
+                    <p class="text-[24pt] font-bold leading-none mt-[2px] mb-[3px]">국 어 영 역</p>
+                </div>
+                <div class="text-right">
+                    <p class="font-bold text-[18pt] leading-none">1</p> <!-- 페이지 번호는 Paged.js가 처리 -->
+                    <span class="inline-block bg-black text-white px-[5px] py-[1px] text-[8.5pt] font-semibold tracking-wider mt-[2px]">홀수형</span>
+                </div>
+            </div>
+            <hr class="border-black border-t-[1.2px] mt-[4px] mb-[1px]">
+            <hr class="border-black border-t-[0.6px] mb-4">
+        </header>
+        <main> <!-- Paged.js가 이 main 태그 내부의 내용을 페이지로 나눔 -->
+            <div class="my-[8px] text-[9.5pt] font-medium">
+                [1~N] 다음 글을 읽고 물음에 답하시오. (콘텐츠 양에 따라 N 결정)
+            </div>
+            <div class="passage-block-preview">
+                <span class="font-semibold">독서 지문 (매우 긴 내용)</span>
+                이곳에 매우 긴 지문 내용을 반복하거나 다양한 길이의 문단들을 삽입합니다.
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                (위 문단을 수십 번 반복)
+            </div>
+            <script>
+                let problemCount = 0;
+                for (let i = 1; i <= 70; i++) { // 문제 70개
+                    problemCount++;
+                    document.write(`
+                        <div class="question-block">
+                            <p><span class="font-bold">${problemCount}.</span> 문제 ${problemCount}번 입니다. 이 문제는 여러 줄로 구성될 수 있으며, 컬럼 및 페이지 분배를 테스트합니다. 충분한 텍스트가 있어야 정확한 테스트가 가능합니다. 이 문항은 특히 컬럼 레이아웃에서 어떻게 배치되는지 확인하기 위함입니다.</p>
+                            <div class="choices">
+                                <p>① 선택지 내용 1 - 첫 번째 옵션입니다.</p> 
+                                <p>② 선택지 내용 2 - 두 번째 옵션입니다. 다소 길어질 수 있습니다.</p> 
+                                <p>③ 선택지 내용 3 - (길이가 다양한 선택지) 중간 길이의 선택지입니다.</p> 
+                                <p>④ 선택지 내용 4 - 네 번째 옵션은 비교적 짧습니다.</p> 
+                                <p>⑤ 선택지 내용 5 - 마지막 선택지이며, 역시 길이를 다양하게 할 수 있습니다. 테스트 목적상 조금 더 길게 작성합니다.</p>
+                            </div>
+                            ${ i % 6 === 0 ? `<div class="보기-box"><p class="보기-title"><보 기></p><p>문제 ${problemCount} 보기입니다. 보기는 컬럼 내 공간을 차지하며 페이지네이션에 영향을 줍니다.</p></div>` : ''}
+                        </div>`);
+                }
+                const titleEl = document.querySelector('#content-for-pagedjs .my-\\[8px\\]');
+                if (titleEl) titleEl.textContent = `[1~${problemCount}] 다음 글을 읽고 물음에 답하시오.`;
+            </script>
+        </main>
+    </div>
+
+    <!-- Paged.js가 페이지를 렌더링할 영역 (위의 #content-for-pagedjs와는 별개) -->
+    <!-- 보통 Paged.js는 body에 직접 페이지를 생성하거나, 지정된 컨테이너에 생성합니다. -->
+    <!-- 여기서는 Paged.js가 body에 직접 페이지를 생성하도록 두고, 
+         위의 #content-for-pagedjs는 원본 소스로만 사용합니다. -->
+
+
+<script>
+    window.PagedConfig = {
+        // auto: false, // true로 하면 DOMContentLoaded 시 자동으로 실행. false면 수동 실행.
+        // content: document.getElementById('content-for-pagedjs').innerHTML, // HTML 문자열로 콘텐츠 전달 가능
+        // target: '#preview-pages-wrapper', // 페이지를 렌더링할 대상 선택자 (기본값은 body)
+        // Paged.js가 기존 #content-for-pagedjs를 직접 변환하도록 할 수도 있음.
+        // 그 경우, Paged.js는 #content-for-pagedjs의 자식으로 .pagedjs_pages를 만듦.
+        // 여기서는 #content-for-pagedjs를 원본으로 두고, Paged.js가 body에 새 페이지들을 만들도록 함.
+        // 또는, #content-for-pagedjs 자체를 paged.js의 flow 대상으로 지정할 수 있음.
+    };
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const oneColumnBtn = document.getElementById('one-column-btn');
+        const twoColumnBtn = document.getElementById('two-column-btn');
+        const reloadBtn = document.getElementById('reload-pagedjs-btn');
+        const contentSourceMain = document.querySelector('#content-for-pagedjs main');
+
+        let pagedPreviewer = null; // Paged.js Previewer 인스턴스 저장
+
+        async function renderWithPagedJs() {
+            // 기존 Paged.js 페이지들 제거 (있다면)
+            const existingPages = document.querySelectorAll('.pagedjs_page, .pagedjs_pages, .pagedjs_interface');
+            existingPages.forEach(el => el.remove());
+
+            // Paged.js Previewer 인스턴스 생성 및 실행
+            // #content-for-pagedjs 내부를 직접 페이지로 변환하도록 함.
+            // Paged.js는 원본 요소를 직접 수정하며 페이지 구조를 만듭니다.
+            // 따라서 원본 콘텐츠를 유지하고 싶다면 복제해서 전달해야 하지만,
+            // 여기서는 #content-for-pagedjs를 직접 변환 대상으로 사용.
+            pagedPreviewer = new Paged.Previewer();
+            try {
+                // #content-for-pagedjs의 *내용* (자식 노드들)을 페이지네이션 대상으로 함.
+                // 또는 #content-for-pagedjs 전체를 대상으로 할 수도 있음.
+                // CSS에서 #content-for-pagedjs main에 컬럼 스타일을 적용했으므로,
+                // Paged.js가 이 main 태그의 내용을 페이지로 나눔.
+                await pagedPreviewer.preview(document.querySelector('#content-for-pagedjs').innerHTML, [], document.body);
+                console.log("Paged.js rendering complete.");
+            } catch (error) {
+                console.error("Paged.js rendering error:", error);
+            }
+        }
+
+        function setActiveColumnButton(isTwoCols) {
+            // ... (버튼 스타일링 로직)
+        }
+        
+        oneColumnBtn.addEventListener('click', async function() {
+            if (contentSourceMain) contentSourceMain.classList.add('one-column');
+            setActiveColumnButton(false);
+            await renderWithPagedJs(); 
+        });
+
+        twoColumnBtn.addEventListener('click', async function() {
+            if (contentSourceMain) contentSourceMain.classList.remove('one-column');
+            setActiveColumnButton(true);
+            await renderWithPagedJs();
+        });
+        
+        if(reloadBtn) {
+            reloadBtn.addEventListener('click', renderWithPagedJs);
+        }
+
+        // 초기 렌더링 (2단 기본)
+        if (contentSourceMain) contentSourceMain.classList.remove('one-column'); // 기본 2단
+        setActiveColumnButton(true);
+        renderWithPagedJs(); // 페이지 로드 시 Paged.js 실행
+    });
+</script>
+</body>
+</html>
