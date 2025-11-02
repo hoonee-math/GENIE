@@ -30,8 +30,6 @@ coverage
 *.tsbuildinfo
 
 .env*
-vite.config.js
-tailwind.config.js
 
 # project files
 *merged.md
