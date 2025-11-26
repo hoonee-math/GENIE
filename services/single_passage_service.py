@@ -19,10 +19,10 @@ try:
     
     client = genai.Client(api_key=GEMINI_API_KEY)
 
-    # 사용 가능 모델 : gemini-2.5-flash-preview-04-17, gemini-2.5-pro-preview-03-25, gemini-2.5-pro, gemini-2.5-pro-preview-05-06, gemini-2.5-pro-preview-06-05, gemini-2.5-flash-preview-05-20 등 docs에 꾸준히 업데이트되는 것을 확인할 수 있습니다.
+    # 사용 가능 모델 : gemini-2.5-flash-preview-04-17, gemini-2.5-pro-preview-03-25, gemini-2.5-pro, gemini-2.5-pro-preview-05-06, gemini-2.5-pro-preview-06-05, gemini-2.5-flash-preview-09-2025 등 docs에 꾸준히 업데이트되는 것을 확인할 수 있습니다.
     # 테스트 모델 : gemini-1.5-flash 
     GEMINI_PRO_MODEL = "gemini-2.5-pro"
-    GEMINI_FLASH_MODEL = "gemini-2.5-flash-preview-05-20"
+    GEMINI_FLASH_MODEL = "gemini-2.5-flash-preview-09-2025"
     
 except Exception as e:
     logger.critical(f"초기화 오류 발생: {e}")
