@@ -155,7 +155,7 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import GeneratedPassageView from '@/views/generation/passage/GeneratedPassageView.vue'
 import PassageAndQuestionLayout from '@/views/generation/PassageAndQuestionLayout.vue'
@@ -399,8 +399,12 @@ const addQuestion = async () => {
     isLoading.value = true;
     loadingMessage.value = "문항을 추가하고 있습니다.\n새로운 문항이 추가될 때까지 최대 1분이 소요될 수 있습니다.";
     try {
-        // (custom_passage, selectedQuestionExample, generateType, pasCode) 
-        await addQuestionToExistingPassage(savedPassageContent.value, selectedQuestionExample.value, generateType.value, passage.value.pasCode)
+        // (custom_passage, selectedQuestionExample, generateType, pasCode)
+        // savedPassageContent.value 대신 passage.value.content 또는 최신 수정본 사용
+        // console.log("savedPassageContent:", savedPassageContent.value);
+        const currentPassageContent = savedPassageContent.value || passage.value.content;
+        // console.log('문항 추가 시 전달되는 지문 내용 일부:', currentPassageContent?.substring(0, 20) + '...');
+        await addQuestionToExistingPassage(currentPassageContent, selectedQuestionExample.value, generateType.value, passage.value.pasCode)
         isQuestionExampleSelectorVisible.value = false;
         
         // ✅ 새로 추가된 문항으로 페이지 이동 (마지막 페이지로)
@@ -443,6 +447,14 @@ const savePassageAndQuestion = async () => {
 // 결제 사용 모달 관련 함수
 const openPaymentUsageModal = () => { isPaymentUsageModalOpen.value = true; };
 const closePaymentUsageModal = () => { isPaymentUsageModalOpen.value = false; };
+
+// passage.value.content가 로드되면 savedPassageContent 자동 동기화
+watch(() => passage.value?.content, (newContent) => {
+    if (newContent && !savedPassageContent.value) {
+        savedPassageContent.value = newContent
+        // console.log('passage 데이터 로드 완료 - savedPassageContent 초기화:', newContent.substring(0, 100) + '...')
+    }
+}, { immediate: true })
 
 onMounted(() => {
     // generateType();
