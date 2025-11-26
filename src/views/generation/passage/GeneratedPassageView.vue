@@ -158,7 +158,11 @@ const loadPassageData = async () => {
 const GenerateQuestionWithThisPassage = () => {
     if (isLoading.value) return // 로딩 중이면 클릭 방지
     goToQuestionGenerateForm.value = true
-    router.push(`/questions/form`)
+    // 현재 지문의 pasCode를 query parameter로 전달
+    router.push({
+        path: '/questions',
+        query: { refPasCode: passage.value.pasCode }
+    })
 }
 
 // 기존 제재를 이용해 지문 다시 만들기 요청

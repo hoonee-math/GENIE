@@ -363,6 +363,18 @@ const closePaymentUsageModal = () => { isPaymentUsageModalOpen.value = false; };
 
 onMounted(() => {
     console.log('passage', passage.value.pasCode)
+
+    // URL query parameter에서 refPasCode 받아오기 ("이어서 문항 생성하기"에서 전달됨)
+    if (route.query.refPasCode) {
+        const pasCode = Number(route.query.refPasCode)
+        // console.log('refPasCode 확인! :', pasCode)
+        refPasCode.value = pasCode
+        // 해당 지문 데이터를 불러와서 표시
+        fetchPassage(pasCode)
+        activeTab.value = 'storage'
+        return
+    }
+
     if (passage.value.pasCode) {
         activeTab.value = 'storage'
         console.log('📥 [DEBUG] PassageAndQuestionLayout: passage.pasCode')
