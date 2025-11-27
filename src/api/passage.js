@@ -34,19 +34,6 @@ export async function getPassageFromDatabase(pasCode) {
   }
 }
 
-// 지문 수정 (/api/pass/update/each)
-export async function updatePassageInDatabase(passageData) {
-  try {
-    // console.log('✏️ [DB UPDATE] 지문 수정 요청:', passageData);
-    const response = await apiPost("/api/pass/update/each", passageData);
-    // console.log('✏️ [DB UPDATE] 지문 수정 성공:', response);
-    return response;
-  } catch (error) {
-    console.error("✏️ [DB UPDATE] 지문 수정 실패:", error);
-    throw error;
-  }
-}
-
 // 지문 데이터 수정 (/api/pass/{pasCode}) - updates 추가 가능한 key 목록: title, content, isFavorite 수정 가능 (null 이면 수정안함)
 export async function updatePassagePartial(pasCode, updates) {
   try {
@@ -155,13 +142,13 @@ export async function updateQuestionPartial(pasCode, queCode, updates) {
   }
 }
 
-// 문항이 있는 지문 목록 조회 (/api/pass/list/withquestions) 
+// 문항이 있는 지문 목록 조회 (/api/pass/list/withquestions)
 export async function getPassagesWithQuestionsListFromDatabase() {
   try {
     console.log('📖 [DB GET] 문항이 있는 지문 목록 조회 요청');
-    
+
     const response = await apiGet("/api/pass/list/withquestions");
-    
+
     console.log('📖 [DB GET] 문항이 있는 지문 목록 조회 성공:', response.length, '개');
     return response;
   } catch (error) {
